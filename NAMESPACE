@@ -1,0 +1,31 @@
+
+importClassesFrom(methods, character, data.frame, list, numeric)
+importClassesFrom(GOstats, GOHyperGResult)
+importMethodsFrom(AnnotationDbi, as.list, colnames, get, 
+				  mappedkeys, mget, ncol,nrow)
+				  
+importMethodsFrom(Category, hyperGTest)
+importFrom(methods, new)
+importFrom(ggplot2, aes, coord_flip, geom_bar, geom_point, ggplot,
+           opts, theme_bw, theme_text, xlab, ylab)
+importFrom(plyr, ., ddply, ldply, llply, mdply)
+
+importFrom(GO.db, GOBPCHILDREN, GOCCCHILDREN, GOMFCHILDREN, GOTERM)
+importFrom(org.Hs.eg.db, org.Hs.egGO, org.Hs.egGO2ALLEGS)
+importFrom(org.Mm.eg.db, org.Mm.egGO, org.Mm.egGO2ALLEGS)
+
+#importFrom(SubpathwayMiner,getAnn, printAnn)
+
+exportClasses(compareClusterResult,
+			  enrichGOResult,
+			  enrichKEGGResult,
+			  groupGOResult)
+			  
+exportMethods("show",
+			  "summary",
+			  "plot")
+
+export(groupGO,
+	   enrichGO,
+	   enrichKEGG,
+	   compareCluster)
