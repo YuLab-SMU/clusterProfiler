@@ -1,0 +1,21 @@
+Package: clusterProfiler
+Version: 0.99.5
+Title: statistical analysis and visulization of functional profiles for genes and gene clusters
+Author: Guangchuang Yu
+Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
+Description: The package implements methods to analyze and visualize functional profiles of gene and gene clusters.
+Type: Package
+Depends: SubpathwayMiner, ggplot2
+Imports: AnnotationDbi, Category, GO.db, GOstats, org.Hs.eg.db, org.Mm.eg.db, plyr, methods
+Suggests: GOSemSim
+biocViews: Clustering, GO, KEGG, Visualization
+License: Artistic-2.0
+Collate:
+    zzz.R
+    AllGenerics.R
+    compareCluster.R
+    enrichGO.R
+	enrichKEGG.R
+	groupGO.R
+	utilities.R
+
