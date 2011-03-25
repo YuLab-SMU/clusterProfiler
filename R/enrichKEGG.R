@@ -1,27 +1,42 @@
 enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.01) {
+	pathID <- mappedkeys(KEGGPATHID2EXTID)
+	pathID2ExtID <- as.list(KEGGPATHID2EXTID)
 	if (organism == "human") {
-		utils::data(list="hsa_ncbi-geneid", package="SubpathwayMiner")
+		idx <- grep("^hsa", pathID) ## select human pathways.
 	} else if (organism == "mouse") {
-		utils::data(list="mmu_ncbi-geneid", package="clusterProfiler")
+		idx <- grep("^mmu", pathID) ## select human pathways.
 	} else {
 		stop (" Not supported yet... \n" )
 	}
-	ann <- getAnn(unique(gene))
-	geneIDs <- c()
-	for (i in 1:length(ann)) {
-		geneID <- ann[[i]][[2]]
-		x = paste(geneID, collapse="/")
-		geneIDs <- c(geneIDs, x)
-	}
-	keggOver <- printAnn(ann)
-	Count <- sapply(keggOver$annGeneRatio, function(i) unlist(strsplit(as.character(i), split="/"))[1])
-	Count <- as.numeric(Count)
+	orgPath2ExtID <- pathID2ExtID[idx]
+	orgExtID <- unique(unlist(orgPath2ExtID))
+		
+	M = sapply(orgPath2ExtID, length)
+	geneID.list = lapply(orgPath2ExtID, function(i) gene[gene %in% i])
+	geneID <- sapply(geneID.list, function(i) paste(i, collapse="/"))
+	k = sapply(geneID.list, length)
+	#k = sapply(orgPath2ExtID, function(i) sum(gene %in% i))
+	pathNum <- length(M)
+	N <- rep(length(orgExtID), pathNum)
+	n <- rep(length(gene), pathNum)
+	args.df <- data.frame(numWdrawn=k-1, numW=M, numB=N-M, numDrawn=n)
+
+	pvalues <- mdply(args.df, HyperG)
+	pvalues <- pvalues[,5]
 	
-	keggOver <- data.frame(pathwayID=rownames(keggOver), keggOver, geneID=geneIDs, Count=Count)
-	colnames(keggOver)[2] <- "Description"
-	idx = as.numeric(as.character(keggOver$pvalue)) < pvalueCutoff
-	keggOver = keggOver[idx,]
-	keggOver$pvalue <- as.numeric(as.character(keggOver$pvalue))
+	annoGeneRatio <- mdply(data.frame(a=k, b=n), .yPaste)
+	annoGeneRatio <- annoGeneRatio[,3]
+	annoBgRatio <- mdply(data.frame(a=M, b=N), .yPaste)
+	annoBgRatio <- annoBgRatio[,3]	
+	pathwayID <- names(orgPath2ExtID)
+	Description <- unlist(path2Name(pathwayID))
+	
+	keggOver <- data.frame(pathwayID=pathwayID, Description=Description, annoGeneRatio=annoGeneRatio, annoBgRatio=annoBgRatio, pvalue=pvalues)
+	
+	qvalue =  fdrtool(keggOver$pvalue, statistic="pvalue",plot=FALSE,verbose=FALSE)$qval
+	keggOver <- data.frame(keggOver, qvalue=qvalue, geneID=geneID, Count=k)
+	keggOver <- keggOver[order(pvalues),]
+	keggOver <- keggOver[ keggOver$pvalue <= pvalueCutoff, ]
 	keggOver$Description <- as.character(keggOver$Description)
 	
 	new("enrichKEGGResult", 

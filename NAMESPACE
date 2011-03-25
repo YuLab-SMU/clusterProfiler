@@ -9,8 +9,10 @@ importFrom(methods, new)
 importFrom(ggplot2, aes, coord_flip, geom_bar, geom_point, ggplot,
            opts, theme_bw, theme_text, xlab, ylab)
 importFrom(plyr, ., ddply, ldply, llply, mdply)
+importFrom(stats, phyper)
 
 importFrom(GO.db, GOBPCHILDREN, GOCCCHILDREN, GOMFCHILDREN, GOTERM)
+importFrom(KEGG.db, KEGGPATHID2EXTID, KEGGPATHID2NAME)
 importFrom(org.Hs.eg.db, org.Hs.egGO, org.Hs.egGO2ALLEGS)
 importFrom(org.Mm.eg.db, org.Mm.egGO, org.Mm.egGO2ALLEGS)
 

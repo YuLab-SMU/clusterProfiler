@@ -160,7 +160,7 @@ yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01, tes
 @
 
 <<KEGG>>=
-yy <- enrichKEGG(gcSample[[5]], organism="human", pvalueCutoff=0.01)
+yy <- enrichKEGG(gcSample[[3]], organism="human", pvalueCutoff=0.01)
 head(summary(yy))
 @
 
@@ -168,10 +168,10 @@ The outputs of \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKE
 \begin{figure}
 \begin{center}
 <<fig=TRUE>>=
-print(plot(yy, caption="BP ontology categrories at level 2"))
+print(plot(yy, caption="KEGG Enrichment Analysis"))
 @
-\captionof{figure}{Example of annotating gene list to BP ontology at level 2.}
-\label{Fig:groupGOPlot}
+\captionof{figure}{Example of KEGG Enrichment Analysis.}
+\label{Fig:enrichKEGGPlot}
 \end{center}
 \end{figure}
 

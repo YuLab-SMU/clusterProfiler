@@ -147,3 +147,25 @@
 	clProf.df$Description <- factor(clProf.df$Description, levels=rev(GOlevel[,2]))
 	return(clProf.df)
 }
+
+
+#### KEGG Enrichment Analysis ###
+path2Name <- function(pathIDs) {
+	pathIDs <- gsub("^\\D+", "",pathIDs, perl=T)
+	path2name <- mget(pathIDs, KEGGPATHID2NAME)
+	return(path2name)
+}
+
+.yPaste <- function(a, b) {
+	x=paste(a, "/", b, sep="", collapse="")
+	return(x)
+}
+
+HyperG <- function(numWdrawn, numW, numB, numDrawn) {
+	#numWdrawn: number of White balls drawn
+	#numW: number of White balls
+	#numB: number of Black balls
+	#numDrawn: number of balls drawn
+	pvalue <- phyper(numWdrawn, numW, numB, numDrawn, lower.tail=FALSE)
+	return(pvalue)
+}
