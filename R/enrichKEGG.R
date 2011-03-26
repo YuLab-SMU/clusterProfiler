@@ -1,6 +1,7 @@
 enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.01) {
-	pathID <- mappedkeys(KEGGPATHID2EXTID)
 	pathID2ExtID <- as.list(KEGGPATHID2EXTID)
+	#pathID <- mappedkeys(KEGGPATHID2EXTID)
+	pathID <- names(pathID2ExtID)
 	if (organism == "human") {
 		idx <- grep("^hsa", pathID) ## select human pathways.
 	} else if (organism == "mouse") {
@@ -24,14 +25,14 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.01) {
 	pvalues <- mdply(args.df, HyperG)
 	pvalues <- pvalues[,5]
 	
-	annoGeneRatio <- mdply(data.frame(a=k, b=n), .yPaste)
-	annoGeneRatio <- annoGeneRatio[,3]
-	annoBgRatio <- mdply(data.frame(a=M, b=N), .yPaste)
-	annoBgRatio <- annoBgRatio[,3]	
+	GeneRatio <- mdply(data.frame(a=k, b=n), .yPaste)
+	GeneRatio <- GeneRatio[,3]
+	BgRatio <- mdply(data.frame(a=M, b=N), .yPaste)
+	BgRatio <- BgRatio[,3]	
 	pathwayID <- names(orgPath2ExtID)
 	Description <- unlist(path2Name(pathwayID))
 	
-	keggOver <- data.frame(pathwayID=pathwayID, Description=Description, annoGeneRatio=annoGeneRatio, annoBgRatio=annoBgRatio, pvalue=pvalues)
+	keggOver <- data.frame(pathwayID=pathwayID, Description=Description, GeneRatio=GeneRatio, BgRatio=BgRatio, pvalue=pvalues)
 	
 	qvalue =  fdrtool(keggOver$pvalue, statistic="pvalue",plot=FALSE,verbose=FALSE)$qval
 	keggOver <- data.frame(keggOver, qvalue=qvalue, geneID=geneID, Count=k)

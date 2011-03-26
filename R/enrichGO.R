@@ -27,7 +27,7 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff = 0.01, test
 	qvalue =  fdrtool(hgOver.df$Pvalue, statistic="pvalue",plot=FALSE,verbose=FALSE)$qval 	  
 	#p.adjust(hgOver.df$Pvalue, method='fdr')
 
-	hgOver.df <- data.frame(hgOver.df, GeneSetSize=GeneSetSize, GeneID=GeneIDs, Qvalue=qvalue)
+	hgOver.df <- data.frame(hgOver.df, GeneSetSize=GeneSetSize, GeneID=GeneIDs, qvalue=qvalue)
 	hgOver.df <- hgOver.df[,c(1,7,2,10,3:5,8,6,9)]
 	
 	hgOver.df <- hgOver.df[ hgOver.df$Pvalue <= pvalueCutoff, ]
