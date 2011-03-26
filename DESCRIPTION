@@ -8,7 +8,7 @@ Type: Package
 Depends: ggplot2, fdrtool
 Imports: AnnotationDbi, Category, GO.db, GOstats, org.Hs.eg.db, org.Mm.eg.db, plyr, methods, KEGG.db
 Suggests: GOSemSim
-biocViews: Clustering, GO, KEGG, Pathways, Visualization, Homo_sapiens, Mus_musculus
+biocViews: Clustering, GO, Pathways, Visualization, Homo_sapiens, Mus_musculus
 License: Artistic-2.0
 Collate:
     zzz.R
