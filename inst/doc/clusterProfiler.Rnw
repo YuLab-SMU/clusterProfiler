@@ -12,7 +12,6 @@
 \usepackage{a4wide}
 \usepackage{times}
 \usepackage{hyperref}
-\usepackage{caption}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage{framed}
@@ -98,7 +97,7 @@ xx <- compareCluster(gcSample, fun=groupGO, organism="human", ont="MF", level=2)
 <<fig=TRUE, width=8>>=
 print(plot(xx, type="dot", caption="MF Ontology Distribution Comparison"))
 @
-\captionof{figure}{Example of comparing MF ontology distribution using dotplot.}
+\caption{Example of comparing MF ontology distribution using dotplot.}
 \label{Fig:compareClusterPlot-groupGO}
 \end{center}
 \end{figure}
@@ -112,7 +111,7 @@ We chose "percentage" as default parameter to represent the sizes of dots, since
 <<fig=TRUE, width=8>>=
 print(plot(xx, type="bar", limit=NULL, by="count", caption="MF Ontology Distribution Comparison"))
 @
-\captionof{figure}{Example of comparing MF ontology distribution using barplot.}
+\caption{Example of comparing MF ontology distribution using barplot.}
 \label{Fig:compareClusterPlot-groupGO-2}
 \end{center}
 \end{figure}
@@ -130,7 +129,7 @@ head(summary(xx))
 <<fig=TRUE>>=
 print(plot(xx, caption="CC Ontology Enrichment Comparison"))
 @
-\captionof{figure}{Example of comparing CC ontology enrichment among gene clusters.}
+\caption{Example of comparing CC ontology enrichment among gene clusters.}
 \label{Fig:compareClusterPlot-enrichGO}
 \end{center}
 \end{figure}
@@ -149,7 +148,7 @@ head(summary(xx))
 <<fig=TRUE, width=7>>=
 print(plot(xx, type="dot", caption="KEGG Enrichment Comparison"))
 @
-\captionof{figure}{Example of comparing KEGG enrichment among gene clusters.}
+\caption{Example of comparing KEGG enrichment among gene clusters.}
 \label{Fig:compareClusterPlot-enrichKEGG}
 \end{center}
 \end{figure}
@@ -172,7 +171,7 @@ The outputs of \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKE
 <<fig=TRUE>>=
 print(plot(yy, caption="KEGG Enrichment Analysis"))
 @
-\captionof{figure}{Example of KEGG Enrichment Analysis.}
+\caption{Example of KEGG Enrichment Analysis.}
 \label{Fig:enrichKEGGPlot}
 \end{center}
 \end{figure}
