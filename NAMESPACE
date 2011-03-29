@@ -16,8 +16,6 @@ importFrom(KEGG.db, KEGGPATHID2EXTID, KEGGPATHID2NAME)
 importFrom(org.Hs.eg.db, org.Hs.egGO, org.Hs.egGO2ALLEGS)
 importFrom(org.Mm.eg.db, org.Mm.egGO, org.Mm.egGO2ALLEGS)
 
-#importFrom(SubpathwayMiner,getAnn, printAnn)
-
 exportClasses(compareClusterResult,
 			  enrichGOResult,
 			  enrichKEGGResult,
