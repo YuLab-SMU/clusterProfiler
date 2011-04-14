@@ -1,5 +1,5 @@
 % \VignetteIndexEntry{An introduction to clusterProfiler}
-% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, GOstats, ggplot2, plyr, methods}
+% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, GOstats, ggplot2, plyr, methods, fdrtool, KEGG.db, Category}
 % \VignetteSuggests{GOSemSim}
 % \VignetteKeywords{Gene Ontology Analysis}
 % \VignettePackage{clusterProfiler}
@@ -104,19 +104,7 @@ print(plot(xx, type="dot", caption="MF Ontology Distribution Comparison"))
 
 By default, only top 5 categories of each cluster was plotted. User can change the parameter \textit{limit} to specify how many categories of each cluster to be plotted, and if \textit{limit} set to NULL, the whole result will be plotted. By default, the dot sizes were based on their corresponding row percentage, and user can set the parameter \textit{by} to "count" to make the comparison based on gene counts. 
 
-We chose "percentage" as default parameter to represent the sizes of dots, since some categories may contain a large number of genes, and make the dot sizes of those small categories too small to compare. To provide the full information, we also provide number of identified genes in each category (numbers in parentheses), as shown in Figure 1. If the dot sizes were based on "count", the parentheses will not showed as in Figure 2.
-
-\begin{figure}
-\begin{center}
-<<fig=TRUE, width=8>>=
-print(plot(xx, type="bar", limit=NULL, by="count", caption="MF Ontology Distribution Comparison"))
-@
-\caption{Example of comparing MF ontology distribution using barplot.}
-\label{Fig:compareClusterPlot-groupGO-2}
-\end{center}
-\end{figure}
-
-In the bar chart, color is used to differ distinct clusters. 
+We chose "percentage" as default parameter to represent the sizes of dots, since some categories may contain a large number of genes, and make the dot sizes of those small categories too small to compare. To provide the full information, we also provide number of identified genes in each category (numbers in parentheses), as shown in Figure 1. If the dot sizes were based on "count", the parentheses will not shown.
 
 \item GO or KEGG enrichment analysis among a set of gene clusters can also be compared by \textit{compareCluster} as shown in the following examples. 
 <<compareCluster>>=
