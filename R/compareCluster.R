@@ -7,7 +7,8 @@ compareCluster <- function(geneClusters, fun=enrichGO, ...) {
 	)
 	
 	clProf.df <- ldply(clProf, rbind)
-	colnames(clProf.df)[1] <- "Cluster"
+	#colnames(clProf.df)[1] <- "Cluster"
+	clProf.df <- rename(clProf.df, c(.id="Cluster"))
 	new("compareClusterResult", 
 		compareClusterResult = clProf.df,
 		geneClusters = geneClusters

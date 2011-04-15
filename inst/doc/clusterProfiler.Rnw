@@ -1,5 +1,5 @@
 % \VignetteIndexEntry{An introduction to clusterProfiler}
-% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, GOstats, ggplot2, plyr, methods, fdrtool, KEGG.db, Category}
+% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, GOstats, ggplot2, methods, fdrtool, KEGG.db, Category}
 % \VignetteSuggests{GOSemSim}
 % \VignetteKeywords{Gene Ontology Analysis}
 % \VignettePackage{clusterProfiler}

@@ -6,10 +6,12 @@ importMethodsFrom(AnnotationDbi, as.list, colnames, get,
 				  
 importMethodsFrom(Category, hyperGTest)
 importFrom(methods, new)
-importFrom(ggplot2, aes, coord_flip, geom_bar, geom_point, ggplot,
-           opts, theme_bw, theme_text, xlab, ylab)
-importFrom(plyr, ., ddply, ldply, llply, mdply)
-importFrom(stats, phyper)
+#importFrom(ggplot2, aes, coord_flip, geom_bar, geom_point, ggplot,
+#           opts, theme_bw, theme_text, xlab, ylab)
+#importFrom(reshape, rename)
+#importFrom(plyr, ddply, ldply, llply, mdply)
+#importFrom(stats, phyper, setNamessetNames)
+
 
 importFrom(GO.db, GOBPCHILDREN, GOCCCHILDREN, GOMFCHILDREN, GOTERM)
 importFrom(KEGG.db, KEGGPATHID2EXTID, KEGGPATHID2NAME)
