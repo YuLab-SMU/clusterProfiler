@@ -82,7 +82,8 @@ setMethod("plot", signature(x="enrichGOResult"),
 setMethod("plot", signature(x="GOHyperGResult"),
 	function(x, caption="") {
 		enrichGOResult <- summary(x)
-		colnames(enrichGOResult)[7] <- "Description"
+		#colnames(enrichGOResult)[7] <- "Description"
+		enrichGOResult <- rename(enrichGOResult, c(Term="Description"))
 		p <- .barplotInternal(enrichGOResult, caption)
 		###color scale based on pvalue
 		p + aes(fill=Pvalue)
