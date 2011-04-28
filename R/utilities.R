@@ -50,9 +50,10 @@
 	
 	Node <- topNode
 	for (i in seq_len(level-1)) {
-		Node <- mget(Node, Children)
+		Node <- mget(Node, Children, ifnotfound=NA)
 		Node <- unique(unlist(Node))
 		Node <- as.vector(Node)
+		Node <- Node[!is.na(Node)]
 	}
 	return(Node)
 }
