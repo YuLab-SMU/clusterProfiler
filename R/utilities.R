@@ -58,17 +58,17 @@
 	return(Node)
 }
 
-.barplotInternal <- function(result, caption) {
+.barplotInternal <- function(result, caption, font.size=12) {
 	pg <- ggplot(result, aes(x=Description, y = Count)) + geom_bar() + coord_flip() 
-	.pModify(pg, caption)
+	.pModify(pg, caption, font.size)
 }
 
-.pModify <- function(p, caption) {
-	p <- p + xlab("") + ylab("") + opts(axis.text.x = theme_text(colour="black", size="12", vjust = 1)) + opts(axis.text.y = theme_text(colour="black", size="12", hjust = 1)) + opts(title=caption)+theme_bw()
+.pModify <- function(p, caption="", font.size=12) {
+	p <- p + xlab("") + ylab("") + opts(axis.text.x = theme_text(colour="black", size=font.size, vjust = 1)) + opts(axis.text.y = theme_text(colour="black", size=font.size, hjust = 1)) + opts(title=caption)+theme_bw()
 	return(p)
 }
 
-.PlotClusterProfInternal <- function(clProf.reshape.df,  type = "dot", by = "percentage",caption="") {
+.PlotClusterProfInternal <- function(clProf.reshape.df,  type = "dot", by = "percentage",caption="", font.size=12) {
 	if (type == "bar") {
 		if (by == "percentage") {
 			p <- ggplot(clProf.reshape.df, aes(x=Description, y = Percentage, fill=Cluster))
@@ -96,7 +96,7 @@
 			p <- p + geom_point(colour="steelblue")
 		}
 	}
-	.pModify(p, caption)
+	.pModify(p, caption, font.size)
 }
 
 
