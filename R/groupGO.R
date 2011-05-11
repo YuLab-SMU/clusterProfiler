@@ -41,7 +41,7 @@ setMethod("summary", signature(object="groupGOResult"),
 )
 
 setMethod("plot", signature(x="groupGOResult"),
-	function (x, order="FALSE", caption="", drop=FALSE){
+	function (x, order="FALSE", caption="", font.size=12, drop=FALSE){
 		groupGOResult <- summary(x)
 		if (drop == TRUE) {
 			# drop void category.
@@ -52,6 +52,6 @@ setMethod("plot", signature(x="groupGOResult"),
 			groupGOResult <- groupGOResult[idx,]
 		}
 		groupGOResult$Description <- factor(groupGOResult$Description, level= as.character(groupGOResult$Description))
-		.barplotInternal(groupGOResult, caption)
+		.barplotInternal(groupGOResult, caption, font.size)
 	}
 )

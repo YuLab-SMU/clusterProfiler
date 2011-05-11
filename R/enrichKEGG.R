@@ -73,9 +73,9 @@ setMethod("summary", signature(object="enrichKEGGResult"),
 )
 
 setMethod("plot", signature(x="enrichKEGGResult"),
-	function(x, caption="") {
+	function(x, caption="", font.size=12) {
 		enrichKEGGResult <- x@enrichKEGGResult
-		p <- .barplotInternal(enrichKEGGResult, caption)
+		p <- .barplotInternal(enrichKEGGResult, caption, font.size)
 		###color scale based on pvalue
 		p + aes(fill=pvalue)
 	}

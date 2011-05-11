@@ -71,20 +71,20 @@ setMethod("summary", signature(object="enrichGOResult"),
 )
 
 setMethod("plot", signature(x="enrichGOResult"),
-	function(x, caption="") {
+	function(x, caption="", font.size=12) {
 		enrichGOResult <- summary(x)
-		p <- .barplotInternal(enrichGOResult, caption)
+		p <- .barplotInternal(enrichGOResult, caption, font.size)
 		###color scale based on pvalue
 		p + aes(fill=Pvalue)
 	}
 )
 
 setMethod("plot", signature(x="GOHyperGResult"),
-	function(x, caption="") {
+	function(x, caption="", font.size=12) {
 		enrichGOResult <- summary(x)
 		#colnames(enrichGOResult)[7] <- "Description"
 		enrichGOResult <- rename(enrichGOResult, c(Term="Description"))
-		p <- .barplotInternal(enrichGOResult, caption)
+		p <- .barplotInternal(enrichGOResult, caption, font.size)
 		###color scale based on pvalue
 		p + aes(fill=Pvalue)
 	}

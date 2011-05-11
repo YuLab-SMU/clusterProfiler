@@ -45,7 +45,7 @@ setMethod("summary", signature(object="compareClusterResult"),
 )
 
 setMethod("plot", signature(x="compareClusterResult"),
-	function(x, type="dot", caption="", limit=5, by="percentage") {
+	function(x, type="dot", caption="", font.size=12, limit=5, by="percentage") {
 		clProf.df <- .compareClusterResultTopN(x, limit)
 		clProf.df <- .removeZeroCount(clProf.df)	
 		
@@ -56,6 +56,6 @@ setMethod("plot", signature(x="compareClusterResult"),
 		} else {
 		
 		}
-		.PlotClusterProfInternal(clProf.df, type, by, caption)
+		.PlotClusterProfInternal(clProf.df, type, by, caption, font.size)
 	}
 )
