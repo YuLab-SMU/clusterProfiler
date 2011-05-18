@@ -5,7 +5,9 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.01) {
 	if (organism == "human") {
 		idx <- grep("^hsa", pathID) ## select human pathways.
 	} else if (organism == "mouse") {
-		idx <- grep("^mmu", pathID) ## select human pathways.
+		idx <- grep("^mmu", pathID) ## select mouse pathways.
+	} else if (organism == "yeast") {
+		idx <- grep("^sce", pathID) ## select yeast pathways.
 	} else {
 		stop (" Not supported yet... \n" )
 	}
