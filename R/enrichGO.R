@@ -1,13 +1,14 @@
 enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff = 0.01, testDirection="over") {
 	if (organism == "human") {
-		#require(org.Hs.eg.db)
 		annotation="org.Hs.eg.db"
 		geneUniverse =  mappedkeys(org.Hs.egGO)
 	} else if (organism == "mouse") {
-		#require(org.Mm.eg.db)
 		annotation="org.Mm.eg.db"
 		geneUniverse =  mappedkeys(org.Mm.egGO)		
-	} else {
+	} else if (organism == "yeast"){
+		annotation="org.Sc.sgd.db"
+		geneUniverse =  mappedkeys(org.Sc.sgdGO)			
+	}else {
 		stop (" Not supported yet... \n" )
 	}
 	params = new("GOHyperGParams", geneIds=gene, universeGeneIds=geneUniverse, annotation=annotation, ontology=ont, pvalueCutoff = pvalueCutoff, conditional = FALSE, testDirection=testDirection)

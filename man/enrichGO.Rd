@@ -10,7 +10,7 @@
 
 \arguments{
   \item{gene}{ a vector of entrez gene id. }
-  \item{organism}{ Currently, only "human" and "mouse" supported. }
+  \item{organism}{ Currently, only "human", "mouse" and "yeast" supported. }
   \item{ont}{ One of "MF", "BP", and "CC" subontologies. }
   \item{pvalueCutoff}{ Cutoff value of pvalue. }
   \item{testDirection}{ one of "over" or "under" for over- or under-representation test. }
