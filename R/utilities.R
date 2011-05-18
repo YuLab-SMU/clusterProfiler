@@ -16,8 +16,10 @@
 		goAllGene= mget(GOID, org.Hs.egGO2ALLEGS, ifnotfound=NA)
 	} else if (organism == "mouse") {
 		goAllGene= mget(GOID, org.Mm.egGO2ALLEGS, ifnotfound=NA)
+	} else if (organism == "yeast") {
+		goAllGene= mget(GOID, org.Sc.sgdGO2ALLORFS, ifnotfound=NA)
 	} else {
-		stop("only *human* supported right now...")
+		stop("only *human* , *mouse*, and *yeast* supported right now...")
 	}
 	#########
 	goGene <- lapply(goAllGene, function(x) gene[gene %in% x])

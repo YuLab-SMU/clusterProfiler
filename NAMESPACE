@@ -17,6 +17,7 @@ importFrom(GO.db, GOBPCHILDREN, GOCCCHILDREN, GOMFCHILDREN, GOTERM)
 importFrom(KEGG.db, KEGGPATHID2EXTID, KEGGPATHID2NAME)
 importFrom(org.Hs.eg.db, org.Hs.egGO, org.Hs.egGO2ALLEGS)
 importFrom(org.Mm.eg.db, org.Mm.egGO, org.Mm.egGO2ALLEGS)
+importFrom(org.Sc.sgd.db, org.Sc.sgdGO, org.Sc.sgdGO2ALLORFS)
 
 exportClasses(compareClusterResult,
 			  enrichGOResult,
