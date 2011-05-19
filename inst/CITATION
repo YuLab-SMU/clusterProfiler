@@ -1,0 +1,15 @@
+citHeader("To cite clusterProfiler in publications use:")
+
+citEntry(entry="ARTICLE",
+  author = "Guangchuang Yu and Qing-Yu He.",
+  title = "Functional similarity analysis of human virus-encoded miRNAs.",
+  journal = "Journal of Clinical Bioinformatics",
+  year = "2011",
+  volume = "1",
+  number = "1",
+  pages = "15",
+  PMID = "",
+  textVersion = paste("Guangchuang Yu and Qing-Yu He.",
+      "Functional similarity analysis of human virus-encoded miRNAs.",
+      "Journal of Clinical Bioinformatics 2011 1(1):15")
+)
