@@ -61,6 +61,7 @@
 }
 
 .barplotInternal <- function(result, caption, font.size=12) {
+	Description <- Count <- NULL # to satisfy codetools
 	pg <- ggplot(result, aes(x=Description, y = Count)) + geom_bar() + coord_flip() 
 	.pModify(pg, caption, font.size)
 }
@@ -71,6 +72,7 @@
 }
 
 .PlotClusterProfInternal <- function(clProf.reshape.df,  type = "dot", by = "percentage",caption="", font.size=12) {
+	Description <- Percentage <- Count <- Cluster <- Pvalue <- pvalue <- NULL # to satisfy codetools
 	if (type == "bar") {
 		if (by == "percentage") {
 			p <- ggplot(clProf.reshape.df, aes(x=Description, y = Percentage, fill=Cluster))
@@ -103,6 +105,7 @@
 
 
 .compareClusterResultTopN <- function(clusterProfResult, limit) {
+	Cluster <- NULL # to satisfy codetools
 	if (is.null(limit)) {
 		return(summary(clusterProfResult))
 	}
@@ -120,6 +123,7 @@
 }
 
 .compareClusterResultReshape <- function(clProf.df) {
+	Description <- Count <- NULL # to satisfy codetools
 	GOlevel <- clProf.df[,c(2,3)]
 	GOlevel <- unique(GOlevel)
 	
