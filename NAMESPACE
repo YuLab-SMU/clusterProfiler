@@ -6,6 +6,7 @@ importMethodsFrom(AnnotationDbi, as.list, colnames, get,
 				  
 importMethodsFrom(Category, hyperGTest)
 importFrom(methods, new)
+importFrom(qvalue, qvalue)
 #importFrom(ggplot2, aes, coord_flip, geom_bar, geom_point, ggplot,
 #           opts, theme_bw, theme_text, xlab, ylab)
 #importFrom(reshape, rename)
