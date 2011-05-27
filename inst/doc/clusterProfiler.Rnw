@@ -1,5 +1,5 @@
 % \VignetteIndexEntry{An introduction to clusterProfiler}
-% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, GOstats, ggplot2, methods, fdrtool, KEGG.db, Category}
+% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, GOstats, ggplot2, methods, qvalue, KEGG.db, Category}
 % \VignetteSuggests{GOSemSim}
 % \VignetteKeywords{Gene Ontology Analysis}
 % \VignettePackage{clusterProfiler}
@@ -122,9 +122,19 @@ print(plot(xx, caption="CC Ontology Enrichment Comparison"))
 \end{center}
 \end{figure}
 
+\begin{figure}
+\begin{center}
+<<fig=TRUE>>=
+print(plot(xx, type="bar", by="count", caption="CC Ontology Enrichment Comparison using bar chart"))
+@
+\caption{Example of comparing CC ontology enrichment among gene clusters.}
+\label{Fig:compareClusterPlot-enrichGO-2}
+\end{center}
+\end{figure}
+
 The p-values indicate that which categories are more likely to have biological meanings. The dots in the image are color-encoded based on their corresponding p-values. Color gradient ranging from blue to red correspond to in order of increasing p-values. Blue indicate lower p-values, and red indicate higher p-values. P-values were filtered out by the threshold giving by parameter \textit{pvalueCutoff}.
 
-We also provide FDR-corrected q-values, which were calculated by \Rpackage{fdrtool}, to control false positive discovery rate. FDR control is necessary since enrichment analysis carrying out hundreds, if not thousands, of tests.
+We also provide q-values, which were calculated by \Rpackage{qvalue}, for user to control false discovery rate. FDR control is necessary since enrichment analysis carrying out hundreds, if not thousands, of tests.
 
 <<compareCluster-KEGG>>=
 xx <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
@@ -141,7 +151,7 @@ print(plot(xx, type="dot", caption="KEGG Enrichment Comparison"))
 \end{center}
 \end{figure}
 
-\item The internal functions for annotating gene and enrichment analysis was \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG}, which was designed to analyze one particular gene list. Gene list can be projected to GO at a given level by \Rfunction{groupGO}. GO enrichment analysis were also provided by \Rfunction{enrichGO} for exploring biological themes of a given gene list. The internal algorithm in \Rfunction{enrichGO} was \Rfunction{hyperGTest} provided by \Rpackage{Category}. \Rfunction{enrichGO} extend \Rpackage{GOstats}\citep{Gentleman2007} by providing corresponding enrichment gene list and the FDR-corrected q-values. KEGG enrichment analysis were also supported by \Rfunction{enrichKEGG}.
+\item The internal functions for annotating gene and enrichment analysis was \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG}, which was designed to analyze one particular gene list. Gene list can be projected to GO at a given level by \Rfunction{groupGO}. GO enrichment analysis were also provided by \Rfunction{enrichGO} for exploring biological themes of a given gene list. The internal algorithm in \Rfunction{enrichGO} was \Rfunction{hyperGTest} provided by \Rpackage{Category}. \Rfunction{enrichGO} extend \Rpackage{GOstats}\citep{Gentleman2007} by providing corresponding enrichment gene list and the q-values. KEGG enrichment analysis were also supported by \Rfunction{enrichKEGG}.
 
 <<GO,eval=FALSE>>=
 yy <- groupGO(gcSample[[1]], organism="human", ont="BP", level=2)

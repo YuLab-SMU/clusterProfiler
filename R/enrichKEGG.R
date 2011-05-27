@@ -36,8 +36,10 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.01) {
 	
 	keggOver <- data.frame(pathwayID=pathwayID, Description=Description, GeneRatio=GeneRatio, BgRatio=BgRatio, pvalue=pvalues)
 	
-	qvalue =  fdrtool(keggOver$pvalue, statistic="pvalue",plot=FALSE,verbose=FALSE)$qval
-	keggOver <- data.frame(keggOver, qvalue=qvalue, geneID=geneID, Count=k)
+	#qvalue =  fdrtool(keggOver$pvalue, statistic="pvalue",plot=FALSE,verbose=FALSE)$qval
+	qobj = qvalue(keggOver$pvalue)
+	qvalues <- qobj$qvalues
+	keggOver <- data.frame(keggOver, qvalue=qvalues, geneID=geneID, Count=k)
 	keggOver <- keggOver[order(pvalues),]
 	keggOver <- keggOver[ keggOver$pvalue <= pvalueCutoff, ]
 	keggOver$Description <- as.character(keggOver$Description)
