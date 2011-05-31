@@ -49,7 +49,7 @@
 
 \bibliographystyle{plainnat}
 
-\title{\Rpackage{clusterProfiler}: an \R\, package for \\ Statistical Analysis and Visulization of Functional Profiles\\ for Genes and Gene Clusters}
+\title{\Rpackage{clusterProfiler}: an \R\, package for \\ Statistical Analysis and Visualization of Functional Profiles\\ for Genes and Gene Clusters}
 \author{Guangchuang Yu \\
 \\
 Jinan University, Guangzhou, China}
@@ -67,7 +67,7 @@ require(clusterProfiler)
 
 In recently years, high-throughput experimental techniques such as microarray and mass spectrometry can identify many lists of genes and gene products. The most widely used strategy for high-throughput data analysis is to identify different gene clusters based on their expression profiles. Another commonly used approach is to annotate these genes to biological knowledge, such as Gene Ontology (GO) and Kyoto Encyclopedia of Genes and Genomes (KEGG), and identify the statistically significantly enriched categories. These two different strategies were implemented in many bioconductor packages, such as \Rpackage{Mfuzz} and \Rpackage{BHC} for clustering analysis and \Rpackage{GOstats} for GO enrichment analysis.
 
-After clustering analysis, researchers not only want to determine whether there is a common theme to a particular gene cluster, but also would like to compare the biological themes among gene clusters, which have different expression profiles.
+After clustering analysis, researchers not only want to determine whether there is a common theme of a particular gene cluster, but also to compare the biological themes among gene clusters, which have different expression profiles.
 There is no existing tools to bridge this gap, and we designed \Rpackage{clusterProfiler}, for comparing functional profiles among gene clusters.
   
 
