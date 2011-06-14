@@ -7,7 +7,7 @@ Description: The package implements methods to analyze and visualize functional 
 Type: Package
 Depends: stats, ggplot2
 Imports: methods, plyr, qvalue, AnnotationDbi, GO.db, KEGG.db, Category, GOstats, org.Hs.eg.db, org.Mm.eg.db, org.Sc.sgd.db
-Suggests: GOSemSim
+Suggests: GOSemSim, DOSE
 biocViews: Clustering, GO, Pathways, Visualization
 License: Artistic-2.0
 Collate:
