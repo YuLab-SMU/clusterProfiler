@@ -52,6 +52,8 @@ setMethod("plot", signature(x="groupGOResult"),
 			groupGOResult <- groupGOResult[idx,]
 		}
 		groupGOResult$Description <- factor(groupGOResult$Description, level= as.character(groupGOResult$Description))
-		.barplotInternal(groupGOResult, caption, font.size)
+		p <- .barplotInternal(groupGOResult, caption, font.size)
+		p <- p+aes(fill=Description)+opts(legend.position="none")
+		print(p)
 	}
 )
