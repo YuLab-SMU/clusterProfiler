@@ -1,3 +1,25 @@
+
+
+#' KEGG Enrichment Analysis of a gene set.
+#' Given a vector of genes, this function will return the enrichment KEGG
+#' categories with FDR control.
+#' 
+#' 
+#' @param gene a vector of entrez gene id.
+#' @param organism Currently, only "human" and "mouse" supported.
+#' @param pvalueCutoff Cutoff value of pvalue.
+#' @param readable if readable is TRUE, the gene IDs will mapping to gene
+#'   symbols.
+#' @return A \code{enrichKEGGResult} instance.
+#' @seealso \code{\link{enrichKEGGResult-class}}, \code{\link{compareCluster}}
+#' @keywords manip
+#' @examples
+#' 
+#' 	data(gcSample)
+#' 	yy = enrichKEGG(gcSample[[5]], pvalueCutoff=0.01)
+#' 	head(summary(yy))
+#' 	#plot(yy)
+#' 
 enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FALSE) {
                                         #pathID2ExtID <- as.list(KEGGPATHID2EXTID)
                                         #pathID <- names(pathID2ExtID)

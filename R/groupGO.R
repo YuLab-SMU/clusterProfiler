@@ -1,3 +1,26 @@
+
+
+#' Functional Profile of a gene set at specific GO level.
+#' Given a vector of genes, this function will return the GO profile at
+#' specific level.
+#' 
+#' 
+#' @param gene a vector of entrez gene id.
+#' @param organism Currently, only "human" and "mouse" supported.
+#' @param ont One of "MF", "BP", and "CC" subontologies.
+#' @param level Specific GO Level.
+#' @param readable if readable is TRUE, the gene IDs will mapping to gene
+#'   symbols.
+#' @return A \code{groupGOResult} instance.
+#' @seealso \code{\link{groupGOResult-class}}, \code{\link{compareCluster}}
+#' @keywords manip
+#' @examples
+#' 
+#' 	data(gcSample)
+#' 	yy <- groupGO(gcSample[[1]], organism="human", ont="BP", level=2)
+#' 	head(summary(yy))
+#' 	#plot(yy)
+#' 
 groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE) {
     GOLevel <- .getGOLevel(ont, level)
     goGene <- .goGene(GOLevel, gene, organism)
