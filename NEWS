@@ -1,3 +1,8 @@
+CHANGES IN VERSION 1.1.16
+------------------------
+ o Re-implement function enrichGO. <2011-07-18 Mon>
+ o add parameter readable, for mapping gene IDs to gene names. <2011-07-18 Mon>
+
 CHANGES IN VERSION 1.1.15
 ------------------------
  o Modified plot method of groupGOResult, with colour coded. <2011-06-15 Wed>

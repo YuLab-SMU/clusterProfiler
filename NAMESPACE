@@ -1,10 +1,12 @@
 
 importClassesFrom(methods, character, data.frame, list, numeric)
-importClassesFrom(GOstats, GOHyperGResult)
+#importClassesFrom(GOstats, GOHyperGResult)
+importClassesFrom(AnnotationDbi, GOTerms)
 importMethodsFrom(AnnotationDbi, as.list, colnames, get, 
-				  mappedkeys, mget, ncol,nrow)
+				  mappedkeys, mget, ncol,nrow,
+				  Ontology)
 				  
-importMethodsFrom(Category, hyperGTest)
+#importMethodsFrom(Category, hyperGTest)
 importFrom(methods, new)
 importFrom(qvalue, qvalue)
 #importFrom(ggplot2, aes, coord_flip, geom_bar, geom_point, ggplot,
@@ -16,9 +18,9 @@ importFrom(qvalue, qvalue)
 
 importFrom(GO.db, GOBPCHILDREN, GOCCCHILDREN, GOMFCHILDREN, GOTERM)
 importFrom(KEGG.db, KEGGPATHID2EXTID, KEGGPATHID2NAME)
-importFrom(org.Hs.eg.db, org.Hs.egGO, org.Hs.egGO2ALLEGS)
-importFrom(org.Mm.eg.db, org.Mm.egGO, org.Mm.egGO2ALLEGS)
-importFrom(org.Sc.sgd.db, org.Sc.sgdGO, org.Sc.sgdGO2ALLORFS)
+importFrom(org.Hs.eg.db, org.Hs.egGO, org.Hs.egGO2ALLEGS, org.Hs.egSYMBOL)
+importFrom(org.Mm.eg.db, org.Mm.egGO, org.Mm.egGO2ALLEGS, org.Mm.egSYMBOL)
+importFrom(org.Sc.sgd.db, org.Sc.sgdGO, org.Sc.sgdGO2ALLORFS, org.Sc.sgdGENENAME)
 
 exportClasses(compareClusterResult,
 			  enrichGOResult,
