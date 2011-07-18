@@ -10,7 +10,7 @@
 }
 
 .goGene <- function(GOID, gene, organism="human") {
-	# return a list of *GO* annotated in *gene* list. 
+	# return a list of *GO* annotated in *gene* list.
 	#######
 	if (organism == "human") {
 		goAllGene= mget(GOID, org.Hs.egGO2ALLEGS, ifnotfound=NA)
@@ -49,7 +49,7 @@
 			Children <- GOCCCHILDREN
 		}
 	)
-	
+
 	Node <- topNode
 	for (i in seq_len(level-1)) {
 		Node <- mget(Node, Children, ifnotfound=NA)
@@ -62,7 +62,7 @@
 
 .barplotInternal <- function(result, caption, font.size=12) {
 	Description <- Count <- NULL # to satisfy codetools
-	pg <- ggplot(result, aes(x=Description, y = Count)) + geom_bar() + coord_flip() 
+	pg <- ggplot(result, aes(x=Description, y = Count)) + geom_bar() + coord_flip()
 	.pModify(pg, caption, font.size)
 }
 
@@ -79,7 +79,7 @@
 		} else if (by == "count") {
 			p <- ggplot(clProf.reshape.df, aes(x=Description, y = Count, fill=Cluster))
 		} else {
-		
+
 		}
 		p <- p+ geom_bar() + coord_flip()
 	}
@@ -89,8 +89,8 @@
 		} else if (by == "count") {
 			p <- ggplot(clProf.reshape.df, aes(x = Cluster, y = Description, size = Count))
 		} else {
-		
-		}	
+
+		}
 		if (any(colnames(clProf.reshape.df) == "Pvalue")) {
 			p <- p + geom_point() + aes(color=Pvalue)
 			# + scale_colour_gradient(low="red", high="yellow")
@@ -126,10 +126,10 @@
 	Description <- Count <- NULL # to satisfy codetools
 	GOlevel <- clProf.df[,c(2,3)]
 	GOlevel <- unique(GOlevel)
-	
+
 	clProf.df <- ddply(clProf.df, .(Description), transform, Percentage = Count/sum(Count), Total = sum(Count))
 	#clProf.df <- ddply(clProf.df, .(Description), transform, Total = sum(Count))
-	
+
 	x <- mdply(clProf.df[, c("Description", "Total")], paste, sep=" (")
 	y <- sapply(x[,3], paste, ")", sep="")
 	clProf.df$Description <- y		### label GO Description with gene counts.
@@ -137,9 +137,9 @@
 	xx <- unique(xx)
 	rownames(xx) <- xx[,1]
 	Termlevel <- xx[as.character(GOlevel[,1]),2]
-	
+
 	#clProf.df <-  clProf.df[, -6] ###drop the *Total* column##
-	
+
 	clProf.df$Description <- factor(clProf.df$Description, levels=rev(Termlevel))
 	return(clProf.df)
 }
@@ -175,4 +175,14 @@ HyperG <- function(numWdrawn, numW, numB, numDrawn) {
 	#numDrawn: number of balls drawn
 	pvalue <- phyper(numWdrawn, numW, numB, numDrawn, lower.tail=FALSE)
 	return(pvalue)
+}
+
+geneID2geneName <- function(geneID.list, organism) {
+    annotation <- switch(organism,
+                         human = org.Hs.egSYMBOL,
+                         mouse = org.Mm.egSYMBOL,
+                         yeast = org.Sc.sgdGENENAME,
+                         )
+    gn <- lapply(geneID.list, function(i) unique(unlist(mget(i, org.Hs.egSYMBOL))))
+    return(gn)
 }

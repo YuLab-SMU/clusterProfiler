@@ -108,7 +108,7 @@ We chose "percentage" as default parameter to represent the sizes of dots, since
 
 \item GO or KEGG enrichment analysis among a set of gene clusters can also be compared by \textit{compareCluster} as shown in the following examples. 
 <<compareCluster>>=
-xx <- compareCluster(gcSample, fun=enrichGO, organism="human", ont="CC", pvalueCutoff=0.01, testDirection="over")
+xx <- compareCluster(gcSample, fun=enrichGO, organism="human", ont="CC", pvalueCutoff=0.01)
 head(summary(xx))
 @
 
@@ -155,7 +155,7 @@ print(plot(xx, type="dot", caption="KEGG Enrichment Comparison"))
 
 <<GO,eval=FALSE>>=
 yy <- groupGO(gcSample[[1]], organism="human", ont="BP", level=2)
-yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01, testDirection="over")
+yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01)
 @
 
 <<KEGG>>=

@@ -5,13 +5,14 @@
   Given a vector of genes, this function will return the enrichment KEGG categories with FDR control.
 }
 \usage{
-	enrichKEGG(gene, organism="human", pvalueCutoff = 0.01)
+	enrichKEGG(gene, organism="human", pvalueCutoff = 0.05, readable=FALSE)
 }
 
 \arguments{
   \item{gene}{ a vector of entrez gene id. }
   \item{organism}{ Currently, only "human" and "mouse" supported. }
   \item{pvalueCutoff}{ Cutoff value of pvalue. }
+  \item{readable}{ if readable is TRUE, the gene IDs will mapping to gene symbols. }
 }
 
 \value{

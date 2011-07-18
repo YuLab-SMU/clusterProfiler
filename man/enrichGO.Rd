@@ -5,7 +5,7 @@
   Given a vector of genes, this function will return the enrichment GO categories with FDR control.
 }
 \usage{
-	enrichGO(gene, organism="human", ont="MF", pvalueCutoff = 0.01, testDirection="over")
+	enrichGO(gene, organism="human", ont="MF", pvalueCutoff = 0.01, readable=FALSE)
 }
 
 \arguments{
@@ -13,7 +13,7 @@
   \item{organism}{ Currently, only "human", "mouse" and "yeast" supported. }
   \item{ont}{ One of "MF", "BP", and "CC" subontologies. }
   \item{pvalueCutoff}{ Cutoff value of pvalue. }
-  \item{testDirection}{ one of "over" or "under" for over- or under-representation test. }
+  \item{readable}{ if readable is TRUE, the gene IDs will mapping to gene symbols. }
 }
 
 \value{
@@ -21,8 +21,8 @@
 }
 
 \seealso{
-	\code{\link{enrichGOResult-class}},
-	\code{\link{compareCluster}}
+  \code{\link{enrichGOResult-class}},
+  \code{\link{compareCluster}}
 }
 
 \examples{

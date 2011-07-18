@@ -5,7 +5,7 @@
   Given a vector of genes, this function will return the GO profile at specific level.
 }
 \usage{
-	groupGO(gene, organism="human", ont="CC", level = 2)
+	groupGO(gene, organism="human", ont="CC", level = 2, readable=FALSE)
 }
 
 \arguments{
@@ -13,6 +13,7 @@
   \item{organism}{ Currently, only "human" and "mouse" supported. }
   \item{ont}{ One of "MF", "BP", and "CC" subontologies. }
   \item{level}{ Specific GO Level. }
+  \item{readable}{ if readable is TRUE, the gene IDs will mapping to gene symbols. }
 }
 
 \value{
