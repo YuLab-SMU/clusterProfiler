@@ -1,3 +1,24 @@
+
+
+#' Compare gene clusters functional profile
+#' Given a list of gene set, this function will compute profiles of each gene
+#' cluster.
+#' 
+#' 
+#' @param geneClusters a list of entrez gene id.
+#' @param fun One of groupGO and enrichGO.
+#' @param ...  Other arguments.
+#' @return A \code{clusterProfResult} instance.
+#' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
+#'   \code{\link{enrichGO}}
+#' @keywords manip
+#' @examples
+#' 
+#' 	data(gcSample)
+#' 	xx <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
+#' 	#summary(xx)
+#' 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
+#' 
 compareCluster <- function(geneClusters, fun=enrichGO, ...) {
 	clProf <- llply(geneClusters, 
 		.fun=function(i) {

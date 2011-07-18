@@ -1,3 +1,26 @@
+
+
+#' GO Enrichment Analysis of a gene set.
+#' Given a vector of genes, this function will return the enrichment GO
+#' categories with FDR control.
+#' 
+#' 
+#' @param gene a vector of entrez gene id.
+#' @param organism Currently, only "human", "mouse" and "yeast" supported.
+#' @param ont One of "MF", "BP", and "CC" subontologies.
+#' @param pvalueCutoff Cutoff value of pvalue.
+#' @param readable if readable is TRUE, the gene IDs will mapping to gene
+#'   symbols.
+#' @return A \code{enrichGOResult} instance.
+#' @seealso \code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}
+#' @keywords manip
+#' @examples
+#' 
+#' 	#data(gcSample)
+#' 	#yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01, testDirection="over")
+#' 	#head(summary(yy))
+#' 	#plot(yy)
+#' 
 enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readable=FALSE) {
     goterms <- Ontology(GOTERM)
     goterms <- names(goterms[goterms == ont])
