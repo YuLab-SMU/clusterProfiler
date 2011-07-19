@@ -3,6 +3,29 @@
 #' GO Enrichment Analysis of a gene set.
 #' Given a vector of genes, this function will return the enrichment GO
 #' categories with FDR control.
+#'
+#'
+#' @param gene a vector of entrez gene id.
+#' @param organism Currently, only "human", "mouse" and "yeast" supported.
+#' @param ont One of "MF", "BP", and "CC" subontologies.
+#' @param pvalueCutoff Cutoff value of pvalue.
+#' @param readable if readable is TRUE, the gene IDs will mapping to gene
+#'   symbols.
+#' @return A \code{enrichGOResult} instance.
+#' @seealso \code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}
+#' @keywords manip
+#' @examples
+#'
+#' 	#data(gcSample)
+#' 	#yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01, testDirection="over")
+#' 	#head(summary(yy))
+#' 	#plot(yy)
+#'
+
+
+#' GO Enrichment Analysis of a gene set.
+#' Given a vector of genes, this function will return the enrichment GO
+#' categories with FDR control.
 #' 
 #' 
 #' @param gene a vector of entrez gene id.
@@ -33,12 +56,7 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
 
     Terms <- goterms[goterms %in% orgTerm]
 
-    GO2ExtID <- switch(organism,
-                       human = mget(Terms, org.Hs.egGO2ALLEGS, ifnotfound=NA),
-                       mouse = mget(Terms, org.Mm.egGO2ALLEGS, ifnotfound=NA),
-                       yeast = mget(Terms, org.Sc.sgdGO2ALLORFS, ifnotfound=NA),
-                       )
-	GO2ExtID <- lapply(GO2ExtID, function(i) unique(i))
+    GO2ExtID <- getGO2ExtID(Terms, organism)
 
     orgExtID <- unique(unlist(GO2ExtID))
 
@@ -65,12 +83,12 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
     pvalues <- pvalues[,5]
 
 
-    GeneRatio <- mdply(data.frame(a=k, b=n), .yPaste)
+    GeneRatio <- mdply(data.frame(a=k, b=n), getRatio)
     GeneRatio <- GeneRatio[,3]
-    BgRatio <- mdply(data.frame(a=M, b=N), .yPaste)
+    BgRatio <- mdply(data.frame(a=M, b=N), getRatio)
     BgRatio <- BgRatio[,3]
     GOID <- names(GO2ExtID)
-    Description <- unlist(sapply(GOID, .GO2Term))
+    Description <- GO2Term(GOID)
 
     goOver <- data.frame(GOID=GOID, Description=Description, GeneRatio=GeneRatio, BgRatio=BgRatio, pvalue=pvalues)
 

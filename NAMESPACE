@@ -4,7 +4,7 @@ importClassesFrom(methods, character, data.frame, list, numeric)
 importClassesFrom(AnnotationDbi, GOTerms)
 importMethodsFrom(AnnotationDbi, as.list, colnames, get, 
 				  mappedkeys, mget, ncol,nrow,
-				  Ontology)
+				  Ontology, Term)
 				  
 #importMethodsFrom(Category, hyperGTest)
 importFrom(methods, new)

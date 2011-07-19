@@ -22,6 +22,7 @@
   \describe{
     \item{\code{compareClusterResult}:}{containing a dataframe of functional profiles.}
 	\item{\code{geneClusters}:}{ input gene clusters. }
+	\item{\code{fun}:}{ function call by compareCluster }
   }
 }
 \section{Methods}{
