@@ -1,9 +1,7 @@
 \name{DataSet}
-\docType{data}	
+\title{Datasets...}
+\description{Datasets
+gcSample contains a sample of gene clusters.}
 \alias{gcSample}
-\title{Datasets}
-\description{ 
-	gcSample contains a sample of gene clusters.
-}	
-
+\docType{data}
 \keyword{datasets}

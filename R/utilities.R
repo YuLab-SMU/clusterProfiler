@@ -9,11 +9,11 @@
     assign("clusterProfilesEnv", new.env(),.GlobalEnv)
 }
 
-##' .. content for \description{} (no empty lines) ..
+##' provide a vector of GOIDs, this function will convert them to corresponding GO Terms
 ##'
-##' .. content for \details{} ..
-##' @title
-##' @param GOID
+##'
+##' @title Mapping GOIDs to GO Terms
+##' @param GOID GOID
 ##' @return GO Terms
 ##' @author Guangchuang Yu
 GO2Term <- function(GOID) {
@@ -22,19 +22,34 @@ GO2Term <- function(GOID) {
     return(term)
 }
 
-getGO2ExtID <- function(Terms, organism) {
+
+##' provide a vector of GOIDs, and organism, this function will return the species specific gene list annotated by the given GOIDs.
+##'
+##'
+##' @title query genes annotated by given GOIDs
+##' @param GOID the query GO IDs
+##' @param organism one of human, mouse and yeast.
+##' @return a list of gene IDs, the names of the list is the GOIDs
+##' @author Guangchuang Yu
+getGO2ExtID <- function(GOID, organism) {
     GO2ExtID <- switch(organism,
-                       human = mget(Terms, org.Hs.egGO2ALLEGS, ifnotfound=NA),
-                       mouse = mget(Terms, org.Mm.egGO2ALLEGS, ifnotfound=NA),
-                       yeast = mget(Terms, org.Sc.sgdGO2ALLORFS, ifnotfound=NA),
+                       human = mget(GOID, org.Hs.egGO2ALLEGS, ifnotfound=NA),
+                       mouse = mget(GOID, org.Mm.egGO2ALLEGS, ifnotfound=NA),
+                       yeast = mget(GOID, org.Sc.sgdGO2ALLORFS, ifnotfound=NA),
                        )
     GO2ExtID <- lapply(GO2ExtID, function(i) unique(i))
     return(GO2ExtID)
 }
 
-
+##' query GOIDs at a specific level.
+##'
+##'
+##' @title get GOIDs at a specific level
+##' @param ont Ontology
+##' @param level GO level
+##' @return a vector of GOIDs
+##' @author Guangchuang Yu
 getGOLevel <- function(ont, level) {
-    ## get GO nodes at a specific level...
     switch(ont,
            MF = {
                topNode <- "GO:0003674"
@@ -60,6 +75,15 @@ getGOLevel <- function(ont, level) {
     return(Node)
 }
 
+##' generate a bar plot
+##'
+##' interal use, not for user.
+##' @title internal function of barplot
+##' @param result a data frame of enrichment result.
+##' @param title graph title
+##' @param font.size font size
+##' @return ggplot object
+##' @author Guangchuang Yu
 .barplotInternal <- function(result, title, font.size=12) {
     Description <- Count <- NULL # to satisfy codetools
     pg <- ggplot(result, aes(x=Description, y = Count)) +
@@ -68,11 +92,36 @@ getGOLevel <- function(ont, level) {
     .pModify(pg, title, font.size)
 }
 
+##' changing ggplot object's title and font size
+##'
+##' interal use, not for user.
+##' @title changing title and font size
+##' @param p ggplot object
+##' @param title graph title
+##' @param font.size font size
+##' @return ggplot object
+##' @author Guangchuang Yu
 .pModify <- function(p, title="", font.size=12) {
-    p <- p + xlab("") + ylab("") + opts(axis.text.x = theme_text(colour="black", size=font.size, vjust = 1)) + opts(axis.text.y = theme_text(colour="black", size=font.size, hjust = 1)) + opts(title=title)+theme_bw()
+    p <- p +
+        xlab("") +
+            ylab("") +
+                opts(axis.text.x = theme_text(colour="black", size=font.size, vjust = 1)) +
+                    opts(axis.text.y = theme_text(colour="black", size=font.size, hjust = 1)) +
+                        opts(title=title)+theme_bw()
     return(p)
 }
 
+##' Internal plot function for plotting compareClusterResult
+##'
+##'
+##' @title .PlotClusterProfInternal
+##' @param clProf.reshape.df data frame of compareCluster result
+##' @param type one of dot and bar
+##' @param by one of percentage and count
+##' @param title graph title
+##' @param font.size graph font size
+##' @return ggplot object
+##' @author Guangchuang Yu
 .PlotClusterProfInternal <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
     Description <- Percentage <- Count <- Cluster <- Pvalue <- pvalue <- NULL # to satisfy codetools
     if (type == "bar") {
@@ -109,30 +158,58 @@ getGOLevel <- function(ont, level) {
 
 
 
-
-
-
-#### KEGG Enrichment Analysis ###
+##' provide a vector of KEGG pathway IDs, this function will convert them to corresponding KEGG pathway Names
+##'
+##'
+##' @title convert KEGG pathway ID to pathway Name
+##' @param pathIDs KEGG pathway IDs
+##' @return KEGG pathway names
+##' @author Guangchuang Yu
 path2Name <- function(pathIDs) {
     pathIDs <- gsub("^\\D+", "",pathIDs, perl=T)
     path2name <- mget(pathIDs, KEGGPATHID2NAME)
     return(path2name)
 }
 
+
+##' provide numerator and denominator, return numerator/denominator
+##'
+##'
+##' @title getRatio
+##' @param a numerator
+##' @param b denominator
+##' @return numerator/denominator
+##' @author Guangchuang Yu
 getRatio <- function(a, b) {
     x=paste(a, "/", b, sep="", collapse="")
     return(x)
 }
 
+
+##' hypergeometric test for enrichment analysis
+##'
+##'
+##' @title hypergeometric test
+##' @param numWdrawn number of White balls drawn
+##' @param numW number of White balls
+##' @param numB number of Black balls
+##' @param numDrawn number of balls drawn
+##' @return pvalue
+##' @author Guangchuang Yu
 HyperG <- function(numWdrawn, numW, numB, numDrawn) {
-    ##numWdrawn: number of White balls drawn
-    ##numW: number of White balls
-    ##numB: number of Black balls
-    ##numDrawn: number of balls drawn
     pvalue <- phyper(numWdrawn, numW, numB, numDrawn, lower.tail=FALSE)
     return(pvalue)
 }
 
+
+##' convert a list of gene IDs to gene Names.
+##'
+##'
+##' @title convert gene IDs to gene Names
+##' @param geneID.list a list of gene IDs
+##' @param organism one of human, mouse and yeast.
+##' @return a list of gene names.
+##' @author Guangchuang Yu
 geneID2geneName <- function(geneID.list, organism) {
     annotation <- switch(organism,
                          human = org.Hs.egSYMBOL,

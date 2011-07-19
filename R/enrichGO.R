@@ -17,33 +17,10 @@
 #' @examples
 #'
 #' 	#data(gcSample)
-#' 	#yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01, testDirection="over")
+#' 	#yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01)
 #' 	#head(summary(yy))
 #' 	#plot(yy)
 #'
-
-
-#' GO Enrichment Analysis of a gene set.
-#' Given a vector of genes, this function will return the enrichment GO
-#' categories with FDR control.
-#' 
-#' 
-#' @param gene a vector of entrez gene id.
-#' @param organism Currently, only "human", "mouse" and "yeast" supported.
-#' @param ont One of "MF", "BP", and "CC" subontologies.
-#' @param pvalueCutoff Cutoff value of pvalue.
-#' @param readable if readable is TRUE, the gene IDs will mapping to gene
-#'   symbols.
-#' @return A \code{enrichGOResult} instance.
-#' @seealso \code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}
-#' @keywords manip
-#' @examples
-#' 
-#' 	#data(gcSample)
-#' 	#yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01, testDirection="over")
-#' 	#head(summary(yy))
-#' 	#plot(yy)
-#' 
 enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readable=FALSE) {
     goterms <- Ontology(GOTERM)
     goterms <- names(goterms[goterms == ont])
@@ -92,13 +69,13 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
 
     goOver <- data.frame(GOID=GOID, Description=Description, GeneRatio=GeneRatio, BgRatio=BgRatio, pvalue=pvalues)
 
-                                        #qvalue =  fdrtool(keggOver$pvalue, statistic="pvalue",plot=FALSE,verbose=FALSE)$qval
     qobj = qvalue(goOver$pvalue, lambda=0.05, pi0.method="bootstrap")
     qvalues <- qobj$qvalues
     goOver <- data.frame(goOver, qvalue=qvalues, geneID=geneID, Count=k)
     goOver <- goOver[order(goOver$pvalue),]
     goOver <- goOver[ goOver$pvalue <= pvalueCutoff, ]
     goOver$Description <- as.character(goOver$Description)
+    rownames(goOver) <- goOver$GOID
 
     new("enrichGOResult",
         enrichGOResult = goOver,
@@ -109,99 +86,79 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
         )
 }
 
-
-
-
-#enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff = 0.01, testDirection="over") {
-#	if (organism == "human") {
-#		annotation="org.Hs.eg.db"
-#		geneUniverse =  mappedkeys(org.Hs.egGO)
-#	} else if (organism == "mouse") {
-#		annotation="org.Mm.eg.db"
-#		geneUniverse =  mappedkeys(org.Mm.egGO)
-#	} else if (organism == "yeast"){
-#		annotation="org.Sc.sgd.db"
-#		geneUniverse =  mappedkeys(org.Sc.sgdGO)
-#	}else {
-#		stop (" Not supported yet... \n" )
-#	}
-#	params = new("GOHyperGParams", geneIds=gene, universeGeneIds=geneUniverse, annotation=annotation, ontology=ont, pvalueCutoff = 1, conditional = FALSE, testDirection=testDirection)
-#	hgOver = hyperGTest(params)
-#	hgOver.df <- summary(hgOver)
-#	if (nrow(hgOver.df) == 0) {
-#		return(NA)
-#	}
-#	colnames(hgOver.df)[c(1,7)] <- c("GOID", "Description")
-#
-#	## get GeneIDs annotated with GOID.
-#	goGene <- .goGene(GOID=hgOver.df[,1], gene, organism)
-#	GeneIDs = .getGeneID(goGene)
-#
-#	GeneSetSize <- rep(length(hgOver@geneIds), nrow(hgOver.df))
-#
-#	#qvalue =  fdrtool(hgOver.df$Pvalue, statistic="pvalue",plot=FALSE,verbose=FALSE)$qval
-#	#p.adjust(hgOver.df$Pvalue, method='fdr')
-#	qobj <- qvalue(hgOver.df$Pvalue)
-#	qvalues <- qobj$qvalues
-#	hgOver.df <- data.frame(hgOver.df, GeneSetSize=GeneSetSize, GeneID=GeneIDs, qvalue=qvalues)
-#	hgOver.df <- hgOver.df[,c(1,7,2,10,3:5,8,6,9)]
-#
-#	hgOver.df <- hgOver.df[ hgOver.df$Pvalue <= pvalueCutoff, ]
-#
-#	new("enrichGOResult",
-#		enrichGOResult = hgOver.df,
-#		pvalueCutoff=pvalueCutoff,
-#		testDirection=testDirection,
-#		Ont = ont,
-#		Organism = organism,
-#		Gene = gene
-#	)
-#}
-
+##' An S4 class that stores Gene Ontology enrichment result
+##' @slot enrichGOResult GO enrichment result
+##' @slot pvalueCutoff pvalueCutoff
+##' @slot Ont Ontology
+##' @slot Organism one of "human", "mouse" and "yeast"
+##' @slot Gene Gene IDs
+##' @author Guangchuang Yu
 setClass("enrichGOResult",
          representation=representation(
          enrichGOResult="data.frame",
          pvalueCutoff="numeric",
-         testDirection="character",
          Ont = "character",
          Organism = "character",
          Gene = "character"
          )
          )
 
+##' show method for \code{enrichGOResult} instance
+##'
+##'
+##' @name show
+##' @docType methods
+##' @rdname show-methods
+##'
+##' @title show method
+##' @param object A \code{enrichGOResult} instance.
+##' @return message
+##' @author GuangchuangYu
 setMethod("show", signature(object="enrichGOResult"),
           function (object){
               ont = object@Ont
               Organism = object@Organism
               GeneNum = length(object@Gene)
-              testDirection = object@testDirection
               pvalueCutoff=object@pvalueCutoff
-              cat (GeneNum, Organism, "Genes to GO", ont, "test for", paste(testDirection, "-representation.", sep=""), "\n", "p value <", pvalueCutoff, "\n")
+              cat ("Hypergeometric test of over-representation GO (", ont, ") categories", " for ", GeneNum, Organism, "genes\n", "p value <", pvalueCutoff, "\n")
           }
           )
 
+##' summary method for \code{enrichGOResult} instance
+##'
+##'
+##' @name summary
+##' @docType methods
+##' @rdname summary-methods
+##'
+##' @title summary method
+##' @param object A \code{enrichGOResult} instance.
+##' @return A data frame
+##' @author GuangchuangYu
 setMethod("summary", signature(object="enrichGOResult"),
           function(object) {
               return(object@enrichGOResult)
           }
           )
 
+##' plot method for \code{enrichGOResult} instance
+##'
+##'
+##' @name plot
+##' @docType methods
+##' @rdname plot-methods
+##'
+##' @title plot method
+##' @param x A \code{enrichGOResult} instance.
+##' @param title graph title
+##' @param font.size graph font size
+##' @return ggplot object
+##' @author Guangchuang Yu
 setMethod("plot", signature(x="enrichGOResult"),
-          function(x, caption="", font.size=12) {
+          function(x, title="", font.size=12) {
               enrichGOResult <- summary(x)
-              p <- .barplotInternal(enrichGOResult, caption, font.size)
-###color scale based on pvalue
+              p <- .barplotInternal(enrichGOResult, title, font.size)
+              ##color scale based on pvalue
               p + aes(fill=Pvalue)
           }
           )
-
-#setMethod("plot", signature(x="GOHyperGResult"),
-#	function(x, caption="", font.size=12) {
-#		enrichGOResult <- summary(x)
-#		#colnames(enrichGOResult)[7] <- "Description"
-#		enrichGOResult <- rename(enrichGOResult, c(Term="Description"))
-#		p <- .barplotInternal(enrichGOResult, caption, font.size)
-#		###color scale based on pvalue
-#		p + aes(fill=Pvalue)
-#	}
-#)

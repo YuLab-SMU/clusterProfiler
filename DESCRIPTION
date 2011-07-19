@@ -1,5 +1,5 @@
 Package: clusterProfiler
-Version: 1.1.18
+Version: 1.1.19
 Title: statistical analysis and visulization of functional profiles for genes and gene clusters
 Author: Guangchuang Yu
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
@@ -11,12 +11,12 @@ Suggests: GOSemSim, DOSE
 biocViews: Bioinformatics, Clustering, GO, Pathways, Visualization, MultipleComparisons
 License: Artistic-2.0
 Collate:
-    zzz.R
-    AllGenerics.R
-    compareCluster.R
-	clusterProfiler-package.R
-    enrichGO.R
-	enrichKEGG.R
-	groupGO.R
-	utilities.R
+		zzz.R
+		AllGenerics.R
+		compareCluster.R
+		clusterProfiler-package.R
+		enrichGO.R
+		enrichKEGG.R
+		groupGO.R
+		utilities.R
 
