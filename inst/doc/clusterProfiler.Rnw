@@ -1,5 +1,5 @@
 % \VignetteIndexEntry{An introduction to clusterProfiler}
-% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, GOstats, ggplot2, methods, qvalue, KEGG.db, Category}
+% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, ggplot2, methods, qvalue, KEGG.db}
 % \VignetteSuggests{GOSemSim}
 % \VignetteKeywords{Gene Ontology Analysis}
 % \VignettePackage{clusterProfiler}
@@ -95,7 +95,7 @@ xx <- compareCluster(gcSample, fun=groupGO, organism="human", ont="MF", level=2)
 \begin{figure}
 \begin{center}
 <<fig=TRUE, width=8>>=
-print(plot(xx, type="dot", caption="MF Ontology Distribution Comparison"))
+print(plot(xx, type="dot", title="MF Ontology Distribution Comparison"))
 @
 \caption{Example of comparing MF ontology distribution using dotplot.}
 \label{Fig:compareClusterPlot-groupGO}
@@ -115,7 +115,7 @@ head(summary(xx))
 \begin{figure}
 \begin{center}
 <<fig=TRUE>>=
-print(plot(xx, caption="CC Ontology Enrichment Comparison"))
+print(plot(xx, title="CC Ontology Enrichment Comparison"))
 @
 \caption{Example of comparing CC ontology enrichment among gene clusters.}
 \label{Fig:compareClusterPlot-enrichGO}
@@ -125,7 +125,7 @@ print(plot(xx, caption="CC Ontology Enrichment Comparison"))
 \begin{figure}
 \begin{center}
 <<fig=TRUE>>=
-print(plot(xx, type="bar", by="count", caption="CC Ontology Enrichment Comparison using bar chart"))
+print(plot(xx, type="bar", by="count", title="CC Ontology Enrichment Comparison using bar chart"))
 @
 \caption{Example of comparing CC ontology enrichment among gene clusters.}
 \label{Fig:compareClusterPlot-enrichGO-2}
@@ -144,7 +144,7 @@ head(summary(xx))
 \begin{figure}
 \begin{center}
 <<fig=TRUE, width=7>>=
-print(plot(xx, type="dot", caption="KEGG Enrichment Comparison"))
+print(plot(xx, type="dot", title="KEGG Enrichment Comparison"))
 @
 \caption{Example of comparing KEGG enrichment among gene clusters.}
 \label{Fig:compareClusterPlot-enrichKEGG}
@@ -167,7 +167,7 @@ The outputs of \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKE
 \begin{figure}
 \begin{center}
 <<fig=TRUE>>=
-print(plot(yy, caption="KEGG Enrichment Analysis"))
+print(plot(yy, title="KEGG Enrichment Analysis"))
 @
 \caption{Example of KEGG Enrichment Analysis.}
 \label{Fig:enrichKEGGPlot}

@@ -3,8 +3,8 @@
 #' KEGG Enrichment Analysis of a gene set.
 #' Given a vector of genes, this function will return the enrichment KEGG
 #' categories with FDR control.
-#' 
-#' 
+#'
+#'
 #' @param gene a vector of entrez gene id.
 #' @param organism Currently, only "human" and "mouse" supported.
 #' @param pvalueCutoff Cutoff value of pvalue.
@@ -14,27 +14,28 @@
 #' @seealso \code{\link{enrichKEGGResult-class}}, \code{\link{compareCluster}}
 #' @keywords manip
 #' @examples
-#' 
+#'
 #' 	data(gcSample)
 #' 	yy = enrichKEGG(gcSample[[5]], pvalueCutoff=0.01)
 #' 	head(summary(yy))
 #' 	#plot(yy)
-#' 
+#'
 enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FALSE) {
-                                        #pathID2ExtID <- as.list(KEGGPATHID2EXTID)
-                                        #pathID <- names(pathID2ExtID)
+    ##pathID2ExtID <- as.list(KEGGPATHID2EXTID)
+    ##pathID <- names(pathID2ExtID)
     pathID <- mappedkeys(KEGGPATHID2EXTID)
 
+    ## select species specific pathways
     if (organism == "human") {
-        idx <- grep("^hsa", pathID) ## select human pathways.
+        idx <- grep("^hsa", pathID)
     } else if (organism == "mouse") {
-        idx <- grep("^mmu", pathID) ## select mouse pathways.
+        idx <- grep("^mmu", pathID)
     } else if (organism == "yeast") {
-        idx <- grep("^sce", pathID) ## select yeast pathways.
+        idx <- grep("^sce", pathID)
     } else {
         stop (" Not supported yet... \n" )
     }
-                                        #orgPath2ExtID <- pathID2ExtID[idx]
+    ##orgPath2ExtID <- pathID2ExtID[idx]
     orgPathID <- pathID[idx]
     orgPath2ExtID <- mget(orgPathID, KEGGPATHID2EXTID, ifnotfound=NA)
     orgPath2ExtID <- lapply(orgPath2ExtID, function(i) unique(i))
@@ -61,16 +62,16 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FAL
     pvalues <- mdply(args.df, HyperG)
     pvalues <- pvalues[,5]
 
-    GeneRatio <- mdply(data.frame(a=k, b=n), .yPaste)
+    GeneRatio <- mdply(data.frame(a=k, b=n), getRatio)
     GeneRatio <- GeneRatio[,3]
-    BgRatio <- mdply(data.frame(a=M, b=N), .yPaste)
+    BgRatio <- mdply(data.frame(a=M, b=N), getRatio)
     BgRatio <- BgRatio[,3]
     pathwayID <- names(orgPath2ExtID)
     Description <- unlist(path2Name(pathwayID))
 
     keggOver <- data.frame(pathwayID=pathwayID, Description=Description, GeneRatio=GeneRatio, BgRatio=BgRatio, pvalue=pvalues)
 
-                                        #qvalue =  fdrtool(keggOver$pvalue, statistic="pvalue",plot=FALSE,verbose=FALSE)$qval
+
     qobj = qvalue(keggOver$pvalue, lambda=0.05, pi0.method="bootstrap")
     qvalues <- qobj$qvalues
     keggOver <- data.frame(keggOver, qvalue=qvalues, geneID=geneID, Count=k)
@@ -111,11 +112,14 @@ setMethod("summary", signature(object="enrichKEGGResult"),
           )
 
 setMethod("plot", signature(x="enrichKEGGResult"),
-          function(x, caption="", font.size=12) {
+          function(x, title="", font.size=12) {
               enrichKEGGResult <- x@enrichKEGGResult
-              p <- .barplotInternal(enrichKEGGResult, caption, font.size)
-###color scale based on pvalue
-              p + aes(fill=pvalue)
+              p <- .barplotInternal(enrichKEGGResult, title, font.size)
+              ##color scale based on pvalue
+              p <- p +
+                  aes(fill=pvalue) +
+                      scale_colour_gradient(low="red", high="yellow")
+              return(p)
           }
           )
 
