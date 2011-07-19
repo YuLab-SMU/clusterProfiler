@@ -1,5 +1,3 @@
-
-
 #' Compare gene clusters functional profile
 #' Given a list of gene set, this function will compute profiles of each gene
 #' cluster.
@@ -19,27 +17,6 @@
 #' 	#summary(xx)
 #' 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
 #'
-
-
-#' Compare gene clusters functional profile
-#' Given a list of gene set, this function will compute profiles of each gene
-#' cluster.
-#' 
-#' 
-#' @param geneClusters a list of entrez gene id.
-#' @param fun One of groupGO and enrichGO.
-#' @param ...  Other arguments.
-#' @return A \code{clusterProfResult} instance.
-#' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
-#'   \code{\link{enrichGO}}
-#' @keywords manip
-#' @examples
-#' 
-#' 	data(gcSample)
-#' 	xx <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
-#' 	#summary(xx)
-#' 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
-#' 
 compareCluster <- function(geneClusters, fun=enrichGO, ...) {
     clProf <- llply(geneClusters,
                     .fun=function(i) {
@@ -58,6 +35,12 @@ compareCluster <- function(geneClusters, fun=enrichGO, ...) {
 	)
 }
 
+
+##' An S4 class that stores cluster comparing result.
+##' @slot compareClusterResult cluster comparing result
+##' @slot geneClusters a list of genes
+##' @slot fun one of groupGO, enrichGO and enrichKEGG
+##' @author Guangchuang Yu
 setClass("compareClusterResult",
          representation = representation(
          compareClusterResult = "data.frame",
@@ -66,6 +49,17 @@ setClass("compareClusterResult",
          )
          )
 
+##' show method for \code{compareClusterResult} instance
+##'
+##'
+##' @name show
+##' @docType methods
+##' @rdname show-methods
+##'
+##' @title show method
+##' @param object A \code{compareClusterResult} instance.
+##' @return message
+##' @author Guangchuang Yu
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
               geneClusterLen <- length(object@geneClusters)
@@ -82,12 +76,39 @@ setMethod("show", signature(object="compareClusterResult"),
           }
           )
 
+##' summary method for \code{compareClusterResult} instance
+##'
+##'
+##' @name summary
+##' @docType methods
+##' @rdname summary-methods
+##'
+##' @title summary method
+##' @param object A \code{compareClusterResult} instance.
+##' @return A data frame
+##' @author Guangchuang Yu
 setMethod("summary", signature(object="compareClusterResult"),
           function(object) {
               return(object@compareClusterResult)
           }
           )
 
+##' plot method for \code{compareClusterResult} instance
+##'
+##'
+##' @name plot
+##' @docType methods
+##' @rdname plot-methods
+##'
+##' @title plot method
+##' @param x A \code{compareClusterResult} instance.
+##' @param type one of "dot" and "bar".
+##' @param title graph title
+##' @param font.size graph font size
+##' @param limit numeric parameter, restrict the top categories for plotting.
+##' @param by one of "percentage" and "count"
+##' @return ggplot object
+##' @author Guangchuang Yu
 setMethod("plot", signature(x="compareClusterResult"),
           function(x, type="dot", title="", font.size=12, limit=5, by="percentage") {
               clProf.df <- summary(x)

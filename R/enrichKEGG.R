@@ -87,6 +87,12 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FAL
 	)
 }
 
+##' An S4 class that stores KEGG enrichment result.
+##' @slot enrichKEGGResult KEGG enrichment result
+##' @slot pvalueCutoff pvalueCutoff
+##' @slot Organism one of "humna", "mouse", and "yeast"
+##' @slot Gene Gene IDs
+##' @author Guangchuang Yu
 setClass("enrichKEGGResult",
          representation=representation(
          enrichKEGGResult="data.frame",
@@ -96,6 +102,17 @@ setClass("enrichKEGGResult",
          )
          )
 
+##' show method for \code{enrichKEGGResult} instance
+##'
+##'
+##' @name show
+##' @docType methods
+##' @rdname show-methods
+##'
+##' @title show method
+##' @param object A \code{enrichKEGGResult} instance.
+##' @return message
+##' @author Guangchuang Yu
 setMethod("show", signature(object="enrichKEGGResult"),
           function (object){
               Organism = object@Organism
@@ -105,12 +122,36 @@ setMethod("show", signature(object="enrichKEGGResult"),
           }
           )
 
+##' summary method for \code{enrichKEGGResult} instance
+##'
+##'
+##' @name summary
+##' @docType methods
+##' @rdname summary-methods
+##'
+##' @title summary method
+##' @param object A \code{enrichKEGGResult} instance.
+##' @return A data frame
+##' @author Guangchuang Yu
 setMethod("summary", signature(object="enrichKEGGResult"),
           function(object) {
               return(object@enrichKEGGResult)
           }
           )
 
+##' plot method for \code{enrichKEGGResult} instance
+##'
+##'
+##' @name plot
+##' @docType methods
+##' @rdname plot-methods
+##'
+##' @title plot method
+##' @param x A \code{enrichKEGGResult} instance.
+##' @param title graph title
+##' @param font.size graph font size
+##' @return ggplot object
+##' @author Guangchuang Yu
 setMethod("plot", signature(x="enrichKEGGResult"),
           function(x, title="", font.size=12) {
               enrichKEGGResult <- x@enrichKEGGResult

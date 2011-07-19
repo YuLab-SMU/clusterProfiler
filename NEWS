@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.1.19
+------------------------
+ o change to using roxygen for generating Rd file. <2011-07-19 Tue>
+ 
 CHANGES IN VERSION 1.1.18
 ------------------------
  o clean up some codes. <2011-07-19 Tue>
