@@ -14,6 +14,7 @@
 #' @return A \code{enrichGOResult} instance.
 #' @seealso \code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}
 #' @keywords manip
+#' @export
 #' @examples
 #'
 #' 	#data(gcSample)

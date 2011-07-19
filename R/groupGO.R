@@ -12,6 +12,7 @@
 #' @return A \code{groupGOResult} instance.
 #' @seealso \code{\link{groupGOResult-class}}, \code{\link{compareCluster}}
 #' @keywords manip
+#' @export
 #' @examples
 #'
 #' 	data(gcSample)
