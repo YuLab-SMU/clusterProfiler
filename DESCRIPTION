@@ -12,7 +12,7 @@ Description: The package implements methods to analyze and visualize
 Version: 1.1.20
 biocViews: Bioinformatics, Clustering, GO, Pathways, Visualization,
     MultipleComparisons
-Depends: stats, plyr, ggplot2
+Depends: stats, ggplot2
 Suggests: GOSemSim, DOSE
 Collate: 'AllGenerics.R' 'clusterProfiler-package.R'
     'compareCluster.R' 'enrichGO.R' 'enrichKEGG.R' 'groupGO.R'
