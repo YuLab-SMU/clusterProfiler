@@ -1,25 +1,27 @@
-#' Functional Profile of a gene set at specific GO level.
-#' Given a vector of genes, this function will return the GO profile at
-#' specific level.
-#'
-#'
-#' @param gene a vector of entrez gene id.
-#' @param organism Currently, only "human" and "mouse" supported.
-#' @param ont One of "MF", "BP", and "CC" subontologies.
-#' @param level Specific GO Level.
-#' @param readable if readable is TRUE, the gene IDs will mapping to gene
-#'   symbols.
-#' @return A \code{groupGOResult} instance.
-#' @seealso \code{\link{groupGOResult-class}}, \code{\link{compareCluster}}
-#' @keywords manip
-#' @export
-#' @examples
-#'
-#' 	data(gcSample)
-#' 	yy <- groupGO(gcSample[[1]], organism="human", ont="BP", level=2)
-#' 	head(summary(yy))
-#' 	#plot(yy)
-#'
+##' Functional Profile of a gene set at specific GO level.
+##' Given a vector of genes, this function will return the GO profile at
+##' specific level.
+##'
+##'
+##' @param gene a vector of entrez gene id.
+##' @param organism Currently, only "human" and "mouse" supported.
+##' @param ont One of "MF", "BP", and "CC" subontologies.
+##' @param level Specific GO Level.
+##' @param readable if readable is TRUE, the gene IDs will mapping to gene
+##'   symbols.
+##' @return A \code{groupGOResult} instance.
+##' @seealso \code{\link{groupGOResult-class}}, \code{\link{compareCluster}}
+##' @keywords manip
+##' @importFrom methods new
+##' @importClassesFrom methods data.frame
+##' @export
+##' @examples
+##'
+##' 	data(gcSample)
+##' 	yy <- groupGO(gcSample[[1]], organism="human", ont="BP", level=2)
+##' 	head(summary(yy))
+##' 	#plot(yy)
+##'
 groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE) {
     GOLevel <- getGOLevel(ont, level) ##get GO IDs of specific level.
 
@@ -44,13 +46,25 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
 	)
 }
 
-##' An S4 class that stores Gene Ontology classification result
+##' Class "groupGOResult"
+##' This class represents the result of functional Profiles of a set of gene at
+##' specific GO level.
+##'
+##'
+##' @name groupGOResult-class
+##' @aliases groupGOResult-class show,groupGOResult-method
+##'   summary,groupGOResult-method plot,groupGOResult-method
+##' @docType class
 ##' @slot groupGOResult GO classification result
 ##' @slot Ont Ontology
 ##' @slot Level GO level
 ##' @slot Organism one of "human", "mouse" and "yeast"
 ##' @slot Gene Gene IDs
+##' @exportClass groupGOResult
 ##' @author Guangchuang Yu
+##' @seealso \code{\linkS4class{compareClusterResult}}
+##'   \code{\link{compareCluster}} \code{\link{groupGO}}
+##' @keywords classes
 setClass("groupGOResult",
          representation=representation(
          groupGOResult="data.frame",
@@ -125,10 +139,10 @@ setMethod("plot", signature(x="groupGOResult"),
                   groupGOResult <- groupGOResult[idx,]
               }
               groupGOResult$Description <- factor(groupGOResult$Description, level= as.character(groupGOResult$Description))
-              p <- .barplotInternal(groupGOResult, title, font.size)
+              p <- plotting.barplot(groupGOResult, title, font.size)
               p <- p +
                   aes(fill=Description) +
                       opts(legend.position="none")
-              print(p)
+              return(p)
           }
           )

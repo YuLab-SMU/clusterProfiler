@@ -1,10 +1,3 @@
-
-##' Assign some initial instances.
-##'
-##'
-##' @title initial function for clusterProfiler
-##' @return environment instance
-##' @author Guangchuang Yu
 .initial <- function() {
     assign("clusterProfilesEnv", new.env(),.GlobalEnv)
 }
@@ -15,6 +8,9 @@
 ##' @title Mapping GOIDs to GO Terms
 ##' @param GOID GOID
 ##' @return GO Terms
+##' @importFrom GO.db GOTERM
+##' @importMethodsFrom AnnotationDbi Term
+##' @importMethodsFrom AnnotationDbi mget
 ##' @author Guangchuang Yu
 GO2Term <- function(GOID) {
     go <- mget(GOID, GOTERM, ifnotfound=NA)
@@ -30,6 +26,10 @@ GO2Term <- function(GOID) {
 ##' @param GOID the query GO IDs
 ##' @param organism one of human, mouse and yeast.
 ##' @return a list of gene IDs, the names of the list is the GOIDs
+##' @importFrom org.Hs.eg.db org.Hs.egGO2ALLEGS
+##' @importFrom org.Mm.eg.db org.Mm.egGO2ALLEGS
+##' @importFrom org.Sc.sgd.db org.Sc.sgdGO2ALLORFS
+##' @importMethodsFrom AnnotationDbi mget
 ##' @author Guangchuang Yu
 getGO2ExtID <- function(GOID, organism) {
     GO2ExtID <- switch(organism,
@@ -48,6 +48,10 @@ getGO2ExtID <- function(GOID, organism) {
 ##' @param ont Ontology
 ##' @param level GO level
 ##' @return a vector of GOIDs
+##' @importFrom GO.db GOBPCHILDREN
+##' @importFrom GO.db GOCCCHILDREN
+##' @importFrom GO.db GOMFCHILDREN
+##' @importMethodsFrom AnnotationDbi mget
 ##' @author Guangchuang Yu
 getGOLevel <- function(ont, level) {
     switch(ont,
@@ -84,12 +88,12 @@ getGOLevel <- function(ont, level) {
 ##' @param font.size font size
 ##' @return ggplot object
 ##' @author Guangchuang Yu
-.barplotInternal <- function(result, title, font.size=12) {
+plotting.barplot <- function(result, title, font.size=12) {
     Description <- Count <- NULL # to satisfy codetools
     pg <- ggplot(result, aes(x=Description, y = Count)) +
         geom_bar() +
             coord_flip()
-    .pModify(pg, title, font.size)
+    pModify(pg, title, font.size)
 }
 
 ##' changing ggplot object's title and font size
@@ -99,9 +103,8 @@ getGOLevel <- function(ont, level) {
 ##' @param p ggplot object
 ##' @param title graph title
 ##' @param font.size font size
-##' @return ggplot object
 ##' @author Guangchuang Yu
-.pModify <- function(p, title="", font.size=12) {
+pModify <- function(p, title="", font.size=12) {
     p <- p +
         xlab("") +
             ylab("") +
@@ -114,7 +117,7 @@ getGOLevel <- function(ont, level) {
 ##' Internal plot function for plotting compareClusterResult
 ##'
 ##'
-##' @title .PlotClusterProfInternal
+##' @title plotting-clusterProfile
 ##' @param clProf.reshape.df data frame of compareCluster result
 ##' @param type one of dot and bar
 ##' @param by one of percentage and count
@@ -122,7 +125,7 @@ getGOLevel <- function(ont, level) {
 ##' @param font.size graph font size
 ##' @return ggplot object
 ##' @author Guangchuang Yu
-.PlotClusterProfInternal <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
+plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
     Description <- Percentage <- Count <- Cluster <- Pvalue <- pvalue <- NULL # to satisfy codetools
     if (type == "bar") {
         if (by == "percentage") {
@@ -153,7 +156,8 @@ getGOLevel <- function(ont, level) {
             p <- p + geom_point(colour="steelblue")
         }
     }
-    .pModify(p, title, font.size)
+    p <- pModify(p, title, font.size)
+	return(p)
 }
 
 
@@ -164,6 +168,7 @@ getGOLevel <- function(ont, level) {
 ##' @title convert KEGG pathway ID to pathway Name
 ##' @param pathIDs KEGG pathway IDs
 ##' @return KEGG pathway names
+##' @importFrom KEGG.db KEGGPATHID2NAME
 ##' @author Guangchuang Yu
 path2Name <- function(pathIDs) {
     pathIDs <- gsub("^\\D+", "",pathIDs, perl=T)
@@ -209,6 +214,9 @@ HyperG <- function(numWdrawn, numW, numB, numDrawn) {
 ##' @param geneID.list a list of gene IDs
 ##' @param organism one of human, mouse and yeast.
 ##' @return a list of gene names.
+##' @importFrom org.Hs.eg.db org.Hs.egSYMBOL
+##' @importFrom org.Mm.eg.db org.Mm.egSYMBOL
+##' @importFrom org.Sc.sgd.db org.Sc.sgdGENENAME
 ##' @author Guangchuang Yu
 geneID2geneName <- function(geneID.list, organism) {
     annotation <- switch(organism,

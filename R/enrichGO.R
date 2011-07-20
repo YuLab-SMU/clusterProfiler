@@ -1,27 +1,31 @@
-
-
-#' GO Enrichment Analysis of a gene set.
-#' Given a vector of genes, this function will return the enrichment GO
-#' categories with FDR control.
-#'
-#'
-#' @param gene a vector of entrez gene id.
-#' @param organism Currently, only "human", "mouse" and "yeast" supported.
-#' @param ont One of "MF", "BP", and "CC" subontologies.
-#' @param pvalueCutoff Cutoff value of pvalue.
-#' @param readable if readable is TRUE, the gene IDs will mapping to gene
-#'   symbols.
-#' @return A \code{enrichGOResult} instance.
-#' @seealso \code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}
-#' @keywords manip
-#' @export
-#' @examples
-#'
-#' 	#data(gcSample)
-#' 	#yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01)
-#' 	#head(summary(yy))
-#' 	#plot(yy)
-#'
+##' GO Enrichment Analysis of a gene set.
+##' Given a vector of genes, this function will return the enrichment GO
+##' categories with FDR control.
+##'
+##'
+##' @param gene a vector of entrez gene id.
+##' @param organism Currently, only "human", "mouse" and "yeast" supported.
+##' @param ont One of "MF", "BP", and "CC" subontologies.
+##' @param pvalueCutoff Cutoff value of pvalue.
+##' @param readable if readable is TRUE, the gene IDs will mapping to gene
+##'   symbols.
+##' @return A \code{enrichGOResult} instance.
+##' @importMethodsFrom AnnotationDbi mappedkeys
+##' @importMethodsFrom AnnotationDbi Ontology
+##' @importFrom qvalue qvalue
+##' @importFrom methods new
+##' @importFrom GO.db GOTERM
+##' @importClassesFrom methods data.frame
+##' @seealso \code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}
+##' @keywords manip
+##' @export
+##' @examples
+##'
+##' 	#data(gcSample)
+##' 	#yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01)
+##' 	#head(summary(yy))
+##' 	#plot(yy)
+##'
 enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readable=FALSE) {
     goterms <- Ontology(GOTERM)
     goterms <- names(goterms[goterms == ont])
@@ -87,13 +91,25 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
         )
 }
 
-##' An S4 class that stores Gene Ontology enrichment result
+##' Class "enrichGOResult"
+##' This class represents the result of GO enrichment analysis with FDR control.
+##'
+##'
+##' @name enrichGOResult-class
+##' @aliases enrichGOResult-class show,enrichGOResult-method
+##'   summary,enrichGOResult-method plot,enrichGOResult-method
+##'
+##' @docType class
 ##' @slot enrichGOResult GO enrichment result
 ##' @slot pvalueCutoff pvalueCutoff
 ##' @slot Ont Ontology
 ##' @slot Organism one of "human", "mouse" and "yeast"
 ##' @slot Gene Gene IDs
+##' @exportClass enrichGOResult
 ##' @author Guangchuang Yu
+##' @seealso \code{\linkS4class{compareClusterResult}}
+##'   \code{\link{compareCluster}} \code{\link{enrichGO}}
+##' @keywords classes
 setClass("enrichGOResult",
          representation=representation(
          enrichGOResult="data.frame",
@@ -158,8 +174,11 @@ setMethod("summary", signature(object="enrichGOResult"),
 setMethod("plot", signature(x="enrichGOResult"),
           function(x, title="", font.size=12) {
               enrichGOResult <- summary(x)
-              p <- .barplotInternal(enrichGOResult, title, font.size)
+              p <- plotting.barplot(enrichGOResult, title, font.size)
               ##color scale based on pvalue
-              p + aes(fill=Pvalue)
+              p <- p +
+                  aes(fill=pvalue) +
+                      scale_fill_continuous(low="red", high="yellow")
+			  return(p)
           }
           )

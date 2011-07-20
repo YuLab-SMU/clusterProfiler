@@ -1,25 +1,30 @@
-
-
-#' KEGG Enrichment Analysis of a gene set.
-#' Given a vector of genes, this function will return the enrichment KEGG
-#' categories with FDR control.
-#'
-#'
-#' @param gene a vector of entrez gene id.
-#' @param organism Currently, only "human" and "mouse" supported.
-#' @param pvalueCutoff Cutoff value of pvalue.
-#' @param readable if readable is TRUE, the gene IDs will mapping to gene
-#'   symbols.
-#' @return A \code{enrichKEGGResult} instance.
-#' @seealso \code{\link{enrichKEGGResult-class}}, \code{\link{compareCluster}}
-#' @keywords manip
-#' @examples
-#'
-#' 	data(gcSample)
-#' 	yy = enrichKEGG(gcSample[[5]], pvalueCutoff=0.01)
-#' 	head(summary(yy))
-#' 	#plot(yy)
-#'
+##' KEGG Enrichment Analysis of a gene set.
+##' Given a vector of genes, this function will return the enrichment KEGG
+##' categories with FDR control.
+##'
+##'
+##' @param gene a vector of entrez gene id.
+##' @param organism Currently, only "human" and "mouse" supported.
+##' @param pvalueCutoff Cutoff value of pvalue.
+##' @param readable if readable is TRUE, the gene IDs will mapping to gene
+##'   symbols.
+##' @return A \code{enrichKEGGResult} instance.
+##' @export
+##' @importMethodsFrom AnnotationDbi mappedkeys
+##' @importMethodsFrom AnnotationDbi mget
+##' @importClassesFrom methods data.frame
+##' @importFrom methods new
+##' @importFrom qvalue qvalue
+##' @importFrom KEGG.db KEGGPATHID2EXTID
+##' @seealso \code{\link{enrichKEGGResult-class}}, \code{\link{compareCluster}}
+##' @keywords manip
+##' @examples
+##'
+##' 	data(gcSample)
+##' 	yy = enrichKEGG(gcSample[[5]], pvalueCutoff=0.01)
+##' 	head(summary(yy))
+##' 	#plot(yy)
+##'
 enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FALSE) {
     ##pathID2ExtID <- as.list(KEGGPATHID2EXTID)
     ##pathID <- names(pathID2ExtID)
@@ -87,12 +92,23 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FAL
 	)
 }
 
-##' An S4 class that stores KEGG enrichment result.
+##' Class "enrichKEGGResult"
+##' This class represents the result of KEGG enrichment analysis.
+##'
+##'
+##' @name enrichKEGGResult-class
+##' @aliases enrichKEGGResult-class show,enrichKEGGResult-method
+##'   summary,enrichKEGGResult-method plot,enrichKEGGResult-method
+##' @docType class
 ##' @slot enrichKEGGResult KEGG enrichment result
 ##' @slot pvalueCutoff pvalueCutoff
 ##' @slot Organism one of "humna", "mouse", and "yeast"
 ##' @slot Gene Gene IDs
-##' @author Guangchuang Yu
+##' @exportClass enrichKEGGResult
+##' @author Guangchuang Yu <guangchuangyu@@gmail.com>
+##' @seealso \code{\linkS4class{compareClusterResult}}
+##'   \code{\link{compareCluster}} \code{\link{enrichKEGG}}
+##' @keywords classes
 setClass("enrichKEGGResult",
          representation=representation(
          enrichKEGGResult="data.frame",
@@ -155,11 +171,11 @@ setMethod("summary", signature(object="enrichKEGGResult"),
 setMethod("plot", signature(x="enrichKEGGResult"),
           function(x, title="", font.size=12) {
               enrichKEGGResult <- x@enrichKEGGResult
-              p <- .barplotInternal(enrichKEGGResult, title, font.size)
+              p <- plotting.barplot(enrichKEGGResult, title, font.size)
               ##color scale based on pvalue
               p <- p +
                   aes(fill=pvalue) +
-                      scale_colour_gradient(low="red", high="yellow")
+                      scale_fill_continuous(low="red", high="yellow")
               return(p)
           }
           )
