@@ -1,22 +1,24 @@
-#' Compare gene clusters functional profile
-#' Given a list of gene set, this function will compute profiles of each gene
-#' cluster.
-#'
-#'
-#' @param geneClusters a list of entrez gene id.
-#' @param fun One of groupGO and enrichGO.
-#' @param ...  Other arguments.
-#' @return A \code{clusterProfResult} instance.
-#' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
-#'   \code{\link{enrichGO}}
-#' @keywords manip
-#' @examples
-#'
-#' 	data(gcSample)
-#' 	xx <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
-#' 	#summary(xx)
-#' 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
-#'
+##' Compare gene clusters functional profile
+##' Given a list of gene set, this function will compute profiles of each gene
+##' cluster.
+##'
+##'
+##' @param geneClusters a list of entrez gene id.
+##' @param fun One of groupGO and enrichGO.
+##' @param ...  Other arguments.
+##' @return A \code{clusterProfResult} instance.
+##' @importFrom methods new
+##' @export
+##' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
+##'   \code{\link{enrichGO}}
+##' @keywords manip
+##' @examples
+##'
+##' 	data(gcSample)
+##' 	xx <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
+##' 	#summary(xx)
+##' 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
+##'
 compareCluster <- function(geneClusters, fun=enrichGO, ...) {
     clProf <- llply(geneClusters,
                     .fun=function(i) {
@@ -36,11 +38,23 @@ compareCluster <- function(geneClusters, fun=enrichGO, ...) {
 }
 
 
-##' An S4 class that stores cluster comparing result.
+##' Class "compareClusterResult"
+##' This class represents the comparison result of gene clusters by GO
+##' categories at specific level or GO enrichment analysis.
+##'
+##'
+##' @name compareClusterResult-class
+##' @aliases compareClusterResult-class show,compareClusterResult-method
+##'   summary,compareClusterResult-method plot,compareClusterResult-method
+##' @docType class
 ##' @slot compareClusterResult cluster comparing result
 ##' @slot geneClusters a list of genes
 ##' @slot fun one of groupGO, enrichGO and enrichKEGG
+##' @exportClass compareClusterResult
 ##' @author Guangchuang Yu
+##' @seealso \code{\linkS4class{groupGOResult}}
+##'   \code{\linkS4class{enrichGOResult}} \code{\link{compareCluster}}
+##' @keywords classes
 setClass("compareClusterResult",
          representation = representation(
          compareClusterResult = "data.frame",
@@ -157,7 +171,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                   Termlevel <- xx[as.character(GOlevel[,1]),2]
 
                   ##drop the *Total* column
-                  ##result[, colnames(result) != "Total"]
+                  result <- result[, colnames(result) != "Total"]
 
                   result$Description <- factor(result$Description, levels=rev(Termlevel))
 
@@ -166,6 +180,7 @@ setMethod("plot", signature(x="compareClusterResult"),
               } else {
 
               }
-              .PlotClusterProfInternal(result, type, by, title, font.size)
+              p <- plotting.clusterProfile(result, type, by, title, font.size)
+			  return(p)
           }
           )

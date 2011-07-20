@@ -1,7 +1,8 @@
 \name{enrichKEGG}
 \alias{enrichKEGG}
 \title{KEGG Enrichment Analysis of a gene set.}
-\usage{enrichKEGG(gene, organism="human", pvalueCutoff=0.05, readable=FALSE)}
+\usage{enrichKEGG(gene, organism="human", pvalueCutoff=0.05,
+    readable=FALSE)}
 \description{KEGG Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment KEGG
 categories with FDR control.}

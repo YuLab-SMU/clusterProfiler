@@ -1,7 +1,8 @@
 \name{enrichGO}
 \alias{enrichGO}
 \title{GO Enrichment Analysis of a gene set.}
-\usage{enrichGO(gene, organism="human", ont="MF", pvalueCutoff=0.01, readable=FALSE)}
+\usage{enrichGO(gene, organism="human", ont="MF", pvalueCutoff=0.01,
+    readable=FALSE)}
 \description{GO Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment GO
 categories with FDR control.}
