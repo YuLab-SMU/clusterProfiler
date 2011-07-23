@@ -19,6 +19,7 @@
 ##' @seealso \code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
 ##' @export
+##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @examples
 ##'
 ##' 	#data(gcSample)
@@ -106,7 +107,7 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
 ##' @slot Organism one of "human", "mouse" and "yeast"
 ##' @slot Gene Gene IDs
 ##' @exportClass enrichGOResult
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\linkS4class{compareClusterResult}}
 ##'   \code{\link{compareCluster}} \code{\link{enrichGO}}
 ##' @keywords classes
@@ -130,7 +131,7 @@ setClass("enrichGOResult",
 ##' @title show method
 ##' @param object A \code{enrichGOResult} instance.
 ##' @return message
-##' @author GuangchuangYu
+##' @author GuangchuangYu \url{http://ygc.name}
 setMethod("show", signature(object="enrichGOResult"),
           function (object){
               ont = object@Ont
@@ -151,7 +152,7 @@ setMethod("show", signature(object="enrichGOResult"),
 ##' @title summary method
 ##' @param object A \code{enrichGOResult} instance.
 ##' @return A data frame
-##' @author GuangchuangYu
+##' @author GuangchuangYu \url{http://ygc.name}
 setMethod("summary", signature(object="enrichGOResult"),
           function(object) {
               return(object@enrichGOResult)
@@ -170,7 +171,7 @@ setMethod("summary", signature(object="enrichGOResult"),
 ##' @param title graph title
 ##' @param font.size graph font size
 ##' @return ggplot object
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="enrichGOResult"),
           function(x, title="", font.size=12) {
               enrichGOResult <- summary(x)
@@ -178,7 +179,7 @@ setMethod("plot", signature(x="enrichGOResult"),
               ##color scale based on pvalue
               p <- p +
                   aes(fill=pvalue) +
-                      scale_fill_continuous(low="red", high="yellow")
+                      scale_fill_continuous(low="red", high="blue")
 			  return(p)
           }
           )

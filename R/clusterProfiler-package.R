@@ -14,9 +14,9 @@
 #' @name clusterProfiler-package
 #' @aliases clusterProfiler-package clusterProfiler
 #' @docType package
-#' @author Guangchuang Yu
+#' @author Guangchuang Yu \email{guangchuangyu@@gmail.com}
 #'
-#' Maintainer: Guangchuang Yu <guangchuangyu@@gmail.com>
+#' Maintainer: Guangchuang Yu \email{guangchuangyu@@gmail.com}
 #' @seealso \linkS4class{compareClusterResult}, \linkS4class{groupGOResult}
 #'   \linkS4class{enrichGOResult}
 #' @keywords package

@@ -15,6 +15,7 @@
 ##' @importFrom methods new
 ##' @importClassesFrom methods data.frame
 ##' @export
+##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @examples
 ##'
 ##' 	data(gcSample)
@@ -61,7 +62,7 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
 ##' @slot Organism one of "human", "mouse" and "yeast"
 ##' @slot Gene Gene IDs
 ##' @exportClass groupGOResult
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\linkS4class{compareClusterResult}}
 ##'   \code{\link{compareCluster}} \code{\link{groupGO}}
 ##' @keywords classes
@@ -85,7 +86,7 @@ setClass("groupGOResult",
 ##' @title show method
 ##' @param object A \code{groupGOResult} instance
 ##' @return message
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="groupGOResult"),
           function (object){
               ont = object@Ont
@@ -127,7 +128,7 @@ setMethod("summary", signature(object="groupGOResult"),
 ##' @param font.size graph font size
 ##' @param drop logical parameter, drop void category.
 ##' @return ggplot object
-##' @author GuangchuangYu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="groupGOResult"),
           function (x, order="FALSE", title="", font.size=12, drop=FALSE){
               groupGOResult <- summary(x)
