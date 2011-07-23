@@ -9,7 +9,7 @@ Type: Package
 Author: Guangchuang Yu
 Description: The package implements methods to analyze and visualize
     functional profiles (GO and KEGG) of gene and gene clusters.
-Version: 1.1.20
+Version: 1.1.21
 biocViews: Bioinformatics, Clustering, GO, Pathways, Visualization,
     MultipleComparisons
 Depends: stats, ggplot2
