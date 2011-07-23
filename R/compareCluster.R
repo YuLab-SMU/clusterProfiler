@@ -9,6 +9,7 @@
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
 ##' @export
+##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
 ##'   \code{\link{enrichGO}}
 ##' @keywords manip
@@ -51,7 +52,7 @@ compareCluster <- function(geneClusters, fun=enrichGO, ...) {
 ##' @slot geneClusters a list of genes
 ##' @slot fun one of groupGO, enrichGO and enrichKEGG
 ##' @exportClass compareClusterResult
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\linkS4class{groupGOResult}}
 ##'   \code{\linkS4class{enrichGOResult}} \code{\link{compareCluster}}
 ##' @keywords classes
@@ -73,7 +74,7 @@ setClass("compareClusterResult",
 ##' @title show method
 ##' @param object A \code{compareClusterResult} instance.
 ##' @return message
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
               geneClusterLen <- length(object@geneClusters)
@@ -100,7 +101,7 @@ setMethod("show", signature(object="compareClusterResult"),
 ##' @title summary method
 ##' @param object A \code{compareClusterResult} instance.
 ##' @return A data frame
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("summary", signature(object="compareClusterResult"),
           function(object) {
               return(object@compareClusterResult)
@@ -122,7 +123,7 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @param limit numeric parameter, restrict the top categories for plotting.
 ##' @param by one of "percentage" and "count"
 ##' @return ggplot object
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="compareClusterResult"),
           function(x, type="dot", title="", font.size=12, limit=5, by="percentage") {
               clProf.df <- summary(x)

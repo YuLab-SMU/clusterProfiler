@@ -11,7 +11,7 @@
 ##' @importFrom GO.db GOTERM
 ##' @importMethodsFrom AnnotationDbi Term
 ##' @importMethodsFrom AnnotationDbi mget
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 GO2Term <- function(GOID) {
     go <- mget(GOID, GOTERM, ifnotfound=NA)
     term <- sapply(go, Term)
@@ -30,7 +30,7 @@ GO2Term <- function(GOID) {
 ##' @importFrom org.Mm.eg.db org.Mm.egGO2ALLEGS
 ##' @importFrom org.Sc.sgd.db org.Sc.sgdGO2ALLORFS
 ##' @importMethodsFrom AnnotationDbi mget
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 getGO2ExtID <- function(GOID, organism) {
     GO2ExtID <- switch(organism,
                        human = mget(GOID, org.Hs.egGO2ALLEGS, ifnotfound=NA),
@@ -52,7 +52,7 @@ getGO2ExtID <- function(GOID, organism) {
 ##' @importFrom GO.db GOCCCHILDREN
 ##' @importFrom GO.db GOMFCHILDREN
 ##' @importMethodsFrom AnnotationDbi mget
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 getGOLevel <- function(ont, level) {
     switch(ont,
            MF = {
@@ -87,7 +87,7 @@ getGOLevel <- function(ont, level) {
 ##' @param title graph title
 ##' @param font.size font size
 ##' @return ggplot object
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.barplot <- function(result, title, font.size=12) {
     Description <- Count <- NULL # to satisfy codetools
     pg <- ggplot(result, aes(x=Description, y = Count)) +
@@ -103,7 +103,7 @@ plotting.barplot <- function(result, title, font.size=12) {
 ##' @param p ggplot object
 ##' @param title graph title
 ##' @param font.size font size
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 pModify <- function(p, title="", font.size=12) {
     p <- p +
         xlab("") +
@@ -124,7 +124,7 @@ pModify <- function(p, title="", font.size=12) {
 ##' @param title graph title
 ##' @param font.size graph font size
 ##' @return ggplot object
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
     Description <- Percentage <- Count <- Cluster <- Pvalue <- pvalue <- NULL # to satisfy codetools
     if (type == "bar") {
@@ -151,7 +151,7 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
             p <- p +
                 geom_point() +
                     aes(color=pvalue) +
-                        scale_colour_gradient(low="red", high="yellow")
+                        scale_colour_gradient(low="red", high="blue")
         } else {
             p <- p + geom_point(colour="steelblue")
         }
@@ -169,7 +169,7 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
 ##' @param pathIDs KEGG pathway IDs
 ##' @return KEGG pathway names
 ##' @importFrom KEGG.db KEGGPATHID2NAME
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 path2Name <- function(pathIDs) {
     pathIDs <- gsub("^\\D+", "",pathIDs, perl=T)
     path2name <- mget(pathIDs, KEGGPATHID2NAME)
@@ -184,7 +184,7 @@ path2Name <- function(pathIDs) {
 ##' @param a numerator
 ##' @param b denominator
 ##' @return numerator/denominator
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 getRatio <- function(a, b) {
     x=paste(a, "/", b, sep="", collapse="")
     return(x)
@@ -200,7 +200,7 @@ getRatio <- function(a, b) {
 ##' @param numB number of Black balls
 ##' @param numDrawn number of balls drawn
 ##' @return pvalue
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 HyperG <- function(numWdrawn, numW, numB, numDrawn) {
     pvalue <- phyper(numWdrawn, numW, numB, numDrawn, lower.tail=FALSE)
     return(pvalue)
@@ -217,7 +217,7 @@ HyperG <- function(numWdrawn, numW, numB, numDrawn) {
 ##' @importFrom org.Hs.eg.db org.Hs.egSYMBOL
 ##' @importFrom org.Mm.eg.db org.Mm.egSYMBOL
 ##' @importFrom org.Sc.sgd.db org.Sc.sgdGENENAME
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 geneID2geneName <- function(geneID.list, organism) {
     annotation <- switch(organism,
                          human = org.Hs.egSYMBOL,

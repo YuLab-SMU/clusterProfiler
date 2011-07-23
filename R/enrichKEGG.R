@@ -16,6 +16,7 @@
 ##' @importFrom methods new
 ##' @importFrom qvalue qvalue
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
+##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\link{enrichKEGGResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
 ##' @examples
@@ -105,7 +106,7 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FAL
 ##' @slot Organism one of "humna", "mouse", and "yeast"
 ##' @slot Gene Gene IDs
 ##' @exportClass enrichKEGGResult
-##' @author Guangchuang Yu <guangchuangyu@@gmail.com>
+##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\linkS4class{compareClusterResult}}
 ##'   \code{\link{compareCluster}} \code{\link{enrichKEGG}}
 ##' @keywords classes
@@ -128,7 +129,7 @@ setClass("enrichKEGGResult",
 ##' @title show method
 ##' @param object A \code{enrichKEGGResult} instance.
 ##' @return message
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="enrichKEGGResult"),
           function (object){
               Organism = object@Organism
@@ -148,7 +149,7 @@ setMethod("show", signature(object="enrichKEGGResult"),
 ##' @title summary method
 ##' @param object A \code{enrichKEGGResult} instance.
 ##' @return A data frame
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("summary", signature(object="enrichKEGGResult"),
           function(object) {
               return(object@enrichKEGGResult)
@@ -167,7 +168,7 @@ setMethod("summary", signature(object="enrichKEGGResult"),
 ##' @param title graph title
 ##' @param font.size graph font size
 ##' @return ggplot object
-##' @author Guangchuang Yu
+##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="enrichKEGGResult"),
           function(x, title="", font.size=12) {
               enrichKEGGResult <- x@enrichKEGGResult
@@ -175,7 +176,7 @@ setMethod("plot", signature(x="enrichKEGGResult"),
               ##color scale based on pvalue
               p <- p +
                   aes(fill=pvalue) +
-                      scale_fill_continuous(low="red", high="yellow")
+                      scale_fill_continuous(low="red", high="blue")
               return(p)
           }
           )
