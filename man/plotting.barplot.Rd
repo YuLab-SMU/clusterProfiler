@@ -5,7 +5,7 @@
 \description{generate a bar plot}
 \details{interal use, not for user.}
 \value{ggplot object}
-\author{Guangchuang Yu}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \arguments{\item{result}{a data frame of enrichment result.}
 \item{title}{graph title}
 \item{font.size}{font size}}

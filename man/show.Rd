@@ -4,5 +4,5 @@
 \description{show method for \code{groupGOResult} instance}
 \docType{methods}
 \value{message}
-\author{Guangchuang Yu}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \arguments{\item{object}{A \code{groupGOResult} instance}}

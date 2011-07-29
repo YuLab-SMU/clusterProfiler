@@ -4,5 +4,5 @@
 \usage{path2Name(pathIDs)}
 \description{provide a vector of KEGG pathway IDs, this function will convert them to corresponding KEGG pathway Names}
 \value{KEGG pathway names}
-\author{Guangchuang Yu}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \arguments{\item{pathIDs}{KEGG pathway IDs}}

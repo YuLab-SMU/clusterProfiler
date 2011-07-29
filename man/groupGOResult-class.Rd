@@ -8,7 +8,7 @@ specific GO level.}
 \alias{summary,groupGOResult-method}
 \alias{plot,groupGOResult-method}
 \docType{class}
-\author{Guangchuang Yu}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \seealso{\code{\linkS4class{compareClusterResult}}
 \code{\link{compareCluster}} \code{\link{groupGO}}}
 \keyword{classes}

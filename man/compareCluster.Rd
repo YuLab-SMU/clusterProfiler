@@ -6,6 +6,7 @@
 Given a list of gene set, this function will compute profiles of each gene
 cluster.}
 \value{A \code{clusterProfResult} instance.}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \seealso{\code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
 \code{\link{enrichGO}}}
 \keyword{manip}

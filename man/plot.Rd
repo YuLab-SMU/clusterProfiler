@@ -4,7 +4,7 @@
 \description{plot method for \code{groupGOResult} instance}
 \docType{methods}
 \value{ggplot object}
-\author{GuangchuangYu}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \arguments{\item{x}{A \code{groupGOResult} instance}
 \item{order}{logical parameter, order the result by *Count*.}
 \item{title}{graph title}

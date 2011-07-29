@@ -65,17 +65,16 @@ require(clusterProfiler)
 
 \section{Introduction}
 
-In recently years, high-throughput experimental techniques such as microarray and mass spectrometry can identify many lists of genes and gene products. The most widely used strategy for high-throughput data analysis is to identify different gene clusters based on their expression profiles. Another commonly used approach is to annotate these genes to biological knowledge, such as Gene Ontology (GO) and Kyoto Encyclopedia of Genes and Genomes (KEGG), and identify the statistically significantly enriched categories. These two different strategies were implemented in many bioconductor packages, such as \Rpackage{Mfuzz} and \Rpackage{BHC} for clustering analysis and \Rpackage{GOstats} for GO enrichment analysis.
+In recently years, high-throughput experimental techniques such as microarray and mass spectrometry can identify many lists of genes and gene products. The most widely used strategy for high-throughput data analysis is to identify different gene clusters based on their expression profiles. Another commonly used approach is to annotate these genes to biological knowledge, such as Gene Ontology (GO) and Kyoto Encyclopedia of Genes and Genomes (KEGG), and identify the statistically significantly enriched categories. These two different strategies were implemented in many bioconductor packages, such as \Rpackage{Mfuzz} and \Rpackage{BHC} for clustering analysis and \Rpackage{GOstats}\citep{Gentleman2007} for GO enrichment analysis.
 
-After clustering analysis, researchers not only want to determine whether there is a common theme of a particular gene cluster, but also to compare the biological themes among gene clusters, which have different expression profiles.
-There is no existing tools to bridge this gap, and we designed \Rpackage{clusterProfiler}, for comparing functional profiles among gene clusters.
+After clustering analysis, researchers not only want to determine whether there is a common theme of a particular gene cluster, but also to compare the biological themes among gene clusters, which have different expression profiles. To bridge this gap, we designed \Rpackage{clusterProfiler}, for comparing functional profiles among gene clusters.
   
 
 This document presents an introduction to the use of \Rpackage{clusterProfiler}, an \R\, package for the analysis of lists of genes and gene clusters based on their GO annotation distribution or enrichment categories of GO and KEGG, and provides methods for visulization.
 
 \section{Quick start}
 
-The following lines provide a quick and simple example on the use of \Rpackage{clusterProfiler} to explore gene list and compare gene clusters.
+The following lines provide a quick and simple example on the use of \Rpackage{clusterProfiler} to explore a set of genes and compare gene clusters.
 
 The analysis proceeds as follows: 
 \begin{itemize}
@@ -87,91 +86,130 @@ data(gcSample)
 gcSample
 @
 
-\item GO distribution among a set of gene clusters can be compared by \textit{compareCluster}, and plotted by bar chart or dot chart. 
-<<compareCluster>>=
+\item Use \Rfunction{groupGO} for genes classification based on GO distribution at a specific level.
+<<groupGO>>=
+x <- groupGO(gene=gcSample[[1]], organism="human", ont="CC", level=2, readable=TRUE)
+summary(x)
+@
+
+\item Use \Rfunction{enrichGO} for GO enrichment analysis.
+<<enrichGO, eval=F>>=
+y <- enrichGO(gene=gcSample[[2]], organism="human", ont="MF", pvalueCutoff=0.01, readable=TRUE)
+@
+
+\item Use \Rfunction{enrichKEGG} for KEGG pathway enrichment analysis.
+<<enrichKEGG>>=
+z <- enrichKEGG(gene=gcSample[[3]], organism="human", pvalueCutoff=0.05, readable=TRUE)
+summary(z)
+@
+
+The input parameters of \textit{gene} is a vector of entrez genes or ORF IDs (for yeast), and \textit{organism} must be one of "human", "mouse", and "yeast", according to the gene IDs. For GO analysis, \textit{ont} must be assigned to one of "BP", "MF", and "CC" for biological process, molecular function and cellular component, respectively. In \Rfunction{groupGO}, the \textit{level} specify the GO level for gene projection. In enrichment analysis, the \textit{pvalueCutoff} is to restrict the result based on their pvalues. Consider multiple testing, qvalues are also provided, for estimating FDR. The \textit{readable} is a logical parameter, if TRUE, the gene IDs will map to gene symbols.
+
+In addition, these results can be visualized by our \Rfunction{plot} function.
+For example:
+<<groupGO, eval=F>>=
+plot(x, title="CC Ontology Classification, level 2", font.size=12)
+@
+\begin{figure}
+\centering
+\centering
+\resizebox{1\textwidth}{!}{\includegraphics{groupGO.png}}
+\caption{Example of gene classification}
+\label{Fig:groupGO}
+\end{figure}
+
+<<enrichKEGG, eval=F>>=
+plot(z, title="KEGG Enrichment")
+@
+\begin{figure}
+\centering
+\centering
+\resizebox{1\textwidth}{!}{\includegraphics{enrichKEGG.png}}
+\caption{Example of KEGG enrichment analysis}
+\label{Fig:enrichKEGG}
+\end{figure}
+
+
+\item Gene clusters can be compared by \textit{compareCluster}, and plotted by bar chart or dot chart. 
+<<compareCluster, eval=F>>=
 xx <- compareCluster(gcSample, fun=groupGO, organism="human", ont="MF", level=2)
+plot(xx, title="MF Ontology Distribution Comparison")
 @
 
 \begin{figure}
-\begin{center}
-<<fig=TRUE, width=8>>=
-print(plot(xx, type="dot", title="MF Ontology Distribution Comparison"))
-@
-\caption{Example of comparing MF ontology distribution using dotplot.}
+\centering
+\centering
+\resizebox{1\textwidth}{!}{\includegraphics{MFcomparison.png}}
+\caption{Example of comparing MF ontology distribution using dotplot}
 \label{Fig:compareClusterPlot-groupGO}
-\end{center}
 \end{figure}
 
-By default, only top 5 categories of each cluster was plotted. User can change the parameter \textit{limit} to specify how many categories of each cluster to be plotted, and if \textit{limit} set to NULL, the whole result will be plotted. By default, the dot sizes were based on their corresponding row percentage, and user can set the parameter \textit{by} to "count" to make the comparison based on gene counts. 
+<<compareCluster, eval=F>>=
+yy <- compareCluster(gcSample, fun=enrichGO, organism="human", ont="CC", pvalueCutoff=0.01)
+plot(yy, title="CC Ontology Enrichment Comparison")
+@
+
+\begin{figure}
+\centering
+\centering
+\resizebox{1\textwidth}{!}{\includegraphics{CCenrichComparisonDot.png}}
+\caption{Example of comparing CC ontology enrichment using dot chart}
+\label{Fig:compareClusterPlot-enrichGO}
+\end{figure}
+
+
+<<compareCluster, eval=F>>=
+plot(yy, title="CC Ontology Enrichment Comparison", type="bar", by="count")
+@
+
+\begin{figure}
+\centering
+\centering
+\resizebox{1\textwidth}{!}{\includegraphics{CCenrichComparisonBar.png}}
+\caption{Example of comparing CC ontology enrichment using bar chart}
+\label{Fig:compareClusterPlot-enrichGO}
+\end{figure}
+
+
+<<compareCluster-KEGG, eval=F>>=
+zz <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
+plot(zz, title="KEGG Pathway Enrichment Comparison")
+@
+
+\begin{figure}
+\centering
+\centering
+\resizebox{1\textwidth}{!}{\includegraphics{KEGGcomparison.png}}
+\caption{Example of comparing KEGG enrichment among gene clusters}
+\label{Fig:compareClusterPlot-enrichKEGG}
+\end{figure}
+
+By default, only top 5 categories of each cluster was plotted. User can changes the parameter \textit{limit} to specify how many categories of each cluster to be plotted, and if \textit{limit} set to NULL, the whole result will be plotted. By default, the dot sizes were based on their corresponding row percentage, and user can set the parameter \textit{by} to "count" to make the comparison based on gene counts. 
 
 We chose "percentage" as default parameter to represent the sizes of dots, since some categories may contain a large number of genes, and make the dot sizes of those small categories too small to compare. To provide the full information, we also provide number of identified genes in each category (numbers in parentheses), as shown in Figure 1. If the dot sizes were based on "count", the parentheses will not shown.
 
-\item GO or KEGG enrichment analysis among a set of gene clusters can also be compared by \textit{compareCluster} as shown in the following examples. 
-<<compareCluster>>=
-xx <- compareCluster(gcSample, fun=enrichGO, organism="human", ont="CC", pvalueCutoff=0.01)
-head(summary(xx))
-@
-
-\begin{figure}
-\begin{center}
-<<fig=TRUE>>=
-print(plot(xx, title="CC Ontology Enrichment Comparison"))
-@
-\caption{Example of comparing CC ontology enrichment among gene clusters.}
-\label{Fig:compareClusterPlot-enrichGO}
-\end{center}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-<<fig=TRUE>>=
-print(plot(xx, type="bar", by="count", title="CC Ontology Enrichment Comparison using bar chart"))
-@
-\caption{Example of comparing CC ontology enrichment among gene clusters.}
-\label{Fig:compareClusterPlot-enrichGO-2}
-\end{center}
-\end{figure}
-
-The p-values indicate that which categories are more likely to have biological meanings. The dots in the image are color-encoded based on their corresponding p-values. Color gradient ranging from blue to red correspond to in order of increasing p-values. Blue indicate lower p-values, and red indicate higher p-values. P-values were filtered out by the threshold giving by parameter \textit{pvalueCutoff}.
+The p-values indicate that which categories are more likely to have biological meanings. The dots in the image are color-encoded based on their corresponding p-values. Color gradient ranging from red to blue correspond to in order of increasing p-values. red indicate low p-values (high enrichment), and blue indicate high p-values (low enrichment). P-values were filtered out by the threshold giving by parameter \textit{pvalueCutoff}.
 
 We also provide q-values, which were calculated by \Rpackage{qvalue}, for user to control false discovery rate. FDR control is necessary since enrichment analysis carrying out hundreds, if not thousands, of tests.
 
-<<compareCluster-KEGG>>=
-xx <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
-head(summary(xx))
+\item Use \Rfunction{compareCluster} as a general function for comparing gene clusters of other kind of gene-ontology associations.
+
+\Rpackage{clusterProfiler} can cooperates with other R package for comparing other ontology analyzed results.
+
+For example, \Rfunction{compareCluster} can call function provided by \Rpackage{DOSE} to compare gene-disease associations among gene clusters. Comparing gene clusters in the context of disease is a critical step in translating molecular findings from microarray, proteomics and other high-throughput methods into clinical relevance.
+
+<<compareCluster-DO, eval=F>>=
+require(DOSE)
+do <- compareCluster(gcSample, fun=enrichDO, organism="human", pvalueCutoff=0.05)
+plot(do, title="Disease Ontology Enrichment Comparison")
 @
 
 \begin{figure}
-\begin{center}
-<<fig=TRUE, width=7>>=
-print(plot(xx, type="dot", title="KEGG Enrichment Comparison"))
-@
-\caption{Example of comparing KEGG enrichment among gene clusters.}
-\label{Fig:compareClusterPlot-enrichKEGG}
-\end{center}
-\end{figure}
-
-\item The internal functions for annotating gene and enrichment analysis was \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG}, which was designed to analyze one particular gene list. Gene list can be projected to GO at a given level by \Rfunction{groupGO}. GO enrichment analysis were also provided by \Rfunction{enrichGO} for exploring biological themes of a given gene list. The internal algorithm in \Rfunction{enrichGO} was \Rfunction{hyperGTest} provided by \Rpackage{Category}. \Rfunction{enrichGO} extend \Rpackage{GOstats}\citep{Gentleman2007} by providing corresponding enrichment gene list and the q-values. KEGG enrichment analysis were also supported by \Rfunction{enrichKEGG}.
-
-<<GO,eval=FALSE>>=
-yy <- groupGO(gcSample[[1]], organism="human", ont="BP", level=2)
-yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01)
-@
-
-<<KEGG>>=
-yy <- enrichKEGG(gcSample[[3]], organism="human", pvalueCutoff=0.01)
-head(summary(yy))
-@
-
-The outputs of \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG} can also be visualized by \Rfunction{plot}.
-\begin{figure}
-\begin{center}
-<<fig=TRUE>>=
-print(plot(yy, title="KEGG Enrichment Analysis"))
-@
-\caption{Example of KEGG Enrichment Analysis.}
-\label{Fig:enrichKEGGPlot}
-\end{center}
+\centering
+\centering
+\resizebox{1\textwidth}{!}{\includegraphics{DOcomparison.png}}
+\caption{Example of comparing disease ontology enrichment among gene clusters}
+\label{Fig:compareClusterPlot-enrichDO}
 \end{figure}
 
 
