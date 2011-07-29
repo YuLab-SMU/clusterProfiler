@@ -7,7 +7,7 @@ This class represents the result of KEGG enrichment analysis.}
 \alias{summary,enrichKEGGResult-method}
 \alias{plot,enrichKEGGResult-method}
 \docType{class}
-\author{Guangchuang Yu <guangchuangyu@gmail.com>}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \seealso{\code{\linkS4class{compareClusterResult}}
 \code{\link{compareCluster}} \code{\link{enrichKEGG}}}
 \keyword{classes}

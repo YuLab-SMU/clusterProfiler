@@ -8,6 +8,7 @@ specific level.}
 \value{A \code{groupGOResult} instance.}
 \seealso{\code{\link{groupGOResult-class}}, \code{\link{compareCluster}}}
 \keyword{manip}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \arguments{\item{gene}{a vector of entrez gene id.}
 \item{organism}{Currently, only "human" and "mouse" supported.}
 \item{ont}{One of "MF", "BP", and "CC" subontologies.}

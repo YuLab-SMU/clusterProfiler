@@ -8,7 +8,7 @@ categories at specific level or GO enrichment analysis.}
 \alias{summary,compareClusterResult-method}
 \alias{plot,compareClusterResult-method}
 \docType{class}
-\author{Guangchuang Yu}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \seealso{\code{\linkS4class{groupGOResult}}
 \code{\linkS4class{enrichGOResult}} \code{\link{compareCluster}}}
 \keyword{classes}

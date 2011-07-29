@@ -4,6 +4,6 @@
 \usage{getGO2ExtID(GOID, organism)}
 \description{provide a vector of GOIDs, and organism, this function will return the species specific gene list annotated by the given GOIDs.}
 \value{a list of gene IDs, the names of the list is the GOIDs}
-\author{Guangchuang Yu}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \arguments{\item{GOID}{the query GO IDs}
 \item{organism}{one of human, mouse and yeast.}}

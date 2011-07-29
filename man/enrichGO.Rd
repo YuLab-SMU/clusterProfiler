@@ -1,14 +1,14 @@
 \name{enrichGO}
 \alias{enrichGO}
 \title{GO Enrichment Analysis of a gene set.}
-\usage{enrichGO(gene, organism="human", ont="MF", pvalueCutoff=0.01,
-    readable=FALSE)}
+\usage{enrichGO(gene, organism="human", ont="MF", pvalueCutoff=0.01, readable=FALSE)}
 \description{GO Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment GO
 categories with FDR control.}
 \value{A \code{enrichGOResult} instance.}
 \seealso{\code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}}
 \keyword{manip}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \arguments{\item{gene}{a vector of entrez gene id.}
 \item{organism}{Currently, only "human", "mouse" and "yeast" supported.}
 \item{ont}{One of "MF", "BP", and "CC" subontologies.}

@@ -7,7 +7,7 @@ This class represents the result of GO enrichment analysis with FDR control.}
 \alias{summary,enrichGOResult-method}
 \alias{plot,enrichGOResult-method}
 \docType{class}
-\author{Guangchuang Yu}
+\author{Guangchuang Yu \url{http://ygc.name}}
 \seealso{\code{\linkS4class{compareClusterResult}}
 \code{\link{compareCluster}} \code{\link{enrichGO}}}
 \keyword{classes}
