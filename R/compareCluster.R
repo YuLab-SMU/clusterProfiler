@@ -78,16 +78,21 @@ setClass("compareClusterResult",
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
               geneClusterLen <- length(object@geneClusters)
-              fun <- object@fun
-              fun <- as.character(substitute(fun))
-              if (fun == "enrichKEGG") {
-                  analysis <- "KEGG Enrichment Analysis"
-              } else if (fun == "groupGO") {
-                  analysis <- "GO Profiling Analysis"
-              } else if (fun == "enrichGO") {
-                  analysis <- "GO Enrichment Analysis"
-              }
-              cat ("Compare", geneClusterLen, "gene clusters using", analysis, "\n")
+              #fun <- object@fun
+              #fun <- as.character(substitute(fun))
+              #if (fun == "enrichKEGG") {
+  #                analysis <- "KEGG Enrichment Analysis"
+  #            } else if (fun == "groupGO") {
+  #                analysis <- "GO Profiling Analysis"
+  #           } else if (fun == "enrichGO") {
+  #                analysis <- "GO Enrichment Analysis"
+   #           } else if (fun == "enrichDO") {
+    #              analysis <- "DO Enrichment Analysis"		 
+#	      } else {
+#		analysis <- "User specify Analysis"
+#	      }
+#              cat ("Compare", geneClusterLen, "gene clusters using", analysis, "\n")
+		cat ("Result of Comparing", geneClusterLen, "gene clusters", "\n")
           }
           )
 
