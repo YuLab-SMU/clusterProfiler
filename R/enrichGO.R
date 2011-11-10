@@ -54,7 +54,8 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
     retain <- which(k != 0)
 	k = k[retain]
 	GO2ExtID <- GO2ExtID[retain]
-	geneID=geneID[retain]
+	geneID <- geneID[retain]
+	geneID.list <- geneID.list[retain]
 
 	M <- sapply(GO2ExtID, length)
 
@@ -78,16 +79,20 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
     qobj = qvalue(goOver$pvalue, lambda=0.05, pi0.method="bootstrap")
     qvalues <- qobj$qvalues
     goOver <- data.frame(goOver, qvalue=qvalues, geneID=geneID, Count=k)
-    goOver <- goOver[order(goOver$pvalue),]
     goOver <- goOver[ goOver$pvalue <= pvalueCutoff, ]
     goOver$Description <- as.character(goOver$Description)
+	goOver <- goOver[order(goOver$pvalue),]
     rownames(goOver) <- goOver$GOID
 
+	geneAnno <- geneID.list[goOver$pvalue <= pvalueCutoff]
+	geneAnno <- geneAnno[order(goOver$pvalue)]
+	
     new("enrichGOResult",
         enrichGOResult = goOver,
         pvalueCutoff=pvalueCutoff,
         Organism = organism,
         Ont = ont,
+		geneAnno = geneAnno,
         Gene = gene
         )
 }
@@ -106,6 +111,7 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
 ##' @slot Ont Ontology
 ##' @slot Organism one of "human", "mouse" and "yeast"
 ##' @slot Gene Gene IDs
+##' @slot geneAnno Gene IDs group by GO
 ##' @exportClass enrichGOResult
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\linkS4class{compareClusterResult}}
@@ -117,6 +123,7 @@ setClass("enrichGOResult",
          pvalueCutoff="numeric",
          Ont = "character",
          Organism = "character",
+		 geneAnno = "list",
          Gene = "character"
          )
          )
@@ -173,13 +180,21 @@ setMethod("summary", signature(object="enrichGOResult"),
 ##' @return ggplot object
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="enrichGOResult"),
-          function(x, title="", font.size=12) {
+          function(x, title="", font.size=12, type="bar", ...) {
               enrichGOResult <- summary(x)
-              p <- plotting.barplot(enrichGOResult, title, font.size)
+              if (type == "bar") {
+				p <- plotting.barplot(enrichGOResult, title, font.size)
               ##color scale based on pvalue
-              p <- p +
-                  aes(fill=pvalue) +
-                      scale_fill_continuous(low="red", high="blue")
-			  return(p)
+				p <- p +
+					aes(fill=pvalue) +
+						scale_fill_continuous(low="red", high="blue")
+				return(p)
+			  }
+			  if (type == "categoryNet") {
+				geneAnno <- x@geneAnno
+				names(geneAnno) <- GO2Term(names(geneAnno))
+				pvalue <- enrichGOResult$pvalue
+				plot.categoryNet(inputList=geneAnno, pvalue=pvalue, ... )
+			  }
           }
           )
