@@ -1,7 +1,8 @@
 \name{plotting.clusterProfile}
 \alias{plotting.clusterProfile}
 \title{plotting-clusterProfile}
-\usage{plotting.clusterProfile(clProf.reshape.df, type="dot", by="percentage", title="", font.size=12)}
+\usage{plotting.clusterProfile(clProf.reshape.df, type="dot", by="percentage",
+    title="", font.size=12)}
 \description{Internal plot function for plotting compareClusterResult}
 \value{ggplot object}
 \author{Guangchuang Yu \url{http://ygc.name}}

@@ -227,3 +227,88 @@ geneID2geneName <- function(geneID.list, organism) {
     gn <- lapply(geneID.list, function(i) unique(unlist(mget(i, annotation))))
     return(gn)
 }
+
+
+##' convert a list of gene IDs to igraph object.
+##'
+##'
+##' @title convert gene IDs to igraph object
+##' @param inputList a list of gene IDs
+##' @return a igraph object.
+##' @importFrom igraph graph.data.frame
+##' @author Guangchuang Yu \url{http://ygc.name}
+list2graph <- function(inputList) {
+	x <- data.frame()
+	for (i in 1:length(inputList)) {
+		x=rbind(x, data.frame(categoryID=rep(names(inputList[i]), length(inputList[[i]])), Gene=inputList[[i]]))
+	}
+	g <- graph.data.frame(x, directed=F)
+	return(g)
+}	
+
+
+##' plot function of gene Concept Net.
+##'
+##'
+##' @title plot gene net by categories
+##' @param inputList a list of gene IDs
+##' @param categorySize setting category size
+##' @param showCategory number of categories to plot
+##' @param pvalue pvalue
+##' @param foldChange foldChange
+##' @param output output type
+##' @return plotted igraph object.
+##' @importFrom igraph tkplot
+##' @importFrom igraph plot.igraph
+##' @importFrom igraph V
+##' @importFrom igraph "V<-"
+##' @importFrom igraph E
+##' @importFrom igraph "E<-"
+##' @importFrom igraph degree
+##' @importFrom igraph layout.fruchterman.reingold
+##' @author Guangchuang Yu \url{http://ygc.name}
+plot.categoryNet <- function(inputList, categorySize="geneNum", showCategory=5, pvalue=NULL, foldChange=NULL, output="fixed") {
+
+	inputList <- inputList[1:showCategory]
+	pvalue <- pvalue[1:showCategory]
+	
+	
+	## generate graph object
+	g=list2graph(inputList)
+
+	## setting some attributes
+	V(g)$size <- 8
+	V(g)$color <- "#D0D0D0" ## grey
+	V(g)$label <- V(g)$name
+
+	E(g)$width=2
+	E(g)$color <- "#728FCE"		#Light Steel Blue
+
+	## attributes of Category Node
+	lengthOfCategory <- length(inputList)
+	V(g)[0:(lengthOfCategory-1)]$size=30  ## setting by default.
+	V(g)[0:(lengthOfCategory-1)]$color= "#FFCC33" 
+	
+	if(is.numeric(categorySize)) {
+		V(g)[0:(lengthOfCategory-1)]$size=categorySize
+	} else {
+		if (categorySize == "geneNum") {
+			n <- degree(g)[1:lengthOfCategory]
+				##sapply(inputList, length)
+			V(g)[0:(lengthOfCategory-1)]$size <- n/max(n) * 20 + 15
+		} 
+		if (categorySize == "pvalue") {
+			if (is.null(pvalue)) {
+				stop("pvalue must not be null...")
+			}
+			pvalue.scale <- -log10(pvalue)
+			V(g)[0:(lengthOfCategory-1)]$size <- pvalue.scale/max(pvalue.scale) * 20 + 15
+		}
+	}
+	if (output == "fixed"){
+		plot.igraph(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold) 
+	} else {
+		tkplot(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold) 
+	}
+	
+}
