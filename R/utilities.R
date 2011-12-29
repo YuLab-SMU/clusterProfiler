@@ -295,7 +295,8 @@ plot.categoryNet <- function(inputList, categorySize="geneNum", showCategory=5, 
 		if (categorySize == "geneNum") {
 			n <- degree(g)[1:lengthOfCategory]
 				##sapply(inputList, length)
-			V(g)[0:(lengthOfCategory-1)]$size <- n/max(n) * 20 + 15
+			V(g)[0:(lengthOfCategory-1)]$size <- n/sum(n) * 100
+			#n/max(n) * 20 + 15
 		} 
 		if (categorySize == "pvalue") {
 			if (is.null(pvalue)) {
@@ -306,7 +307,7 @@ plot.categoryNet <- function(inputList, categorySize="geneNum", showCategory=5, 
 		}
 	}
 	if (output == "fixed"){
-		plot.igraph(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold) 
+		igraph::plot.igraph(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold) 
 	} else {
 		tkplot(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold) 
 	}
