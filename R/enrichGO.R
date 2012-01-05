@@ -7,6 +7,7 @@
 ##' @param organism Currently, only "human", "mouse" and "yeast" supported.
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param pvalueCutoff Cutoff value of pvalue.
+##' @param qvalueCutoff Cutoff value of qvalue.
 ##' @param readable if readable is TRUE, the gene IDs will mapping to gene
 ##'   symbols.
 ##' @return A \code{enrichGOResult} instance.
@@ -27,7 +28,7 @@
 ##' 	#head(summary(yy))
 ##' 	#plot(yy)
 ##'
-enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readable=FALSE) {
+enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, qvalueCutoff=0.05, readable=FALSE) {
     goterms <- Ontology(GOTERM)
     goterms <- names(goterms[goterms == ont])
 
@@ -79,17 +80,23 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
     qobj = qvalue(goOver$pvalue, lambda=0.05, pi0.method="bootstrap")
     qvalues <- qobj$qvalues
     goOver <- data.frame(goOver, qvalue=qvalues, geneID=geneID, Count=k)
-    goOver <- goOver[ goOver$pvalue <= pvalueCutoff, ]
-    goOver$Description <- as.character(goOver$Description)
+    
+	goOver <- goOver[ goOver$pvalue <= pvalueCutoff, ]
+	goOver <- goOver[ goOver$qvalue <= qvalueCutoff, ]
+
+	
+	goOver$Description <- as.character(goOver$Description)
 	goOver <- goOver[order(goOver$pvalue),]
     rownames(goOver) <- goOver$GOID
-
+	
+	
 	geneAnno <- geneID.list[goOver$pvalue <= pvalueCutoff]
 	geneAnno <- geneAnno[order(goOver$pvalue)]
 	
     new("enrichGOResult",
         enrichGOResult = goOver,
         pvalueCutoff=pvalueCutoff,
+		qvalueCutoff=qvalueCutoff,
         Organism = organism,
         Ont = ont,
 		geneAnno = geneAnno,
@@ -108,6 +115,7 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, readab
 ##' @docType class
 ##' @slot enrichGOResult GO enrichment result
 ##' @slot pvalueCutoff pvalueCutoff
+##' @slot qvalueCutoff qvalueCutoff
 ##' @slot Ont Ontology
 ##' @slot Organism one of "human", "mouse" and "yeast"
 ##' @slot Gene Gene IDs
@@ -121,6 +129,7 @@ setClass("enrichGOResult",
          representation=representation(
          enrichGOResult="data.frame",
          pvalueCutoff="numeric",
+		 qvalueCutoff="numeric",
          Ont = "character",
          Organism = "character",
 		 geneAnno = "list",

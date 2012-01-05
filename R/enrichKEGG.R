@@ -6,6 +6,7 @@
 ##' @param gene a vector of entrez gene id.
 ##' @param organism Currently, only "human" and "mouse" supported.
 ##' @param pvalueCutoff Cutoff value of pvalue.
+##' @param qvalueCutoff Cutoff value of qvalue.
 ##' @param readable if readable is TRUE, the gene IDs will mapping to gene
 ##'   symbols.
 ##' @return A \code{enrichKEGGResult} instance.
@@ -26,7 +27,7 @@
 ##' 	head(summary(yy))
 ##' 	#plot(yy)
 ##'
-enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FALSE) {
+enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, qvalueCutoff = 0.05, readable=FALSE) {
     ##pathID2ExtID <- as.list(KEGGPATHID2EXTID)
     ##pathID <- names(pathID2ExtID)
     pathID <- mappedkeys(KEGGPATHID2EXTID)
@@ -82,7 +83,10 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FAL
     qvalues <- qobj$qvalues
     keggOver <- data.frame(keggOver, qvalue=qvalues, geneID=geneID, Count=k)
     keggOver <- keggOver[order(pvalues),]
+	
     keggOver <- keggOver[ keggOver$pvalue <= pvalueCutoff, ]
+	keggOver <- keggOver[ keggOver$qvalue <= qvalueCutoff, ]
+	
     keggOver$Description <- as.character(keggOver$Description)
 
     new("enrichKEGGResult",
@@ -103,6 +107,7 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, readable=FAL
 ##' @docType class
 ##' @slot enrichKEGGResult KEGG enrichment result
 ##' @slot pvalueCutoff pvalueCutoff
+##' @slot qvalueCutoff qvalueCutoff
 ##' @slot Organism one of "humna", "mouse", and "yeast"
 ##' @slot Gene Gene IDs
 ##' @exportClass enrichKEGGResult
@@ -114,6 +119,7 @@ setClass("enrichKEGGResult",
          representation=representation(
          enrichKEGGResult="data.frame",
          pvalueCutoff="numeric",
+         qvalueCutoff="numeric",		 
          Organism = "character",
          Gene = "character"
          )
