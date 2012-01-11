@@ -125,16 +125,16 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @param type one of "dot" and "bar".
 ##' @param title graph title
 ##' @param font.size graph font size
-##' @param limit numeric parameter, restrict the top categories for plotting.
+##' @param showCategory numeric parameter, restrict the top categories for plotting.
 ##' @param by one of "percentage" and "count"
 ##' @return ggplot object
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="compareClusterResult"),
-          function(x, type="dot", title="", font.size=12, limit=5, by="percentage") {
+          function(x, type="dot", title="", font.size=12, showCategory=5, by="percentage") {
               clProf.df <- summary(x)
 
               ## get top 5 (default) categories of each gene cluster.
-              if (is.null(limit)) {
+              if (is.null(showCategory)) {
                   result <- clProf.df
               } else {
                   Cluster <- NULL # to satisfy codetools
@@ -148,7 +148,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                                           return(df)
                                       }
                                   },
-                                  N=limit
+                                  N=showCategory
                                   )
               }
 

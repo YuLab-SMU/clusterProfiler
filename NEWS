@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.3.3
+------------------------
+ o add showCategory parameter for plot functions <2011-01-11 Wed>
+ 
 CHANGES IN VERSION 1.3.2
 ------------------------
  o add qvalueCutoff parameter. <2011-01-05 Thu>

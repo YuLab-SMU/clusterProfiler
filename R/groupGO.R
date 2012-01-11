@@ -126,11 +126,12 @@ setMethod("summary", signature(object="groupGOResult"),
 ##' @param order logical parameter, order the result by *Count*.
 ##' @param title graph title
 ##' @param font.size graph font size
+##' @param showCategory number of GO categories to show.
 ##' @param drop logical parameter, drop void category.
 ##' @return ggplot object
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="groupGOResult"),
-          function (x, order="FALSE", title="", font.size=12, drop=FALSE){
+          function (x, order="FALSE", title="", font.size=12, showCategory=NULL, drop=FALSE){
               groupGOResult <- summary(x)
               if (drop == TRUE) {
                   groupGOResult <- groupGOResult[groupGOResult$Count != 0, ]
@@ -139,6 +140,11 @@ setMethod("plot", signature(x="groupGOResult"),
                   idx <- order(groupGOResult$Count)
                   groupGOResult <- groupGOResult[idx,]
               }
+			  if ( is.numeric(showCategory) & showCategory < nrow(groupGOResult) ) {
+                  idx <- order(groupGOResult$Count)
+                  groupGOResult <- groupGOResult[idx,]				  
+				  groupGOResult <- groupGOResult[1:showCategory,]
+			  }
               groupGOResult$Description <- factor(groupGOResult$Description, level= as.character(groupGOResult$Description))
               p <- plotting.barplot(groupGOResult, title, font.size)
               p <- p +

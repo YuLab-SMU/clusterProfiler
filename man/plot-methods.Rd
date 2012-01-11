@@ -11,7 +11,7 @@
 
   \item{font.size}{graph font size}
 
-  \item{limit}{numeric parameter, restrict the top
+  \item{showCategory}{numeric parameter, restrict the top
   categories for plotting.}
 
   \item{by}{one of "percentage" and "count"}
@@ -22,11 +22,15 @@
 
   \item{font.size}{graph font size}
 
+  \item{showCategory}{number of KEGG categories to show.}
+
   \item{x}{A \code{enrichKEGGResult} instance.}
 
   \item{title}{graph title}
 
   \item{font.size}{graph font size}
+
+  \item{showCategory}{number of KEGG categories to show.}
 
   \item{x}{A \code{groupGOResult} instance}
 
@@ -36,6 +40,8 @@
   \item{title}{graph title}
 
   \item{font.size}{graph font size}
+
+  \item{showCategory}{number of GO categories to show.}
 
   \item{drop}{logical parameter, drop void category.}
 }
