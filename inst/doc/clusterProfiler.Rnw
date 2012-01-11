@@ -184,7 +184,7 @@ plot(zz, title="KEGG Pathway Enrichment Comparison")
 \label{Fig:compareClusterPlot-enrichKEGG}
 \end{figure}
 
-By default, only top 5 categories of each cluster was plotted. User can changes the parameter \textit{limit} to specify how many categories of each cluster to be plotted, and if \textit{limit} set to NULL, the whole result will be plotted. By default, the dot sizes were based on their corresponding row percentage, and user can set the parameter \textit{by} to "count" to make the comparison based on gene counts. 
+By default, only top 5 categories of each cluster was plotted. User can changes the parameter \textit{showCategory} to specify how many categories of each cluster to be plotted, and if \textit{showCateogry} was set to NULL, the whole result will be plotted. By default, the dot sizes were based on their corresponding row percentage, and user can set the parameter \textit{by} to "count" to make the comparison based on gene counts. 
 
 We chose "percentage" as default parameter to represent the sizes of dots, since some categories may contain a large number of genes, and make the dot sizes of those small categories too small to compare. To provide the full information, we also provide number of identified genes in each category (numbers in parentheses), as shown in Figure 1. If the dot sizes were based on "count", the parentheses will not shown.
 

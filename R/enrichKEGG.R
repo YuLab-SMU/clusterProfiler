@@ -173,11 +173,15 @@ setMethod("summary", signature(object="enrichKEGGResult"),
 ##' @param x A \code{enrichKEGGResult} instance.
 ##' @param title graph title
 ##' @param font.size graph font size
+##' @param showCategory number of KEGG categories to show.
 ##' @return ggplot object
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="enrichKEGGResult"),
-          function(x, title="", font.size=12) {
+          function(x, title="", font.size=12, showCategory=NULL) {
               enrichKEGGResult <- x@enrichKEGGResult
+			  if ( is.numeric(showCategory) & showCategory < nrow(enrichKEGGResult) ) {			  
+				  enrichKEGGResult <- enrichKEGGResult[1:showCategory,]
+			  }			  
               p <- plotting.barplot(enrichKEGGResult, title, font.size)
               ##color scale based on pvalue
               p <- p +
