@@ -181,12 +181,11 @@ path2Name <- function(pathIDs) {
 ##'
 ##'
 ##' @title getRatio
-##' @param a numerator
-##' @param b denominator
+##' @param x vector of numerator and denominator
 ##' @return numerator/denominator
 ##' @author Guangchuang Yu \url{http://ygc.name}
-getRatio <- function(a, b) {
-    x=paste(a, "/", b, sep="", collapse="")
+getRatio <- function(x) {
+    x=paste(x[1], "/", x[2], sep="", collapse="")
     return(x)
 }
 
@@ -195,13 +194,17 @@ getRatio <- function(a, b) {
 ##'
 ##'
 ##' @title hypergeometric test
-##' @param numWdrawn number of White balls drawn
-##' @param numW number of White balls
-##' @param numB number of Black balls
-##' @param numDrawn number of balls drawn
+##' @param n a vector of White balls drawn,
+##' 			 White balls
+##'                      Black balls
+##'                      balls drawn
 ##' @return pvalue
 ##' @author Guangchuang Yu \url{http://ygc.name}
-HyperG <- function(numWdrawn, numW, numB, numDrawn) {
+HyperG <- function(n) {
+    numWdrawn <- n[1]
+    numW <- n[2]
+    numB <- n[3]
+    numDrawn <- n[4]
     pvalue <- phyper(numWdrawn, numW, numB, numDrawn, lower.tail=FALSE)
     return(pvalue)
 }
@@ -244,7 +247,7 @@ list2graph <- function(inputList) {
 	}
 	g <- graph.data.frame(x, directed=F)
 	return(g)
-}	
+}
 
 
 ##' plot function of gene Concept Net.
@@ -271,8 +274,8 @@ plot.categoryNet <- function(inputList, categorySize="geneNum", showCategory=5, 
 
 	inputList <- inputList[1:showCategory]
 	pvalue <- pvalue[1:showCategory]
-	
-	
+
+
 	## generate graph object
 	g=list2graph(inputList)
 
@@ -287,8 +290,8 @@ plot.categoryNet <- function(inputList, categorySize="geneNum", showCategory=5, 
 	## attributes of Category Node
 	lengthOfCategory <- length(inputList)
 	V(g)[0:(lengthOfCategory-1)]$size=30  ## setting by default.
-	V(g)[0:(lengthOfCategory-1)]$color= "#FFCC33" 
-	
+	V(g)[0:(lengthOfCategory-1)]$color= "#FFCC33"
+
 	if(is.numeric(categorySize)) {
 		V(g)[0:(lengthOfCategory-1)]$size=categorySize
 	} else {
@@ -297,7 +300,7 @@ plot.categoryNet <- function(inputList, categorySize="geneNum", showCategory=5, 
 				##sapply(inputList, length)
 			V(g)[0:(lengthOfCategory-1)]$size <- n/sum(n) * 100
 			#n/max(n) * 20 + 15
-		} 
+		}
 		if (categorySize == "pvalue") {
 			if (is.null(pvalue)) {
 				stop("pvalue must not be null...")
@@ -307,9 +310,9 @@ plot.categoryNet <- function(inputList, categorySize="geneNum", showCategory=5, 
 		}
 	}
 	if (output == "fixed"){
-		igraph::plot.igraph(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold) 
+		igraph::plot.igraph(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold)
 	} else {
-		tkplot(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold) 
+		tkplot(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold)
 	}
-	
+
 }

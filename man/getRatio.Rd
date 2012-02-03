@@ -2,12 +2,10 @@
 \alias{getRatio}
 \title{getRatio}
 \usage{
-  getRatio(a, b)
+  getRatio(x)
 }
 \arguments{
-  \item{a}{numerator}
-
-  \item{b}{denominator}
+  \item{x}{vector of numerator and denominator}
 }
 \value{
   numerator/denominator

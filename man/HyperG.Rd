@@ -2,16 +2,11 @@
 \alias{HyperG}
 \title{hypergeometric test}
 \usage{
-  HyperG(numWdrawn, numW, numB, numDrawn)
+  HyperG(n)
 }
 \arguments{
-  \item{numWdrawn}{number of White balls drawn}
-
-  \item{numW}{number of White balls}
-
-  \item{numB}{number of Black balls}
-
-  \item{numDrawn}{number of balls drawn}
+  \item{n}{a vector of White balls drawn, White balls Black
+  balls balls drawn}
 }
 \value{
   pvalue
