@@ -53,25 +53,29 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, qvalue
 
     k = sapply(geneID.list, length)
     retain <- which(k != 0)
-	k = k[retain]
-	GO2ExtID <- GO2ExtID[retain]
-	geneID <- geneID[retain]
-	geneID.list <- geneID.list[retain]
+    k = k[retain]
+    GO2ExtID <- GO2ExtID[retain]
+    geneID <- geneID[retain]
+    geneID.list <- geneID.list[retain]
 
-	M <- sapply(GO2ExtID, length)
+    M <- sapply(GO2ExtID, length)
 
     pathNum <- length(M)
     N <- rep(length(orgExtID), pathNum)
     n <- rep(length(gene), pathNum)
     args.df <- data.frame(numWdrawn=k-1, numW=M, numB=N-M, numDrawn=n)
-    pvalues <- mdply(args.df, HyperG)
-    pvalues <- pvalues[,5]
+    ##pvalues <- mdply(args.df, HyperG)
+    ##pvalues <- pvalues[,5]
+    pvalues <- apply(args.df, 1, HyperG)
 
+    ##GeneRatio <- mdply(data.frame(a=k, b=n), getRatio)
+    ##GeneRatio <- GeneRatio[,3]
+    GeneRatio <- apply(data.frame(a=k, b=n), 1, getRatio)
 
-    GeneRatio <- mdply(data.frame(a=k, b=n), getRatio)
-    GeneRatio <- GeneRatio[,3]
-    BgRatio <- mdply(data.frame(a=M, b=N), getRatio)
-    BgRatio <- BgRatio[,3]
+    ##BgRatio <- mdply(data.frame(a=M, b=N), getRatio)
+    ##BgRatio <- BgRatio[,3]
+    BgRatio <- apply(data.frame(a=M, b=N), 1, getRatio)
+
     GOID <- names(GO2ExtID)
     Description <- GO2Term(GOID)
 
@@ -80,26 +84,26 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, qvalue
     qobj = qvalue(goOver$pvalue, lambda=0.05, pi0.method="bootstrap")
     qvalues <- qobj$qvalues
     goOver <- data.frame(goOver, qvalue=qvalues, geneID=geneID, Count=k)
-    
-	goOver <- goOver[ goOver$pvalue <= pvalueCutoff, ]
-	goOver <- goOver[ goOver$qvalue <= qvalueCutoff, ]
 
-	
-	goOver$Description <- as.character(goOver$Description)
-	goOver <- goOver[order(goOver$pvalue),]
+    goOver <- goOver[ goOver$pvalue <= pvalueCutoff, ]
+    goOver <- goOver[ goOver$qvalue <= qvalueCutoff, ]
+
+
+    goOver$Description <- as.character(goOver$Description)
+    goOver <- goOver[order(goOver$pvalue),]
     rownames(goOver) <- goOver$GOID
-	
-	
-	geneAnno <- geneID.list[goOver$pvalue <= pvalueCutoff]
-	geneAnno <- geneAnno[order(goOver$pvalue)]
-	
+
+
+    geneAnno <- geneID.list[goOver$pvalue <= pvalueCutoff]
+    geneAnno <- geneAnno[order(goOver$pvalue)]
+
     new("enrichGOResult",
         enrichGOResult = goOver,
         pvalueCutoff=pvalueCutoff,
-		qvalueCutoff=qvalueCutoff,
+        qvalueCutoff=qvalueCutoff,
         Organism = organism,
         Ont = ont,
-		geneAnno = geneAnno,
+        geneAnno = geneAnno,
         Gene = gene
         )
 }
@@ -192,9 +196,9 @@ setMethod("summary", signature(object="enrichGOResult"),
 setMethod("plot", signature(x="enrichGOResult"),
           function(x, title="", font.size=12, type="bar", showCategory=NULL,...) {
               enrichGOResult <- summary(x)
-			  if ( is.numeric(showCategory) & showCategory < nrow(enrichGOResult) ) {			  
+			  if ( is.numeric(showCategory) & showCategory < nrow(enrichGOResult) ) {
 				  enrichGOResult <- enrichGOResult[1:showCategory,]
-			  }					  
+			  }
               if (type == "bar") {
 				p <- plotting.barplot(enrichGOResult, title, font.size)
               ##color scale based on pvalue

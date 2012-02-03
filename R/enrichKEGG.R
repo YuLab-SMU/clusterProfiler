@@ -66,13 +66,18 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, qvalueCutoff
     N <- rep(length(orgExtID), pathNum)
     n <- rep(length(gene), pathNum)
     args.df <- data.frame(numWdrawn=k-1, numW=M, numB=N-M, numDrawn=n)
-    pvalues <- mdply(args.df, HyperG)
-    pvalues <- pvalues[,5]
+    ##pvalues <- mdply(args.df, HyperG)
+    ##pvalues <- pvalues[,5]
+    pvalues <- apply(args.df, 1, HyperG)
 
-    GeneRatio <- mdply(data.frame(a=k, b=n), getRatio)
-    GeneRatio <- GeneRatio[,3]
-    BgRatio <- mdply(data.frame(a=M, b=N), getRatio)
-    BgRatio <- BgRatio[,3]
+    ##GeneRatio <- mdply(data.frame(a=k, b=n), getRatio)
+    ##GeneRatio <- GeneRatio[,3]
+    GeneRatio <- apply(data.frame(a=k, b=n), 1, getRatio)
+
+    ##BgRatio <- mdply(data.frame(a=M, b=N), getRatio)
+    ##BgRatio <- BgRatio[,3]
+    BgRatio <- apply(data.frame(a=M, b=N), 1, getRatio)
+
     pathwayID <- names(orgPath2ExtID)
     Description <- unlist(path2Name(pathwayID))
 
@@ -83,10 +88,10 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, qvalueCutoff
     qvalues <- qobj$qvalues
     keggOver <- data.frame(keggOver, qvalue=qvalues, geneID=geneID, Count=k)
     keggOver <- keggOver[order(pvalues),]
-	
+
     keggOver <- keggOver[ keggOver$pvalue <= pvalueCutoff, ]
 	keggOver <- keggOver[ keggOver$qvalue <= qvalueCutoff, ]
-	
+
     keggOver$Description <- as.character(keggOver$Description)
 
     new("enrichKEGGResult",
@@ -119,7 +124,7 @@ setClass("enrichKEGGResult",
          representation=representation(
          enrichKEGGResult="data.frame",
          pvalueCutoff="numeric",
-         qvalueCutoff="numeric",		 
+         qvalueCutoff="numeric",
          Organism = "character",
          Gene = "character"
          )
@@ -179,9 +184,9 @@ setMethod("summary", signature(object="enrichKEGGResult"),
 setMethod("plot", signature(x="enrichKEGGResult"),
           function(x, title="", font.size=12, showCategory=NULL) {
               enrichKEGGResult <- x@enrichKEGGResult
-			  if ( is.numeric(showCategory) & showCategory < nrow(enrichKEGGResult) ) {			  
+			  if ( is.numeric(showCategory) & showCategory < nrow(enrichKEGGResult) ) {
 				  enrichKEGGResult <- enrichKEGGResult[1:showCategory,]
-			  }			  
+			  }
               p <- plotting.barplot(enrichKEGGResult, title, font.size)
               ##color scale based on pvalue
               p <- p +
