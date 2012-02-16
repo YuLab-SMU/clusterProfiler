@@ -8,6 +8,9 @@
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
+##' @importFrom plyr llply
+##' @importFrom plyr ldply
+##' @importFrom plyr rename
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
@@ -53,6 +56,7 @@ compareCluster <- function(geneClusters, fun=enrichGO, ...) {
 ##' @slot fun one of groupGO, enrichGO and enrichKEGG
 ##' @exportClass compareClusterResult
 ##' @author Guangchuang Yu \url{http://ygc.name}
+##' @exportClass compareClusterResult
 ##' @seealso \code{\linkS4class{groupGOResult}}
 ##'   \code{\linkS4class{enrichGOResult}} \code{\link{compareCluster}}
 ##' @keywords classes
@@ -74,25 +78,26 @@ setClass("compareClusterResult",
 ##' @title show method
 ##' @param object A \code{compareClusterResult} instance.
 ##' @return message
+##' @importFrom methods show
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
               geneClusterLen <- length(object@geneClusters)
-              #fun <- object@fun
-              #fun <- as.character(substitute(fun))
-              #if (fun == "enrichKEGG") {
-  #                analysis <- "KEGG Enrichment Analysis"
-  #            } else if (fun == "groupGO") {
-  #                analysis <- "GO Profiling Analysis"
-  #           } else if (fun == "enrichGO") {
-  #                analysis <- "GO Enrichment Analysis"
-   #           } else if (fun == "enrichDO") {
-    #              analysis <- "DO Enrichment Analysis"		 
-#	      } else {
-#		analysis <- "User specify Analysis"
-#	      }
-#              cat ("Compare", geneClusterLen, "gene clusters using", analysis, "\n")
-		cat ("Result of Comparing", geneClusterLen, "gene clusters", "\n")
+                                        #fun <- object@fun
+                                        #fun <- as.character(substitute(fun))
+                                        #if (fun == "enrichKEGG") {
+                                        #                analysis <- "KEGG Enrichment Analysis"
+                                        #            } else if (fun == "groupGO") {
+                                        #                analysis <- "GO Profiling Analysis"
+                                        #           } else if (fun == "enrichGO") {
+                                        #                analysis <- "GO Enrichment Analysis"
+                                        #           } else if (fun == "enrichDO") {
+                                        #              analysis <- "DO Enrichment Analysis"
+                                        #	      } else {
+                                        #		analysis <- "User specify Analysis"
+                                        #	      }
+                                        #              cat ("Compare", geneClusterLen, "gene clusters using", analysis, "\n")
+              cat ("Result of Comparing", geneClusterLen, "gene clusters", "\n")
           }
           )
 
@@ -106,6 +111,8 @@ setMethod("show", signature(object="compareClusterResult"),
 ##' @title summary method
 ##' @param object A \code{compareClusterResult} instance.
 ##' @return A data frame
+##' @importFrom stats4 summary
+##' @exportMethod summary
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("summary", signature(object="compareClusterResult"),
           function(object) {
@@ -128,6 +135,11 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @param showCategory numeric parameter, restrict the top categories for plotting.
 ##' @param by one of "percentage" and "count"
 ##' @return ggplot object
+##' @importFrom graphics plot
+##' @importFrom plyr ddply
+##' @importFrom plyr mdply
+##' @importFrom plyr .
+##' @exportMethod plot
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="compareClusterResult"),
           function(x, type="dot", title="", font.size=12, showCategory=5, by="percentage") {
