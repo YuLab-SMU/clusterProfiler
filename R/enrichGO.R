@@ -28,7 +28,9 @@
 ##' 	#head(summary(yy))
 ##' 	#plot(yy)
 ##'
-enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, qvalueCutoff=0.05, readable=FALSE) {
+enrichGO <- function(gene, organism="human", ont="MF",
+                     pvalueCutoff=0.01, qvalueCutoff=0.05,
+                     readable=FALSE) {
     goterms <- Ontology(GOTERM)
     goterms <- names(goterms[goterms == ont])
 
@@ -63,7 +65,10 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, qvalue
     pathNum <- length(M)
     N <- rep(length(orgExtID), pathNum)
     n <- rep(length(gene), pathNum)
-    args.df <- data.frame(numWdrawn=k-1, numW=M, numB=N-M, numDrawn=n)
+    args.df <- data.frame(numWdrawn=k-1,
+                          numW=M,
+                          numB=N-M,
+                          numDrawn=n)
     ##pvalues <- mdply(args.df, HyperG)
     ##pvalues <- pvalues[,5]
     pvalues <- apply(args.df, 1, HyperG)
@@ -79,9 +84,13 @@ enrichGO <- function(gene, organism="human", ont="MF", pvalueCutoff=0.01, qvalue
     GOID <- names(GO2ExtID)
     Description <- GO2Term(GOID)
 
-    goOver <- data.frame(GOID=GOID, Description=Description, GeneRatio=GeneRatio, BgRatio=BgRatio, pvalue=pvalues)
+    goOver <- data.frame(GOID=GOID,
+                         Description=Description,
+                         GeneRatio=GeneRatio,
+                         BgRatio=BgRatio,
+                         pvalue=pvalues)
 
-    qobj = qvalue(goOver$pvalue, lambda=0.05, pi0.method="bootstrap")
+    qobj = qvalue(goOver$pvalue, lambda=0.05,pi0.method="bootstrap")
     qvalues <- qobj$qvalues
     goOver <- data.frame(goOver, qvalue=qvalues, geneID=geneID, Count=k)
 
@@ -151,6 +160,7 @@ setClass("enrichGOResult",
 ##' @title show method
 ##' @param object A \code{enrichGOResult} instance.
 ##' @return message
+##' @importFrom methods show
 ##' @author GuangchuangYu \url{http://ygc.name}
 setMethod("show", signature(object="enrichGOResult"),
           function (object){
@@ -158,7 +168,9 @@ setMethod("show", signature(object="enrichGOResult"),
               Organism = object@Organism
               GeneNum = length(object@Gene)
               pvalueCutoff=object@pvalueCutoff
-              cat ("Hypergeometric test of over-representation GO (", ont, ") categories", " for ", GeneNum, Organism, "genes\n", "p value <", pvalueCutoff, "\n")
+              cat ("Hypergeometric test of over-representation GO (",
+                   ont, ") categories", " for ", GeneNum, Organism,
+                   "genes\n", "p value <", pvalueCutoff, "\n")
           }
           )
 
@@ -172,6 +184,8 @@ setMethod("show", signature(object="enrichGOResult"),
 ##' @title summary method
 ##' @param object A \code{enrichGOResult} instance.
 ##' @return A data frame
+##' @importFrom stats4 summary
+##' @exportMethod summary
 ##' @author GuangchuangYu \url{http://ygc.name}
 setMethod("summary", signature(object="enrichGOResult"),
           function(object) {
@@ -192,26 +206,31 @@ setMethod("summary", signature(object="enrichGOResult"),
 ##' @param font.size graph font size
 ##' @param showCategory number of KEGG categories to show.
 ##' @return ggplot object
+##' @importFrom graphics plot
+##' @importFrom ggplot2 scale_fill_continuous
+##' @importFrom ggplot2 aes
+##' @importFrom ggplot2 %+%
+##' @exportMethod plot
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="enrichGOResult"),
-          function(x, title="", font.size=12, type="bar", showCategory=NULL,...) {
-              enrichGOResult <- summary(x)
-			  if ( is.numeric(showCategory) & showCategory < nrow(enrichGOResult) ) {
-				  enrichGOResult <- enrichGOResult[1:showCategory,]
-			  }
+          function(x, title="", font.size=12, type="bar", showCategory=5,...) {
+              enrichGOResult <- x@enrichGOResult
+              if ( is.numeric(showCategory) & showCategory < nrow(enrichGOResult) ) {
+                  enrichGOResult <- enrichGOResult[1:showCategory,]
+              }
               if (type == "bar") {
-				p <- plotting.barplot(enrichGOResult, title, font.size)
-              ##color scale based on pvalue
-				p <- p +
-					aes(fill=pvalue) +
-						scale_fill_continuous(low="red", high="blue")
-				return(p)
-			  }
-			  if (type == "categoryNet") {
-				geneAnno <- x@geneAnno
-				names(geneAnno) <- GO2Term(names(geneAnno))
-				pvalue <- enrichGOResult$pvalue
-				plot.categoryNet(inputList=geneAnno, pvalue=pvalue, ... )
-			  }
+                  p <- plotting.barplot(enrichGOResult, title, font.size)
+                  ##color scale based on pvalue
+                  p <- p +
+                      aes(fill=pvalue) +
+                          scale_fill_continuous(low="red", high="blue")
+                  return(p)
+              }
+              if (type == "categoryNet") {
+                  geneAnno <- x@geneAnno
+                  names(geneAnno) <- GO2Term(names(geneAnno))
+                  pvalue <- enrichGOResult$pvalue
+                  plot.categoryNet(inputList=geneAnno, pvalue=pvalue, ... )
+              }
           }
           )

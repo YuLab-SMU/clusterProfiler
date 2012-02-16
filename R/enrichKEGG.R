@@ -27,7 +27,9 @@
 ##' 	head(summary(yy))
 ##' 	#plot(yy)
 ##'
-enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, qvalueCutoff = 0.05, readable=FALSE) {
+enrichKEGG <- function(gene, organism="human",
+                       pvalueCutoff = 0.05, qvalueCutoff = 0.05,
+                       readable=FALSE) {
     ##pathID2ExtID <- as.list(KEGGPATHID2EXTID)
     ##pathID <- names(pathID2ExtID)
     pathID <- mappedkeys(KEGGPATHID2EXTID)
@@ -81,16 +83,21 @@ enrichKEGG <- function(gene, organism="human", pvalueCutoff = 0.05, qvalueCutoff
     pathwayID <- names(orgPath2ExtID)
     Description <- unlist(path2Name(pathwayID))
 
-    keggOver <- data.frame(pathwayID=pathwayID, Description=Description, GeneRatio=GeneRatio, BgRatio=BgRatio, pvalue=pvalues)
+    keggOver <- data.frame(pathwayID=pathwayID,
+                           Description=Description,
+                           GeneRatio=GeneRatio,
+                           BgRatio=BgRatio,
+                           pvalue=pvalues)
 
 
     qobj = qvalue(keggOver$pvalue, lambda=0.05, pi0.method="bootstrap")
     qvalues <- qobj$qvalues
-    keggOver <- data.frame(keggOver, qvalue=qvalues, geneID=geneID, Count=k)
+    keggOver <- data.frame(keggOver, qvalue=qvalues,
+                           geneID=geneID, Count=k)
     keggOver <- keggOver[order(pvalues),]
 
     keggOver <- keggOver[ keggOver$pvalue <= pvalueCutoff, ]
-	keggOver <- keggOver[ keggOver$qvalue <= qvalueCutoff, ]
+    keggOver <- keggOver[ keggOver$qvalue <= qvalueCutoff, ]
 
     keggOver$Description <- as.character(keggOver$Description)
 
@@ -140,13 +147,16 @@ setClass("enrichKEGGResult",
 ##' @title show method
 ##' @param object A \code{enrichKEGGResult} instance.
 ##' @return message
+##' @importFrom methods show
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="enrichKEGGResult"),
           function (object){
               Organism = object@Organism
               GeneNum = length(object@Gene)
               pvalueCutoff=object@pvalueCutoff
-              cat (GeneNum, Organism, "Genes to KEGG test for over-representation.", "\n", "p value <", pvalueCutoff, "\n")
+              cat (GeneNum, Organism,
+                   "Genes to KEGG test for over-representation.", "\n",
+                   "p value <", pvalueCutoff, "\n")
           }
           )
 
@@ -160,6 +170,8 @@ setMethod("show", signature(object="enrichKEGGResult"),
 ##' @title summary method
 ##' @param object A \code{enrichKEGGResult} instance.
 ##' @return A data frame
+##' @importFrom stats4 summary
+##' @exportMethod summary
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("summary", signature(object="enrichKEGGResult"),
           function(object) {
@@ -180,13 +192,18 @@ setMethod("summary", signature(object="enrichKEGGResult"),
 ##' @param font.size graph font size
 ##' @param showCategory number of KEGG categories to show.
 ##' @return ggplot object
+##' @importFrom graphics plot
+##' @importFrom ggplot2 %+%
+##' @importFrom ggplot2 aes
+##' @importFrom ggplot2 scale_fill_continuous
+##' @exportMethod plot
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="enrichKEGGResult"),
-          function(x, title="", font.size=12, showCategory=NULL) {
+          function(x, title="", font.size=12, showCategory=5) {
               enrichKEGGResult <- x@enrichKEGGResult
-			  if ( is.numeric(showCategory) & showCategory < nrow(enrichKEGGResult) ) {
-				  enrichKEGGResult <- enrichKEGGResult[1:showCategory,]
-			  }
+              if ( is.numeric(showCategory) & showCategory < nrow(enrichKEGGResult) ) {
+                  enrichKEGGResult <- enrichKEGGResult[1:showCategory,]
+              }
               p <- plotting.barplot(enrichKEGGResult, title, font.size)
               ##color scale based on pvalue
               p <- p +

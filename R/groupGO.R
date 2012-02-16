@@ -1,3 +1,4 @@
+
 ##' Functional Profile of a gene set at specific GO level.
 ##' Given a vector of genes, this function will return the GO profile at
 ##' specific level.
@@ -37,7 +38,8 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
 
     Count <- unlist(lapply(geneID.list, length))
     Descriptions <- GO2Term(GOLevel)
-    result = data.frame(GOID=GOLevel, Description=Descriptions, Count=Count, GeneID=geneID)
+    result = data.frame(GOID=GOLevel,Description=Descriptions,
+                        Count=Count, GeneID=geneID)
     new("groupGOResult",
         groupGOResult=result,
         Ont = ont,
@@ -86,6 +88,7 @@ setClass("groupGOResult",
 ##' @title show method
 ##' @param object A \code{groupGOResult} instance
 ##' @return message
+##' @importFrom methods show
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="groupGOResult"),
           function (object){
@@ -107,6 +110,8 @@ setMethod("show", signature(object="groupGOResult"),
 ##' @title summary method
 ##' @param object A \code{groupGOResult} instance
 ##' @return A data frame
+##' @importFrom stats4 summary
+##' @exportMethod summary
 ##' @author Guangchuang Yu
 setMethod("summary", signature(object="groupGOResult"),
           function (object){
@@ -129,10 +134,15 @@ setMethod("summary", signature(object="groupGOResult"),
 ##' @param showCategory number of GO categories to show.
 ##' @param drop logical parameter, drop void category.
 ##' @return ggplot object
+##' @importFrom graphics plot
+##' @importFrom ggplot2 %+%
+##' @importFrom ggplot2 aes
+##' @importFrom ggplot2 opts
+##' @exportMethod plot
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="groupGOResult"),
-          function (x, order="FALSE", title="", font.size=12, showCategory=NULL, drop=FALSE){
-              groupGOResult <- summary(x)
+          function (x, order="FALSE", title="", font.size=12, showCategory=5, drop=FALSE){
+              groupGOResult <- x@groupGOResult
               if (drop == TRUE) {
                   groupGOResult <- groupGOResult[groupGOResult$Count != 0, ]
               }
@@ -140,12 +150,13 @@ setMethod("plot", signature(x="groupGOResult"),
                   idx <- order(groupGOResult$Count)
                   groupGOResult <- groupGOResult[idx,]
               }
-			  if ( is.numeric(showCategory) & showCategory < nrow(groupGOResult) ) {
+              if ( is.numeric(showCategory) & showCategory < nrow(groupGOResult) ) {
                   idx <- order(groupGOResult$Count)
-                  groupGOResult <- groupGOResult[idx,]				  
-				  groupGOResult <- groupGOResult[1:showCategory,]
-			  }
-              groupGOResult$Description <- factor(groupGOResult$Description, level= as.character(groupGOResult$Description))
+                  groupGOResult <- groupGOResult[idx,]
+                  groupGOResult <- groupGOResult[1:showCategory,]
+              }
+              groupGOResult$Description <- factor(groupGOResult$Description,
+                                                  level= as.character(groupGOResult$Description))
               p <- plotting.barplot(groupGOResult, title, font.size)
               p <- p +
                   aes(fill=Description) +

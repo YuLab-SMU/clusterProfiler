@@ -87,6 +87,11 @@ getGOLevel <- function(ont, level) {
 ##' @param title graph title
 ##' @param font.size font size
 ##' @return ggplot object
+##' @importFrom ggplot2 ggplot
+##' @importFrom ggplot2 aes
+##' @importFrom ggplot2 geom_bar
+##' @importFrom ggplot2 %+%
+##' @importFrom ggplot2 coord_flip
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.barplot <- function(result, title, font.size=12) {
     Description <- Count <- NULL # to satisfy codetools
@@ -103,6 +108,12 @@ plotting.barplot <- function(result, title, font.size=12) {
 ##' @param p ggplot object
 ##' @param title graph title
 ##' @param font.size font size
+##' @importFrom ggplot2 %+%
+##' @importFrom ggplot2 opts
+##' @importFrom ggplot2 xlab
+##' @importFrom ggplot2 ylab
+##' @importFrom ggplot2 theme_bw
+##' @importFrom ggplot2 theme_text
 ##' @author Guangchuang Yu \url{http://ygc.name}
 pModify <- function(p, title="", font.size=12) {
     p <- p +
@@ -124,6 +135,12 @@ pModify <- function(p, title="", font.size=12) {
 ##' @param title graph title
 ##' @param font.size graph font size
 ##' @return ggplot object
+##' @importFrom ggplot2 ggplot
+##' @importFrom ggplot2 aes
+##' @importFrom ggplot2 geom_bar
+##' @importFrom ggplot2 coord_flip
+##' @importFrom ggplot2 geom_point
+##' @importFrom ggplot2 scale_colour_gradient
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
     Description <- Percentage <- Count <- Cluster <- Pvalue <- pvalue <- NULL # to satisfy codetools
