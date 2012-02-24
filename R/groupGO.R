@@ -134,11 +134,9 @@ setMethod("summary", signature(object="groupGOResult"),
 ##' @param showCategory number of GO categories to show.
 ##' @param drop logical parameter, drop void category.
 ##' @return ggplot object
-##' @importFrom graphics plot
 ##' @importFrom ggplot2 %+%
 ##' @importFrom ggplot2 aes
 ##' @importFrom ggplot2 opts
-##' @exportMethod plot
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="groupGOResult"),
           function (x, order="FALSE", title="", font.size=12, showCategory=5, drop=FALSE){

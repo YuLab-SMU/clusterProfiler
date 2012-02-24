@@ -192,11 +192,9 @@ setMethod("summary", signature(object="enrichKEGGResult"),
 ##' @param font.size graph font size
 ##' @param showCategory number of KEGG categories to show.
 ##' @return ggplot object
-##' @importFrom graphics plot
 ##' @importFrom ggplot2 %+%
 ##' @importFrom ggplot2 aes
 ##' @importFrom ggplot2 scale_fill_continuous
-##' @exportMethod plot
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="enrichKEGGResult"),
           function(x, title="", font.size=12, showCategory=5) {
