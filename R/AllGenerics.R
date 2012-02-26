@@ -1,2 +1,4 @@
+##' @importFrom BiocGenerics plot
 ##' @exportMethod plot
-setGeneric("plot", function(x, ...) standardGeneric("plot"))
+if ( !isGeneric("plot") )
+	setGeneric("plot", function(x, ...) standardGeneric("plot"))

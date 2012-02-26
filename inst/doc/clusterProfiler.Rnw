@@ -169,7 +169,7 @@ Figure 1. More details of this analysis are described in \cite{yu2012}.
 
 \begin{figure}[htb]
   \begin{center}
-    \includegraphics[width=.7\linewidth]{omics2012.eps}
+    \includegraphics[width=.7\linewidth]{omics2012.pdf}
     \caption{Comparison of GO enrichment of gene clusters}
     \label{Fig:omicsYu2012}
   \end{center}
@@ -195,16 +195,13 @@ visualizing analyzed result.
 Bar plot was used to visualized functional profile of the given
 collection of genes.
 
-<<plot enrichGO, eval=F>>=
-plot(y, titile="MF Enrichment analysis", showCategory=10)
-@
-
 \begin{figure}[htb]
   \begin{center}
-    \includegraphics[width=.7\linewidth]{enrichGO.eps}
-    \caption{Example of plotting functional profiles}
-    \label{Fig:enrichGO}
+<<plotenrichGO, fig=T>>=
+plot(y, titile="MF Enrichment analysis", showCategory=10)
+@   
   \end{center}
+  \caption{\label{Fig:enrichGO} Example of plotting functional profiles}
 \end{figure}
 
 The plot function call was consistent for analysis results generated
@@ -227,7 +224,7 @@ plot(xx)
 
 \begin{figure}[htb]
   \begin{center}
-    \includegraphics[width=.7\linewidth]{compareCluster.eps}
+    \includegraphics[width=.7\linewidth]{compareCluster.png}
     \caption{GO Enrichment Comparison}
     \label{Fig:compareCluster}
   \end{center}
