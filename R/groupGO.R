@@ -110,7 +110,7 @@ setMethod("show", signature(object="groupGOResult"),
 ##' @title summary method
 ##' @param object A \code{groupGOResult} instance
 ##' @return A data frame
-##' @importFrom stats4 summary
+##' @importFrom BiocGenerics summary
 ##' @exportMethod summary
 ##' @author Guangchuang Yu
 setMethod("summary", signature(object="groupGOResult"),
@@ -119,25 +119,11 @@ setMethod("summary", signature(object="groupGOResult"),
           }
           )
 
-##' plot method for \code{groupGOResult} instance
-##'
-##'
-##' @name plot
-##' @docType methods
 ##' @rdname plot-methods
-##'
-##' @title plot method
-##' @param x A \code{groupGOResult} instance
-##' @param order logical parameter, order the result by *Count*.
-##' @param title graph title
-##' @param font.size graph font size
-##' @param showCategory number of GO categories to show.
-##' @param drop logical parameter, drop void category.
-##' @return ggplot object
+##' @aliases plot,groupGOResult,ANY-method
 ##' @importFrom ggplot2 %+%
 ##' @importFrom ggplot2 aes
 ##' @importFrom ggplot2 opts
-##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="groupGOResult"),
           function (x, order="FALSE", title="", font.size=12, showCategory=5, drop=FALSE){
               groupGOResult <- x@groupGOResult

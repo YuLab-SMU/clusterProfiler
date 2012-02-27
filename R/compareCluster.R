@@ -111,7 +111,7 @@ setMethod("show", signature(object="compareClusterResult"),
 ##' @title summary method
 ##' @param object A \code{compareClusterResult} instance.
 ##' @return A data frame
-##' @importFrom stats4 summary
+##' @importFrom BiocGenerics summary
 ##' @exportMethod summary
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("summary", signature(object="compareClusterResult"),
@@ -120,25 +120,11 @@ setMethod("summary", signature(object="compareClusterResult"),
           }
           )
 
-##' plot method for \code{compareClusterResult} instance
-##'
-##'
-##' @name plot
-##' @docType methods
 ##' @rdname plot-methods
-##'
-##' @title plot method
-##' @param x A \code{compareClusterResult} instance.
-##' @param type one of "dot" and "bar".
-##' @param title graph title
-##' @param font.size graph font size
-##' @param showCategory numeric parameter, restrict the top categories for plotting.
-##' @param by one of "percentage" and "count"
-##' @return ggplot object
+##' @aliases plot,compareClusterResult,ANY-method
 ##' @importFrom plyr ddply
 ##' @importFrom plyr mdply
 ##' @importFrom plyr .
-##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="compareClusterResult"),
           function(x, type="dot", title="", font.size=12, showCategory=5, by="percentage") {
               clProf.df <- summary(x)

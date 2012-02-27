@@ -184,7 +184,7 @@ setMethod("show", signature(object="enrichGOResult"),
 ##' @title summary method
 ##' @param object A \code{enrichGOResult} instance.
 ##' @return A data frame
-##' @importFrom stats4 summary
+##' @importFrom BiocGenerics summary
 ##' @exportMethod summary
 ##' @author GuangchuangYu \url{http://ygc.name}
 setMethod("summary", signature(object="enrichGOResult"),
@@ -193,23 +193,11 @@ setMethod("summary", signature(object="enrichGOResult"),
           }
           )
 
-##' plot method for \code{enrichGOResult} instance
-##'
-##'
-##' @name plot
-##' @docType methods
 ##' @rdname plot-methods
-##'
-##' @title plot method
-##' @param x A \code{enrichGOResult} instance.
-##' @param title graph title
-##' @param font.size graph font size
-##' @param showCategory number of KEGG categories to show.
-##' @return ggplot object
+##' @aliases plot,enrichGOResult,ANY-method
 ##' @importFrom ggplot2 scale_fill_continuous
 ##' @importFrom ggplot2 aes
 ##' @importFrom ggplot2 %+%
-##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("plot", signature(x="enrichGOResult"),
           function(x, title="", font.size=12, type="bar", showCategory=5,...) {
               enrichGOResult <- x@enrichGOResult
