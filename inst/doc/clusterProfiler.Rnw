@@ -175,6 +175,10 @@ Figure 1. More details of this analysis are described in \cite{yu2012}.
   \end{center}
 \end{figure}
 
+Another example was shown in \cite{yu2011}, we calculated functional
+similarities among viral miRNAs using method described in
+\cite{yu_new_2011}, and compared significant KEGG pathways regulated
+by different viruses using \Rpackage{clusterProfiler}.
 
 The comparison function was designed as a general-package for
 comparing gene clusters of any kind of gene-ontology associations, not
@@ -199,7 +203,7 @@ collection of genes.
   \begin{center}
 <<plotenrichGO, fig=T>>=
 plot(y, titile="MF Enrichment analysis", showCategory=10)
-@   
+@
   \end{center}
   \caption{\label{Fig:enrichGO} Example of plotting functional profiles}
 \end{figure}
