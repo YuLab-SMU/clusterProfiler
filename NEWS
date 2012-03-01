@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.3.12
+------------------------
+ o fixed BibTeX database file .bib. 
+   month = , must be month = someMonth, or totally deleted,
+   leave it blank will cause texi2dvi failed. <2012-03-01, Thu>
+   
 CHANGES IN VERSION 1.3.11
 ------------------------
  o update vignette. <2012-02-28, Tue>
