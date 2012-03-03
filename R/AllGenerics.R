@@ -7,7 +7,7 @@
 ##' @title plot method
 ##' @param ... Additional argument list
 ##' @return plot
-##' @importFrom BiocGenerics plot
+##' @importFrom graphics plot
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
 if ( !isGeneric("plot") )
