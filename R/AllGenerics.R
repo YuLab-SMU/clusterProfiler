@@ -7,7 +7,7 @@
 ##' @title plot method
 ##' @param ... Additional argument list
 ##' @return plot
-##' @importFrom graphics plot
+##' @importFrom stats4 plot
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
 if ( !isGeneric("plot") )

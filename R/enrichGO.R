@@ -184,7 +184,7 @@ setMethod("show", signature(object="enrichGOResult"),
 ##' @title summary method
 ##' @param object A \code{enrichGOResult} instance.
 ##' @return A data frame
-##' @importFrom BiocGenerics summary
+##' @importFrom stats4 summary
 ##' @exportMethod summary
 ##' @author GuangchuangYu \url{http://ygc.name}
 setMethod("summary", signature(object="enrichGOResult"),
