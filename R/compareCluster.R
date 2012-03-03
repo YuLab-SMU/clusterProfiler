@@ -111,7 +111,7 @@ setMethod("show", signature(object="compareClusterResult"),
 ##' @title summary method
 ##' @param object A \code{compareClusterResult} instance.
 ##' @return A data frame
-##' @importFrom BiocGenerics summary
+##' @importFrom stats4 summary
 ##' @exportMethod summary
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("summary", signature(object="compareClusterResult"),

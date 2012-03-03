@@ -110,7 +110,7 @@ setMethod("show", signature(object="groupGOResult"),
 ##' @title summary method
 ##' @param object A \code{groupGOResult} instance
 ##' @return A data frame
-##' @importFrom BiocGenerics summary
+##' @importFrom stats4 summary
 ##' @exportMethod summary
 ##' @author Guangchuang Yu
 setMethod("summary", signature(object="groupGOResult"),

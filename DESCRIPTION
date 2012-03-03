@@ -9,12 +9,12 @@ Description: The package implements methods to analyze and visualize
     functional profiles (GO and KEGG) of gene and gene clusters.
 Depends: R (>= 2.10)
 Imports: methods,
+	stats4,
 	ggplot2,
 	DBI, 
 	qvalue, 
 	plyr,
 	AnnotationDbi,
-	BiocGenerics,
 	GO.db, 
 	KEGG.db,
 	org.Hs.eg.db, 
