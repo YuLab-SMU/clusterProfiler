@@ -124,9 +124,8 @@ summary(z)
 
 With the demise of KEGG (at least without subscription), the pathway
 data used in \Rpackage{clusterProfiler} will not update, and we
-encourage user to use \Rfunction{enrichPathway} in \Rpackage{rPA}
-\url{https://github.com/GuangchuangYu/rPA}, which use Reactome as a
-source of pathway data.
+encourage user to use \Rfunction{enrichPathway} in \Rpackage{ReactomePA}, 
+which use Reactome as a source of pathway data.
 
 \end{itemize}
 
@@ -186,9 +185,9 @@ only GO and KEGG this package provided, but also other biological and
 biomedical ontologies.
 
 For example, \Rfunction{compareCluster} can cooperate seamless with
-\Rpackage{DOSE} and \Rpackage{rPA} and compare gene cluster in the
+\Rpackage{DOSE} and \Rpackage{ReactomePA} and compare gene cluster in the
 context of disease and reactome pathway as demonstrated in the online
-vignette of \Rpackage{DOSE} and \Rpackage{rPA} respectively.
+vignette of \Rpackage{DOSE} and \Rpackage{ReactomePA} respectively.
 
 \section{Visualization}
 
@@ -266,8 +265,8 @@ only GO (\Rfunction{groupGO} and \Rfunction{enrichGO}) and KEGG
 (\Rfunction{enrichKEGG}) provided in this package, but also other
   biological or biomedical ontologies, including Disease Ontology (via
   \Rfunction{enrichDO} in \Rpackage{DOSE}) and Reactome Pathway (via
-  \Rfunction{enrichPathway} in \Rpackage{rPA}). More details can be
-  found in the vignettes of \Rpackage{DOSE} and \Rpackage{rPA}.
+  \Rfunction{enrichPathway} in \Rpackage{ReactomePA}). More details can be
+  found in the vignettes of \Rpackage{DOSE} and \Rpackage{ReactomePA}.
 
 
 \section{Session Information}
