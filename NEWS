@@ -1,14 +1,22 @@
+CHANGES IN VERSION 1.3.14
+------------------------
+ o re-implement enrichGO by import enrich.internal in DOSE
+   implement S3 methods for mapping IDs for GO analysis. <2012-03-18, Sun>
+ o re-implement enrichKEGG by import enrich.internal in DOSE
+   implement S3 methods for mapping IDs for KEGG analysis. <2012-03-19, Mon>
+ o re-implement groupGOResult class by extended from enrichResult, 
+   and modified groupGO by using S3 methods designed for enrichGO. <2012-03-19,Mon>
+
 CHANGES IN VERSION 1.3.13
 ------------------------
- o import plot summary from stats4, for BiocGenerics (version 0.1.10) removed them <2012-03-03, Sat> 
- o update vignette <2012-03-06, Tue>
-   
+ o import plot summary from stats4, for BiocGenerics (version 0.1.10) removed them <2012-03-03, Sat>
+
 CHANGES IN VERSION 1.3.12
 ------------------------
- o fixed BibTeX database file .bib. 
+ o fixed BibTeX database file .bib.
    month = , must be month = someMonth, or totally deleted,
    leave it blank will cause texi2dvi failed. <2012-03-01, Thu>
-   
+
 CHANGES IN VERSION 1.3.11
 ------------------------
  o update vignette. <2012-02-28, Tue>
@@ -17,29 +25,29 @@ CHANGES IN VERSION 1.3.10
 ------------------------
  o fixed warnings concerning documents of plot generics. <2012-02-27, Mon>
  o import summary generic from BiocGenerics instead of stats4. <2012-02-27, Mon>
- 
+
 CHANGES IN VERSION 1.3.9
 ------------------------
- o fixed build error in bioc repos <2012-02-26 Sun> 
- 
+ o fixed build error in bioc repos <2012-02-26 Sun>
+
 CHANGES IN VERSION 1.3.8
 ------------------------
- o add visualization section in vignette <2012-02-16 Thu>  
- 
+ o add visualization section in vignette <2012-02-16 Thu>
+
 CHANGES IN VERSION 1.3.7
 ------------------------
- o @exportMethod plot <2012-02-15 Wed>  
+ o @exportMethod plot <2012-02-15 Wed>
  o fix bug when calling summary method from plot,
    for summary defined in base is S3 method,
    instead import summary generic from stats4 <2012-02-15 Wed>
-   
+
 CHANGES IN VERSION 1.3.6
 ------------------------
- o remove generic definition of show, summary and plot, add NAMESPACE import show 
-   from methods and plot from graphics. summary need not to import, for is defined 
-   in the base package. <2012-02-13 Mon> 
- o rewrite vignette <2012-02-13 Mon> 
- 
+ o remove generic definition of show, summary and plot, add NAMESPACE import show
+   from methods and plot from graphics. summary need not to import, for is defined
+   in the base package. <2012-02-13 Mon>
+ o rewrite vignette <2012-02-13 Mon>
+
 CHANGES IN VERSION 1.3.5
 ------------------------
  o update plot codes accompany with new version of ggplot2(>=0.9.0) <2012-02-07 Tue>

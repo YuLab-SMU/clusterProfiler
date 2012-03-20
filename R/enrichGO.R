@@ -10,14 +10,15 @@
 ##' @param qvalueCutoff Cutoff value of qvalue.
 ##' @param readable if readable is TRUE, the gene IDs will mapping to gene
 ##'   symbols.
-##' @return A \code{enrichGOResult} instance.
-##' @importMethodsFrom AnnotationDbi mappedkeys
-##' @importMethodsFrom AnnotationDbi Ontology
-##' @importFrom qvalue qvalue
-##' @importFrom methods new
-##' @importFrom GO.db GOTERM
-##' @importClassesFrom methods data.frame
-##' @seealso \code{\link{enrichGOResult-class}}, \code{\link{compareCluster}}
+##' @return A \code{enrichResult} instance.
+##' @importFrom DOSE enrich.internal
+##' @importClassesFrom DOSE enrichResult
+##' @importMethodsFrom DOSE show
+##' @importMethodsFrom DOSE summary
+##' @importMethodsFrom DOSE plot
+##' @importMethodsFrom DOSE setReadable
+##' @importFrom DOSE EXTID2NAME
+##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
@@ -28,195 +29,194 @@
 ##' 	#head(summary(yy))
 ##' 	#plot(yy)
 ##'
-enrichGO <- function(gene, organism="human", ont="MF",
-                     pvalueCutoff=0.01, qvalueCutoff=0.05,
+enrichGO <- function(gene,
+                     organism="human",
+                     ont="MF",
+                     pvalueCutoff=0.05,
+                     qvalueCutoff=0.05,
                      readable=FALSE) {
+
+    enrich.internal(gene,
+                    organism=organism,
+                    pvalueCutoff=pvalueCutoff,
+                    qvalueCutoff=qvalueCutoff,
+                    ont=ont,
+                    readable=readable)
+}
+
+
+##' @importFrom DOSE EXTID2TERMID
+##' @S3method EXTID2TERMID MF
+EXTID2TERMID.MF <- function(gene, organism) {
+    EXTID2TERMID.GO(gene=gene, ont="MF", organism=organism)
+}
+
+##' @importFrom DOSE EXTID2TERMID
+##' @S3method EXTID2TERMID BP
+EXTID2TERMID.BP <- function(gene, organism) {
+    EXTID2TERMID.GO(gene=gene, ont="BP", organism=organism)
+}
+
+##' @importFrom DOSE EXTID2TERMID
+##' @S3method EXTID2TERMID CC
+EXTID2TERMID.CC <- function(gene, organism) {
+    EXTID2TERMID.GO(gene=gene, ont="CC", organism=organism)
+}
+
+##' @importMethodsFrom AnnotationDbi Ontology
+##' @importFrom GO.db GOTERM
+##' @importMethodsFrom AnnotationDbi mappedkeys
+##' @importFrom plyr dlply
+##' @importFrom plyr .
+##' @importClassesFrom methods data.frame
+EXTID2TERMID.GO <- function(gene, ont, organism) {
+    # get all goterms within the specific ontology
     goterms <- Ontology(GOTERM)
     goterms <- names(goterms[goterms == ont])
 
-    orgTerm <- switch(organism,
-                      human = mappedkeys(org.Hs.egGO2ALLEGS),
-                      mouse = mappedkeys(org.Mm.egGO2ALLEGS),
-                      yeast = mappedkeys(org.Sc.sgdGO2ALLORFS),
-                      )
+    ## get organism specific GO terms
+    annoDb <- switch(organism,
+                     human = "org.Hs.eg.db",
+                     mouse = "org.Mm.eg.db",
+                     yeast = "org.Sc.sgd.db",
+                     )
+    require(annoDb, character.only = TRUE)
 
+    mappedDb <- switch(organism,
+                     human = "org.Hs.egGO2ALLEGS",
+                     mouse = "org.Mm.egGO2ALLEGS",
+                     yeast = "org.Sc.sgdGO2ALLORFS",
+                     )
+    mappedDb <- eval(parse(text=mappedDb))
+
+    orgTerm <- mappedkeys(mappedDb)
+
+    ## narrow down goterms to specific organism
     Terms <- goterms[goterms %in% orgTerm]
 
-    GO2ExtID <- getGO2ExtID(Terms, organism)
-
-    orgExtID <- unique(unlist(GO2ExtID))
-
-    geneID.list = lapply(GO2ExtID, function(i) gene[gene %in% i])
-    if (readable) {
-        geneID.list <- geneID2geneName(geneID.list, organism)
-    }
-    geneID <- sapply(geneID.list, function(i) paste(i, collapse="/"))
+    ## mapping GO to External gene ID
+    class(Terms) <- ont
+    GO2ExtID <- TERMID2EXTID(Terms, organism)
 
 
-    k = sapply(geneID.list, length)
-    retain <- which(k != 0)
-    k = k[retain]
-    GO2ExtID <- GO2ExtID[retain]
-    geneID <- geneID[retain]
-    geneID.list <- geneID.list[retain]
+    gene <- as.character(gene)
+    qGO2ExtID = lapply(GO2ExtID, function(i) gene[gene %in% i])
+    len <- sapply(qGO2ExtID, length)
+    notZero.idx <- len != 0
+    qGO2ExtID <- qGO2ExtID[notZero.idx]
 
-    M <- sapply(GO2ExtID, length)
+    len <- sapply(qGO2ExtID, length)
+    qGO2ExtID.df <- data.frame(GO=rep(names(qGO2ExtID), times=len),
+                               ExtID=unlist(qGO2ExtID))
 
-    pathNum <- length(M)
-    N <- rep(length(orgExtID), pathNum)
-    n <- rep(length(gene), pathNum)
-    args.df <- data.frame(numWdrawn=k-1,
-                          numW=M,
-                          numB=N-M,
-                          numDrawn=n)
-    ##pvalues <- mdply(args.df, HyperG)
-    ##pvalues <- pvalues[,5]
-    pvalues <- apply(args.df, 1, HyperG)
+    ExtID <- NULL ## to satisfy codetools
+    qExtID2GO <- dlply(qGO2ExtID.df, .(ExtID), function(i) as.character(i$GO))
 
-    ##GeneRatio <- mdply(data.frame(a=k, b=n), getRatio)
-    ##GeneRatio <- GeneRatio[,3]
-    GeneRatio <- apply(data.frame(a=k, b=n), 1, getRatio)
-
-    ##BgRatio <- mdply(data.frame(a=M, b=N), getRatio)
-    ##BgRatio <- BgRatio[,3]
-    BgRatio <- apply(data.frame(a=M, b=N), 1, getRatio)
-
-    GOID <- names(GO2ExtID)
-    Description <- GO2Term(GOID)
-
-    goOver <- data.frame(GOID=GOID,
-                         Description=Description,
-                         GeneRatio=GeneRatio,
-                         BgRatio=BgRatio,
-                         pvalue=pvalues)
-
-    qobj = qvalue(goOver$pvalue, lambda=0.05,pi0.method="bootstrap")
-    qvalues <- qobj$qvalues
-    goOver <- data.frame(goOver, qvalue=qvalues, geneID=geneID, Count=k)
-
-    goOver <- goOver[ goOver$pvalue <= pvalueCutoff, ]
-    goOver <- goOver[ goOver$qvalue <= qvalueCutoff, ]
-
-
-    goOver$Description <- as.character(goOver$Description)
-    goOver <- goOver[order(goOver$pvalue),]
-    rownames(goOver) <- goOver$GOID
-
-
-    geneAnno <- geneID.list[goOver$pvalue <= pvalueCutoff]
-    geneAnno <- geneAnno[order(goOver$pvalue)]
-
-    new("enrichGOResult",
-        enrichGOResult = goOver,
-        pvalueCutoff=pvalueCutoff,
-        qvalueCutoff=qvalueCutoff,
-        Organism = organism,
-        Ont = ont,
-        geneAnno = geneAnno,
-        Gene = gene
-        )
+    return(qExtID2GO)
 }
 
-##' Class "enrichGOResult"
-##' This class represents the result of GO enrichment analysis with FDR control.
-##'
-##'
-##' @name enrichGOResult-class
-##' @aliases enrichGOResult-class show,enrichGOResult-method
-##'   summary,enrichGOResult-method plot,enrichGOResult-method
-##'
-##' @docType class
-##' @slot enrichGOResult GO enrichment result
-##' @slot pvalueCutoff pvalueCutoff
-##' @slot qvalueCutoff qvalueCutoff
-##' @slot Ont Ontology
-##' @slot Organism one of "human", "mouse" and "yeast"
-##' @slot Gene Gene IDs
-##' @slot geneAnno Gene IDs group by GO
-##' @exportClass enrichGOResult
-##' @author Guangchuang Yu \url{http://ygc.name}
-##' @seealso \code{\linkS4class{compareClusterResult}}
-##'   \code{\link{compareCluster}} \code{\link{enrichGO}}
-##' @keywords classes
-setClass("enrichGOResult",
-         representation=representation(
-         enrichGOResult="data.frame",
-         pvalueCutoff="numeric",
-		 qvalueCutoff="numeric",
-         Ont = "character",
-         Organism = "character",
-		 geneAnno = "list",
-         Gene = "character"
-         )
-         )
+##' @importFrom DOSE TERMID2EXTID
+##' @S3method TERMID2EXTID MF
+TERMID2EXTID.MF <- function(term, organism) {
+    TERMID2EXTID.GO(term, organism)
+}
 
-##' show method for \code{enrichGOResult} instance
-##'
-##'
-##' @name show
-##' @docType methods
-##' @rdname show-methods
-##'
-##' @title show method
-##' @param object A \code{enrichGOResult} instance.
-##' @return message
-##' @importFrom methods show
-##' @author GuangchuangYu \url{http://ygc.name}
-setMethod("show", signature(object="enrichGOResult"),
-          function (object){
-              ont = object@Ont
-              Organism = object@Organism
-              GeneNum = length(object@Gene)
-              pvalueCutoff=object@pvalueCutoff
-              cat ("Hypergeometric test of over-representation GO (",
-                   ont, ") categories", " for ", GeneNum, Organism,
-                   "genes\n", "p value <", pvalueCutoff, "\n")
-          }
-          )
+##' @importFrom DOSE TERMID2EXTID
+##' @S3method TERMID2EXTID BP
+TERMID2EXTID.BP <- function(term, organism) {
+    TERMID2EXTID.GO(term, organism)
+}
 
-##' summary method for \code{enrichGOResult} instance
-##'
-##'
-##' @name summary
-##' @docType methods
-##' @rdname summary-methods
-##'
-##' @title summary method
-##' @param object A \code{enrichGOResult} instance.
-##' @return A data frame
-##' @importFrom stats4 summary
-##' @exportMethod summary
-##' @author GuangchuangYu \url{http://ygc.name}
-setMethod("summary", signature(object="enrichGOResult"),
-          function(object) {
-              return(object@enrichGOResult)
-          }
-          )
+##' @importFrom DOSE TERMID2EXTID
+##' @S3method TERMID2EXTID CC
+TERMID2EXTID.CC <- function(term, organism) {
+    TERMID2EXTID.GO(term, organism)
+}
 
-##' @rdname plot-methods
-##' @aliases plot,enrichGOResult,ANY-method
-##' @importFrom ggplot2 scale_fill_continuous
-##' @importFrom ggplot2 aes
-##' @importFrom ggplot2 %+%
-setMethod("plot", signature(x="enrichGOResult"),
-          function(x, title="", font.size=12, type="bar", showCategory=5,...) {
-              enrichGOResult <- x@enrichGOResult
-              if ( is.numeric(showCategory) & showCategory < nrow(enrichGOResult) ) {
-                  enrichGOResult <- enrichGOResult[1:showCategory,]
-              }
-              if (type == "bar") {
-                  p <- plotting.barplot(enrichGOResult, title, font.size)
-                  ##color scale based on pvalue
-                  p <- p +
-                      aes(fill=pvalue) +
-                          scale_fill_continuous(low="red", high="blue")
-                  return(p)
-              }
-              if (type == "categoryNet") {
-                  geneAnno <- x@geneAnno
-                  names(geneAnno) <- GO2Term(names(geneAnno))
-                  pvalue <- enrichGOResult$pvalue
-                  plot.categoryNet(inputList=geneAnno, pvalue=pvalue, ... )
-              }
-          }
-          )
+##' @importMethodsFrom AnnotationDbi mget
+TERMID2EXTID.GO <- function(term, organism) {
+    term <- as.character(term)
+    annoDb <- switch(organism,
+                     human = "org.Hs.eg.db",
+                     mouse = "org.Mm.eg.db",
+                     yeast = "org.Sc.sgd.db",
+                     )
+    require(annoDb, character.only = TRUE)
+
+    mappedDb <- switch(organism,
+                     human = "org.Hs.egGO2ALLEGS",
+                     mouse = "org.Mm.egGO2ALLEGS",
+                     yeast = "org.Sc.sgdGO2ALLORFS",
+                     )
+    mappedDb <- eval(parse(text=mappedDb))
+    GO2ExtID <- mget(term, mappedDb, ifnotfound=NA)
+    GO2ExtID <- lapply(GO2ExtID, function(i) unique(i))
+    return(GO2ExtID)
+}
+
+
+
+##' @importFrom DOSE ALLEXTID
+##' @S3method ALLEXTID MF
+ALLEXTID.MF <- function(organism) {
+    ALLEXTID.GO(organism)
+}
+
+##' @importFrom DOSE ALLEXTID
+##' @S3method ALLEXTID BP
+ALLEXTID.BP <- function(organism) {
+    ALLEXTID.GO(organism)
+}
+
+##' @importFrom DOSE ALLEXTID
+##' @S3method ALLEXTID CC
+ALLEXTID.CC <- function(organism) {
+    ALLEXTID.GO(organism)
+}
+
+##' @importMethodsFrom AnnotationDbi mappedkeys
+ALLEXTID.GO <- function(organism) {
+    annoDb <- switch(organism,
+                     human = "org.Hs.eg.db",
+                     mouse = "org.Mm.eg.db",
+                     yeast = "org.Sc.sgd.db",
+                     )
+    require(annoDb, character.only = TRUE)
+
+    mappedDb <- switch(organism,
+                       human = "org.Hs.egGO",
+                       mouse = "org.Mm.egGO",
+                       yeast = "org.Sc.sgdGO",
+                       )
+    mappedDb <- eval(parse(text=mappedDb))
+    extID <- mappedkeys(mappedDb)
+    return(extID)
+}
+
+##' @importFrom DOSE TERM2NAME
+##' @S3method TERM2NAME MF
+TERM2NAME.MF <- function(term) {
+    TERM2NAME.GO(term)
+}
+
+##' @importFrom DOSE TERM2NAME
+##' @S3method TERM2NAME BP
+TERM2NAME.BP <- function(term) {
+    TERM2NAME.GO(term)
+}
+
+##' @importFrom DOSE TERM2NAME
+##' @S3method TERM2NAME CC
+TERM2NAME.CC <- function(term) {
+    TERM2NAME.GO(term)
+}
+
+##' @importFrom GO.db GOTERM
+##' @importMethodsFrom AnnotationDbi Term
+##' @importMethodsFrom AnnotationDbi mget
+TERM2NAME.GO <- function(term) {
+    term <- as.character(term)
+    go <- mget(term, GOTERM, ifnotfound=NA)
+    termName <- sapply(go, Term)
+    return(term)
+}

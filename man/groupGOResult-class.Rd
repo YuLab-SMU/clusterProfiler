@@ -1,9 +1,7 @@
 \docType{class}
 \name{groupGOResult-class}
 \alias{groupGOResult-class}
-\alias{plot,groupGOResult-method}
 \alias{show,groupGOResult-method}
-\alias{summary,groupGOResult-method}
 \title{Class "groupGOResult"
 This class represents the result of functional Profiles of a set of gene at
 specific GO level.}

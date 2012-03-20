@@ -21,7 +21,7 @@ categories with FDR control.}
   mapping to gene symbols.}
 }
 \value{
-  A \code{enrichKEGGResult} instance.
+  A \code{enrichResult} instance.
 }
 \description{
   KEGG Enrichment Analysis of a gene set. Given a vector of
@@ -38,7 +38,7 @@ data(gcSample)
   Guangchuang Yu \url{http://ygc.name}
 }
 \seealso{
-  \code{\link{enrichKEGGResult-class}},
+  \code{\link{enrichResult-class}},
   \code{\link{compareCluster}}
 }
 \keyword{manip}

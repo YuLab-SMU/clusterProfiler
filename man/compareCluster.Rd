@@ -4,12 +4,13 @@
 Given a list of gene set, this function will compute profiles of each gene
 cluster.}
 \usage{
-  compareCluster(geneClusters, fun = enrichGO, ...)
+  compareCluster(geneClusters, fun = "enrichGO", ...)
 }
 \arguments{
   \item{geneClusters}{a list of entrez gene id.}
 
-  \item{fun}{One of groupGO and enrichGO.}
+  \item{fun}{One of "groupGO", "enrichGO", "enrichKEGG",
+  "enrichDO" or "enrichPathway" .}
 
   \item{...}{Other arguments.}
 }
@@ -23,7 +24,7 @@ cluster.}
 }
 \examples{
 data(gcSample)
-	xx <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
+	xx <- compareCluster(gcSample, fun="enrichKEGG", organism="human", pvalueCutoff=0.05)
 	#summary(xx)
 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
 }

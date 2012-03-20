@@ -15,6 +15,9 @@
 ##' @keywords manip
 ##' @importFrom methods new
 ##' @importClassesFrom methods data.frame
+##' @importFrom DOSE EXTID2NAME
+##' @importFrom DOSE TERMID2EXTID
+##' @importFrom DOSE TERM2NAME
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @examples
@@ -27,26 +30,37 @@
 groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE) {
     GOLevel <- getGOLevel(ont, level) ##get GO IDs of specific level.
 
-    GO2ExtID <- getGO2ExtID(GOLevel, organism) ## mapping GOID to External Gene IDs.
+    class(GOLevel) <- ont
+    GO2ExtID <- TERMID2EXTID(GOLevel, organism) ## mapping GOID to External Gene IDs.
 
     geneID.list <- lapply(GO2ExtID, function(x) gene[gene %in% x]) ## retain External Gene IDs which appear in *gene*
 
-    if (readable) {
-        geneID.list <- geneID2geneName(geneID.list, organism) ## mapping Gene IDs to Gene Names.
-    }
+    ## if (readable) {
+        ## mapping Gene IDs to Gene Names.
+    ##    geneID.list <- lapply(geneID.list, EXTID2NAME, organism=organism)
+    ## }
     geneID <- sapply(geneID.list, function(i) paste(i, collapse="/"))
 
     Count <- unlist(lapply(geneID.list, length))
-    Descriptions <- GO2Term(GOLevel)
-    result = data.frame(GOID=GOLevel,Description=Descriptions,
-                        Count=Count, GeneID=geneID)
-    new("groupGOResult",
-        groupGOResult=result,
-        Ont = ont,
-        Level = level,
-        Organism = organism,
-        Gene = gene
-	)
+
+    Descriptions <- TERM2NAME(GOLevel)
+    result = data.frame(ID=as.character(GOLevel),
+                        Description=Descriptions,
+                        Count=Count,
+                        geneID=geneID)
+
+    x <- new("groupGOResult",
+             result=result,
+             ontology = ont,
+             level = level,
+             organism = organism,
+             gene = gene,
+             geneInCategory = geneID.list
+             )
+    if (readable) {
+        setReadable(x)
+    }
+    return(x)
 }
 
 ##' Class "groupGOResult"
@@ -56,27 +70,31 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
 ##'
 ##' @name groupGOResult-class
 ##' @aliases groupGOResult-class show,groupGOResult-method
-##'   summary,groupGOResult-method plot,groupGOResult-method
 ##' @docType class
-##' @slot groupGOResult GO classification result
-##' @slot Ont Ontology
-##' @slot Level GO level
-##' @slot Organism one of "human", "mouse" and "yeast"
-##' @slot Gene Gene IDs
+##' @slot result GO classification result
+##' @slot ontology Ontology
+##' @slot level GO level
+##' @slot organism one of "human", "mouse" and "yeast"
+##' @slot gene Gene IDs
+##' @slot geneInCategory gene and category association
+##' @slot readable logical flag of gene ID in symbol or not.
 ##' @exportClass groupGOResult
 ##' @author Guangchuang Yu \url{http://ygc.name}
+##' @importClassesFrom DOSE enrichResult
+##' @importMethodsFrom DOSE summary
+##' @importMethodsFrom DOSE plot
+##' @importMethodsFrom DOSE setReadable
 ##' @seealso \code{\linkS4class{compareClusterResult}}
 ##'   \code{\link{compareCluster}} \code{\link{groupGO}}
 ##' @keywords classes
 setClass("groupGOResult",
          representation=representation(
-         groupGOResult="data.frame",
-         Ont = "character",
-         Level = "numeric",
-         Organism = "character",
-         Gene = "character"
+         level = "numeric"
+         ),
+
+         contains = "enrichResult"
          )
-         )
+
 
 ##' show method for \code{groupGOResult} instance
 ##'
@@ -92,59 +110,10 @@ setClass("groupGOResult",
 ##' @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="groupGOResult"),
           function (object){
-              ont = object@Ont
-              Level = object@Level
-              Organism = object@Organism
-              Gene = object@Gene
+              ont = object@ontology
+              Level = object@level
+              Organism = object@organism
+              Gene = object@gene
               cat ("GO", ont, "Profiles", "at level", Level, "of", length(Gene),  Organism, "genes", "\n")
-          }
-          )
-
-##' summary method for \code{groupGOResult} instance
-##'
-##'
-##' @name summary
-##' @docType methods
-##' @rdname summary-methods
-##'
-##' @title summary method
-##' @param object A \code{groupGOResult} instance
-##' @return A data frame
-##' @importFrom stats4 summary
-##' @exportMethod summary
-##' @author Guangchuang Yu
-setMethod("summary", signature(object="groupGOResult"),
-          function (object){
-              return(object@groupGOResult)
-          }
-          )
-
-##' @rdname plot-methods
-##' @aliases plot,groupGOResult,ANY-method
-##' @importFrom ggplot2 %+%
-##' @importFrom ggplot2 aes
-##' @importFrom ggplot2 opts
-setMethod("plot", signature(x="groupGOResult"),
-          function (x, order="FALSE", title="", font.size=12, showCategory=5, drop=FALSE){
-              groupGOResult <- x@groupGOResult
-              if (drop == TRUE) {
-                  groupGOResult <- groupGOResult[groupGOResult$Count != 0, ]
-              }
-              if (order == TRUE) {
-                  idx <- order(groupGOResult$Count)
-                  groupGOResult <- groupGOResult[idx,]
-              }
-              if ( is.numeric(showCategory) & showCategory < nrow(groupGOResult) ) {
-                  idx <- order(groupGOResult$Count)
-                  groupGOResult <- groupGOResult[idx,]
-                  groupGOResult <- groupGOResult[1:showCategory,]
-              }
-              groupGOResult$Description <- factor(groupGOResult$Description,
-                                                  level= as.character(groupGOResult$Description))
-              p <- plotting.barplot(groupGOResult, title, font.size)
-              p <- p +
-                  aes(fill=Description) +
-                      opts(legend.position="none")
-              return(p)
           }
           )

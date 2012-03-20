@@ -2,44 +2,8 @@
     assign("clusterProfilesEnv", new.env(),.GlobalEnv)
 }
 
-##' provide a vector of GOIDs, this function will convert them to corresponding GO Terms
-##'
-##'
-##' @title Mapping GOIDs to GO Terms
-##' @param GOID GOID
-##' @return GO Terms
-##' @importFrom GO.db GOTERM
-##' @importMethodsFrom AnnotationDbi Term
-##' @importMethodsFrom AnnotationDbi mget
-##' @author Guangchuang Yu \url{http://ygc.name}
-GO2Term <- function(GOID) {
-    go <- mget(GOID, GOTERM, ifnotfound=NA)
-    term <- sapply(go, Term)
-    return(term)
-}
 
 
-##' provide a vector of GOIDs, and organism, this function will return the species specific gene list annotated by the given GOIDs.
-##'
-##'
-##' @title query genes annotated by given GOIDs
-##' @param GOID the query GO IDs
-##' @param organism one of human, mouse and yeast.
-##' @return a list of gene IDs, the names of the list is the GOIDs
-##' @importFrom org.Hs.eg.db org.Hs.egGO2ALLEGS
-##' @importFrom org.Mm.eg.db org.Mm.egGO2ALLEGS
-##' @importFrom org.Sc.sgd.db org.Sc.sgdGO2ALLORFS
-##' @importMethodsFrom AnnotationDbi mget
-##' @author Guangchuang Yu \url{http://ygc.name}
-getGO2ExtID <- function(GOID, organism) {
-    GO2ExtID <- switch(organism,
-                       human = mget(GOID, org.Hs.egGO2ALLEGS, ifnotfound=NA),
-                       mouse = mget(GOID, org.Mm.egGO2ALLEGS, ifnotfound=NA),
-                       yeast = mget(GOID, org.Sc.sgdGO2ALLORFS, ifnotfound=NA),
-                       )
-    GO2ExtID <- lapply(GO2ExtID, function(i) unique(i))
-    return(GO2ExtID)
-}
 
 ##' query GOIDs at a specific level.
 ##'
@@ -79,51 +43,6 @@ getGOLevel <- function(ont, level) {
     return(Node)
 }
 
-##' generate a bar plot
-##'
-##' interal use, not for user.
-##' @title internal function of barplot
-##' @param result a data frame of enrichment result.
-##' @param title graph title
-##' @param font.size font size
-##' @return ggplot object
-##' @importFrom ggplot2 ggplot
-##' @importFrom ggplot2 aes
-##' @importFrom ggplot2 geom_bar
-##' @importFrom ggplot2 %+%
-##' @importFrom ggplot2 coord_flip
-##' @author Guangchuang Yu \url{http://ygc.name}
-plotting.barplot <- function(result, title, font.size=12) {
-    Description <- Count <- NULL # to satisfy codetools
-    pg <- ggplot(result, aes(x=Description, y = Count)) +
-        geom_bar() +
-            coord_flip()
-    pModify(pg, title, font.size)
-}
-
-##' changing ggplot object's title and font size
-##'
-##' interal use, not for user.
-##' @title changing title and font size
-##' @param p ggplot object
-##' @param title graph title
-##' @param font.size font size
-##' @importFrom ggplot2 %+%
-##' @importFrom ggplot2 opts
-##' @importFrom ggplot2 xlab
-##' @importFrom ggplot2 ylab
-##' @importFrom ggplot2 theme_bw
-##' @importFrom ggplot2 theme_text
-##' @author Guangchuang Yu \url{http://ygc.name}
-pModify <- function(p, title="", font.size=12) {
-    p <- p +
-        xlab("") +
-            ylab("") +
-                opts(axis.text.x = theme_text(colour="black", size=font.size, vjust = 1)) +
-                    opts(axis.text.y = theme_text(colour="black", size=font.size, hjust = 1)) +
-                        opts(title=title)+theme_bw()
-    return(p)
-}
 
 ##' Internal plot function for plotting compareClusterResult
 ##'
@@ -140,6 +59,12 @@ pModify <- function(p, title="", font.size=12) {
 ##' @importFrom ggplot2 geom_bar
 ##' @importFrom ggplot2 coord_flip
 ##' @importFrom ggplot2 geom_point
+##' @importFrom ggplot2 %+%
+##' @importFrom ggplot2 opts
+##' @importFrom ggplot2 xlab
+##' @importFrom ggplot2 ylab
+##' @importFrom ggplot2 theme_bw
+##' @importFrom ggplot2 theme_text
 ##' @importFrom ggplot2 scale_colour_gradient
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
@@ -173,163 +98,10 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
             p <- p + geom_point(colour="steelblue")
         }
     }
-    p <- pModify(p, title, font.size)
-	return(p)
+    p <- p + xlab("") + ylab("") +
+        opts(axis.text.x = theme_text(colour="black", size=font.size, vjust = 1)) +
+            opts(axis.text.y = theme_text(colour="black", size=font.size, hjust = 1)) +
+                opts(title=title)+theme_bw()
+    return(p)
 }
 
-
-
-##' provide a vector of KEGG pathway IDs, this function will convert them to corresponding KEGG pathway Names
-##'
-##'
-##' @title convert KEGG pathway ID to pathway Name
-##' @param pathIDs KEGG pathway IDs
-##' @return KEGG pathway names
-##' @importFrom KEGG.db KEGGPATHID2NAME
-##' @author Guangchuang Yu \url{http://ygc.name}
-path2Name <- function(pathIDs) {
-    pathIDs <- gsub("^\\D+", "",pathIDs, perl=T)
-    path2name <- mget(pathIDs, KEGGPATHID2NAME)
-    return(path2name)
-}
-
-
-##' provide numerator and denominator, return numerator/denominator
-##'
-##'
-##' @title getRatio
-##' @param x vector of numerator and denominator
-##' @return numerator/denominator
-##' @author Guangchuang Yu \url{http://ygc.name}
-getRatio <- function(x) {
-    x=paste(x[1], "/", x[2], sep="", collapse="")
-    return(x)
-}
-
-
-##' hypergeometric test for enrichment analysis
-##'
-##'
-##' @title hypergeometric test
-##' @param n a vector of White balls drawn,
-##' 			 White balls
-##'                      Black balls
-##'                      balls drawn
-##' @return pvalue
-##' @author Guangchuang Yu \url{http://ygc.name}
-HyperG <- function(n) {
-    numWdrawn <- n[1]
-    numW <- n[2]
-    numB <- n[3]
-    numDrawn <- n[4]
-    pvalue <- phyper(numWdrawn, numW, numB, numDrawn, lower.tail=FALSE)
-    return(pvalue)
-}
-
-
-##' convert a list of gene IDs to gene Names.
-##'
-##'
-##' @title convert gene IDs to gene Names
-##' @param geneID.list a list of gene IDs
-##' @param organism one of human, mouse and yeast.
-##' @return a list of gene names.
-##' @importFrom org.Hs.eg.db org.Hs.egSYMBOL
-##' @importFrom org.Mm.eg.db org.Mm.egSYMBOL
-##' @importFrom org.Sc.sgd.db org.Sc.sgdGENENAME
-##' @author Guangchuang Yu \url{http://ygc.name}
-geneID2geneName <- function(geneID.list, organism) {
-    annotation <- switch(organism,
-                         human = org.Hs.egSYMBOL,
-                         mouse = org.Mm.egSYMBOL,
-                         yeast = org.Sc.sgdGENENAME,
-                         )
-    gn <- lapply(geneID.list, function(i) unique(unlist(mget(i, annotation))))
-    return(gn)
-}
-
-
-##' convert a list of gene IDs to igraph object.
-##'
-##'
-##' @title convert gene IDs to igraph object
-##' @param inputList a list of gene IDs
-##' @return a igraph object.
-##' @importFrom igraph graph.data.frame
-##' @author Guangchuang Yu \url{http://ygc.name}
-list2graph <- function(inputList) {
-	x <- data.frame()
-	for (i in 1:length(inputList)) {
-		x=rbind(x, data.frame(categoryID=rep(names(inputList[i]), length(inputList[[i]])), Gene=inputList[[i]]))
-	}
-	g <- graph.data.frame(x, directed=F)
-	return(g)
-}
-
-
-##' plot function of gene Concept Net.
-##'
-##'
-##' @title plot gene net by categories
-##' @param inputList a list of gene IDs
-##' @param categorySize setting category size
-##' @param showCategory number of categories to plot
-##' @param pvalue pvalue
-##' @param foldChange foldChange
-##' @param output output type
-##' @return plotted igraph object.
-##' @importFrom igraph tkplot
-##' @importFrom igraph plot.igraph
-##' @importFrom igraph V
-##' @importFrom igraph "V<-"
-##' @importFrom igraph E
-##' @importFrom igraph "E<-"
-##' @importFrom igraph degree
-##' @importFrom igraph layout.fruchterman.reingold
-##' @author Guangchuang Yu \url{http://ygc.name}
-plot.categoryNet <- function(inputList, categorySize="geneNum", showCategory=5, pvalue=NULL, foldChange=NULL, output="fixed") {
-
-	inputList <- inputList[1:showCategory]
-	pvalue <- pvalue[1:showCategory]
-
-
-	## generate graph object
-	g=list2graph(inputList)
-
-	## setting some attributes
-	V(g)$size <- 8
-	V(g)$color <- "#D0D0D0" ## grey
-	V(g)$label <- V(g)$name
-
-	E(g)$width=2
-	E(g)$color <- "#728FCE"		#Light Steel Blue
-
-	## attributes of Category Node
-	lengthOfCategory <- length(inputList)
-	V(g)[0:(lengthOfCategory-1)]$size=30  ## setting by default.
-	V(g)[0:(lengthOfCategory-1)]$color= "#FFCC33"
-
-	if(is.numeric(categorySize)) {
-		V(g)[0:(lengthOfCategory-1)]$size=categorySize
-	} else {
-		if (categorySize == "geneNum") {
-			n <- degree(g)[1:lengthOfCategory]
-				##sapply(inputList, length)
-			V(g)[0:(lengthOfCategory-1)]$size <- n/sum(n) * 100
-			#n/max(n) * 20 + 15
-		}
-		if (categorySize == "pvalue") {
-			if (is.null(pvalue)) {
-				stop("pvalue must not be null...")
-			}
-			pvalue.scale <- -log10(pvalue)
-			V(g)[0:(lengthOfCategory-1)]$size <- pvalue.scale/max(pvalue.scale) * 20 + 15
-		}
-	}
-	if (output == "fixed"){
-		igraph::plot.igraph(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold)
-	} else {
-		tkplot(g, vertex.label.font=2, vertex.label.color='#666666', vertex.label.cex=1.5, vertex.frame.color=V(g)$color,  layout=layout.fruchterman.reingold)
-	}
-
-}
