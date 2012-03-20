@@ -57,9 +57,8 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
              gene = gene,
              geneInCategory = geneID.list
              )
-    if (readable) {
-        setReadable(x)
-    }
+    setReadable(x) <- readable
+
     return(x)
 }
 
@@ -83,7 +82,7 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
 ##' @importClassesFrom DOSE enrichResult
 ##' @importMethodsFrom DOSE summary
 ##' @importMethodsFrom DOSE plot
-##' @importMethodsFrom DOSE setReadable
+##' @importMethodsFrom DOSE setReadable<-
 ##' @seealso \code{\linkS4class{compareClusterResult}}
 ##'   \code{\link{compareCluster}} \code{\link{groupGO}}
 ##' @keywords classes

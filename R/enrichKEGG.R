@@ -16,7 +16,7 @@
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
 ##' @importMethodsFrom DOSE plot
-##' @importMethodsFrom DOSE setReadable
+##' @importMethodsFrom DOSE setReadable<-
 ##' @importFrom DOSE EXTID2NAME
 
 
