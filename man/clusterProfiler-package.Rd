@@ -26,7 +26,7 @@ of gene and gene clusters.}
 }
 \seealso{
   \linkS4class{compareClusterResult},
-  \linkS4class{groupGOResult} \linkS4class{enrichGOResult}
+  \linkS4class{groupGOResult} \linkS4class{enrichResult}
 }
 \keyword{package}
 

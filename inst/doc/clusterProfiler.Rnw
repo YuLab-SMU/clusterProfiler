@@ -103,29 +103,43 @@ explore the functional profiles of a collection of genes.
 
 <<groupGO>>=
 data(gcSample)
-x <- groupGO(gene=gcSample[[1]], organism="human", ont="CC", level=2, readable=TRUE)
-summary(x)
+x <- groupGO(gene=gcSample[[1]],
+             organism="human",
+             ont="CC",
+             level=2,
+             readable=TRUE)
+head(summary(x))
 @
 
   \item \Rfunction{enrichGO} for GO enrichment analysis
 
 <<enrichGO>>=
-y <- enrichGO(gene=gcSample[[2]], organism="human", ont="MF", pvalueCutoff=0.01, qvalueCutoff=0.05, readable=TRUE)
-summary(y)
+y <- enrichGO(gene=gcSample[[2]],
+              organism="human",
+              ont="MF",
+              pvalueCutoff=0.01,
+              qvalueCutoff=0.05,
+              readable=TRUE)
+head(summary(y))
 @
 
   \item \Rfunction{enrichKEGG} for KEGG pathway enrichment
   analysis.
 
 <<enrichKEGG>>=
-z <- enrichKEGG(gene=gcSample[[3]], organism="human", pvalueCutoff=0.05, qvalueCutoff=0.05, readable=TRUE)
-summary(z)
+z <- enrichKEGG(gene=gcSample[[3]],
+                organism="human",
+                pvalueCutoff=0.05,
+                qvalueCutoff=0.05,
+                readable=TRUE)
+head(summary(z))
 @
 
 With the demise of KEGG (at least without subscription), the pathway
 data used in \Rpackage{clusterProfiler} will not update, and we
-encourage user to use \Rfunction{enrichPathway} in \Rpackage{ReactomePA}, 
-which use Reactome as a source of pathway data.
+encourage user to use \Rfunction{enrichPathway} in Bioconductor
+package \Rpackage{ReactomePA}, which use Reactome as a source of
+pathway data.
 
 \end{itemize}
 
@@ -195,13 +209,16 @@ vignette of \Rpackage{DOSE} and \Rpackage{ReactomePA} respectively.
 visualizing analyzed result.
 
 
-Bar plot was used to visualized functional profile of the given
+\begin{itemize}
+  \item Bar Plot
+
+    Bar plot was used to visualized functional profile of the given
 collection of genes.
 
 \begin{figure}[htb]
   \begin{center}
 <<plotenrichGO, fig=T>>=
-plot(y, titile="MF Enrichment analysis", showCategory=10)
+plot(y, type="bar", title="MF Enrichment analysis", showCategory=10)
 @
   \end{center}
   \caption{\label{Fig:enrichGO} Example of plotting functional profiles}
@@ -212,16 +229,47 @@ by \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG}.
 
 Users can try the following command:
 <<plot method, eval=F>>=
-plot(x)
-plot(z)
+plot(x, type="bar", order=FALSE, drop=TRUE)
+plot(z, type="bar", font.size=12)
+@
+
+  \item Category Net Plot
+
+    Category-gene network model was also implmented to extract the
+    complex relationships between genes and associated categories. It
+    provides a high-level model to understand the functionalities of genes.
+
+\begin{figure}[htb]
+  \begin{center}
+<<plotgroupGO, fig=T>>=
+plot(x, type="cnet", showCategory=5, output="fixed")
+@
+  \end{center}
+  \caption{\label{Fig:groupGO-cnet} Example of plotting GO profiles using cnetplot}
+\end{figure}
+
+The plot function call was consistent for analysis results generated
+by \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG}.
+
+Users can try the following command:
+<<plot method 2, eval=F>>=
+plot(y, type="cnet", categorySize="geneNum")
+plot(z, type="cnet", categorySize="pvalue", output="interactive")
 @
 
 
-Dot plot was implemented for cluster comparison as shown in Figure
-1. Here, we demonstrated the functional call of \Rfunction{compareCluster}.
+  \item Dot Plot
+
+    Dot plot was implemented for cluster comparison as shown in Figure
+    1. Here, we demonstrated the functional call of \Rfunction{compareCluster}.
 
 <<compareCluster, eval=F>>=
-xx <- compareCluster(gcSample, fun=enrichGO, ont="CC", organism="human", pvalueCutoff=0.05, qvalueCutoff=0.05)
+xx <- compareCluster(gcSample,
+                     fun="enrichGO",
+                     ont="CC",
+                     organism="human",
+                     pvalueCutoff=0.05,
+                     qvalueCutoff=0.05)
 plot(xx)
 @
 
@@ -232,6 +280,13 @@ plot(xx)
     \label{Fig:compareCluster}
   \end{center}
 \end{figure}
+
+Bar plot was also supported to visualize cluster comparision.
+User can try the following command to explore the usage:
+<<plot method, eval=F>>=
+plot(xx, type="bar", by="percentage")
+plot(xx, type="bar", by="count")
+@
 
 By default, only top 5 (most significant) categories of each cluster
 was plotted. User can changes the parameter \textit{showCategory} to
@@ -258,6 +313,7 @@ enrichment). P-values were filtered out by the threshold giving by
 parameter \textit{pvalueCutoff}, and FDR was control by parameter
 \textit{qvalueCutoff}.
 
+\end{itemize}
 
 \Rfunction{compareCluster} was designed as a general function for
 comparing gene clusters of any kind of gene-ontology associations, not

@@ -4,7 +4,7 @@
 ##'
 ##'
 ##' @param geneClusters a list of entrez gene id.
-##' @param fun One of groupGO and enrichGO.
+##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
@@ -19,11 +19,12 @@
 ##' @examples
 ##'
 ##' 	data(gcSample)
-##' 	xx <- compareCluster(gcSample, fun=enrichKEGG, organism="human", pvalueCutoff=0.05)
+##' 	xx <- compareCluster(gcSample, fun="enrichKEGG", organism="human", pvalueCutoff=0.05)
 ##' 	#summary(xx)
 ##' 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
 ##'
-compareCluster <- function(geneClusters, fun=enrichGO, ...) {
+compareCluster <- function(geneClusters, fun="enrichGO", ...) {
+    fun <- eval(parse(text=fun))
     clProf <- llply(geneClusters,
                     .fun=function(i) {
 			x=fun(i, ...)
@@ -58,7 +59,7 @@ compareCluster <- function(geneClusters, fun=enrichGO, ...) {
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @exportClass compareClusterResult
 ##' @seealso \code{\linkS4class{groupGOResult}}
-##'   \code{\linkS4class{enrichGOResult}} \code{\link{compareCluster}}
+##'   \code{\linkS4class{enrichResult}} \code{\link{compareCluster}}
 ##' @keywords classes
 setClass("compareClusterResult",
          representation = representation(
@@ -126,7 +127,13 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @importFrom plyr mdply
 ##' @importFrom plyr .
 setMethod("plot", signature(x="compareClusterResult"),
-          function(x, type="dot", title="", font.size=12, showCategory=5, by="percentage") {
+          function(x,
+                   type="dot",
+                   title="",
+                   font.size=12,
+                   showCategory=5,
+                   by="percentage") {
+
               clProf.df <- summary(x)
 
               ## get top 5 (default) categories of each gene cluster.
@@ -154,12 +161,17 @@ setMethod("plot", signature(x="compareClusterResult"),
               GOlevel <- unique(GOlevel)
 
               result <- result[result$Count != 0, ]
-              result$Description <- factor(result$Description, levels=rev(GOlevel[,2]))
+              result$Description <- factor(result$Description,
+                                           levels=rev(GOlevel[,2]))
 
 
               if (by=="percentage") {
                   Description <- Count <- NULL # to satisfy codetools
-                  result <- ddply(result, .(Description), transform, Percentage = Count/sum(Count), Total = sum(Count))
+                  result <- ddply(result,
+                                  .(Description),
+                                  transform,
+                                  Percentage = Count/sum(Count),
+                                  Total = sum(Count))
 
                   ## label GO Description with gene counts.
                   x <- mdply(result[, c("Description", "Total")], paste, sep=" (")
@@ -175,7 +187,8 @@ setMethod("plot", signature(x="compareClusterResult"),
                   ##drop the *Total* column
                   result <- result[, colnames(result) != "Total"]
 
-                  result$Description <- factor(result$Description, levels=rev(Termlevel))
+                  result$Description <- factor(result$Description,
+                                               levels=rev(Termlevel))
 
               } else if (by == "count") {
 

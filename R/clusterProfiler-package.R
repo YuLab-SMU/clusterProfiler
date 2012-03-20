@@ -18,7 +18,7 @@
 #'
 #' Maintainer: Guangchuang Yu \email{guangchuangyu@@gmail.com}
 #' @seealso \linkS4class{compareClusterResult}, \linkS4class{groupGOResult}
-#'   \linkS4class{enrichGOResult}
+#'   \linkS4class{enrichResult}
 #' @keywords package
 NULL
 

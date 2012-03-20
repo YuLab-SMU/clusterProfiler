@@ -9,16 +9,25 @@
 ##' @param qvalueCutoff Cutoff value of qvalue.
 ##' @param readable if readable is TRUE, the gene IDs will mapping to gene
 ##'   symbols.
-##' @return A \code{enrichKEGGResult} instance.
+##' @return A \code{enrichResult} instance.
 ##' @export
+##' @importFrom DOSE enrich.internal
+##' @importClassesFrom DOSE enrichResult
+##' @importMethodsFrom DOSE show
+##' @importMethodsFrom DOSE summary
+##' @importMethodsFrom DOSE plot
+##' @importMethodsFrom DOSE setReadable
+##' @importFrom DOSE EXTID2NAME
+
+
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importClassesFrom methods data.frame
-##' @importFrom methods new
-##' @importFrom qvalue qvalue
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
+
+
 ##' @author Guangchuang Yu \url{http://ygc.name}
-##' @seealso \code{\link{enrichKEGGResult-class}}, \code{\link{compareCluster}}
+##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
 ##' @examples
 ##'
@@ -27,9 +36,47 @@
 ##' 	head(summary(yy))
 ##' 	#plot(yy)
 ##'
-enrichKEGG <- function(gene, organism="human",
-                       pvalueCutoff = 0.05, qvalueCutoff = 0.05,
+enrichKEGG <- function(gene,
+                       organism="human",
+                       pvalueCutoff = 0.05,
+                       qvalueCutoff = 0.05,
                        readable=FALSE) {
+
+    enrich.internal(gene,
+                    organism = organism,
+                    pvalueCutoff = pvalueCutoff,
+                    qvalueCutoff = qvalueCutoff,
+                    ont = "KEGG",
+                    readable = readable)
+
+}
+
+
+##' @importFrom DOSE EXTID2TERMID
+##' @importMethodsFrom AnnotationDbi mget
+##' @importFrom KEGG.db KEGGEXTID2PATHID
+##' @S3method EXTID2TERMID KEGG
+EXTID2TERMID.KEGG <- function(gene, organism) {
+    gene <- as.character(gene)
+    qExtID2PathID <- mget(gene, KEGGEXTID2PATHID, ifnotfound=NA)
+    notNA.idx <- unlist(lapply(qExtID2PathID, function(i) !all(is.na(i))))
+    qExtID2PathID <- qExtID2PathID[notNA.idx]
+    return(qExtID2PathID)
+}
+
+##' @importFrom DOSE TERMID2EXTID
+##' @importMethodsFrom AnnotationDbi mget
+##' @importFrom KEGG.db KEGGPATHID2EXTID
+##' @S3method TERMID2EXTID KEGG
+TERMID2EXTID.KEGG <- function(term, organism) {
+    pathID2ExtID <- mget(unique(term), KEGGPATHID2EXTID, ifnotfound=NA)
+    return(pathID2ExtID)
+}
+
+##' @importFrom DOSE ALLEXTID
+##' @importFrom KEGG.db KEGGPATHID2EXTID
+##' @S3method ALLEXTID KEGG
+ALLEXTID.KEGG <- function(organism) {
     ##pathID2ExtID <- as.list(KEGGPATHID2EXTID)
     ##pathID <- names(pathID2ExtID)
     pathID <- mappedkeys(KEGGPATHID2EXTID)
@@ -46,156 +93,21 @@ enrichKEGG <- function(gene, organism="human",
     }
     ##orgPath2ExtID <- pathID2ExtID[idx]
     orgPathID <- pathID[idx]
-    orgPath2ExtID <- mget(orgPathID, KEGGPATHID2EXTID, ifnotfound=NA)
+    class(orgPathID) <- "KEGG"
+    orgPath2ExtID <- TERMID2EXTID(orgPathID)
     orgPath2ExtID <- lapply(orgPath2ExtID, function(i) unique(i))
 
     orgExtID <- unique(unlist(orgPath2ExtID))
-
-    geneID.list = lapply(orgPath2ExtID, function(i) gene[gene %in% i])
-    if (readable) {
-        geneID.list <- geneID2geneName(geneID.list, organism)
-    }
-    geneID <- sapply(geneID.list, function(i) paste(i, collapse="/"))
-    k = sapply(geneID.list, length)
-    retain <- which(k != 0)
-    k = k[retain]
-    orgPath2ExtID <- orgPath2ExtID[retain]
-    geneID=geneID[retain]
-
-    M = sapply(orgPath2ExtID, length)
-
-    pathNum <- length(M)
-    N <- rep(length(orgExtID), pathNum)
-    n <- rep(length(gene), pathNum)
-    args.df <- data.frame(numWdrawn=k-1, numW=M, numB=N-M, numDrawn=n)
-    ##pvalues <- mdply(args.df, HyperG)
-    ##pvalues <- pvalues[,5]
-    pvalues <- apply(args.df, 1, HyperG)
-
-    ##GeneRatio <- mdply(data.frame(a=k, b=n), getRatio)
-    ##GeneRatio <- GeneRatio[,3]
-    GeneRatio <- apply(data.frame(a=k, b=n), 1, getRatio)
-
-    ##BgRatio <- mdply(data.frame(a=M, b=N), getRatio)
-    ##BgRatio <- BgRatio[,3]
-    BgRatio <- apply(data.frame(a=M, b=N), 1, getRatio)
-
-    pathwayID <- names(orgPath2ExtID)
-    Description <- unlist(path2Name(pathwayID))
-
-    keggOver <- data.frame(pathwayID=pathwayID,
-                           Description=Description,
-                           GeneRatio=GeneRatio,
-                           BgRatio=BgRatio,
-                           pvalue=pvalues)
-
-
-    qobj = qvalue(keggOver$pvalue, lambda=0.05, pi0.method="bootstrap")
-    qvalues <- qobj$qvalues
-    keggOver <- data.frame(keggOver, qvalue=qvalues,
-                           geneID=geneID, Count=k)
-    keggOver <- keggOver[order(pvalues),]
-
-    keggOver <- keggOver[ keggOver$pvalue <= pvalueCutoff, ]
-    keggOver <- keggOver[ keggOver$qvalue <= qvalueCutoff, ]
-
-    keggOver$Description <- as.character(keggOver$Description)
-
-    new("enrichKEGGResult",
-        enrichKEGGResult = keggOver,
-        pvalueCutoff=pvalueCutoff,
-        Organism = organism,
-        Gene = gene
-	)
+    return(orgExtID)
 }
 
-##' Class "enrichKEGGResult"
-##' This class represents the result of KEGG enrichment analysis.
-##'
-##'
-##' @name enrichKEGGResult-class
-##' @aliases enrichKEGGResult-class show,enrichKEGGResult-method
-##'   summary,enrichKEGGResult-method plot,enrichKEGGResult-method
-##' @docType class
-##' @slot enrichKEGGResult KEGG enrichment result
-##' @slot pvalueCutoff pvalueCutoff
-##' @slot qvalueCutoff qvalueCutoff
-##' @slot Organism one of "humna", "mouse", and "yeast"
-##' @slot Gene Gene IDs
-##' @exportClass enrichKEGGResult
-##' @author Guangchuang Yu \url{http://ygc.name}
-##' @seealso \code{\linkS4class{compareClusterResult}}
-##'   \code{\link{compareCluster}} \code{\link{enrichKEGG}}
-##' @keywords classes
-setClass("enrichKEGGResult",
-         representation=representation(
-         enrichKEGGResult="data.frame",
-         pvalueCutoff="numeric",
-         qvalueCutoff="numeric",
-         Organism = "character",
-         Gene = "character"
-         )
-         )
-
-##' show method for \code{enrichKEGGResult} instance
-##'
-##'
-##' @name show
-##' @docType methods
-##' @rdname show-methods
-##'
-##' @title show method
-##' @param object A \code{enrichKEGGResult} instance.
-##' @return message
-##' @importFrom methods show
-##' @author Guangchuang Yu \url{http://ygc.name}
-setMethod("show", signature(object="enrichKEGGResult"),
-          function (object){
-              Organism = object@Organism
-              GeneNum = length(object@Gene)
-              pvalueCutoff=object@pvalueCutoff
-              cat (GeneNum, Organism,
-                   "Genes to KEGG test for over-representation.", "\n",
-                   "p value <", pvalueCutoff, "\n")
-          }
-          )
-
-##' summary method for \code{enrichKEGGResult} instance
-##'
-##'
-##' @name summary
-##' @docType methods
-##' @rdname summary-methods
-##'
-##' @title summary method
-##' @param object A \code{enrichKEGGResult} instance.
-##' @return A data frame
-##' @importFrom stats4 summary
-##' @exportMethod summary
-##' @author Guangchuang Yu \url{http://ygc.name}
-setMethod("summary", signature(object="enrichKEGGResult"),
-          function(object) {
-              return(object@enrichKEGGResult)
-          }
-          )
-
-##' @rdname plot-methods
-##' @aliases plot,enrichKEGGResult,ANY-method
-##' @importFrom ggplot2 %+%
-##' @importFrom ggplot2 aes
-##' @importFrom ggplot2 scale_fill_continuous
-setMethod("plot", signature(x="enrichKEGGResult"),
-          function(x, title="", font.size=12, showCategory=5) {
-              enrichKEGGResult <- x@enrichKEGGResult
-              if ( is.numeric(showCategory) & showCategory < nrow(enrichKEGGResult) ) {
-                  enrichKEGGResult <- enrichKEGGResult[1:showCategory,]
-              }
-              p <- plotting.barplot(enrichKEGGResult, title, font.size)
-              ##color scale based on pvalue
-              p <- p +
-                  aes(fill=pvalue) +
-                      scale_fill_continuous(low="red", high="blue")
-              return(p)
-          }
-          )
-
+##' @importFrom DOSE TERM2NAME
+##' @importFrom KEGG.db KEGGPATHID2NAME
+##' @importMethodsFrom AnnotationDbi mget
+##' @S3method TERM2NAME KEGG
+TERM2NAME.KEGG <- function(term) {
+    term <- as.character(term)
+    pathIDs <- gsub("^\\D+", "",term, perl=T)
+    path2name <- unlist(mget(pathIDs, KEGGPATHID2NAME))
+    return(path2name)
+}

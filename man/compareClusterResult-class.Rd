@@ -17,7 +17,7 @@ categories at specific level or GO enrichment analysis.}
 }
 \seealso{
   \code{\linkS4class{groupGOResult}}
-  \code{\linkS4class{enrichGOResult}}
+  \code{\linkS4class{enrichResult}}
   \code{\link{compareCluster}}
 }
 \keyword{classes}

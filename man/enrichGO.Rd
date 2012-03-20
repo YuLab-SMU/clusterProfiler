@@ -5,7 +5,7 @@ Given a vector of genes, this function will return the enrichment GO
 categories with FDR control.}
 \usage{
   enrichGO(gene, organism = "human", ont = "MF",
-    pvalueCutoff = 0.01, qvalueCutoff = 0.05,
+    pvalueCutoff = 0.05, qvalueCutoff = 0.05,
     readable = FALSE)
 }
 \arguments{
@@ -24,7 +24,7 @@ categories with FDR control.}
   mapping to gene symbols.}
 }
 \value{
-  A \code{enrichGOResult} instance.
+  A \code{enrichResult} instance.
 }
 \description{
   GO Enrichment Analysis of a gene set. Given a vector of
@@ -41,7 +41,7 @@ categories with FDR control.}
   Guangchuang Yu \url{http://ygc.name}
 }
 \seealso{
-  \code{\link{enrichGOResult-class}},
+  \code{\link{enrichResult-class}},
   \code{\link{compareCluster}}
 }
 \keyword{manip}
