@@ -6,6 +6,7 @@ CHANGES IN VERSION 1.3.14
    implement S3 methods for mapping IDs for KEGG analysis. <2012-03-19, Mon>
  o re-implement groupGOResult class by extended from enrichResult, 
    and modified groupGO by using S3 methods designed for enrichGO. <2012-03-19,Mon>
+ o bug fixed for importing setReadable<- instead of setReadable. <2012-03-20, Tue>
 
 CHANGES IN VERSION 1.3.13
 ------------------------
