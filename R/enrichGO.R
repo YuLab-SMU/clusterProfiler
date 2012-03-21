@@ -218,5 +218,5 @@ TERM2NAME.GO <- function(term) {
     term <- as.character(term)
     go <- mget(term, GOTERM, ifnotfound=NA)
     termName <- sapply(go, Term)
-    return(term)
+    return(termName)
 }
