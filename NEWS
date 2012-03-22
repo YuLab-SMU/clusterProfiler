@@ -1,3 +1,11 @@
+CHANGES IN VERSION 1.3.15
+------------------------
+ o add support to organsims other than human, mouse, and yeast. <2012-03-22, Thu>
+ o add GFFparser.R, which provide function Gff2GeneTable to parse Gff files and
+   build gene information table.<2012-03-22, Thu>
+ o add function buildGOmap for building GO mapping files for unsurported organisms,
+   which can be analyzed now. <2012-03-22, Thu>
+
 CHANGES IN VERSION 1.3.14
 ------------------------
  o re-implement enrichGO by import enrich.internal in DOSE
@@ -11,7 +19,8 @@ CHANGES IN VERSION 1.3.14
 
 CHANGES IN VERSION 1.3.13
 ------------------------
- o import plot summary from stats4, for BiocGenerics (version 0.1.10) removed them <2012-03-03, Sat>
+ o import plot summary from stats4, for BiocGenerics (version 0.1.10)
+   removed them <2012-03-03, Sat>
 
 CHANGES IN VERSION 1.3.12
 ------------------------

@@ -70,48 +70,62 @@ EXTID2TERMID.CC <- function(gene, organism) {
 ##' @importFrom plyr .
 ##' @importClassesFrom methods data.frame
 EXTID2TERMID.GO <- function(gene, ont, organism) {
-    # get all goterms within the specific ontology
+
+    gene <- as.character(gene)
+
+    ## get all goterms within the specific ontology
     goterms <- Ontology(GOTERM)
     goterms <- names(goterms[goterms == ont])
 
-    ## get organism specific GO terms
-    annoDb <- switch(organism,
-                     human = "org.Hs.eg.db",
-                     mouse = "org.Mm.eg.db",
-                     yeast = "org.Sc.sgd.db",
-                     )
-    require(annoDb, character.only = TRUE)
 
-    mappedDb <- switch(organism,
-                     human = "org.Hs.egGO2ALLEGS",
-                     mouse = "org.Mm.egGO2ALLEGS",
-                     yeast = "org.Sc.sgdGO2ALLORFS",
-                     )
-    mappedDb <- eval(parse(text=mappedDb))
+    supported_Org <- c("human", "mouse", "yeast")
+    if (organism %in% supported_Org) {
+        ## get organism specific GO terms
+        annoDb <- switch(organism,
+                         human = "org.Hs.eg.db",
+                         mouse = "org.Mm.eg.db",
+                         yeast = "org.Sc.sgd.db",
+                         )
+        require(annoDb, character.only = TRUE)
 
-    orgTerm <- mappedkeys(mappedDb)
+        mappedDb <- switch(organism,
+                           human = "org.Hs.egGO2ALLEGS",
+                           mouse = "org.Mm.egGO2ALLEGS",
+                           yeast = "org.Sc.sgdGO2ALLORFS",
+                           )
+        mappedDb <- eval(parse(text=mappedDb))
 
-    ## narrow down goterms to specific organism
-    Terms <- goterms[goterms %in% orgTerm]
+        orgTerm <- mappedkeys(mappedDb)
 
-    ## mapping GO to External gene ID
-    class(Terms) <- ont
-    GO2ExtID <- TERMID2EXTID(Terms, organism)
+        ## narrow down goterms to specific organism
+        Terms <- goterms[goterms %in% orgTerm]
+
+        ## mapping GO to External gene ID
+        class(Terms) <- ont
+        GO2ExtID <- TERMID2EXTID(Terms, organism)
 
 
-    gene <- as.character(gene)
-    qGO2ExtID = lapply(GO2ExtID, function(i) gene[gene %in% i])
-    len <- sapply(qGO2ExtID, length)
-    notZero.idx <- len != 0
-    qGO2ExtID <- qGO2ExtID[notZero.idx]
+        qGO2ExtID = lapply(GO2ExtID, function(i) gene[gene %in% i])
+        len <- sapply(qGO2ExtID, length)
+        notZero.idx <- len != 0
+        qGO2ExtID <- qGO2ExtID[notZero.idx]
 
-    len <- sapply(qGO2ExtID, length)
-    qGO2ExtID.df <- data.frame(GO=rep(names(qGO2ExtID), times=len),
-                               ExtID=unlist(qGO2ExtID))
+        len <- sapply(qGO2ExtID, length)
+        qGO2ExtID.df <- data.frame(GO=rep(names(qGO2ExtID), times=len),
+                                   ExtID=unlist(qGO2ExtID))
 
-    ExtID <- NULL ## to satisfy codetools
-    qExtID2GO <- dlply(qGO2ExtID.df, .(ExtID), function(i) as.character(i$GO))
-
+        ExtID <- NULL ## to satisfy codetools
+        qExtID2GO <- dlply(qGO2ExtID.df, .(ExtID), function(i) as.character(i$GO))
+    } else {
+        if (file.exists("EG2ALLGO.rda")) {
+            EG2ALLGO <- NULL # to satisfy codetools
+            load("EG2ALLGO.rda")
+            qExtID2GO <- EG2ALLGO[gene]
+            qExtID2GO <- lapply(qExtID2GO, function(i) i[i %in% goterms])
+        } else {
+            stop("GO mapping file not found in the working directory")
+        }
+    }
     return(qExtID2GO)
 }
 
@@ -136,21 +150,33 @@ TERMID2EXTID.CC <- function(term, organism) {
 ##' @importMethodsFrom AnnotationDbi mget
 TERMID2EXTID.GO <- function(term, organism) {
     term <- as.character(term)
-    annoDb <- switch(organism,
-                     human = "org.Hs.eg.db",
-                     mouse = "org.Mm.eg.db",
-                     yeast = "org.Sc.sgd.db",
-                     )
-    require(annoDb, character.only = TRUE)
 
-    mappedDb <- switch(organism,
-                     human = "org.Hs.egGO2ALLEGS",
-                     mouse = "org.Mm.egGO2ALLEGS",
-                     yeast = "org.Sc.sgdGO2ALLORFS",
-                     )
-    mappedDb <- eval(parse(text=mappedDb))
-    GO2ExtID <- mget(term, mappedDb, ifnotfound=NA)
-    GO2ExtID <- lapply(GO2ExtID, function(i) unique(i))
+    supported_Org <- c("human", "mouse", "yeast")
+    if (organism %in% supported_Org) {
+        annoDb <- switch(organism,
+                         human = "org.Hs.eg.db",
+                         mouse = "org.Mm.eg.db",
+                         yeast = "org.Sc.sgd.db",
+                         )
+        require(annoDb, character.only = TRUE)
+
+        mappedDb <- switch(organism,
+                           human = "org.Hs.egGO2ALLEGS",
+                           mouse = "org.Mm.egGO2ALLEGS",
+                           yeast = "org.Sc.sgdGO2ALLORFS",
+                           )
+        mappedDb <- eval(parse(text=mappedDb))
+        GO2ExtID <- mget(term, mappedDb, ifnotfound=NA)
+        GO2ExtID <- lapply(GO2ExtID, function(i) unique(i))
+    } else {
+        if (file.exists("GO2ALLEG.rda")) {
+            GO2ALLEG <- NULL # to satisfy codetools
+            load("GO2ALLEG.rda")
+            GO2ExtID <- GO2ALLEG[term]
+        } else {
+            stop("GO Mapping file not found in the working directory")
+        }
+    }
     return(GO2ExtID)
 }
 
@@ -176,20 +202,31 @@ ALLEXTID.CC <- function(organism) {
 
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ALLEXTID.GO <- function(organism) {
-    annoDb <- switch(organism,
-                     human = "org.Hs.eg.db",
-                     mouse = "org.Mm.eg.db",
-                     yeast = "org.Sc.sgd.db",
-                     )
-    require(annoDb, character.only = TRUE)
+    supported_Org <- c("human", "mouse", "yeast")
+    if (organism %in% supported_Org) {
+        annoDb <- switch(organism,
+                         human = "org.Hs.eg.db",
+                         mouse = "org.Mm.eg.db",
+                         yeast = "org.Sc.sgd.db",
+                         )
+        require(annoDb, character.only = TRUE)
 
-    mappedDb <- switch(organism,
-                       human = "org.Hs.egGO",
-                       mouse = "org.Mm.egGO",
-                       yeast = "org.Sc.sgdGO",
-                       )
-    mappedDb <- eval(parse(text=mappedDb))
-    extID <- mappedkeys(mappedDb)
+        mappedDb <- switch(organism,
+                           human = "org.Hs.egGO",
+                           mouse = "org.Mm.egGO",
+                           yeast = "org.Sc.sgdGO",
+                           )
+        mappedDb <- eval(parse(text=mappedDb))
+        extID <- mappedkeys(mappedDb)
+    } else {
+        if (file.exists("EG2ALLGO.rda")) {
+            EG2ALLGO <- NULL ## to satisfy codetools
+            load("EG2ALLGO.rda")
+            extID <- names(EG2ALLGO)
+        } else {
+            stop("GO mapping file not found in the working directory")
+        }
+    }
     return(extID)
 }
 

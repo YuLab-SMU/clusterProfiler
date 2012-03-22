@@ -105,3 +105,51 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
     return(p)
 }
 
+##' building GO mapping files
+##'
+##' provided by a data.frame of gene and GO directly annotation file
+##' this function will building gene to GO and GO to gene mapping,
+##' with directly and undirectly annotation.
+##' @title buildGOmap
+##' @param gomap data.frame with two columns names "entrezgene", and "go_accession"
+##' @return files save in the the working directory
+##' @importMethodsFrom AnnotationDbi mget
+##' @importFrom GO.db GOMFANCESTOR
+##' @importFrom GO.db GOBPANCESTOR
+##' @importFrom GO.db GOCCANCESTOR
+##' @importFrom plyr dlply
+##' @export
+##' @author Yu Guangchuang
+buildGOmap <- function(gomap) {
+
+    GO2EG <- dlply(gomap,"go_accession",.fun=function(i) i$entrezgene)
+    EG2GO <- dlply(gomap,"entrezgene",.fun=function(i) i$go_accession)
+
+    save(GO2EG, file="GO2EG.rda", compress="xz")
+    save(EG2GO, file="EG2GO.rda", compress="xz")
+
+
+
+    EG2ALLGO <- lapply(EG2GO,
+                        function(i) {
+                            mfans <- unlist(mget(i, GOMFANCESTOR, ifnotfound=NA))
+                            bpans <- unlist(mget(i, GOBPANCESTOR, ifnotfound=NA))
+                            ccans <- unlist(mget(i, GOCCANCESTOR, ifnotfound=NA))
+                            ans <- c(mfans, bpans, ccans)
+                            ans <- ans[ !is.na(ans) ]
+                            ans <- c(i, ans)
+                            ans <- unique(ans)
+                            ans <- ans[ans != "all"]
+                            return(ans)
+                        })
+    save(EG2ALLGO, file="EG2ALLGO.rda", compress="xz")
+
+    len <- lapply(EG2ALLGO,length)
+    EG2ALLGO.df <- data.frame(EG=rep(names(EG2ALLGO), times=len),
+                              GO=unlist(EG2ALLGO))
+    GO <- NULL ## satisfy code tools
+    GO2ALLEG <- dlply(EG2ALLGO.df, .(GO), function(i) as.character(i$EG))
+    GO2ALLEG <- lapply(GO2ALLEG, unique)
+    save(GO2ALLEG, file="GO2ALLEG.rda", compress="xz")
+    print("GO Annotation Mapping files save in the working directory.")
+}
