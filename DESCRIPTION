@@ -23,8 +23,6 @@ Imports:
 Suggests:
     GOSemSim,
     ReactomePA
-License: Artistic-2.0
-URL: http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118
 biocViews: Bioinformatics,
     Clustering,
     GO,
@@ -41,4 +39,6 @@ Collate:
     'groupGO.R'
     'utilities.R'
     'zzz.R'
+License: Artistic-2.0
+URL: http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118    
 Packaged: 2012-02-16 11:11:44 UTC; root
