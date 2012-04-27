@@ -23,12 +23,12 @@ Imports:
 Suggests:
     GOSemSim,
     ReactomePA
-biocViews: Bioinformatics,
-    Clustering,
+biocViews: Clustering,
     GO,
     Pathways,
     Visualization,
-    MultipleComparisons
+    MultipleComparisons,
+    GeneSetEnrichment
 Collate:
     'AllGenerics.R'
     'clusterProfiler-package.R'
