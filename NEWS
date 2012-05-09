@@ -2,7 +2,7 @@ CHANGES IN VERSION 1.5.0
 ------------------------
  o bump up version to 1.5.0 for BioC 2.11 devel
  o add URL in DESCRIPTION
- o update citation <2012-05-09, Wed>
+ o update citation and add biocView GeneSetEnrichment <2012-05-09, Wed>
 
  CHANGES IN VERSION 1.3.15
 ------------------------
