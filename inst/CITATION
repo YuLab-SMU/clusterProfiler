@@ -8,7 +8,7 @@ citEntry(entry="ARTICLE",
   volume = "16",
   number = "5",
   pages = "284-287",
-  PMID = "22452878",
+  PMID = "22455463",
   textVersion = paste("Guangchuang Yu, Li-Gen Wang, Yanyan Han and Qing-Yu He.",
       "clusterProfiler: an R package for comparing biological themes among gene clusters.",
       "OMICS: A Journal of Integrative Biology 2012 16(5):284-287")
