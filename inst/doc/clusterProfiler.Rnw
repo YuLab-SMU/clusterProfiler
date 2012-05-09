@@ -90,7 +90,7 @@ Please cite the following articles when using
 \\
 G Yu, LG Wang, Y Han, QY He. clusterProfiler: an R package for
 comparing biological themes among gene clusters. \textit{OMICS: A
-  Journal of Integrative Biology}. 2012, 16(5), in press. \\
+  Journal of Integrative Biology}. 2012, 16(5), 284-287. \\
 
 \section{Functional Profiles}
 
