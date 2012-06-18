@@ -18,14 +18,10 @@
 ##' @importMethodsFrom DOSE plot
 ##' @importMethodsFrom DOSE setReadable<-
 ##' @importFrom DOSE EXTID2NAME
-
-
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importClassesFrom methods data.frame
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
-
-
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
@@ -88,6 +84,8 @@ ALLEXTID.KEGG <- function(organism) {
         idx <- grep("^mmu", pathID)
     } else if (organism == "yeast") {
         idx <- grep("^sce", pathID)
+    } else if (organism == "zebrafish") {
+        idx <- grep("^dre", pathID)
     } else {
         stop (" Not supported yet... \n" )
     }
