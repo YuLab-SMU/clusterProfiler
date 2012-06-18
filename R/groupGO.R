@@ -18,6 +18,7 @@
 ##' @importFrom DOSE EXTID2NAME
 ##' @importFrom DOSE TERMID2EXTID
 ##' @importFrom DOSE TERM2NAME
+##' @importMethodsFrom DOSE "setReadable<-"
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @examples

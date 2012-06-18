@@ -4,6 +4,50 @@
 
 
 
+getSupported_Org <- function() {
+    supported_Org <- c("human", "mouse", "yeast", "zebrafish")
+    return(supported_Org)
+}
+
+getAnnoDb <- function(organism) {
+    annoDb <- switch(organism,
+                     human = "org.Hs.eg.db",
+                     mouse = "org.Mm.eg.db",
+                     yeast = "org.Sc.sgd.db",
+                     zebrafish = "org.Dr.eg.db"
+                     )
+    return(annoDb)    
+}
+
+getGO2ALLEG_MappedDb <- function(organism) {
+    annoDb <- getAnnoDb(organism)
+    require(annoDb, character.only = TRUE)
+
+    mappedDb <- switch(organism,
+                       human = "org.Hs.egGO2ALLEGS",
+                       mouse = "org.Mm.egGO2ALLEGS",
+                       yeast = "org.Sc.sgdGO2ALLORFS",
+                       zebrafish = "org.Dr.egGO2ALLEGS"
+                       )
+    mappedDb <- eval(parse(text=mappedDb))
+    return(mappedDb)
+}
+
+getEG2GO_MappedDb <- function(organism) {
+    annoDb <- getAnnoDb(organism)
+
+    require(annoDb, character.only = TRUE)
+
+    mappedDb <- switch(organism,
+                       human = "org.Hs.egGO",
+                       mouse = "org.Mm.egGO",
+                       yeast = "org.Sc.sgdGO",
+                       zebrafish = "org.Dr.egGO"
+                       )
+    mappedDb <- eval(parse(text=mappedDb))
+    return(mappedDb)
+}
+
 
 ##' query GOIDs at a specific level.
 ##'

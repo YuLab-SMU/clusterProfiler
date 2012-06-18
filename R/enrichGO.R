@@ -16,7 +16,7 @@
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
 ##' @importMethodsFrom DOSE plot
-##' @importMethodsFrom DOSE setReadable<-
+##' @importMethodsFrom DOSE "setReadable<-"
 ##' @importFrom DOSE EXTID2NAME
 ##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
@@ -77,23 +77,9 @@ EXTID2TERMID.GO <- function(gene, ont, organism) {
     goterms <- Ontology(GOTERM)
     goterms <- names(goterms[goterms == ont])
 
-
-    supported_Org <- c("human", "mouse", "yeast")
+    supported_Org <- getSupported_Org()
     if (organism %in% supported_Org) {
-        ## get organism specific GO terms
-        annoDb <- switch(organism,
-                         human = "org.Hs.eg.db",
-                         mouse = "org.Mm.eg.db",
-                         yeast = "org.Sc.sgd.db",
-                         )
-        require(annoDb, character.only = TRUE)
-
-        mappedDb <- switch(organism,
-                           human = "org.Hs.egGO2ALLEGS",
-                           mouse = "org.Mm.egGO2ALLEGS",
-                           yeast = "org.Sc.sgdGO2ALLORFS",
-                           )
-        mappedDb <- eval(parse(text=mappedDb))
+        mappedDb <- getGO2ALLEG_MappedDb(organism)
 
         orgTerm <- mappedkeys(mappedDb)
 
@@ -151,21 +137,9 @@ TERMID2EXTID.CC <- function(term, organism) {
 TERMID2EXTID.GO <- function(term, organism) {
     term <- as.character(term)
 
-    supported_Org <- c("human", "mouse", "yeast")
+    supported_Org <- getSupported_Org()
     if (organism %in% supported_Org) {
-        annoDb <- switch(organism,
-                         human = "org.Hs.eg.db",
-                         mouse = "org.Mm.eg.db",
-                         yeast = "org.Sc.sgd.db",
-                         )
-        require(annoDb, character.only = TRUE)
-
-        mappedDb <- switch(organism,
-                           human = "org.Hs.egGO2ALLEGS",
-                           mouse = "org.Mm.egGO2ALLEGS",
-                           yeast = "org.Sc.sgdGO2ALLORFS",
-                           )
-        mappedDb <- eval(parse(text=mappedDb))
+        mappedDb <- getGO2ALLEG_MappedDb(organism)
         GO2ExtID <- mget(term, mappedDb, ifnotfound=NA)
         GO2ExtID <- lapply(GO2ExtID, function(i) unique(i))
     } else {
@@ -200,23 +174,12 @@ ALLEXTID.CC <- function(organism) {
     ALLEXTID.GO(organism)
 }
 
+
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ALLEXTID.GO <- function(organism) {
-    supported_Org <- c("human", "mouse", "yeast")
+    supported_Org <- getSupported_Org()
     if (organism %in% supported_Org) {
-        annoDb <- switch(organism,
-                         human = "org.Hs.eg.db",
-                         mouse = "org.Mm.eg.db",
-                         yeast = "org.Sc.sgd.db",
-                         )
-        require(annoDb, character.only = TRUE)
-
-        mappedDb <- switch(organism,
-                           human = "org.Hs.egGO",
-                           mouse = "org.Mm.egGO",
-                           yeast = "org.Sc.sgdGO",
-                           )
-        mappedDb <- eval(parse(text=mappedDb))
+        mappedDb <- getEG2GO_MappedDb(organism)
         extID <- mappedkeys(mappedDb)
     } else {
         if (file.exists("EG2ALLGO.rda")) {
