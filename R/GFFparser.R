@@ -9,13 +9,15 @@
 Gff2GeneTable <- function(gffFile) {
     gff <- readGff(gffFile)
 
-    GI2GeneID <- data.frame(GI=getGffAttribution(gff$attributes, field="GI"),
-                            GeneID=getGffAttribution(gff$attributes, field="GeneID")
-                                        #,
-                                        #Product=getGffAttribution(gff$attributes, field="product")
-                            )
-    GI2GeneID <- GI2GeneID[!is.na(GI2GeneID$GI),]
-    GI2GeneID <- GI2GeneID[!is.na(GI2GeneID$Gene),]
+    GeneID <- data.frame(GeneID=getGffAttribution(gff$attributes, field="GeneID")
+                         )
+    ## GI2GeneID <- data.frame(GI=getGffAttribution(gff$attributes, field="GI"),
+    ##                        GeneID=getGffAttribution(gff$attributes, field="GeneID")
+    ##                                    #,
+    ##                                    #Product=getGffAttribution(gff$attributes, field="product")
+    ##                        )
+    ## GI2GeneID <- GI2GeneID[!is.na(GI2GeneID$GI),]
+    ## GI2GeneID <- GI2GeneID[!is.na(GI2GeneID$Gene),]
 
     geneInfo <- gff[gff$feature == "gene",]
     geneInfo <- geneInfo[, c("seqname", "start", "end", "strand", "attributes")]
@@ -25,7 +27,8 @@ Gff2GeneTable <- function(gffFile) {
     geneInfo$GeneName[is.na(geneInfo$GeneName)] <- "-"
 
     geneInfo <- geneInfo[, -5] ## abondom "attributes" column.
-    geneTable <- merge(GI2GeneID, geneInfo, by.x="GeneID", by.y="GeneID")
+    ## geneTable <- merge(GI2GeneID, geneInfo, by.x="GeneID", by.y="GeneID")
+    geneTable <- merge(GeneID, geneInfo, by.x="GeneID", by.y="GeneID")
     geneTable <- unique(geneTable)
     save(geneTable, file="geneTable.rda", compress="xz")
     print("Gene Table file save in the working directory.")
