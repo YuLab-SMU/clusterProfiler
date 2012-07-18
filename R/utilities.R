@@ -16,7 +16,7 @@ getAnnoDb <- function(organism) {
                      yeast = "org.Sc.sgd.db",
                      zebrafish = "org.Dr.eg.db"
                      )
-    return(annoDb)    
+    return(annoDb)
 }
 
 getGO2ALLEG_MappedDb <- function(organism) {
@@ -165,6 +165,13 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
 ##' @export
 ##' @author Yu Guangchuang
 buildGOmap <- function(gomap) {
+    if( any( colnames(gomap) %in% "go_id" ) ) {
+        colnames(gomap)[colnames(gomap) %in% "go_id"] <- "go_accession"
+    }
+
+    ## remove empty GO annotation
+    gomap <- gomap[gomap$go_accession != "", ]
+
 
     GO2EG <- dlply(gomap,"go_accession",.fun=function(i) i$entrezgene)
     EG2GO <- dlply(gomap,"entrezgene",.fun=function(i) i$go_accession)

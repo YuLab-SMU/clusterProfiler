@@ -1,10 +1,14 @@
-CHANGES IN VERSION 1.5.0
+CHANGES IN VERSION 1.5.1
+------------------------
+ o bug fixed of buildGOmap due to the empty GO annotation query from biomaRt <2012-07-18, Wed>
+
+Changes IN VERSION 1.5.0
 ------------------------
  o bump up version to 1.5.0 for BioC 2.11 devel
  o add URL in DESCRIPTION
  o update citation and add biocView GeneSetEnrichment <2012-05-09, Wed>
  o support zebrafish <2012-05-18, Mon>
- 
+
  CHANGES IN VERSION 1.3.15
 ------------------------
  o add support to organsims other than human, mouse, and yeast. <2012-03-22, Thu>
