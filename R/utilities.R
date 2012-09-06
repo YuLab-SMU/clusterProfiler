@@ -104,11 +104,11 @@ getGOLevel <- function(ont, level) {
 ##' @importFrom ggplot2 coord_flip
 ##' @importFrom ggplot2 geom_point
 ##' @importFrom ggplot2 %+%
-##' @importFrom ggplot2 opts
+##' @importFrom ggplot2 theme
 ##' @importFrom ggplot2 xlab
 ##' @importFrom ggplot2 ylab
 ##' @importFrom ggplot2 theme_bw
-##' @importFrom ggplot2 theme_text
+##' @importFrom ggplot2 element_text
 ##' @importFrom ggplot2 scale_colour_gradient
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
@@ -143,9 +143,9 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
         }
     }
     p <- p + xlab("") + ylab("") +
-        opts(axis.text.x = theme_text(colour="black", size=font.size, vjust = 1)) +
-            opts(axis.text.y = theme_text(colour="black", size=font.size, hjust = 1)) +
-                opts(title=title)+theme_bw()
+        theme(axis.text.x = element_text(colour="black", size=font.size, vjust = 1)) +
+            theme(axis.text.y = element_text(colour="black", size=font.size, hjust = 1)) +
+                ggtitle(title)+theme_bw()
     return(p)
 }
 
