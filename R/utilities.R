@@ -109,6 +109,7 @@ getGOLevel <- function(ont, level) {
 ##' @importFrom ggplot2 ylab
 ##' @importFrom ggplot2 theme_bw
 ##' @importFrom ggplot2 element_text
+##' @importFrom ggplot2 ggtitle
 ##' @importFrom ggplot2 scale_colour_gradient
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
