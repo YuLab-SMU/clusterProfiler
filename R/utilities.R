@@ -157,6 +157,7 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
 ##' with directly and undirectly annotation.
 ##' @title buildGOmap
 ##' @param gomap data.frame with two columns names "entrezgene", and "go_accession"
+##' @param compress logical, indicate file save in compress or not.
 ##' @return files save in the the working directory
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importFrom GO.db GOMFANCESTOR
@@ -165,7 +166,7 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
 ##' @importFrom plyr dlply
 ##' @export
 ##' @author Yu Guangchuang
-buildGOmap <- function(gomap) {
+buildGOmap <- function(gomap, compress=TRUE) {
     if( any( colnames(gomap) %in% "go_id" ) ) {
         colnames(gomap)[colnames(gomap) %in% "go_id"] <- "go_accession"
     }
@@ -174,12 +175,17 @@ buildGOmap <- function(gomap) {
     gomap <- gomap[gomap$go_accession != "", ]
 
 
-    GO2EG <- dlply(gomap,"go_accession",.fun=function(i) i$entrezgene)
-    EG2GO <- dlply(gomap,"entrezgene",.fun=function(i) i$go_accession)
+    GO2EG <- dlply(gomap,"go_accession",.fun=function(i) as.character(i$entrezgene))
+    EG2GO <- dlply(gomap,"entrezgene",.fun=function(i) as.character(i$go_accession))
 
-    save(GO2EG, file="GO2EG.rda", compress="xz")
-    save(EG2GO, file="EG2GO.rda", compress="xz")
+    if (compress) {
+      save(GO2EG, file="GO2EG.rda", compress="xz")
+      save(EG2GO, file="EG2GO.rda", compress="xz")
+    } else {
+      save(GO2EG, file="GO2EG.rda")
+      save(EG2GO, file="EG2GO.rda")
 
+    }
 
 
     EG2ALLGO <- lapply(EG2GO,
@@ -194,7 +200,11 @@ buildGOmap <- function(gomap) {
                             ans <- ans[ans != "all"]
                             return(ans)
                         })
-    save(EG2ALLGO, file="EG2ALLGO.rda", compress="xz")
+    if (compress) {
+      save(EG2ALLGO, file="EG2ALLGO.rda", compress="xz")
+    } else {
+      save(EG2ALLGO, file="EG2ALLGO.rda")
+    }
 
     len <- lapply(EG2ALLGO,length)
     EG2ALLGO.df <- data.frame(EG=rep(names(EG2ALLGO), times=len),
@@ -202,6 +212,10 @@ buildGOmap <- function(gomap) {
     GO <- NULL ## satisfy code tools
     GO2ALLEG <- dlply(EG2ALLGO.df, .(GO), function(i) as.character(i$EG))
     GO2ALLEG <- lapply(GO2ALLEG, unique)
-    save(GO2ALLEG, file="GO2ALLEG.rda", compress="xz")
+    if (compress) {
+      save(GO2ALLEG, file="GO2ALLEG.rda", compress="xz")
+    } else {
+      save(GO2ALLEG, file="GO2ALLEG.rda")
+    }
     print("GO Annotation Mapping files save in the working directory.")
 }

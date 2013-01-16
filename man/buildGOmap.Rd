@@ -2,11 +2,14 @@
 \alias{buildGOmap}
 \title{buildGOmap}
 \usage{
-  buildGOmap(gomap)
+  buildGOmap(gomap, compress = TRUE)
 }
 \arguments{
   \item{gomap}{data.frame with two columns names
   "entrezgene", and "go_accession"}
+
+  \item{compress}{logical, indicate file save in compress
+  or not.}
 }
 \value{
   files save in the the working directory
