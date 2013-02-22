@@ -86,6 +86,8 @@ ALLEXTID.KEGG <- function(organism) {
         idx <- grep("^sce", pathID)
     } else if (organism == "zebrafish") {
         idx <- grep("^dre", pathID)
+    } else if (organism == "celegans") {
+        idx <- grep("^cel", pathID)
     } else {
         stop (" Not supported yet... \n" )
     }

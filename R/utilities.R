@@ -5,7 +5,7 @@
 
 
 getSupported_Org <- function() {
-    supported_Org <- c("human", "mouse", "yeast", "zebrafish")
+    supported_Org <- c("human", "mouse", "yeast", "zebrafish", "celegans")
     return(supported_Org)
 }
 
@@ -14,7 +14,8 @@ getAnnoDb <- function(organism) {
                      human = "org.Hs.eg.db",
                      mouse = "org.Mm.eg.db",
                      yeast = "org.Sc.sgd.db",
-                     zebrafish = "org.Dr.eg.db"
+                     zebrafish = "org.Dr.eg.db",
+                     celegans = "org.Ce.eg.db"
                      )
     return(annoDb)
 }
@@ -27,7 +28,8 @@ getGO2ALLEG_MappedDb <- function(organism) {
                        human = "org.Hs.egGO2ALLEGS",
                        mouse = "org.Mm.egGO2ALLEGS",
                        yeast = "org.Sc.sgdGO2ALLORFS",
-                       zebrafish = "org.Dr.egGO2ALLEGS"
+                       zebrafish = "org.Dr.egGO2ALLEGS",
+                       celegans = "org.Ce.egGO2ALLEGS"          
                        )
     mappedDb <- eval(parse(text=mappedDb))
     return(mappedDb)
@@ -42,7 +44,8 @@ getEG2GO_MappedDb <- function(organism) {
                        human = "org.Hs.egGO",
                        mouse = "org.Mm.egGO",
                        yeast = "org.Sc.sgdGO",
-                       zebrafish = "org.Dr.egGO"
+                       zebrafish = "org.Dr.egGO",
+                       celegans = "org.Ce.egGO"
                        )
     mappedDb <- eval(parse(text=mappedDb))
     return(mappedDb)

@@ -114,6 +114,25 @@ EXTID2TERMID.GO <- function(gene, ont, organism) {
     }
     return(qExtID2GO)
 }
+## EXTID2TERMID.GO <- function(gene, ont, organism) {
+##     gene <- as.character(gene)
+##     supported_Org <- clusterProfiler:::getSupported_Org()
+##     if (organism %in% supported_Org) {
+##         annoDb <- clusterProfiler:::getAnnoDb(organism)
+##         require(annoDb, character.only=TRUE)
+##         annoDb <- eval(parse(text=annoDb))
+##     }
+##     go <- select(annoDb, keys=gene, keytype="ENTREZID", cols="GOALL")
+##     go <- go[!is.na(go$GOALL),]
+##     go <- go[go$ONTOLOGY == ont,]
+##     qGO2ExtID.df <- data.frame(GO=go$GOALL, ExtID=go$ENTREZID)
+
+##     ExtID <- NULL ## to satisfy codetools
+##     qExtID2GO <- dlply(qGO2ExtID.df, .(ExtID), function(i) as.character(i$GO))
+
+##     return(qExtID2GO)
+## }
+
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @S3method TERMID2EXTID MF
