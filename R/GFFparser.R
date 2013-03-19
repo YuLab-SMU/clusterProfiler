@@ -6,7 +6,7 @@
 ##' @return file save.
 ##' @export
 ##' @author Yu Guangchuang
-Gff2GeneTable <- function(gffFile) {
+Gff2GeneTable <- function(gffFile, compress=TRUE) {
     gff <- readGff(gffFile)
 
     GeneID <- data.frame(GeneID=getGffAttribution(gff$attributes, field="GeneID")
@@ -30,7 +30,11 @@ Gff2GeneTable <- function(gffFile) {
     ## geneTable <- merge(GI2GeneID, geneInfo, by.x="GeneID", by.y="GeneID")
     geneTable <- merge(GeneID, geneInfo, by.x="GeneID", by.y="GeneID")
     geneTable <- unique(geneTable)
-    save(geneTable, file="geneTable.rda", compress="xz")
+    if (compress) {
+        save(geneTable, file="geneTable.rda", compress="xz")
+    } else {
+        save(geneTable, file="geneTable.rda")
+    }
     print("Gene Table file save in the working directory.")
 }
 
