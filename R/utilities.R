@@ -29,7 +29,7 @@ getGO2ALLEG_MappedDb <- function(organism) {
                        mouse = "org.Mm.egGO2ALLEGS",
                        yeast = "org.Sc.sgdGO2ALLORFS",
                        zebrafish = "org.Dr.egGO2ALLEGS",
-                       celegans = "org.Ce.egGO2ALLEGS"          
+                       celegans = "org.Ce.egGO2ALLEGS"
                        )
     mappedDb <- eval(parse(text=mappedDb))
     return(mappedDb)
@@ -119,9 +119,11 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
     Description <- Percentage <- Count <- Cluster <- Pvalue <- pvalue <- NULL # to satisfy codetools
     if (type == "bar") {
         if (by == "percentage") {
-            p <- ggplot(clProf.reshape.df, aes(x=Description, y = Percentage, fill=Cluster))
+            p <- ggplot(clProf.reshape.df,
+                        aes(x=Description, y = Percentage, fill=Cluster))
         } else if (by == "count") {
-            p <- ggplot(clProf.reshape.df, aes(x=Description, y = Count, fill=Cluster))
+            p <- ggplot(clProf.reshape.df,
+                        aes(x=Description, y = Count, fill=Cluster))
         } else {
 
         }
@@ -131,9 +133,11 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
     }
     if (type == "dot") {
         if (by == "percentage") {
-            p <- ggplot(clProf.reshape.df, aes(x = Cluster, y = Description, size = Percentage))
+            p <- ggplot(clProf.reshape.df,
+                        aes(x = Cluster, y = Description, size = Percentage))
         } else if (by == "count") {
-            p <- ggplot(clProf.reshape.df, aes(x = Cluster, y = Description, size = Count))
+            p <- ggplot(clProf.reshape.df,
+                        aes(x = Cluster, y = Description, size = Count))
         } else {
 
         }
@@ -148,8 +152,9 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
     }
     p <- p + xlab("") + ylab("") +
         theme(axis.text.x = element_text(colour="black", size=font.size, vjust = 1)) +
-            theme(axis.text.y = element_text(colour="black", size=font.size, hjust = 1)) +
-                ggtitle(title)+theme_bw()
+            theme(axis.text.y = element_text(colour="black",
+                  size=font.size, hjust = 1)) +
+                      ggtitle(title)+theme_bw()
     return(p)
 }
 

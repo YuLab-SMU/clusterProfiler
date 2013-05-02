@@ -214,26 +214,26 @@ ALLEXTID.GO <- function(organism) {
 
 ##' @importFrom DOSE TERM2NAME
 ##' @S3method TERM2NAME MF
-TERM2NAME.MF <- function(term) {
-    TERM2NAME.GO(term)
+TERM2NAME.MF <- function(term, organism) {
+    TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERM2NAME
 ##' @S3method TERM2NAME BP
-TERM2NAME.BP <- function(term) {
-    TERM2NAME.GO(term)
+TERM2NAME.BP <- function(term, organism) {
+    TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERM2NAME
 ##' @S3method TERM2NAME CC
-TERM2NAME.CC <- function(term) {
-    TERM2NAME.GO(term)
+TERM2NAME.CC <- function(term, organism) {
+    TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom GO.db GOTERM
 ##' @importMethodsFrom AnnotationDbi Term
 ##' @importMethodsFrom AnnotationDbi mget
-TERM2NAME.GO <- function(term) {
+TERM2NAME.GO <- function(term, organism) {
     term <- as.character(term)
     go <- mget(term, GOTERM, ifnotfound=NA)
     termName <- sapply(go, Term)
