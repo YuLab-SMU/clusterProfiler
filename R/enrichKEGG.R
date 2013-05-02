@@ -105,7 +105,7 @@ ALLEXTID.KEGG <- function(organism) {
 ##' @importFrom KEGG.db KEGGPATHID2NAME
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @S3method TERM2NAME KEGG
-TERM2NAME.KEGG <- function(term) {
+TERM2NAME.KEGG <- function(term, organism) {
     term <- as.character(term)
     pathIDs <- gsub("^\\D+", "",term, perl=T)
     path2name <- unlist(mget(pathIDs, KEGGPATHID2NAME))

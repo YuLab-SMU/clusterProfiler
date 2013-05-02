@@ -3,6 +3,7 @@
 ##' given the GFF file, this function will extract information and save it in working directory
 ##' @title Gff2GeneTable
 ##' @param gffFile GFF file
+##' @param compress compress file or not
 ##' @return file save.
 ##' @export
 ##' @author Yu Guangchuang
