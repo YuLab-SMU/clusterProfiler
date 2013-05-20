@@ -1,7 +1,8 @@
 CHANGES IN VERSION 1.9.1
 ------------------------
+ o enrichGO and enrichKEGG support rat organism <2013-05-20, Mon>
  o change some code according to DOSE <2013-03-27, Wed> 
-
+ 
 CHANGES IN VERSION 1.7.1
 ------------------------
  o support GO enrichment analysis for organism celegans <2013-01-22, Fri> 

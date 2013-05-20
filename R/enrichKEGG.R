@@ -82,6 +82,8 @@ ALLEXTID.KEGG <- function(organism) {
         idx <- grep("^hsa", pathID)
     } else if (organism == "mouse") {
         idx <- grep("^mmu", pathID)
+    } else if (organism == "rat") {
+        idx <- grep("^rno", pathID)
     } else if (organism == "yeast") {
         idx <- grep("^sce", pathID)
     } else if (organism == "zebrafish") {
