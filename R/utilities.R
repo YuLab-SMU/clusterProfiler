@@ -5,7 +5,7 @@
 
 
 getSupported_Org <- function() {
-    supported_Org <- c("human", "mouse", "yeast", "zebrafish", "celegans")
+    supported_Org <- c("human", "mouse", "rat", "yeast", "zebrafish", "celegans")
     return(supported_Org)
 }
 
@@ -13,6 +13,7 @@ getAnnoDb <- function(organism) {
     annoDb <- switch(organism,
                      human = "org.Hs.eg.db",
                      mouse = "org.Mm.eg.db",
+                     rat = "org.Rn.eg.db",
                      yeast = "org.Sc.sgd.db",
                      zebrafish = "org.Dr.eg.db",
                      celegans = "org.Ce.eg.db"
@@ -27,6 +28,7 @@ getGO2ALLEG_MappedDb <- function(organism) {
     mappedDb <- switch(organism,
                        human = "org.Hs.egGO2ALLEGS",
                        mouse = "org.Mm.egGO2ALLEGS",
+                       rat = "org.Rn.egGO2ALLEGS",
                        yeast = "org.Sc.sgdGO2ALLORFS",
                        zebrafish = "org.Dr.egGO2ALLEGS",
                        celegans = "org.Ce.egGO2ALLEGS"
@@ -43,6 +45,7 @@ getEG2GO_MappedDb <- function(organism) {
     mappedDb <- switch(organism,
                        human = "org.Hs.egGO",
                        mouse = "org.Mm.egGO",
+                       rat = "org.Rn.egGO",
                        yeast = "org.Sc.sgdGO",
                        zebrafish = "org.Dr.egGO",
                        celegans = "org.Ce.egGO"
