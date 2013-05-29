@@ -45,7 +45,7 @@ Now you have all GeneID stored in eg, I recommend you using biomaRt package to q
 
 ```{r}
 require(biomaRt)
-bacteria=useMart("bacteria_mart_14")
+bacteria=useMart("bacteria_mart_16")
 bac = useDataset("str_22007_gene",mart=bacteria)
 gomap <- getBM(attributes = c("entrezgene",
                "go_accession"),
@@ -78,7 +78,7 @@ gene <- c("3572890","3572609","3572407","3572408","3572333",
           "3572206","3572193","3571922","3571782","3571786",
           "3571624","3571626","3571412","3571413","3571382",
           "3571286","3571289","3571124","3571106","3571029")
-mf <- enrichGO(gene, ont="MF", organism="M5005", pvalueCutoff=0.05, qvalueCutoff=0.1, readable=TRUE)
+mf <- enrichGO(gene, ont="MF", organism="M5005", pvalueCutoff=0.05, readable=TRUE)
 summary(mf)
 ```
 

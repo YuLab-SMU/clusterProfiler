@@ -7,16 +7,17 @@
 ##' @param organism Currently, only "human", "mouse" and "yeast" supported.
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param pvalueCutoff Cutoff value of pvalue.
-##' @param qvalueCutoff Cutoff value of qvalue.
-##' @param readable if readable is TRUE, the gene IDs will mapping to gene
-##'   symbols.
+##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
+##' @param universe background genes
+##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
+##' @param readable whether mapping gene ID to gene Name
 ##' @return A \code{enrichResult} instance.
 ##' @importFrom DOSE enrich.internal
 ##' @importClassesFrom DOSE enrichResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
 ##' @importMethodsFrom DOSE plot
-##' @importMethodsFrom DOSE "setReadable<-"
+##' @importFrom DOSE setReadable
 ##' @importFrom DOSE EXTID2NAME
 ##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
@@ -33,15 +34,19 @@ enrichGO <- function(gene,
                      organism="human",
                      ont="MF",
                      pvalueCutoff=0.05,
-                     qvalueCutoff=0.05,
+                     pAdjustMethod="BH",
+                     universe,
+                     minGSSize = 5,
                      readable=FALSE) {
 
     enrich.internal(gene,
                     organism=organism,
                     pvalueCutoff=pvalueCutoff,
-                    qvalueCutoff=qvalueCutoff,
-                    ont=ont,
-                    readable=readable)
+                    pAdjustMethod=pAdjustMethod,
+                    ont = ont,
+                    universe = universe,
+                    minGSSize = minGSSize,
+                    readable = readable)
 }
 
 

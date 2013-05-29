@@ -18,7 +18,7 @@
 ##' @importFrom DOSE EXTID2NAME
 ##' @importFrom DOSE TERMID2EXTID
 ##' @importFrom DOSE TERM2NAME
-##' @importMethodsFrom DOSE "setReadable<-"
+##' @importFrom DOSE setReadable
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @examples
@@ -58,7 +58,8 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
              gene = gene,
              geneInCategory = geneID.list
              )
-    setReadable(x) <- readable
+    if(readable == TRUE) 
+        x <- setReadable(x)
 
     return(x)
 }
@@ -83,7 +84,7 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
 ##' @importClassesFrom DOSE enrichResult
 ##' @importMethodsFrom DOSE summary
 ##' @importMethodsFrom DOSE plot
-##' @importMethodsFrom DOSE setReadable<-
+##' @importFrom DOSE setReadable
 ##' @seealso \code{\linkS4class{compareClusterResult}}
 ##'   \code{\link{compareCluster}} \code{\link{groupGO}}
 ##' @keywords classes
