@@ -6,9 +6,10 @@
 ##' @param gene a vector of entrez gene id.
 ##' @param organism Currently, only "human" and "mouse" supported.
 ##' @param pvalueCutoff Cutoff value of pvalue.
-##' @param qvalueCutoff Cutoff value of qvalue.
-##' @param readable if readable is TRUE, the gene IDs will mapping to gene
-##'   symbols.
+##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
+##' @param universe background genes
+##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
+##' @param readable whether mapping gene ID to gene Name
 ##' @return A \code{enrichResult} instance.
 ##' @export
 ##' @importFrom DOSE enrich.internal
@@ -16,7 +17,7 @@
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
 ##' @importMethodsFrom DOSE plot
-##' @importMethodsFrom DOSE setReadable<-
+##' @importFrom DOSE setReadable
 ##' @importFrom DOSE EXTID2NAME
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ##' @importMethodsFrom AnnotationDbi mget
@@ -35,14 +36,18 @@
 enrichKEGG <- function(gene,
                        organism="human",
                        pvalueCutoff = 0.05,
-                       qvalueCutoff = 0.05,
+                       pAdjustMethod="BH",
+                       universe,
+                       minGSSize = 5,
                        readable=FALSE) {
 
     enrich.internal(gene,
                     organism = organism,
-                    pvalueCutoff = pvalueCutoff,
-                    qvalueCutoff = qvalueCutoff,
+                    pvalueCutoff=pvalueCutoff,
+                    pAdjustMethod=pAdjustMethod,
                     ont = "KEGG",
+                    universe = universe,
+                    minGSSize = minGSSize,
                     readable = readable)
 
 }

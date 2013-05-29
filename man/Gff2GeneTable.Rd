@@ -2,10 +2,12 @@
 \alias{Gff2GeneTable}
 \title{Gff2GeneTable}
 \usage{
-  Gff2GeneTable(gffFile)
+  Gff2GeneTable(gffFile, compress = TRUE)
 }
 \arguments{
   \item{gffFile}{GFF file}
+
+  \item{compress}{compress file or not}
 }
 \value{
   file save.

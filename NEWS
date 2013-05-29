@@ -2,6 +2,7 @@ CHANGES IN VERSION 1.9.1
 ------------------------
  o enrichGO and enrichKEGG support rat organism <2013-05-20, Mon>
  o change some code according to DOSE <2013-03-27, Wed> 
+ o modify enrichGO and enrichKEGG according to the change of enrich.internal, remove qvalueCutoff parameter, add pAdjustMethod, add universe paramter for user to specify background. <2013-05-29, Wed>
  
 CHANGES IN VERSION 1.7.1
 ------------------------

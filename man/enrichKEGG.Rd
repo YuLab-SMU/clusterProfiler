@@ -5,7 +5,8 @@ Given a vector of genes, this function will return the enrichment KEGG
 categories with FDR control.}
 \usage{
   enrichKEGG(gene, organism = "human", pvalueCutoff = 0.05,
-    qvalueCutoff = 0.05, readable = FALSE)
+    pAdjustMethod = "BH", universe, minGSSize = 5,
+    readable = FALSE)
 }
 \arguments{
   \item{gene}{a vector of entrez gene id.}
@@ -15,10 +16,15 @@ categories with FDR control.}
 
   \item{pvalueCutoff}{Cutoff value of pvalue.}
 
-  \item{qvalueCutoff}{Cutoff value of qvalue.}
+  \item{pAdjustMethod}{one of "holm", "hochberg", "hommel",
+  "bonferroni", "BH", "BY", "fdr", "none"}
 
-  \item{readable}{if readable is TRUE, the gene IDs will
-  mapping to gene symbols.}
+  \item{universe}{background genes}
+
+  \item{minGSSize}{minimal size of genes annotated by
+  Ontology term for testing.}
+
+  \item{readable}{whether mapping gene ID to gene Name}
 }
 \value{
   A \code{enrichResult} instance.

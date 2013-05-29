@@ -118,7 +118,6 @@ y <- enrichGO(gene=gcSample[[2]],
               organism="human",
               ont="MF",
               pvalueCutoff=0.01,
-              qvalueCutoff=0.05,
               readable=TRUE)
 head(summary(y))
 @
@@ -130,7 +129,6 @@ head(summary(y))
 z <- enrichKEGG(gene=gcSample[[3]],
                 organism="human",
                 pvalueCutoff=0.05,
-                qvalueCutoff=0.05,
                 readable=TRUE)
 head(summary(z))
 @
@@ -158,7 +156,7 @@ specify the GO level for gene projection.
 
 
 In enrichment analysis, the \textit{pvalueCutoff} is to restrict the
-result based on their pvalues, and \textit{qvalueCutoff} is to control
+result based on their pvalues, and \textit{qvalue} is to control
 false discovery rate (FDR) to prevent high FDR in multiple
 testing. The \textit{readable} is a logical parameter to indicate the
 input gene IDs will map to gene symbols or not.
@@ -268,8 +266,7 @@ xx <- compareCluster(gcSample,
                      fun="enrichGO",
                      ont="CC",
                      organism="human",
-                     pvalueCutoff=0.05,
-                     qvalueCutoff=0.05)
+                     pvalueCutoff=0.05)
 plot(xx)
 @
 
@@ -311,7 +308,7 @@ correspond to in order of increasing p-values. That is, red indicate
 low p-values (high enrichment), and blue indicate high p-values (low
 enrichment). P-values were filtered out by the threshold giving by
 parameter \textit{pvalueCutoff}, and FDR was control by parameter
-\textit{qvalueCutoff}.
+\textit{qvalue}.
 
 \end{itemize}
 
