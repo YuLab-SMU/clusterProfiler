@@ -52,6 +52,55 @@ enrichKEGG <- function(gene,
 
 }
 
+##' viewKEGG function is for visualize KEGG pathways
+##' works with enrichResult object to visualize enriched KEGG pathway
+##'
+##'
+##' @importFrom pathview pathview
+##' @param obj enrichResult object
+##' @param pathwayID pathway ID or index
+##' @param foldChange fold change values
+##' @param color.low color of low foldChange genes
+##' @param color.high color of high foldChange genes
+##' @param kegg.native logical
+##' @param out.suffix suffix of output file
+##' @export
+viewKEGG <- function(obj, pathwayID, foldChange,
+                     color.low="green",
+                     color.high="red",
+                     kegg.native=TRUE,
+                     out.suffix="clusterProfiler") {
+
+    if (class(obj) != "enrichResult")
+        stop("only enrichResult object supported.")
+    if (obj@ontology != "KEGG")
+        stop("only KEGG supported.")
+
+    require("pathview", character.only=TRUE)
+    if (is.numeric(pathwayID)) {
+        pathwayID <- summary(obj)[pathwayID, 1]
+    }
+    if (length(pathwayID) == 1 & pathwayID == "all") {
+        pathwayID <- summary(obj)[, 1]
+    }
+    m.fc <- max(abs(foldChange))
+    bins <- ceiling(m.fc) * 2
+    if (bins < 10)
+        bins <- 10
+    res <- lapply(pathwayID, function(pid) {
+        pathview(gene.data=foldChange,
+                 pathway.id = pid,
+                 species = "hsa",
+                 limit = list(gene=m.fc, cpd=1),
+                 bins = list(gene=bins, cpd=10),
+                 low = list(gene=color.low, cpd="blue"),
+                 high = list(gene=color.high, cpd="yellow"),
+                 kegg.native=kegg.native,
+                 out.suffix=out.suffix,
+                 new.signature=FALSE)
+    })
+    return (res)
+}
 
 ##' @importFrom DOSE EXTID2TERMID
 ##' @importMethodsFrom AnnotationDbi mget
