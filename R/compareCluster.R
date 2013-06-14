@@ -198,6 +198,6 @@ setMethod("plot", signature(x="compareClusterResult"),
 
               }
               p <- plotting.clusterProfile(result, type, by, title, font.size)
-			  return(p)
+              return(p)
           }
           )

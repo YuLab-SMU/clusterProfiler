@@ -117,6 +117,7 @@ getGOLevel <- function(ont, level) {
 ##' @importFrom ggplot2 element_text
 ##' @importFrom ggplot2 ggtitle
 ##' @importFrom ggplot2 scale_colour_gradient
+##' @importFrom DOSE theme_dose
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
     Description <- Percentage <- Count <- Cluster <- Pvalue <- pvalue <- NULL # to satisfy codetools
@@ -153,11 +154,12 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
             p <- p + geom_point(colour="steelblue")
         }
     }
-    p <- p + xlab("") + ylab("") +
-        theme(axis.text.x = element_text(colour="black", size=font.size, vjust = 1)) +
-            theme(axis.text.y = element_text(colour="black",
-                  size=font.size, hjust = 1)) +
-                      ggtitle(title)+theme_bw()
+    p <- p + xlab("") + ylab("") + ggtitle(title) +
+        theme_dose(font.size)
+        ## theme(axis.text.x = element_text(colour="black", size=font.size, vjust = 1)) +
+        ##     theme(axis.text.y = element_text(colour="black",
+        ##           size=font.size, hjust = 1)) +
+        ##               ggtitle(title)+theme_bw()
     return(p)
 }
 

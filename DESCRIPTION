@@ -19,7 +19,8 @@ Imports:
     GO.db,
     KEGG.db,
     org.Hs.eg.db,
-    DOSE
+    DOSE,
+    pathview
 Suggests:
     GOSemSim,
     ReactomePA

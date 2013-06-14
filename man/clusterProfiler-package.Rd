@@ -12,11 +12,11 @@ of gene and gene clusters.}
 }
 \details{
   \tabular{ll}{ Package: \tab clusterProfiler\cr Type: \tab
-  Package\cr Version: \tab 1.0.0\cr Date: \tab
-  03-15-2011\cr biocViews:\tab GO, Clustering,
-  Visulization\cr Depends:\tab AnnotationDbi, GO.db,
-  org.Hs.eg.db, ggplot2, plyr, methods\cr Suggests:\tab
-  GOSemSim\cr License: \tab Artistic-2.0\cr }
+  Package\cr Version: \tab 1.9.\cr Date: \tab 06-13-2013\cr
+  biocViews:\tab GO, Clustering, Visulization\cr
+  Depends:\tab AnnotationDbi, GO.db, org.Hs.eg.db, ggplot2,
+  plyr, methods\cr Suggests:\tab GOSemSim\cr License: \tab
+  Artistic-2.0\cr }
 }
 \author{
   Guangchuang Yu \email{guangchuangyu@gmail.com}

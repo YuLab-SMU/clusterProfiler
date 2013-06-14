@@ -1,65 +1,92 @@
 % \VignetteIndexEntry{An introduction to clusterProfiler}
-% \VignetteDepends{AnnotationDbi, GO.db, org.Hs.eg.db, ggplot2, plyr,
-% methods, qvalue, KEGG.db, igraph}
-% \VignetteSuggests{GOSemSim, DOSE}
-% \VignetteKeywords{Gene Ontology Analysis}
-% \VignettePackage{clusterProfiler}
+% \VignettePackage{clusterProfiler}}
 
-%\SweaveOpts{prefix.string=images/fig}
+% To compile this document, run the commands within R
+% require(cacheSweave); Sweave('clusterProfiler.Rnw', driver=cacheSweaveDriver()); tools::texi2dvi("clusterProfiler.tex", pdf=TRUE)
 
-\documentclass[a4paper]{article}
+\documentclass[12pt]{article}
+\usepackage[a4paper,left=3cm,top=2cm,bottom=3cm,right=3cm,ignoreheadfoot]{geometry}
+\pagestyle{empty}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{helvet}
+\usepackage[titletoc]{appendix}
+\usepackage{tocloft}
 
-\usepackage{Sweave}
-\usepackage{a4wide}
-\usepackage{times}
-\usepackage{hyperref}
-\usepackage[T1]{fontenc}
-\usepackage[english]{babel}
-\usepackage{framed}
-\usepackage{longtable}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage[authoryear,round]{natbib}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{.5em}
 
-\textwidth=6.2in
-\textheight=8.5in
-%\parskip=.3cm
-\oddsidemargin=.1in
-\evensidemargin=.1in
-\headheight=-.3in
+\renewcommand{\familydefault}{\sfdefault}
 
-\newcommand{\Rfunction}[1]{{\texttt{#1}}}
-\newcommand{\Robject}[1]{{\texttt{#1}}}
-\newcommand{\Rpackage}[1]{{\textit{#1}}}
-\newcommand{\Rmethod}[1]{{\texttt{#1}}}
-\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
-\newcommand{\Rclass}[1]{{\textit{#1}}}
 \newcommand{\Rcode}[1]{{\texttt{#1}}}
-\newtheorem{theorem}{Theorem}[section]
-
+\newcommand{\Robject}[1]{{\small\texttt{#1}}}
+\newcommand{\Rfunction}[1]{\Robject{#1}}
+\newcommand{\Rpackage}[1]{\textit{#1}}
+\newcommand{\Rparameter}[1]{\textit{#1}}
+\newcommand{\Rclass}[1]{\textit{#1}}
 \newcommand{\R}{\textsf{R}}
 
-\newcommand{\term}[1]{\emph{#1}}
-\newcommand{\mref}[2]{\htmladdnormallinkfoot{#2}{#1}}
+\usepackage[
+  bookmarks,%
+  colorlinks,%
+  linktoc=section,%
+  linkcolor=RedViolet,%
+  citecolor=RedViolet,%
+  urlcolor=RedViolet,%
+  linkbordercolor={1 1 1},%
+  citebordercolor={1 1 1},%
+  urlbordercolor={1 1 1},%
+  raiselinks,%
+  plainpages,%
+  pdftex
+  ]{hyperref}
 
 
-\bibliographystyle{plainnat}
+\usepackage{cite}
+\renewcommand{\floatpagefraction}{0.9}
 
-\title{Biological Theme Comparison}
+\usepackage{sectsty}
+\sectionfont{\sffamily\bfseries\color{RoyalBlue}\sectionrule{0pt}{0pt}{-1ex}{1pt}}
+\subsectionfont{\sffamily\bfseries\color{RoyalBlue}}
+\subsubsectionfont{\sffamily\bfseries\color{RoyalBlue}}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\lfoot{}\cfoot{}\rfoot{}
+\renewcommand{\headrule}{}
+
+\usepackage{graphicx}
+%\usepackage{xstring}
+
+\usepackage{Sweave}
+\SweaveOpts{keep.source=TRUE,eps=FALSE,pdf=FALSE,png=TRUE,include=FALSE,width=4,height=4.5,resolution=150}
+\setkeys{Gin}{width=0.5\textwidth}
+
+\definecolor{darkgray}{gray}{0.2}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontsize=\small,xleftmargin=1em,formatcom={\color{darkgray}}}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small,xleftmargin=1em,frame=leftline,framerule=.6pt,rulecolor=\color{darkgray},framesep=1em,formatcom={\color{darkgray}}}
+\fvset{listparameters={\setlength{\topsep}{0pt}}}
+\renewenvironment{Schunk}{\vspace{\topsep}}{\vspace{\topsep}}
+
+
+\newcommand{\fixme}[1]{{\textbf{Fixme:} \textit{\textcolor{blue}{#1}}}}
+
+
+\title{\textsf{\textbf{Using \Rpackage{clusterProfiler} to identify and compare functional profiles of gene lists}}}
 \author{Guangchuang Yu \\
 College of Life Science and Technology \\
 Jinan University, Guangzhou, China \\
 email: \texttt{guangchuangyu@gmail.com}}
 
 \begin{document}
-
 \maketitle
 
 <<options,echo=FALSE>>=
-options(width=60)
+options(digits=3, width=80, prompt=" ", continue=" ")
 require(clusterProfiler)
 @
+
+\tableofcontents
 
 \section{Introduction}
 
@@ -68,7 +95,7 @@ microarray, RNA-Seq and mass spectrometry can detect cellular
 moleculars at systems-level. These kinds of analysis generate huge
 quantitaties of data, which need to be given a biological
 interpretation. A commonly used approach is via clustering in the gene
-dimension for grouping different genes based on their similarities\citep{yu2010}.
+dimension for grouping different genes based on their similarities \cite{yu2010}.
 \\
 To search for shared functions among genes, a common way is to
 incorporate the biological knowledge, such as Gene Ontology (GO) and
@@ -80,7 +107,7 @@ whether there is a common theme of a particular gene cluster, but also
 to compare the biological themes among gene clusters. The manual step
 to choose interesting clusters followed by enrichment analysis on each
 selected cluster is slow and tedious. To bridge this gap, we designed
-\Rpackage{clusterProfiler}, for comparing and visulizing functional
+\Rpackage{clusterProfiler} \cite{yu2012}, for comparing and visualizing functional
 profiles among gene clusters.
 
 \section{Citation}
@@ -92,199 +119,193 @@ G Yu, LG Wang, Y Han, QY He. clusterProfiler: an R package for
 comparing biological themes among gene clusters. \textit{OMICS: A
   Journal of Integrative Biology}. 2012, 16(5), 284-287. \\
 
-\section{Functional Profiles}
-
-In \Rpackage{clusterProfiler}, we implemented three functions to
-explore the functional profiles of a collection of genes.
-
-\begin{itemize}
-  \item \Rfunction{groupGO} for gene classification based on GO
-    distribution at a specific level
+\section{Gene Ontology Classification}
+In \Rpackage{clusterProfiler}, \Rfunction{groupGO} is designed for gene classification based on GO distribution at a specific level.
 
 <<groupGO>>=
-data(gcSample)
-x <- groupGO(gene=gcSample[[1]],
-             organism="human",
-             ont="CC",
-             level=2,
-             readable=TRUE)
-head(summary(x))
+require(DOSE)
+data(geneList)
+gene <- names(geneList)[abs(geneList) > 2]
+head(gene)
+ggo <- groupGO(gene=gene, organism="human",
+				ont="BP", level=3, readable=TRUE)
+head(summary(ggo))
 @
 
-  \item \Rfunction{enrichGO} for GO enrichment analysis
+\section{Enrichment Analysis}
+\subsection{Hypergeometric model}
+Enrichment analysis \cite{boyle2004} is a widely used approach to identify biological
+themes. Here we implement hypergeometric model to assess whether the
+number of selected genes associated with disease is larger than
+expected. 
+
+To determine whether any terms annotate a specified list of
+    genes at frequency greater than that would be expected by chance,
+    \Rpackage{clusterProfiler} calculates a p-value using the hypergeometric distribution:
+
+$
+p = 1 - \displaystyle\sum_{i = 0}^{k-1}
+  \frac{
+      {M \choose i}
+      {{N-M} \choose {n-i}}
+    } {
+      {N \choose n}
+    }
+$
+
+In this equation, \textit{N} is the total number of genes in the
+background distribution, \textit{M} is the number of genes within that
+distribution that are annotated (either directly or indirectly) to the
+node of interest, \textit{n} is the size of the list of genes of
+interest and \textit{k} is the number of genes within that list which
+are annotated to the node. The background distribution by default is
+all the genes that have annotation.
+
+P-values were adjusted for multiple comparison, and q-values were also calculated for FDR control.
+
+\subsection{GO enrichment analysis}
 
 <<enrichGO>>=
-y <- enrichGO(gene=gcSample[[2]],
+ego <- enrichGO(gene=gene,
+				universe = names(geneList),
               organism="human",
-              ont="MF",
+              ont="CC",
               pvalueCutoff=0.01,
               readable=TRUE)
-head(summary(y))
+head(summary(ego))
 @
 
-  \item \Rfunction{enrichKEGG} for KEGG pathway enrichment
-  analysis.
+\subsection{KEGG pathway enrichment analysis}
 
 <<enrichKEGG>>=
-z <- enrichKEGG(gene=gcSample[[3]],
+kk <- enrichKEGG(gene=gene,
                 organism="human",
-                pvalueCutoff=0.05,
+                pvalueCutoff=0.01,
                 readable=TRUE)
-head(summary(z))
+head(summary(kk))
 @
 
-With the demise of KEGG (at least without subscription), the pathway
-data used in \Rpackage{clusterProfiler} will not update, and we
-encourage user to use \Rfunction{enrichPathway} in Bioconductor
-package \Rpackage{ReactomePA}, which use Reactome as a source of
-pathway data.
+\subsection{DO enrichment analysis}
 
-\end{itemize}
+Disease Ontology (DO) enrichment analysis is implemented in \Rpackage{DOSE}, please refer to the package vignettes. The \Rfunction{enrichDO} function is very useful for identifying disease association of interesting genes.
 
+\subsection{Reactome pathway enrichment analysis}
 
-The function calls of \Rfunction{groupGO}, \Rfunction{enrichGO} and
-\Rfunction{enrichKEGG} are similar. The input parameters of
+With the demise of KEGG (at least without subscription), the KEGG pathway data in Bioconductor will not update and we encourage user to analyze pathway using \Rpackage{ReactomePA} which use Reactome as a source of pathway data. The function call of \Rfunction{enrichPathway} in \Rpackage{ReactomePA} is consistent with \Rfunction{enrichKEGG}.
+
+\subsection{Function call}
+The function calls of \Rfunction{groupGO}, \Rfunction{enrichGO},
+\Rfunction{enrichKEGG}, \Rfunction{enrichDO} and \Rfunction{enrichPathway} are similar. 
+The input parameters of
 \textit{gene} is a vector of entrezgene (for human and mouse) or ORF
-(for yeast) IDs, and \textit{organism} must be one of "human",
-"mouse", and "yeast", according to the gene IDs.
-
-
+(for yeast) IDs, and \textit{organism} should be supported species (please refer to the manual of the specific function).
+\\
+\\
 For GO analysis, \textit{ont} must be assigned to one of "BP", "MF",
 and "CC" for biological process, molecular function and cellular
 component, respectively. In \Rfunction{groupGO}, the \textit{level}
 specify the GO level for gene projection.
-
-
+\\
+\\
 In enrichment analysis, the \textit{pvalueCutoff} is to restrict the
-result based on their pvalues, and \textit{qvalue} is to control
-false discovery rate (FDR) to prevent high FDR in multiple
-testing. The \textit{readable} is a logical parameter to indicate the
+result based on their pvalues and the adjusted p values. \textit{Q-values} were also calculated for controlling
+false discovery rate (FDR). 
+\\
+\\
+The \textit{readable} is a logical parameter to indicate the
 input gene IDs will map to gene symbols or not.
 
+\subsection{Visualization}
+The output of \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG} can be visualized by bar plot and category-gene-network plot. It is very common to visualize the enrichment result in bar or pie chart. We believe the pie chart is misleading and only provide bar chart.
+
+\subsubsection{barplot}
+<<barplot, fig=TRUE, height=5, width=6>>=
+barplot(ggo, drop=TRUE, showCategory=12)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.6\textwidth]{clusterProfiler-barplot}
+\caption{barplot of GO classification Result}
+\label{barplot}
+\end{figure}
+
+<<barplot-enrich, fig=TRUE, height=5, width=8>>=
+barplot(ego, showCategory=8)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.6\textwidth]{clusterProfiler-barplot-enrich}
+\caption{barplot of GO enrichment Result}
+\label{barplot}
+\end{figure}
+
+\subsubsection{cnetplot}
+In order to consider the potentially biological complexities in which a gene may belong to multiple annotation categories and provide information of numeric changes if available, we developed \Rfunction{cnetplot} function to extract the complex association.
+<<cnetplot, fig=TRUE, height=14, width=14>>=
+cnetplot(ego, categorySize="pvalue", foldChange=geneList)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.9\textwidth]{clusterProfiler-cnetplot}
+\caption{cnetplot of GO enrichment result}
+\label{cnetplot}
+\end{figure}
+
+<<cnetplot-KEGG, fig=TRUE, height=14, width=14>>=
+cnetplot(kk, categorySize="geneNum", foldChange=geneList)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.9\textwidth]{clusterProfiler-cnetplot-KEGG}
+\caption{cnetplot of KEGG enrichment result}
+\label{cnetplot}
+\end{figure}
+\subsubsection{viewKEGG}
+We developed \Rfunction{viewKEGG}, which extend functions of \Rpackage{Pathview} to support output of \Rfunction{enrichKEGG}, to automate visualize KEGG pathway.
+
+<<viewKEGG>>=
+pv.res <- viewKEGG(kk, pathwayID="hsa04110", foldChange=geneList, kegg.native=TRUE)
+pv.res <- viewKEGG(kk, pathwayID=1, foldChange=geneList, kegg.native=FALSE)
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.9\textwidth,type=png,ext=.png,read=.png]{hsa04110.clusterProfiler}
+\caption{viewKEGG in KEGG view}
+\label{viewKEGG}
+\end{figure}
+\\
+\\
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.9\textwidth,type=pdf,ext=.pdf,read=.pdf]{hsa04110.clusterProfiler}
+\caption{viewKEGG in Graphviz view}
+\label{viewKEGG}
+\end{figure}
+
+The parameter \Rparameter{pathwayID} can be numeric vector or character vector. If \Rparameter{pathwayID} is numeric value, \Rfunction{viewKEGG} will use it as index of \textit{KEGG enrichment result} and convert it to corresponding pathway ID. The \Rparameter{pathwayID} can also set to "all", and all the maps of significant pathways will be generated.
 
 \section{Biological theme comparison}
+\Rpackage{clusterProfiler} was developed for biological theme comparison, and it provides a function, \Rfunction{compareCluster}, to automatically calculate enriched functional categories of each gene clusters.
 
-\Rpackage{clusterProfiler} was developed for biological theme
-comparison, and it supplies a function, \Rfunction{compareCluster}, to
-automatically calculate enriched functional categories of each gene
-clusters.
+<<compareCluster, fig=TRUE, height=8, width=8>>=
+data(gcSample)
+ck <- compareCluster(geneCluster=gcSample, fun="enrichKEGG")
+plot(ck)
+@
 
-As we demonstrated in \cite{yu2012}, we analyzed the publicly
-available expression dataset of breast tumour tissues from 200
-patients (GSE11121, Gene Expression Omnibus) \citep{schmidt2008}. We
-identified 8 gene clusters from differentially expressed genes, and
-using \Rfunction{compareCluster} to compare these gene clusters by
-their enriched biological process, with the strict cutoff of p-values
-< 0.01 and q-values < 0.05. The analysis result was illustrated in
-Figure 1. More details of this analysis are described in \cite{yu2012}.
-
-\begin{figure}[htb]
-  \begin{center}
-    \includegraphics[width=.7\linewidth]{omics2012.pdf}
-    \caption{Comparison of GO enrichment of gene clusters}
-    \label{Fig:omicsYu2012}
-  \end{center}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.9\textwidth]{clusterProfiler-compareCluster}
+\caption{Comparison of KEGG enrichment of gene clusters}
+\label{compareCluster}
 \end{figure}
-
-Another example was shown in \cite{yu2011}, we calculated functional
-similarities among viral miRNAs using method described in
-\cite{yu_new_2011}, and compared significant KEGG pathways regulated
-by different viruses using \Rpackage{clusterProfiler}.
-
-The comparison function was designed as a general-package for
-comparing gene clusters of any kind of gene-ontology associations, not
-only GO and KEGG this package provided, but also other biological and
-biomedical ontologies.
-
-For example, \Rfunction{compareCluster} can cooperate seamless with
-\Rpackage{DOSE} and \Rpackage{ReactomePA} and compare gene cluster in the
-context of disease and reactome pathway as demonstrated in the online
-vignette of \Rpackage{DOSE} and \Rpackage{ReactomePA} respectively.
-
-\section{Visualization}
-
-\Rpackage{clusterProfiler} implemented serveral methods for
-visualizing analyzed result.
-
-
-\begin{itemize}
-  \item Bar Plot
-
-    Bar plot was used to visualized functional profile of the given
-collection of genes.
-
-\begin{figure}[htb]
-  \begin{center}
-<<plotenrichGO, fig=T>>=
-plot(y, type="bar", title="MF Enrichment analysis", showCategory=10)
-@
-  \end{center}
-  \caption{\label{Fig:enrichGO} Example of plotting functional profiles}
-\end{figure}
-
-The plot function call was consistent for analysis results generated
-by \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG}.
-
-Users can try the following command:
-<<plot method, eval=F>>=
-plot(x, type="bar", order=FALSE, drop=TRUE)
-plot(z, type="bar", font.size=12)
-@
-
-  \item Category Net Plot
-
-    Category-gene network model was also implmented to extract the
-    complex relationships between genes and associated categories. It
-    provides a high-level model to understand the functionalities of genes.
-
-\begin{figure}[htb]
-  \begin{center}
-<<plotgroupGO, fig=T>>=
-plot(x, type="cnet", showCategory=5, output="fixed")
-@
-  \end{center}
-  \caption{\label{Fig:groupGO-cnet} Example of plotting GO profiles using cnetplot}
-\end{figure}
-
-The plot function call was consistent for analysis results generated
-by \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG}.
-
-Users can try the following command:
-<<plot method 2, eval=F>>=
-plot(y, type="cnet", categorySize="geneNum")
-plot(z, type="cnet", categorySize="pvalue", output="interactive")
-@
-
-
-  \item Dot Plot
-
-    Dot plot was implemented for cluster comparison as shown in Figure
-    1. Here, we demonstrated the functional call of \Rfunction{compareCluster}.
-
-<<compareCluster, eval=F>>=
-xx <- compareCluster(gcSample,
-                     fun="enrichGO",
-                     ont="CC",
-                     organism="human",
-                     pvalueCutoff=0.05)
-plot(xx)
-@
-
-\begin{figure}[htb]
-  \begin{center}
-    \includegraphics[width=.7\linewidth]{compareCluster.png}
-    \caption{GO Enrichment Comparison}
-    \label{Fig:compareCluster}
-  \end{center}
-\end{figure}
-
-Bar plot was also supported to visualize cluster comparision.
-User can try the following command to explore the usage:
-<<plot method, eval=F>>=
-plot(xx, type="bar", by="percentage")
-plot(xx, type="bar", by="count")
-@
-
+\\
+\\
 By default, only top 5 (most significant) categories of each cluster
 was plotted. User can changes the parameter \textit{showCategory} to
 specify how many categories of each cluster to be plotted, and if
@@ -306,31 +327,34 @@ biological meanings. The dots in the plot are color-coded based on
 their corresponding p-values. Color gradient ranging from red to blue
 correspond to in order of increasing p-values. That is, red indicate
 low p-values (high enrichment), and blue indicate high p-values (low
-enrichment). P-values were filtered out by the threshold giving by
-parameter \textit{pvalueCutoff}, and FDR was control by parameter
-\textit{qvalue}.
+enrichment). P-values and adjusted p-values were filtered out by the threshold giving by
+parameter \textit{pvalueCutoff}, and FDR can be estimated by \textit{qvalue}.
 
-\end{itemize}
-
-\Rfunction{compareCluster} was designed as a general function for
-comparing gene clusters of any kind of gene-ontology associations, not
-only GO (\Rfunction{groupGO} and \Rfunction{enrichGO}) and KEGG
-(\Rfunction{enrichKEGG}) provided in this package, but also other
-  biological or biomedical ontologies, including Disease Ontology (via
-  \Rfunction{enrichDO} in \Rpackage{DOSE}) and Reactome Pathway (via
-  \Rfunction{enrichPathway} in \Rpackage{ReactomePA}). More details can be
+User can refer to the example in \cite{yu2012}; we analyzed the publicly available expression dataset of breast tumour tissues from 200 patients (GSE11121, Gene Expression Omnibus) \cite{schmidt2008}. We
+identified 8 gene clusters from differentially expressed genes, and
+using \Rfunction{compareCluster} to compare these gene clusters by
+their enriched biological process.
+\\
+\\
+Another example was shown in \cite{yu2011}, we calculated functional
+similarities among viral miRNAs using method described in
+\cite{yu_new_2011}, and compared significant KEGG pathways regulated
+by different viruses using \Rfunction{compareCluster}.
+\\
+\\
+The comparison function was designed as a general-package for
+comparing gene clusters of any kind of ontology associations, not
+only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} this package provided, but also other biological and biomedical ontologies, for instance, \Rfunction{enrichDO} from \Rpackage{DOSE} and \Rfunction{enrichPathway} from \Rpackage{ReactomePA} work fine with \Rfunction{compareCluster} for comparing biological themes in disease and reactome pathway perspective. More details can be
   found in the vignettes of \Rpackage{DOSE} and \Rpackage{ReactomePA}.
-
 
 \section{Session Information}
 
 The version number of R and packages loaded for generating the vignette were:
 
-\begin{verbatim}
-<<echo=FALSE,results=tex>>=
-sessionInfo()
+<<sessInfo, results=tex, echo=FALSE>>=
+toLatex(sessionInfo())
 @
-\end{verbatim}
 
+\bibliographystyle{unsrt}
 \bibliography{clusterProfiler}
 \end{document}
