@@ -6,7 +6,7 @@ categories with FDR control.}
 \usage{
   enrichGO(gene, organism = "human", ont = "MF",
     pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
-    minGSSize = 5, readable = FALSE)
+    qvalueCutoff = 0.2, minGSSize = 5, readable = FALSE)
 }
 \arguments{
   \item{gene}{a vector of entrez gene id.}
@@ -22,6 +22,8 @@ categories with FDR control.}
   "bonferroni", "BH", "BY", "fdr", "none"}
 
   \item{universe}{background genes}
+
+  \item{qvalueCutoff}{qvalue cutoff}
 
   \item{minGSSize}{minimal size of genes annotated by
   Ontology term for testing.}

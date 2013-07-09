@@ -1,16 +1,21 @@
+CHANGES IN VERSION 1.9.3
+------------------------
+ o extend enrichGO to support 20 species <2013-07-09, Mon>
+ o update vignettes. <2013-07-09, Mon>
+
 CHANGES IN VERSION 1.9.1
 ------------------------
  o enrichGO and enrichKEGG support rat organism <2013-05-20, Mon>
- o change some code according to DOSE <2013-03-27, Wed> 
+ o change some code according to DOSE <2013-03-27, Wed>
  o modify enrichGO and enrichKEGG according to the change of enrich.internal, remove qvalueCutoff parameter, add pAdjustMethod, add universe paramter for user to specify background. <2013-05-29, Wed>
  o add function viewKEGG for visualizing KEGG pathway and update vignette. <2013-06-14, Fri>
-  
+
 CHANGES IN VERSION 1.7.1
 ------------------------
- o support GO enrichment analysis for organism celegans <2013-01-22, Fri> 
+ o support GO enrichment analysis for organism celegans <2013-01-22, Fri>
  o add compress parameter in buildGOmap <2013-01-16, Wed>
- o import ggtitle from ggplot2 <2012-09-07, Fri> 
- o update codes of plot functions accompaning with ggplot2 (version 0.9.2) <2012-09-06, Thu> 
+ o import ggtitle from ggplot2 <2012-09-07, Fri>
+ o update codes of plot functions accompaning with ggplot2 (version 0.9.2) <2012-09-06, Thu>
  o bug fixed of buildGOmap due to the empty GO annotation query from biomaRt <2012-07-18, Wed>
 
 Changes IN VERSION 1.5.0
