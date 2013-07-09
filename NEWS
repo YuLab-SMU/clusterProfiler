@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.9.4
+------------------------
+ o bug fixed of readGff, add default parameter fill=TRUE in read.table function <2013-07-09, Mon>
+
 CHANGES IN VERSION 1.9.3
 ------------------------
  o extend enrichGO to support 20 species <2013-07-09, Mon>
