@@ -50,11 +50,10 @@ Gff2GeneTable <- function(gffFile, compress=TRUE) {
 
 readGff <- function(gffFile, nrows = -1) {
     cat("Reading ", gffFile, ": ", sep="")
-    gff = read.table(gffFile, sep="\t", as.is=TRUE, quote="\"",
-    header=FALSE, comment.char="#", nrows = nrows,
-    colClasses=c("character", "character", "character", "integer",
-    "integer",
-    "character", "character", "character", "character"))
+    gff <- read.table(gffFile, sep="\t", as.is=TRUE, quote="\"", fill=TRUE,
+                      header=FALSE, comment.char="#", nrows=nrows,
+                      colClasses=c("character", "character", "character", "integer",
+                      "integer", "character", "character", "character", "character"))
     colnames(gff) = c("seqname", "source", "feature", "start", "end",
             "score", "strand", "frame", "attributes")
     cat("found", nrow(gff), "rows with classes:",
