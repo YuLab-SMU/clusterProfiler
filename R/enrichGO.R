@@ -9,6 +9,7 @@
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
+##' @param qvalueCutoff qvalue cutoff
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param readable whether mapping gene ID to gene Name
 ##' @return A \code{enrichResult} instance.
@@ -36,6 +37,7 @@ enrichGO <- function(gene,
                      pvalueCutoff=0.05,
                      pAdjustMethod="BH",
                      universe,
+                     qvalueCutoff = 0.2,
                      minGSSize = 5,
                      readable=FALSE) {
 
@@ -45,6 +47,7 @@ enrichGO <- function(gene,
                     pAdjustMethod=pAdjustMethod,
                     ont = ont,
                     universe = universe,
+                    qvalueCutoff = qvalueCutoff,
                     minGSSize = minGSSize,
                     readable = readable)
 }
@@ -119,25 +122,6 @@ EXTID2TERMID.GO <- function(gene, ont, organism) {
     }
     return(qExtID2GO)
 }
-## EXTID2TERMID.GO <- function(gene, ont, organism) {
-##     gene <- as.character(gene)
-##     supported_Org <- clusterProfiler:::getSupported_Org()
-##     if (organism %in% supported_Org) {
-##         annoDb <- clusterProfiler:::getAnnoDb(organism)
-##         require(annoDb, character.only=TRUE)
-##         annoDb <- eval(parse(text=annoDb))
-##     }
-##     go <- select(annoDb, keys=gene, keytype="ENTREZID", cols="GOALL")
-##     go <- go[!is.na(go$GOALL),]
-##     go <- go[go$ONTOLOGY == ont,]
-##     qGO2ExtID.df <- data.frame(GO=go$GOALL, ExtID=go$ENTREZID)
-
-##     ExtID <- NULL ## to satisfy codetools
-##     qExtID2GO <- dlply(qGO2ExtID.df, .(ExtID), function(i) as.character(i$GO))
-
-##     return(qExtID2GO)
-## }
-
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @S3method TERMID2EXTID MF
@@ -158,6 +142,7 @@ TERMID2EXTID.CC <- function(term, organism) {
 }
 
 ##' @importMethodsFrom AnnotationDbi mget
+##' @importFrom GOSemSim getSupported_Org
 TERMID2EXTID.GO <- function(term, organism) {
     term <- as.character(term)
 
@@ -200,6 +185,7 @@ ALLEXTID.CC <- function(organism) {
 
 
 ##' @importMethodsFrom AnnotationDbi mappedkeys
+##' @importFrom GOSemSim getSupported_Org
 ALLEXTID.GO <- function(organism) {
     supported_Org <- getSupported_Org()
     if (organism %in% supported_Org) {

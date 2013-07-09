@@ -2,7 +2,7 @@ Package: clusterProfiler
 Type: Package
 Title: statistical analysis and visulization of functional profiles for
     genes and gene clusters
-Version: 1.9.2
+Version: 1.9.3
 Author: Guangchuang Yu, Li-Gen Wang
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
 Description: The package implements methods to analyze and visualize
@@ -20,9 +20,8 @@ Imports:
     KEGG.db,
     org.Hs.eg.db,
     DOSE,
-    pathview
+    GOSemSim
 Suggests:
-    GOSemSim,
     ReactomePA
 biocViews: Clustering,
     GO,

@@ -2,55 +2,40 @@
     assign("clusterProfilesEnv", new.env(),.GlobalEnv)
 }
 
-
-
-getSupported_Org <- function() {
-    supported_Org <- c("human", "mouse", "rat", "yeast", "zebrafish", "celegans")
-    return(supported_Org)
-}
-
-getAnnoDb <- function(organism) {
-    annoDb <- switch(organism,
-                     human = "org.Hs.eg.db",
-                     mouse = "org.Mm.eg.db",
-                     rat = "org.Rn.eg.db",
-                     yeast = "org.Sc.sgd.db",
-                     zebrafish = "org.Dr.eg.db",
-                     celegans = "org.Ce.eg.db"
-                     )
-    return(annoDb)
-}
-
+##' @importFrom GOSemSim getDb
 getGO2ALLEG_MappedDb <- function(organism) {
-    annoDb <- getAnnoDb(organism)
+    annoDb <- getDb(organism)
     require(annoDb, character.only = TRUE)
 
     mappedDb <- switch(organism,
-                       human = "org.Hs.egGO2ALLEGS",
-                       mouse = "org.Mm.egGO2ALLEGS",
-                       rat = "org.Rn.egGO2ALLEGS",
-                       yeast = "org.Sc.sgdGO2ALLORFS",
-                       zebrafish = "org.Dr.egGO2ALLEGS",
-                       celegans = "org.Ce.egGO2ALLEGS"
+                       anopheles    = "org.Ag.egGO2ALLEGS",
+                       arabidopsis  = "org.At.tairGO2ALLTAIRS",
+                       bovine       = "org.Bt.egGO2ALLEGS",
+                       canine       = "org.Cf.egGO2ALLEGS",
+                       chicken      = "org.Gg.egGO2ALLEGS",
+                       chimp        = "org.Pt.egGO2ALLEGS",
+                       ecolik12     = "org.EcK12.egGO2ALLEGS",
+                       ecsakai      = "org.EcSakai.egGO2ALLEGS",
+                       fly          = "org.Dm.egGO2ALLEGS",
+                       human        = "org.Hs.egGO2ALLEGS",
+                       malaria      = "org.Pf.plasmoGO2ALLORFS",
+                       mouse        = "org.Mm.egGO2ALLEGS",
+                       pig          = "org.Ss.egGO2ALLEGS",
+                       rat          = "org.Rn.egGO2ALLEGS",
+                       rhesus       = "org.Mmu.egGO2ALLEGS",
+                       worm         = "org.Ce.egGO2ALLEGS",
+                       xenopus      = "org.Xl.egGO2ALLEGS",
+                       yeast        = "org.Sc.sgdGO2ALLORFS",
+                       zebrafish    = "org.Dr.egGO2ALLEGS"
                        )
     mappedDb <- eval(parse(text=mappedDb))
     return(mappedDb)
 }
 
+##' @importFrom GOSemSim loadGOMap
 getEG2GO_MappedDb <- function(organism) {
-    annoDb <- getAnnoDb(organism)
-
-    require(annoDb, character.only = TRUE)
-
-    mappedDb <- switch(organism,
-                       human = "org.Hs.egGO",
-                       mouse = "org.Mm.egGO",
-                       rat = "org.Rn.egGO",
-                       yeast = "org.Sc.sgdGO",
-                       zebrafish = "org.Dr.egGO",
-                       celegans = "org.Ce.egGO"
-                       )
-    mappedDb <- eval(parse(text=mappedDb))
+    loadGOMap(organism)
+    mappedDb <- get("gomap", envir=eval(parse(text="GOSemSimEnv")))
     return(mappedDb)
 }
 

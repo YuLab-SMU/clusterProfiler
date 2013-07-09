@@ -8,6 +8,7 @@
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
+##' @param qvalueCutoff qvalue cutoff
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param readable whether mapping gene ID to gene Name
 ##' @return A \code{enrichResult} instance.
@@ -39,6 +40,7 @@ enrichKEGG <- function(gene,
                        pAdjustMethod="BH",
                        universe,
                        minGSSize = 5,
+                       qvalueCutoff=0.2,
                        readable=FALSE) {
 
     enrich.internal(gene,
@@ -48,6 +50,7 @@ enrichKEGG <- function(gene,
                     ont = "KEGG",
                     universe = universe,
                     minGSSize = minGSSize,
+                    qvalueCutoff = qvalueCutoff,
                     readable = readable)
 
 }
@@ -56,7 +59,6 @@ enrichKEGG <- function(gene,
 ##' works with enrichResult object to visualize enriched KEGG pathway
 ##'
 ##'
-##' @importFrom pathview pathview
 ##' @param obj enrichResult object
 ##' @param pathwayID pathway ID or index
 ##' @param foldChange fold change values
@@ -66,17 +68,18 @@ enrichKEGG <- function(gene,
 ##' @param out.suffix suffix of output file
 ##' @export
 viewKEGG <- function(obj, pathwayID, foldChange,
-                     color.low="green",
-                     color.high="red",
-                     kegg.native=TRUE,
-                     out.suffix="clusterProfiler") {
+                       color.low="green",
+                       color.high="red",
+                       kegg.native=TRUE,
+                       out.suffix="clusterProfiler") {
 
     if (class(obj) != "enrichResult")
         stop("only enrichResult object supported.")
     if (obj@ontology != "KEGG")
         stop("only KEGG supported.")
 
-    require("pathview", character.only=TRUE)
+    pkg <- "pathview"
+    suppressMessages(require(pkg, character.only=TRUE))
     if (is.numeric(pathwayID)) {
         pathwayID <- summary(obj)[pathwayID, 1]
     }
@@ -87,6 +90,7 @@ viewKEGG <- function(obj, pathwayID, foldChange,
     bins <- ceiling(m.fc) * 2
     if (bins < 10)
         bins <- 10
+    pathview <- eval(parse(text=pkg))
     res <- lapply(pathwayID, function(pid) {
         pathview(gene.data=foldChange,
                  pathway.id = pid,
