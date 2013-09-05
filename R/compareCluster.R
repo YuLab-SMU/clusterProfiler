@@ -28,7 +28,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", ...) {
     clProf <- llply(geneClusters,
                     .fun=function(i) {
 			x=fun(i, ...)
-                        if (class(x) == "enrichResult") {
+                        if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
                             summary(x)
                         }
                     }
