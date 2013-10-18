@@ -96,7 +96,7 @@ moleculars at systems-level. These kinds of analysis generate huge
 quantitaties of data, which need to be given a biological
 interpretation. A commonly used approach is via clustering in the gene
 dimension for grouping different genes based on their similarities \cite{yu2010}.
-\\
+
 To search for shared functions among genes, a common way is to
 incorporate the biological knowledge, such as Gene Ontology (GO) and
 Kyoto Encyclopedia of genes and Genomes (KEGG), for identifying
@@ -114,7 +114,8 @@ profiles among gene clusters.
 
 Please cite the following articles when using
 \Rpackage{clusterProfiler}. \\
-\\
+
+
 G Yu, LG Wang, Y Han, QY He. clusterProfiler: an R package for
 comparing biological themes among gene clusters. \textit{OMICS: A
   Journal of Integrative Biology}. 2012, 16(5), 284-287. \\
@@ -199,19 +200,16 @@ The function calls of \Rfunction{groupGO}, \Rfunction{enrichGO},
 The input parameters of
 \textit{gene} is a vector of entrezgene (for human and mouse) or ORF
 (for yeast) IDs, and \textit{organism} should be supported species (please refer to the manual of the specific function).
-\\
-\\
+
 For GO analysis, \textit{ont} must be assigned to one of "BP", "MF",
 and "CC" for biological process, molecular function and cellular
 component, respectively. In \Rfunction{groupGO}, the \textit{level}
 specify the GO level for gene projection.
-\\
-\\
+
 In enrichment analysis, the \textit{pvalueCutoff} is to restrict the
 result based on their pvalues and the adjusted p values. \textit{Q-values} were also calculated for controlling
 false discovery rate (FDR). 
-\\
-\\
+
 The \textit{readable} is a logical parameter to indicate the
 input gene IDs will map to gene symbols or not.
 
@@ -278,8 +276,7 @@ pv.res <- viewKEGG(kk, pathwayID=1, foldChange=geneList, kegg.native=FALSE)
 \caption{viewKEGG in KEGG view}
 \label{viewKEGG}
 \end{figure}
-\\
-\\
+
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.9\textwidth,type=pdf,ext=.pdf,read=.pdf]{hsa04110.clusterProfiler}
@@ -304,8 +301,8 @@ plot(ck)
 \caption{Comparison of KEGG enrichment of gene clusters}
 \label{compareCluster}
 \end{figure}
-\\
-\\
+
+
 By default, only top 5 (most significant) categories of each cluster
 was plotted. User can changes the parameter \textit{showCategory} to
 specify how many categories of each cluster to be plotted, and if
@@ -334,14 +331,13 @@ User can refer to the example in \cite{yu2012}; we analyzed the publicly availab
 identified 8 gene clusters from differentially expressed genes, and
 using \Rfunction{compareCluster} to compare these gene clusters by
 their enriched biological process.
-\\
-\\
+
+
 Another example was shown in \cite{yu2011}, we calculated functional
 similarities among viral miRNAs using method described in
 \cite{yu_new_2011}, and compared significant KEGG pathways regulated
 by different viruses using \Rfunction{compareCluster}.
-\\
-\\
+
 The comparison function was designed as a general-package for
 comparing gene clusters of any kind of ontology associations, not
 only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} this package provided, but also other biological and biomedical ontologies, for instance, \Rfunction{enrichDO} from \Rpackage{DOSE} and \Rfunction{enrichPathway} from \Rpackage{ReactomePA} work fine with \Rfunction{compareCluster} for comparing biological themes in disease and reactome pathway perspective. More details can be
