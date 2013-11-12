@@ -84,6 +84,9 @@ viewKEGG <- function(obj, pathwayID, foldChange,
     if (obj@ontology != "KEGG")
         stop("only KEGG supported.")
 
+    print("viewKEGG is a wrapper function of pathview")
+    citation("pathview")
+    
     pkg <- "pathview"
     suppressMessages(require(pkg, character.only=TRUE))
     if (is.numeric(pathwayID)) {
