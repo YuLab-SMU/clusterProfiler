@@ -1,3 +1,8 @@
+CHANGES IN VERSION 1.11.2
+------------------------
+ o remove viewKEGG function <2013-11-12, Tue>
+ o In vignette, illustrates how to visualize KEGG pathway using use pathview package. <2013-11-12, Tue>
+
 CHANGES IN VERSION 1.9.4
 ------------------------
  o bug fixed of readGff, add default parameter fill=TRUE in read.table function <2013-07-09, Mon>

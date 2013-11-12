@@ -1,3 +1,4 @@
+% \VignetteEngine{knitr}
 % \VignetteIndexEntry{An introduction to clusterProfiler}
 % \VignettePackage{clusterProfiler}}
 
@@ -41,6 +42,7 @@
   ]{hyperref}
 
 
+\usepackage{url}
 \usepackage{cite}
 \renewcommand{\floatpagefraction}{0.9}
 
@@ -58,32 +60,32 @@
 \usepackage{graphicx}
 %\usepackage{xstring}
 
-\usepackage{Sweave}
-\SweaveOpts{keep.source=TRUE,eps=FALSE,pdf=FALSE,png=TRUE,include=FALSE,width=4,height=4.5,resolution=150}
-\setkeys{Gin}{width=0.5\textwidth}
 
-\definecolor{darkgray}{gray}{0.2}
-\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontsize=\small,xleftmargin=1em,formatcom={\color{darkgray}}}
-\DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small,xleftmargin=1em,frame=leftline,framerule=.6pt,rulecolor=\color{darkgray},framesep=1em,formatcom={\color{darkgray}}}
-\fvset{listparameters={\setlength{\topsep}{0pt}}}
-\renewenvironment{Schunk}{\vspace{\topsep}}{\vspace{\topsep}}
 
+<<include=FALSE>>=
+library(DOSE)
+library(GO.db)
+library(org.Hs.eg.db)
+library(pathview)
+library(clusterProfiler)
+library(knitr)
+opts_chunk$set(tidy=TRUE,tidy.opts=list(keep.blank.line=FALSE, width.cutoff=50),out.truncate=80,out.lines=6,cache=TRUE,dev='pdf',include=TRUE,fig.width=6,fig.height=6,resolution=150)
+@
 
 \newcommand{\fixme}[1]{{\textbf{Fixme:} \textit{\textcolor{blue}{#1}}}}
 
 
 \title{\textsf{\textbf{Using \Rpackage{clusterProfiler} to identify and compare functional profiles of gene lists}}}
 \author{Guangchuang Yu \\
-College of Life Science and Technology \\
-Jinan University, Guangzhou, China \\
-email: \texttt{guangchuangyu@gmail.com}}
+School of Biological Sciences \\
+The University of Hong Kong, Hong Kong SAR, China \\
+email: \texttt{gcyu@connect.hku.hk}}
 
 \begin{document}
 \maketitle
 
 <<options,echo=FALSE>>=
 options(digits=3, width=80, prompt=" ", continue=" ")
-require(clusterProfiler)
 @
 
 \tableofcontents
@@ -92,7 +94,7 @@ require(clusterProfiler)
 
 In recently years, high-throughput experimental techniques such as
 microarray, RNA-Seq and mass spectrometry can detect cellular
-moleculars at systems-level. These kinds of analysis generate huge
+moleculars at systems-level. These kinds of analyses generate huge
 quantitaties of data, which need to be given a biological
 interpretation. A commonly used approach is via clustering in the gene
 dimension for grouping different genes based on their similarities \cite{yu2010}.
@@ -196,7 +198,7 @@ With the demise of KEGG (at least without subscription), the KEGG pathway data i
 
 \subsection{Function call}
 The function calls of \Rfunction{groupGO}, \Rfunction{enrichGO},
-\Rfunction{enrichKEGG}, \Rfunction{enrichDO} and \Rfunction{enrichPathway} are similar. 
+\Rfunction{enrichKEGG}, \Rfunction{enrichDO} and \Rfunction{enrichPathway} are consistent. 
 The input parameters of
 \textit{gene} is a vector of entrezgene (for human and mouse) or ORF
 (for yeast) IDs, and \textit{organism} should be supported species (please refer to the manual of the specific function).
@@ -217,90 +219,58 @@ input gene IDs will map to gene symbols or not.
 The output of \Rfunction{groupGO}, \Rfunction{enrichGO} and \Rfunction{enrichKEGG} can be visualized by bar plot and category-gene-network plot. It is very common to visualize the enrichment result in bar or pie chart. We believe the pie chart is misleading and only provide bar chart.
 
 \subsubsection{barplot}
-<<barplot, fig=TRUE, height=5, width=6>>=
+<<barplot, fig.height=5, fig.width=6>>=
 barplot(ggo, drop=TRUE, showCategory=12)
 @
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.6\textwidth]{clusterProfiler-barplot}
-\caption{barplot of GO classification Result}
-\label{barplot}
-\end{figure}
 
-<<barplot-enrich, fig=TRUE, height=5, width=8>>=
+
+<<barplot-enrich, fig.height=5, fig.width=8>>=
 barplot(ego, showCategory=8)
 @
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.6\textwidth]{clusterProfiler-barplot-enrich}
-\caption{barplot of GO enrichment Result}
-\label{barplot}
-\end{figure}
 
 \subsubsection{cnetplot}
 In order to consider the potentially biological complexities in which a gene may belong to multiple annotation categories and provide information of numeric changes if available, we developed \Rfunction{cnetplot} function to extract the complex association.
-<<cnetplot, fig=TRUE, height=14, width=14>>=
+<<cnetplot, fig.height=14, fig.width=14>>=
 cnetplot(ego, categorySize="pvalue", foldChange=geneList)
 @
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.9\textwidth]{clusterProfiler-cnetplot}
-\caption{cnetplot of GO enrichment result}
-\label{cnetplot}
-\end{figure}
 
-<<cnetplot-KEGG, fig=TRUE, height=14, width=14>>=
+<<cnetplot-KEGG, fig.height=14, fig.width=14>>=
 cnetplot(kk, categorySize="geneNum", foldChange=geneList)
 @
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.9\textwidth]{clusterProfiler-cnetplot-KEGG}
-\caption{cnetplot of KEGG enrichment result}
-\label{cnetplot}
-\end{figure}
-\subsubsection{viewKEGG}
-We developed \Rfunction{viewKEGG}, which extend functions of \Rpackage{Pathview} to support output of \Rfunction{enrichKEGG}, to automate visualize KEGG pathway.
+
+
+\subsubsection{pathview from pathview package}
+\Rpackage{clusterProfiler} users can also use \Rfunction{pathview} from the \Rpackage{pathview} \cite{luo_pathview} to visualize KEGG pathway.
+
+The following example illustrate how to visualize "hsa04110" pathway, which was enriched in our previous analysis.
 
 <<viewKEGG>>=
-pv.res <- viewKEGG(kk, pathwayID="hsa04110", foldChange=geneList, kegg.native=TRUE)
-pv.res <- viewKEGG(kk, pathwayID=1, foldChange=geneList, kegg.native=FALSE)
+require(pathview)
+hsa04110 <- pathview(gene.data=geneList, pathway.id="hsa04110", species="hsa", limit=list(gene=max(abs(geneList)), cpd=1))
 @
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.9\textwidth,type=png,ext=.png,read=.png]{hsa04110.clusterProfiler}
-\caption{viewKEGG in KEGG view}
+\includegraphics[width=.9\textwidth,type=png,ext=.png,read=.png]{hsa04110.pathview}
+\caption{visualize KEGG pathway using pathview}
 \label{viewKEGG}
 \end{figure}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.9\textwidth,type=pdf,ext=.pdf,read=.pdf]{hsa04110.clusterProfiler}
-\caption{viewKEGG in Graphviz view}
-\label{viewKEGG}
-\end{figure}
+For further information, please refer to the vignette of \Rpackage{pathview} \cite{luo_pathview}.
 
-The parameter \Rparameter{pathwayID} can be numeric vector or character vector. If \Rparameter{pathwayID} is numeric value, \Rfunction{viewKEGG} will use it as index of \textit{KEGG enrichment result} and convert it to corresponding pathway ID. The \Rparameter{pathwayID} can also set to "all", and all the maps of significant pathways will be generated.
 
 \section{Biological theme comparison}
 \Rpackage{clusterProfiler} was developed for biological theme comparison, and it provides a function, \Rfunction{compareCluster}, to automatically calculate enriched functional categories of each gene clusters.
 
-<<compareCluster, fig=TRUE, height=8, width=8>>=
+<<compareCluster, fig.height=8, fig.width=8>>=
 data(gcSample)
 ck <- compareCluster(geneCluster=gcSample, fun="enrichKEGG")
 plot(ck)
 @
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.9\textwidth]{clusterProfiler-compareCluster}
-\caption{Comparison of KEGG enrichment of gene clusters}
-\label{compareCluster}
-\end{figure}
 
 
 By default, only top 5 (most significant) categories of each cluster
@@ -347,7 +317,7 @@ only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} this 
 
 The version number of R and packages loaded for generating the vignette were:
 
-<<sessInfo, results=tex, echo=FALSE>>=
+<<sessInfo, results='asis', echo=FALSE>>=
 toLatex(sessionInfo())
 @
 
