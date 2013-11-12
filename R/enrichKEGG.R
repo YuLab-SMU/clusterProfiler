@@ -66,7 +66,13 @@ enrichKEGG <- function(gene,
 ##' @param color.high color of high foldChange genes
 ##' @param kegg.native logical
 ##' @param out.suffix suffix of output file
-##' @export
+## @importFrom pathview pathview
+## @importFrom pathview kegg.species.code
+##' @references Luo et al. (2013) Pathview: an R/Bioconductor package for 
+##'pathway-based data integration and visualization. \emph{Bioinformatics} (Oxford,
+##'England), 29:14 1830--1831, 2013. ISSN 1367-4803
+##'\url{http://bioinformatics.oxfordjournals.org/content/abstract/29/14/1830.abstract}
+##'PMID: 23740750
 viewKEGG <- function(obj, pathwayID, foldChange,
                        color.low="green",
                        color.high="red",
