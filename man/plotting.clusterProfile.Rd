@@ -2,8 +2,8 @@
 \alias{plotting.clusterProfile}
 \title{plotting-clusterProfile}
 \usage{
-  plotting.clusterProfile(clProf.reshape.df, type = "dot",
-    by = "percentage", title = "", font.size = 12)
+plotting.clusterProfile(clProf.reshape.df, type = "dot", by = "geneRatio",
+  colorBy = "p.adjust", title = "", font.size = 12)
 }
 \arguments{
   \item{clProf.reshape.df}{data frame of compareCluster
@@ -18,12 +18,12 @@
   \item{font.size}{graph font size}
 }
 \value{
-  ggplot object
+ggplot object
 }
 \description{
-  Internal plot function for plotting compareClusterResult
+Internal plot function for plotting compareClusterResult
 }
 \author{
-  Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://ygc.name}
 }
 

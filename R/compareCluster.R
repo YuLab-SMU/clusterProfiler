@@ -134,7 +134,11 @@ setMethod("plot", signature(x="compareClusterResult"),
                    title="",
                    font.size=12,
                    showCategory=5,
-                   by="percentage") {
+                   by="geneRatio",
+                   colorBy="p.adjust",
+                   angle.axis.x=90,
+                   hjust.axis.x=1,
+                   vjust.axis.x=0.5) {
 
               clProf.df <- summary(x)
 
@@ -167,7 +171,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                                            levels=rev(GOlevel[,2]))
 
 
-              if (by=="percentage") {
+              if (by=="rowPercentage") {
                   Description <- Count <- NULL # to satisfy codetools
                   result <- ddply(result,
                                   .(Description),
@@ -193,11 +197,27 @@ setMethod("plot", signature(x="compareClusterResult"),
                                                levels=rev(Termlevel))
 
               } else if (by == "count") {
-
+                  ## nothing
+              } else if (by == "geneRatio") {
+                  cls <- as.character(result$Cluster)
+                  clsu <- unique(cls)
+                  idx <- sapply(clsu, function(i) which(i == cls)[1])
+                  gcSize <- result$Count[idx]
+                  names(gcSize) <- clsu
+                  result$GeneRatio <- result$Count / gcSize[cls]
+                  result$Cluster <- paste(cls, "(", gcSize[cls], ")", sep="")
               } else {
-
+                  ## nothing
               }
-              p <- plotting.clusterProfile(result, type, by, title, font.size)
+              p <- plotting.clusterProfile(result,
+                                           type=type,
+                                           by=by,
+                                           colorBy=colorBy,
+                                           title=title,
+                                           font.size=font.size,
+                                           angle.axis.x=angle.axis.x,
+                                           hjust.axis.x=hjust.axis.x,
+                                           vjust.axis.x=vjust.axis.x)
               return(p)
           }
           )

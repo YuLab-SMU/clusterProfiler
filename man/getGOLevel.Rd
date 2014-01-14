@@ -2,7 +2,7 @@
 \alias{getGOLevel}
 \title{get GOIDs at a specific level}
 \usage{
-  getGOLevel(ont, level)
+getGOLevel(ont, level)
 }
 \arguments{
   \item{ont}{Ontology}
@@ -10,12 +10,12 @@
   \item{level}{GO level}
 }
 \value{
-  a vector of GOIDs
+a vector of GOIDs
 }
 \description{
-  query GOIDs at a specific level.
+query GOIDs at a specific level.
 }
 \author{
-  Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://ygc.name}
 }
 

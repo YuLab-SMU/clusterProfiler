@@ -1,3 +1,8 @@
+CHANGES IN VERSION 1.11.3
+------------------------
+ o now plotting compareClusterResult support scale the dot size by geneRatio, and it is now setting as default. <2014-01-14, Tue>
+ o The original default parameter by="percentage" is now changing to "rowPercentage" <2014-01-14, Tue>
+
 CHANGES IN VERSION 1.11.2
 ------------------------
  o remove viewKEGG function <2013-11-12, Tue>

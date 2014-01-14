@@ -4,9 +4,9 @@
 Given a vector of genes, this function will return the enrichment GO
 categories with FDR control.}
 \usage{
-  enrichGO(gene, organism = "human", ont = "MF",
-    pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
-    qvalueCutoff = 0.2, minGSSize = 5, readable = FALSE)
+enrichGO(gene, organism = "human", ont = "MF", pvalueCutoff = 0.05,
+  pAdjustMethod = "BH", universe, qvalueCutoff = 0.2, minGSSize = 5,
+  readable = FALSE)
 }
 \arguments{
   \item{gene}{a vector of entrez gene id.}
@@ -31,12 +31,12 @@ categories with FDR control.}
   \item{readable}{whether mapping gene ID to gene Name}
 }
 \value{
-  A \code{enrichResult} instance.
+A \code{enrichResult} instance.
 }
 \description{
-  GO Enrichment Analysis of a gene set. Given a vector of
-  genes, this function will return the enrichment GO
-  categories with FDR control.
+GO Enrichment Analysis of a gene set. Given a vector of
+genes, this function will return the enrichment GO
+categories with FDR control.
 }
 \examples{
 #data(gcSample)
@@ -45,11 +45,11 @@ categories with FDR control.}
 	#plot(yy)
 }
 \author{
-  Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://ygc.name}
 }
 \seealso{
-  \code{\link{enrichResult-class}},
-  \code{\link{compareCluster}}
+\code{\link{enrichResult-class}},
+\code{\link{compareCluster}}
 }
 \keyword{manip}
 

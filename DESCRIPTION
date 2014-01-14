@@ -2,7 +2,7 @@ Package: clusterProfiler
 Type: Package
 Title: statistical analysis and visulization of functional profiles for
     genes and gene clusters
-Version: 1.11.2
+Version: 1.11.3
 Author: Guangchuang Yu, Li-Gen Wang
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
 Description: The package implements methods to analyze and visualize
@@ -31,16 +31,6 @@ biocViews: Clustering,
     Visualization,
     MultipleComparisons,
     GeneSetEnrichment
-Collate:
-    'AllGenerics.R'
-    'clusterProfiler-package.R'
-    'compareCluster.R'
-    'enrichGO.R'
-    'enrichKEGG.R'
-    'GFFparser.R'
-    'groupGO.R'
-    'utilities.R'
-    'zzz.R'
 License: Artistic-2.0
 URL: http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118
 Packaged: NA

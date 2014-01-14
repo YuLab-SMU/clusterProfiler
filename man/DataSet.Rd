@@ -5,7 +5,7 @@
 \title{Datasets
 gcSample contains a sample of gene clusters.}
 \description{
-  Datasets gcSample contains a sample of gene clusters.
+Datasets gcSample contains a sample of gene clusters.
 }
 \keyword{datasets}
 
