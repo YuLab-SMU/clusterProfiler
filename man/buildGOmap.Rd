@@ -2,7 +2,7 @@
 \alias{buildGOmap}
 \title{buildGOmap}
 \usage{
-  buildGOmap(gomap, compress = TRUE)
+buildGOmap(gomap, compress = TRUE)
 }
 \arguments{
   \item{gomap}{data.frame with two columns names
@@ -12,18 +12,17 @@
   or not.}
 }
 \value{
-  files save in the the working directory
+files save in the the working directory
 }
 \description{
-  building GO mapping files
+building GO mapping files
 }
 \details{
-  provided by a data.frame of gene and GO directly
-  annotation file this function will building gene to GO
-  and GO to gene mapping, with directly and undirectly
-  annotation.
+provided by a data.frame of gene and GO directly annotation
+file this function will building gene to GO and GO to gene
+mapping, with directly and undirectly annotation.
 }
 \author{
-  Yu Guangchuang
+Yu Guangchuang
 }
 

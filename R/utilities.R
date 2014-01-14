@@ -91,6 +91,7 @@ getGOLevel <- function(ont, level) {
 ##' @return ggplot object
 ##' @importFrom ggplot2 ggplot
 ##' @importFrom ggplot2 aes
+##' @importFrom ggplot2 aes_string
 ##' @importFrom ggplot2 geom_bar
 ##' @importFrom ggplot2 coord_flip
 ##' @importFrom ggplot2 geom_point
@@ -104,8 +105,16 @@ getGOLevel <- function(ont, level) {
 ##' @importFrom ggplot2 scale_colour_gradient
 ##' @importFrom DOSE theme_dose
 ##' @author Guangchuang Yu \url{http://ygc.name}
-plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "percentage",title="", font.size=12) {
-    Description <- Percentage <- Count <- Cluster <- Pvalue <- pvalue <- NULL # to satisfy codetools
+plotting.clusterProfile <- function(clProf.reshape.df,
+                                    type = "dot",
+                                    by = "geneRatio",
+                                    colorBy = "p.adjust",
+                                    title="",
+                                    font.size=12,
+                                    angle.axis.x=90,
+                                    hjust.axis.x=1,
+                                    vjust.axis.x=0.5) {
+    Description <- Percentage <- Count <- Cluster <- GeneRatio <- p.adjust <- pvalue <- NULL # to satisfy codetools
     if (type == "bar") {
         if (by == "percentage") {
             p <- ggplot(clProf.reshape.df,
@@ -121,19 +130,22 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
                 coord_flip()
     }
     if (type == "dot") {
-        if (by == "percentage") {
+        if (by == "rowPercentage") {
             p <- ggplot(clProf.reshape.df,
                         aes(x = Cluster, y = Description, size = Percentage))
         } else if (by == "count") {
             p <- ggplot(clProf.reshape.df,
                         aes(x = Cluster, y = Description, size = Count))
+        } else if (by == "geneRatio") {
+            p <- ggplot(clProf.reshape.df,
+                        aes(x = Cluster, y = Description, size = GeneRatio))
         } else {
-
+            ## nothing here
         }
-        if (any(colnames(clProf.reshape.df) == "pvalue")) {
+        if (any(colnames(clProf.reshape.df) == colorBy)) {
             p <- p +
                 geom_point() +
-                    aes(color=pvalue) +
+                    aes_string(color=colorBy) +
                         scale_colour_gradient(low="red", high="blue")
         } else {
             p <- p + geom_point(colour="steelblue")
@@ -141,10 +153,13 @@ plotting.clusterProfile <- function(clProf.reshape.df,  type = "dot", by = "perc
     }
     p <- p + xlab("") + ylab("") + ggtitle(title) +
         theme_dose(font.size)
-        ## theme(axis.text.x = element_text(colour="black", size=font.size, vjust = 1)) +
-        ##     theme(axis.text.y = element_text(colour="black",
-        ##           size=font.size, hjust = 1)) +
-        ##               ggtitle(title)+theme_bw()
+    ## theme(axis.text.x = element_text(colour="black", size=font.size, vjust = 1)) +
+    ##     theme(axis.text.y = element_text(colour="black",
+    ##           size=font.size, hjust = 1)) +
+    ##               ggtitle(title)+theme_bw()
+    p <- p + theme(axis.text.x = element_text(angle=angle.axis.x,
+                       hjust=hjust.axis.x,
+                       vjust=vjust.axis.x))
     return(p)
 }
 

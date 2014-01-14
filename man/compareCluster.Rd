@@ -4,7 +4,7 @@
 Given a list of gene set, this function will compute profiles of each gene
 cluster.}
 \usage{
-  compareCluster(geneClusters, fun = "enrichGO", ...)
+compareCluster(geneClusters, fun = "enrichGO", ...)
 }
 \arguments{
   \item{geneClusters}{a list of entrez gene id.}
@@ -15,12 +15,12 @@ cluster.}
   \item{...}{Other arguments.}
 }
 \value{
-  A \code{clusterProfResult} instance.
+A \code{clusterProfResult} instance.
 }
 \description{
-  Compare gene clusters functional profile Given a list of
-  gene set, this function will compute profiles of each
-  gene cluster.
+Compare gene clusters functional profile Given a list of
+gene set, this function will compute profiles of each gene
+cluster.
 }
 \examples{
 data(gcSample)
@@ -29,11 +29,11 @@ data(gcSample)
 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
 }
 \author{
-  Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://ygc.name}
 }
 \seealso{
-  \code{\link{compareClusterResult-class}},
-  \code{\link{groupGO}} \code{\link{enrichGO}}
+\code{\link{compareClusterResult-class}},
+\code{\link{groupGO}} \code{\link{enrichGO}}
 }
 \keyword{manip}
 

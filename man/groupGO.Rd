@@ -4,8 +4,8 @@
 Given a vector of genes, this function will return the GO profile at
 specific level.}
 \usage{
-  groupGO(gene, organism = "human", ont = "CC", level = 2,
-    readable = FALSE)
+groupGO(gene, organism = "human", ont = "CC", level = 2,
+  readable = FALSE)
 }
 \arguments{
   \item{gene}{a vector of entrez gene id.}
@@ -21,12 +21,12 @@ specific level.}
   mapping to gene symbols.}
 }
 \value{
-  A \code{groupGOResult} instance.
+A \code{groupGOResult} instance.
 }
 \description{
-  Functional Profile of a gene set at specific GO level.
-  Given a vector of genes, this function will return the GO
-  profile at specific level.
+Functional Profile of a gene set at specific GO level.
+Given a vector of genes, this function will return the GO
+profile at specific level.
 }
 \examples{
 data(gcSample)
@@ -35,11 +35,11 @@ data(gcSample)
 	#plot(yy)
 }
 \author{
-  Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://ygc.name}
 }
 \seealso{
-  \code{\link{groupGOResult-class}},
-  \code{\link{compareCluster}}
+\code{\link{groupGOResult-class}},
+\code{\link{compareCluster}}
 }
 \keyword{manip}
 

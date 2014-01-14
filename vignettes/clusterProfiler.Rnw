@@ -42,7 +42,6 @@
   ]{hyperref}
 
 
-\usepackage{url}
 \usepackage{cite}
 \renewcommand{\floatpagefraction}{0.9}
 
@@ -281,12 +280,15 @@ be plotted.
 
 The dot sizes were based on their corresponding row percentage by
 default, and user can set the parameter \textit{by} to "count" to make
-the comparison based on gene counts. We choose "percentage" as default
-parameter to represent the size of dots, since some categories may
+the comparison based on gene counts. The parameter \textit{by} can also set 
+to "rowPercentage" to normalize the dot sizes, since some categories may
 contain a large number of genes, and make the dot sizes of those small
-categories too small to compare. To provide the full information, we
+categories too small to compare. The default parameter \textit{by} is setting 
+to "geneRatio", which corresponding to the "GeneRatio" column of the output.
+To provide the full information, we
 also provide number of identified genes in each category (numbers in
-parentheses), as shown in Figure 3. If the dot sizes were based on
+parentheses) when \textit{by} is setting to "rowPercentage" and number of gene clusters in each cluster label (numbers in parentheses) when \textit{by} is setting to "geneRatio", 
+as shown in Figure 3. If the dot sizes were based on
 "count", the row numbers will not shown.
 
 The p-values indicate that which categories are more likely to have

@@ -3,9 +3,8 @@
 \title{viewKEGG function is for visualize KEGG pathways
 works with enrichResult object to visualize enriched KEGG pathway}
 \usage{
-  viewKEGG(obj, pathwayID, foldChange, color.low = "green",
-    color.high = "red", kegg.native = TRUE,
-    out.suffix = "clusterProfiler")
+viewKEGG(obj, pathwayID, foldChange, color.low = "green",
+  color.high = "red", kegg.native = TRUE, out.suffix = "clusterProfiler")
 }
 \arguments{
   \item{obj}{enrichResult object}
@@ -23,16 +22,15 @@ works with enrichResult object to visualize enriched KEGG pathway}
   \item{out.suffix}{suffix of output file}
 }
 \description{
-  viewKEGG function is for visualize KEGG pathways works
-  with enrichResult object to visualize enriched KEGG
-  pathway
+viewKEGG function is for visualize KEGG pathways works with
+enrichResult object to visualize enriched KEGG pathway
 }
 \references{
-  Luo et al. (2013) Pathview: an R/Bioconductor package for
-  pathway-based data integration and visualization.
-  \emph{Bioinformatics} (Oxford, England), 29:14
-  1830--1831, 2013. ISSN 1367-4803
-  \url{http://bioinformatics.oxfordjournals.org/content/abstract/29/14/1830.abstract}
-  PMID: 23740750
+Luo et al. (2013) Pathview: an R/Bioconductor package for
+pathway-based data integration and visualization.
+\emph{Bioinformatics} (Oxford, England), 29:14 1830--1831,
+2013. ISSN 1367-4803
+\url{http://bioinformatics.oxfordjournals.org/content/abstract/29/14/1830.abstract}
+PMID: 23740750
 }
 
