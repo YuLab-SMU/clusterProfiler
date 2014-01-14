@@ -215,6 +215,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                   gsize <- as.numeric(sub("/\\d+$", "", as.character(result$GeneRatio)))
                   gcsize <- as.numeric(sub("^\\d+/", "", as.character(result$GeneRatio)))
                   result$GeneRatio = gsize/gcsize
+                  result$Cluster <- paste(as.character(result$Cluster), "(", gcsize, ")", sep="")
               } else {
                   ## nothing
               }
