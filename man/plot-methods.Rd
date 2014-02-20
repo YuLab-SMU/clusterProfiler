@@ -11,10 +11,19 @@
 \arguments{
   \item{...}{Additional argument list}
 
-  \item{x}{the coordinates of points in the plot.
-  Alternatively, a single plotting structure, function or
-  \emph{any \R object with a \code{plot} method} can be
-  provided.}
+  \item{x}{compareClusterResult object}
+
+  \item{type}{one of bar or dot}
+
+  \item{title}{figure title}
+
+  \item{font.size}{font size}
+
+  \item{showCategory}{category numbers}
+
+  \item{by}{one of geneRatio, Percentage or count}
+
+  \item{colorBy}{one of pvalue or p.adjust}
 }
 \value{
 plot

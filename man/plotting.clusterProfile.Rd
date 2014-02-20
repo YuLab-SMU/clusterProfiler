@@ -16,6 +16,8 @@ plotting.clusterProfile(clProf.reshape.df, type = "dot", by = "geneRatio",
   \item{title}{graph title}
 
   \item{font.size}{graph font size}
+
+  \item{colorBy}{one of pvalue or p.adjust}
 }
 \value{
 ggplot object
