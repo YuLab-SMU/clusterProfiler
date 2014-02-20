@@ -71,52 +71,40 @@ setClass("compareClusterResult",
          )
          )
 
-##' show method for \code{compareClusterResult} instance
-##'
-##'
-##' @name show
-##' @docType methods
-##' @rdname show-methods
-##'
-##' @title show method
-##' @param object A \code{compareClusterResult} instance.
-##' @return message
-##' @importFrom methods show
-##' @author Guangchuang Yu \url{http://ygc.name}
+## show method for \code{compareClusterResult} instance
+##
+##
+## @name show
+## @alias show
+## @docType methods
+## @rdname show-methods
+##
+## @title show method
+## @param object A \code{compareClusterResult} instance.
+## @return message
+## @importFrom methods show
+## @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
               geneClusterLen <- length(object@geneClusters)
-                                        #fun <- object@fun
-                                        #fun <- as.character(substitute(fun))
-                                        #if (fun == "enrichKEGG") {
-                                        #                analysis <- "KEGG Enrichment Analysis"
-                                        #            } else if (fun == "groupGO") {
-                                        #                analysis <- "GO Profiling Analysis"
-                                        #           } else if (fun == "enrichGO") {
-                                        #                analysis <- "GO Enrichment Analysis"
-                                        #           } else if (fun == "enrichDO") {
-                                        #              analysis <- "DO Enrichment Analysis"
-                                        #	      } else {
-                                        #		analysis <- "User specify Analysis"
-                                        #	      }
-                                        #              cat ("Compare", geneClusterLen, "gene clusters using", analysis, "\n")
               cat ("Result of Comparing", geneClusterLen, "gene clusters", "\n")
           }
           )
 
-##' summary method for \code{compareClusterResult} instance
-##'
-##'
-##' @name summary
-##' @docType methods
-##' @rdname summary-methods
-##'
-##' @title summary method
-##' @param object A \code{compareClusterResult} instance.
-##' @return A data frame
-##' @importFrom stats4 summary
-##' @exportMethod summary
-##' @author Guangchuang Yu \url{http://ygc.name}
+## summary method for \code{compareClusterResult} instance
+##
+##
+## @name summary
+## @alias summary
+## @docType methods
+## @rdname summary-methods
+##
+## @title summary method
+## @param object A \code{compareClusterResult} instance.
+## @return A data frame
+## @importFrom stats4 summary
+## @exportMethod summary
+## @author Guangchuang Yu \url{http://ygc.name}
 setMethod("summary", signature(object="compareClusterResult"),
           function(object) {
               return(object@compareClusterResult)
@@ -128,6 +116,13 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @importFrom plyr ddply
 ##' @importFrom plyr mdply
 ##' @importFrom plyr .
+##' @param x compareClusterResult object
+##' @param type one of bar or dot
+##' @param title figure title
+##' @param font.size font size
+##' @param showCategory category numbers
+##' @param by one of geneRatio, Percentage or count
+##' @param colorBy one of pvalue or p.adjust
 setMethod("plot", signature(x="compareClusterResult"),
           function(x,
                    type="dot",
@@ -135,10 +130,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                    font.size=12,
                    showCategory=5,
                    by="geneRatio",
-                   colorBy="p.adjust",
-                   angle.axis.x=90,
-                   hjust.axis.x=1,
-                   vjust.axis.x=0.5) {
+                   colorBy="p.adjust") {
 
               clProf.df <- summary(x)
 
@@ -215,7 +207,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                   gsize <- as.numeric(sub("/\\d+$", "", as.character(result$GeneRatio)))
                   gcsize <- as.numeric(sub("^\\d+/", "", as.character(result$GeneRatio)))
                   result$GeneRatio = gsize/gcsize
-                  result$Cluster <- paste(as.character(result$Cluster), "(", gcsize, ")", sep="")
+                  result$Cluster <- paste(as.character(result$Cluster),"\n", "(", gcsize, ")", sep="")
               } else {
                   ## nothing
               }
@@ -224,10 +216,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                                            by=by,
                                            colorBy=colorBy,
                                            title=title,
-                                           font.size=font.size,
-                                           angle.axis.x=angle.axis.x,
-                                           hjust.axis.x=hjust.axis.x,
-                                           vjust.axis.x=vjust.axis.x)
+                                           font.size=font.size)
               return(p)
           }
           )

@@ -97,18 +97,18 @@ setClass("groupGOResult",
          )
 
 
-##' show method for \code{groupGOResult} instance
-##'
-##'
-##' @name show
-##' @docType methods
-##' @rdname show-methods
-##'
-##' @title show method
-##' @param object A \code{groupGOResult} instance
-##' @return message
-##' @importFrom methods show
-##' @author Guangchuang Yu \url{http://ygc.name}
+## show method for \code{groupGOResult} instance
+##
+##
+## @name show
+## @docType methods
+## @rdname show-methods
+##
+## @title show method
+## @param object A \code{groupGOResult} instance
+## @return message
+## @importFrom methods show
+## @author Guangchuang Yu \url{http://ygc.name}
 setMethod("show", signature(object="groupGOResult"),
           function (object){
               ont = object@ontology

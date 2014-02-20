@@ -88,6 +88,7 @@ getGOLevel <- function(ont, level) {
 ##' @param by one of percentage and count
 ##' @param title graph title
 ##' @param font.size graph font size
+##' @param colorBy one of pvalue or p.adjust
 ##' @return ggplot object
 ##' @importFrom ggplot2 ggplot
 ##' @importFrom ggplot2 aes
@@ -110,10 +111,7 @@ plotting.clusterProfile <- function(clProf.reshape.df,
                                     by = "geneRatio",
                                     colorBy = "p.adjust",
                                     title="",
-                                    font.size=12,
-                                    angle.axis.x=90,
-                                    hjust.axis.x=1,
-                                    vjust.axis.x=0.5) {
+                                    font.size=12) {
     Description <- Percentage <- Count <- Cluster <- GeneRatio <- p.adjust <- pvalue <- NULL # to satisfy codetools
     if (type == "bar") {
         if (by == "percentage") {
@@ -157,9 +155,9 @@ plotting.clusterProfile <- function(clProf.reshape.df,
     ##     theme(axis.text.y = element_text(colour="black",
     ##           size=font.size, hjust = 1)) +
     ##               ggtitle(title)+theme_bw()
-    p <- p + theme(axis.text.x = element_text(angle=angle.axis.x,
-                       hjust=hjust.axis.x,
-                       vjust=vjust.axis.x))
+    ## p <- p + theme(axis.text.x = element_text(angle=angle.axis.x,
+    ##                    hjust=hjust.axis.x,
+    ##                    vjust=vjust.axis.x))
     return(p)
 }
 
