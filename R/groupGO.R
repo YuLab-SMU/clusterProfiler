@@ -43,12 +43,13 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
     geneID <- sapply(geneID.list, function(i) paste(i, collapse="/"))
 
     Count <- unlist(lapply(geneID.list, length))
-
+    GeneRatio <- paste(Count, length(unique(unlist(geneID))), sep="/")
     Descriptions <- TERM2NAME(GOLevel)
     result = data.frame(ID=as.character(GOLevel),
-                        Description=Descriptions,
-                        Count=Count,
-                        geneID=geneID)
+        Description=Descriptions,
+        Count=Count,
+        GeneRatio=GeneRatio,
+        geneID=geneID)
 
     x <- new("groupGOResult",
              result=result,
