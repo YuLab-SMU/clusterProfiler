@@ -152,13 +152,24 @@ TERMID2EXTID.GO <- function(term, organism) {
         GO2ExtID <- mget(term, mappedDb, ifnotfound=NA)
         GO2ExtID <- lapply(GO2ExtID, function(i) unique(i))
     } else {
+        oldwd <- getwd()
+        if(organism == "D39") {
+            dir <- system.file("extdata/D39/", package="clusterProfiler")
+            setwd(dir)
+        }
+        if(organism == "M5005") {
+            dir <- system.file("extdata/M5005/", package="clusterProfiler")
+            setwd(dir)
+        }
         if (file.exists("GO2ALLEG.rda")) {
             GO2ALLEG <- NULL # to satisfy codetools
             load("GO2ALLEG.rda")
             GO2ExtID <- GO2ALLEG[term]
         } else {
+            setwd(oldwd)
             stop("GO Mapping file not found in the working directory")
         }
+        setwd(oldwd)
     }
     return(GO2ExtID)
 }
@@ -192,13 +203,24 @@ ALLEXTID.GO <- function(organism) {
         mappedDb <- getEG2GO_MappedDb(organism)
         extID <- mappedkeys(mappedDb)
     } else {
+        oldwd <- getwd()
+        if(organism == "D39") {
+            dir <- system.file("extdata/D39/", package="clusterProfiler")
+            setwd(dir)
+        }
+        if(organism == "M5005") {
+            dir <- system.file("extdata/M5005/", package="clusterProfiler")
+            setwd(dir)
+        }
         if (file.exists("EG2ALLGO.rda")) {
             EG2ALLGO <- NULL ## to satisfy codetools
             load("EG2ALLGO.rda")
             extID <- names(EG2ALLGO)
         } else {
+            setwd(oldwd)
             stop("GO mapping file not found in the working directory")
         }
+        setwd(oldwd)
     }
     return(extID)
 }

@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.13.1
+------------------------
+ o update man files according to the change of roxygen2 (ver 4.0.0) <2014-05-16, Fri>
+
 CHANGES IN VERSION 1.11.3
 ------------------------
  o now plotting compareClusterResult support scale the dot size by geneRatio, and it is now setting as default. <2014-01-14, Tue>
