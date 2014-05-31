@@ -1,0 +1,85 @@
+How to use clusterProfiler to do GO enrichment analysis with unsupported organisms
+==================================
+#### Guangchuang Yu
+#### Jinan University
+
+
+This vignette is an extension for what already exists in the clusterProfiler.pdf vignette.  The clusterProfiler provide enrichGO function to do hypergeometric testing with “human”, “mouse” , "zebrafish" and “yeast” organism supported. It is very easy to support other organism provided that the bioconductor annotation package exists.  
+
+
+Most of the software packages for GO enrichment analysis in the Bioconductor project were designed for model organism, and they all rely on the bioconductor annotation packages.
+
+If the organism without annotation package available, it is not easy to employ the existed package to perform such an analysis.
+
+I have extended clusterProfiler to support the unsupported organism. 
+
+Here, I will illustrate how to do GO analysis for Streptococcus pyogenes M1 MGAS5005, as an example.
+
+For doing GO analysis, you should have gene and GO mapping data.
+
+I suppose you have nothing in hand, and explain how you get these things in hand.
+
+The whole genome annotation can be downloaded from NCBI. In this example, the M5005 bacteria whole genome annotation file can be downloaded from: ftp://ftp.ncbi.nih.gov/genomes/Bacteria/Streptococcus_pyogenes_MGAS5005_uid58337/
+
+The clusterProfiler package has functions for parsing GFF file. When you have downloaded the gff file, using the following command:
+
+```{r}
+suppressPackageStartupMessages(require(clusterProfiler))
+Gff2GeneTable("NC_007297.gff")
+```
+
+This function will parse the gff file, and extract information to form a data.frame, and save it as “geneTable.rda” in the current working directory.
+
+```{r}
+load("geneTable.rda")
+head(geneTable)
+```
+
+This geneTable is useful for ID mapping, and will be used for mapping GeneID to GeneName if parameter readable is set to TRUE when calling enrichGO.
+
+```{r}
+eg <- geneTable$GeneID
+```
+
+Now you have all GeneID stored in eg, I recommend you using biomaRt package to query GO annotation, and I will demonstrate how to do it.
+
+```{r}
+require(biomaRt)
+bacteria=useMart("bacteria_mart_16")
+bac = useDataset("str_22007_gene",mart=bacteria)
+gomap <- getBM(attributes = c("entrezgene",
+               "go_accession"),
+                filters = "entrezgene",
+                values = eg, mart = bac)
+
+dim(gomap)
+head(gomap)
+```
+
+You should use other dataset for other bacteria. If the organism is not bacteria, you should use other mart, for instance fungi_mart_13 for fungi.
+
+
+The gomap only contain GO directly annotation, but undirectly annotation was needed for GO enrichment analysis.
+
+So, clusterProfiler provided another function called buildGOmap, for building gomap files needed for analysis.
+
+```{r}
+buildGOmap(gomap)
+```
+
+After running this command, buildGOmap function generate GO2EG.rda, EG2GO.rda, GO2ALLEG.rda and EG2ALLGO.rda in the working directory.
+
+Providing these files in the working directory. The enrichGO function can perform hypergeometric test for this organism.
+
+Suppose the following genes are of interested.
+
+```{r}
+gene <- c("3572890","3572609","3572407","3572408","3572333",
+          "3572206","3572193","3571922","3571782","3571786",
+          "3571624","3571626","3571412","3571413","3571382",
+          "3571286","3571289","3571124","3571106","3571029")
+mf <- enrichGO(gene, ont="MF", organism="M5005", pvalueCutoff=0.05, readable=TRUE)
+summary(mf)
+```
+
+You can used other tools provided in clusterProfiler, such as plot to visualize the result, and compareCluster to compare different gene clusters.
