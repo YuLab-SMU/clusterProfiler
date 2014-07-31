@@ -8,7 +8,7 @@ Guangchuang YU, School of Public Health, The University of Hong Kong [http://ygc
 
 ## Citation ##
 
-Please cite the following articles when using `clusterProfiler`:
+Please cite the following article when using `clusterProfiler`:
 
 ```
 Yu G, Wang L, Han Y and He. Q (2012). 
