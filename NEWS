@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.13.2
+------------------------
+ o implement gseGO and gseKEGG for gene set enrichment analysis <2014-07-31, Thu>
+ o import enrichMap from DOSE <2014-07-31, Thu>
+ o add corresponding section in vignettes <2014-07-31, Thu>
+
 CHANGES IN VERSION 1.13.1
 ------------------------
  o update man files according to the change of roxygen2 (ver 4.0.0) <2014-05-16, Fri>

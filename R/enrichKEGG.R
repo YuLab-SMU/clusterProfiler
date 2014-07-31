@@ -118,7 +118,8 @@ viewKEGG <- function(obj, pathwayID, foldChange,
 ##' @importFrom DOSE EXTID2TERMID
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importFrom KEGG.db KEGGEXTID2PATHID
-##' @S3method EXTID2TERMID KEGG
+##' @method EXTID2TERMID KEGG
+##' @export
 EXTID2TERMID.KEGG <- function(gene, organism) {
     gene <- as.character(gene)
     qExtID2PathID <- mget(gene, KEGGEXTID2PATHID, ifnotfound=NA)
@@ -130,7 +131,8 @@ EXTID2TERMID.KEGG <- function(gene, organism) {
 ##' @importFrom DOSE TERMID2EXTID
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
-##' @S3method TERMID2EXTID KEGG
+##' @method TERMID2EXTID KEGG
+##' @export
 TERMID2EXTID.KEGG <- function(term, organism) {
     pathID2ExtID <- mget(unique(term), KEGGPATHID2EXTID, ifnotfound=NA)
     return(pathID2ExtID)
@@ -138,7 +140,8 @@ TERMID2EXTID.KEGG <- function(term, organism) {
 
 ##' @importFrom DOSE ALLEXTID
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
-##' @S3method ALLEXTID KEGG
+##' @method ALLEXTID KEGG
+##' @export
 ALLEXTID.KEGG <- function(organism) {
     ##pathID2ExtID <- as.list(KEGGPATHID2EXTID)
     ##pathID <- names(pathID2ExtID)
@@ -173,7 +176,8 @@ ALLEXTID.KEGG <- function(organism) {
 ##' @importFrom DOSE TERM2NAME
 ##' @importFrom KEGG.db KEGGPATHID2NAME
 ##' @importMethodsFrom AnnotationDbi mget
-##' @S3method TERM2NAME KEGG
+##' @method TERM2NAME KEGG
+##' @export
 TERM2NAME.KEGG <- function(term, organism) {
     term <- as.character(term)
     pathIDs <- gsub("^\\D+", "",term, perl=T)
