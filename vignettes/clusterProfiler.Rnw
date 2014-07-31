@@ -200,7 +200,8 @@ ego2 <- gseGO(geneList=geneList,
               ont="CC",
               nPerm=100,
               minGSSize=120,
-              pvalueCutoff=0.01)
+              pvalueCutoff=0.01,
+              verbose=FALSE)
 head(summary(ego2))
 @
 
@@ -219,7 +220,8 @@ kk2 <- gseKEGG(geneList=geneList,
                organism="human",
                nPerm=100,
                minGSSize=120,
-               pvalueCutoff=0.01)
+               pvalueCutoff=0.01,
+               verbose=FALSE)
 head(summary(kk2))
 @
 
