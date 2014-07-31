@@ -12,6 +12,7 @@
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
 ##' @importFrom DOSE gsea
+##' @importFrom DOSE gseAnalyzer
 ##' @importClassesFrom DOSE gseaResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
@@ -29,24 +30,16 @@ gseGO <- function(geneList,
                   pAdjustMethod = "BH",
                   verbose       = TRUE) {
     
-
-    setType <- ont
-    if (verbose)
-        sprintf("preparing geneSet collections of setType '%s'...", setType)
+    gseAnalyzer(geneList      = geneList,
+                setType       = ont,
+                organism      = organism,
+                exponent      = exponent,
+                nPerm         = nPerm,
+                minGSSize     = minGSSize,
+                pvalueCutoff  = pvalueCutoff,
+                pAdjustMethod = pAdjustMethod,
+                verbose       = verbose)
     
-    class(setType) <- setType
-    geneSets <- getGeneSet(setType, organism)
-    
-    gsea(geneList      = geneList,
-         geneSets      = geneSets,
-         setType       = setType,
-         organism      = organism,
-         exponent      = exponent,
-         nPerm         = nPerm,
-         minGSSize     = minGSSize,
-         pvalueCutoff  = pvalueCutoff,
-         pAdjustMethod = pAdjustMethod,
-         verbose       = verbose)
 }
 
 
@@ -63,6 +56,7 @@ gseGO <- function(geneList,
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
 ##' @importFrom DOSE gsea
+##' @importFrom DOSE gseAnalyzer
 ##' @importClassesFrom DOSE gseaResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
@@ -79,24 +73,16 @@ gseKEGG <- function(geneList,
                   pAdjustMethod = "BH",
                   verbose       = TRUE) {
     
+    gseAnalyzer(geneList      = geneList,
+                setType       = "KEGG",
+                organism      = organism,
+                exponent      = exponent,
+                nPerm         = nPerm,
+                minGSSize     = minGSSize,
+                pvalueCutoff  = pvalueCutoff,
+                pAdjustMethod = pAdjustMethod,
+                verbose       = verbose)
 
-    setType <- "KEGG"
-    if (verbose)
-        sprintf("preparing geneSet collections of setType '%s'...", setType)
-    
-    class(setType) <- setType
-    geneSets <- getGeneSet(setType, organism)
-    
-    gsea(geneList      = geneList,
-         geneSets      = geneSets,
-         setType       = setType,
-         organism      = organism,
-         exponent      = exponent,
-         nPerm         = nPerm,
-         minGSSize     = minGSSize,
-         pvalueCutoff  = pvalueCutoff,
-         pAdjustMethod = pAdjustMethod,
-         verbose       = verbose)
 }
 
 ##' visualize analyzing result of GSEA
