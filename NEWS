@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.13.3
+------------------------
+ o add keepGOlevel, keepGOterm, excludeGOlevel, excludeGOterm, not exported yet <2014-08-28, Thu>
+
 CHANGES IN VERSION 1.13.2
 ------------------------
  o implement gseGO and gseKEGG for gene set enrichment analysis <2014-07-31, Thu>

@@ -2,6 +2,40 @@
     assign("clusterProfilesEnv", new.env(),.GlobalEnv)
 }
 
+excludeGOlevel <- function(x, ont, level) {
+    lv <- unlist(lapply(level, getGOLevel, ont=ont))
+    x <- excludeGOterm(x, lv)
+    return(x)
+}
+
+excludeGOterm <- function(x, term) {
+    if ( is(x, "enrichResult") ) {
+        x@result <- x@result[! x@result[, "ID"] %in% term, ]
+    } else if ( is(x, "compareClusterResult") ) {
+        x@compareClusterResult <- x@compareClusterResult[! x@compareClusterResult[, "ID"] %in% term, ]
+    } else {
+        stop("x should be one of enrichResult of compareClusterResult...")
+    }
+    return(x)
+}
+
+keepGOlevel <- function(x, ont, level) {
+    lv <- unlist(lapply(level, getGOLevel, ont=ont))
+    x <- keepGOterm(x, lv)
+    return(x)
+}
+
+keepGOterm <- function(x, term) {
+    if ( is(x, "enrichResult") ) {
+        x@result <- x@result[x@result[, "ID"] %in% term, ]
+    } else if ( is(x, "compareClusterResult") ) {
+        x@compareClusterResult <- x@compareClusterResult[x@compareClusterResult[, "ID"] %in% term, ]
+    } else {
+        stop("x should be one of enrichResult of compareClusterResult...")
+    }
+    return(x)
+}
+
 ##' @importFrom GOSemSim getDb
 getGO2ALLEG_MappedDb <- function(organism) {
     annoDb <- getDb(organism)
