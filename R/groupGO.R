@@ -5,7 +5,10 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism Currently, only "human" and "mouse" supported.
+##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
+##'"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
+##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
+##'"zebrafish".
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param level Specific GO Level.
 ##' @param readable if readable is TRUE, the gene IDs will mapping to gene

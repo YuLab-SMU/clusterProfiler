@@ -12,7 +12,10 @@ enrichGO(gene, organism = "human", ont = "MF", pvalueCutoff = 0.05,
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{Currently, only "human", "mouse" and "yeast" supported.}
+\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine",
+"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
+"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
+"zebrafish".}
 
 \item{ont}{One of "MF", "BP", and "CC" subontologies.}
 

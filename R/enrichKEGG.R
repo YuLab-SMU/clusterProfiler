@@ -184,3 +184,4 @@ TERM2NAME.KEGG <- function(term, organism) {
     path2name <- unlist(mget(pathIDs, KEGGPATHID2NAME))
     return(path2name)
 }
+
