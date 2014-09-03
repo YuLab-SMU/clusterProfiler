@@ -10,7 +10,10 @@ gseKEGG(geneList, organism = "human", exponent = 1, nPerm = 1000,
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{organism}{organism}
+\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine",
+"chicken", "chimp", "ecolik12","ecsakai", "fly", "human",
+"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus",
+"yeast" and "zebrafish".}
 
 \item{exponent}{weight of each step}
 

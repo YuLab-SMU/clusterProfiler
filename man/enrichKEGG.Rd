@@ -12,7 +12,10 @@ enrichKEGG(gene, organism = "human", pvalueCutoff = 0.05,
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{Currently, only "human" and "mouse" supported.}
+\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine",
+"chicken", "chimp", "ecolik12","ecsakai", "fly", "human",
+"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus",
+"yeast" and "zebrafish".}
 
 \item{pvalueCutoff}{Cutoff value of pvalue.}
 
