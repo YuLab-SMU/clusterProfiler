@@ -121,6 +121,36 @@ G Yu, LG Wang, Y Han, QY He. clusterProfiler: an R package for
 comparing biological themes among gene clusters. \textit{OMICS: A
   Journal of Integrative Biology}. 2012, 16(5), 284-287. \\
 
+\section{Supported organisms}
+At present, \Rpackage{clusterProfiler} about 20 species as shown below:
+    
+\begin{itemize}
+  \item \textit{Arabidopsis}
+  \item \textit{Anopheles}
+  \item \textit{Bovine}
+  \item \textit{Canine}
+  \item \textit{Chicken}
+  \item \textit{Chimp}
+  \item \textit{E coli strain K12}
+  \item \textit{E coli strain Sakai}
+  \item \textit{Fly}
+  \item \textit{Human}
+  \item \textit{Malaria}
+  \item \textit{Mouse}
+  \item \textit{Pig}
+  \item \textit{Rat}
+  \item \textit{Rhesus}
+  \item \textit{Worm}
+  \item \textit{Xenopus}
+  \item \textit{Yeast}
+  \item \textit{Zebrafish}
+\end{itemize}
+
+These species are all supported by GO and KEGG analyses.
+
+GO analyses also support \textit{Coelicolor} and \textit{Gondii}.
+
+
 \section{Gene Ontology Classification}
 In \Rpackage{clusterProfiler}, \Rfunction{groupGO} is designed for gene classification based on GO distribution at a specific level.
 

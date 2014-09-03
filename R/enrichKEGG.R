@@ -4,7 +4,10 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism Currently, only "human" and "mouse" supported.
+##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
+##'"chicken", "chimp", "ecolik12","ecsakai", "fly", "human",
+##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus",
+##' "yeast" and "zebrafish".
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
@@ -148,18 +151,46 @@ ALLEXTID.KEGG <- function(organism) {
     pathID <- mappedkeys(KEGGPATHID2EXTID)
 
     ## select species specific pathways
-    if (organism == "human") {
+    if (organism == "anopheles") {
+        idx <- grep("^aga", pathID)
+    } else if (organism == "arabidopsis") {
+        idx <- grep("^ath", pathID)
+    } else if (organism == "bovine") {
+        idx <- grep("^bta", pathID)
+    } else if (organism == "canine") {
+        idx <- grep("^cfa", pathID)
+    } else if (organism == "celegans") {
+        idx <- grep("^cel", pathID)
+    } else if (organism == "chicken") {
+        idx <- grep("^gga", pathID)
+    } else if (organism == "chipm") {
+        idx <- grep("^ptr", pathID)
+    } else if (organism == "ecolik12") {
+        idx <- grep("^eco", pathID)
+    } else if (organism == "ecsakai") {
+        idx <- grep("^ecs", pathID)
+    } else if (organism == "fly") {
+        idx <- grep("^dme", pathID)
+    } else if (organism == "human") {
         idx <- grep("^hsa", pathID)
+    } else if (organism == "malaria") {
+        idx <- grep("^pfa", pathID)
     } else if (organism == "mouse") {
         idx <- grep("^mmu", pathID)
+    } else if (organism == "pig") {
+        idx <- grep("^ssc", pathID)
     } else if (organism == "rat") {
         idx <- grep("^rno", pathID)
+    } else if (organism == "rhesus") {
+        idx <- grep("^mcc", pathID)
+    } else if (organism == "worm") {
+        idx <- grep("^cel", pathID)
+    } else if (organism == "xenopus") {
+        idx <- grep("^xla", pathID)
     } else if (organism == "yeast") {
         idx <- grep("^sce", pathID)
     } else if (organism == "zebrafish") {
         idx <- grep("^dre", pathID)
-    } else if (organism == "celegans") {
-        idx <- grep("^cel", pathID)
     } else {
         stop (" Not supported yet... \n" )
     }
