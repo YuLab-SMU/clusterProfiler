@@ -159,8 +159,6 @@ ALLEXTID.KEGG <- function(organism) {
         idx <- grep("^bta", pathID)
     } else if (organism == "canine") {
         idx <- grep("^cfa", pathID)
-    } else if (organism == "celegans") {
-        idx <- grep("^cel", pathID)
     } else if (organism == "chicken") {
         idx <- grep("^gga", pathID)
     } else if (organism == "chipm") {
