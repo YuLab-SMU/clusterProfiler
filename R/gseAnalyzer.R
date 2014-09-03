@@ -4,7 +4,10 @@
 ##' @title gseGO
 ##' @param geneList order ranked geneList
 ##' @param ont one of "BP", "MF", "CC" or "GO"
-##' @param organism organism
+##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
+##'"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
+##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
+##'"zebrafish".
 ##' @param exponent weight of each step
 ##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing

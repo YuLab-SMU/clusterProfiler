@@ -11,7 +11,10 @@ groupGO(gene, organism = "human", ont = "CC", level = 2,
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{Currently, only "human" and "mouse" supported.}
+\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine",
+"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
+"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
+"zebrafish".}
 
 \item{ont}{One of "MF", "BP", and "CC" subontologies.}
 
