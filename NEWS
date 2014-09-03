@@ -1,5 +1,10 @@
-CHANGES IN VERSION 1.13.4
+CHANGES IN VERSION 1.99.0
 ------------------------
+ o set version to 1.99.0 and will release version 2.0.0 in next BioConductor release. <2014-09-03, Wed>
+   + In version 2.0.0, the package was extended to support about 20 species for both of GO and KEGG analyses.
+   + support gene set enrichment analysis algorithm for both of GO and KEGG.
+   + support enrichMap visualization.
+ o support about 20 species of KEGG analyses. <2014-09-03, Wed>
  o update man file to indicate that enrichGO is now support more than 20 species <2014-09-03, Wed>
 
 CHANGES IN VERSION 1.13.3
