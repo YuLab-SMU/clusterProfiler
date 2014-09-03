@@ -4,7 +4,10 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism Currently, only "human", "mouse" and "yeast" supported.
+##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
+##'"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
+##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
+##'"zebrafish".
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"

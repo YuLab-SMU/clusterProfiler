@@ -2,7 +2,7 @@ Package: clusterProfiler
 Type: Package
 Title: statistical analysis and visulization of functional profiles for
     genes and gene clusters
-Version: 1.13.3
+Version: 1.13.4
 Author: Guangchuang Yu, Li-Gen Wang
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
 Description: This package implements methods to analyze and visualize
@@ -26,7 +26,7 @@ Suggests:
     knitr
 VignetteBuilder: knitr
 License: Artistic-2.0
-URL: http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118
+URL: https://github.com/GuangchuangYu/clusterProfiler
 Packaged: NA
 biocViews: Clustering, GO, Pathways, Visualization, MultipleComparison,
     GeneSetEnrichment
