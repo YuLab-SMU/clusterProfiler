@@ -181,7 +181,7 @@ ALLEXTID.KEGG <- function(organism) {
         idx <- grep("^rno", pathID)
     } else if (organism == "rhesus") {
         idx <- grep("^mcc", pathID)
-    } else if (organism == "worm") {
+    } else if (organism == "worm" || organism == "celegans") {
         idx <- grep("^cel", pathID)
     } else if (organism == "xenopus") {
         idx <- grep("^xla", pathID)
