@@ -29,7 +29,7 @@ To install:
  * the latest released version:
    `biocLite("clusterProfiler")`
  * the latest development version:
-   `install_github("GuangchuangYu/clusterProfiler")`
+   `install_github(c("DOSE", "clusterProfiler"), "GuangchuangYu")`
 
 Find out more at [http://www.bioconductor.org/packages/release/bioc/html/clusterProfiler.html](http://www.bioconductor.org/packages/release/bioc/html/clusterProfiler.html) and check out the [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/clusterProfiler/inst/doc/clusterProfiler.pdf).
 
