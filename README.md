@@ -11,9 +11,9 @@ Guangchuang YU, School of Public Health, The University of Hong Kong [http://ygc
 Please cite the following article when using `clusterProfiler`:
 
 ```
-Yu G, Wang L, Han Y and He. Q (2012). 
+Yu G, Wang L, Han Y and He Q. 
 clusterProfiler: an R package for comparing biological themes among gene clusters.
-OMICS: A Journal of Integrative Biology, 16(5), pp. 284-287. 
+OMICS: A Journal of Integrative Biology, 2012, 16(5):284-287. 
 ```
 
 URL: [http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118](http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118)
