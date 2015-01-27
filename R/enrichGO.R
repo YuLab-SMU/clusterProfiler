@@ -28,12 +28,12 @@
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @examples
-##'
-##' 	#data(gcSample)
-##' 	#yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01)
-##' 	#head(summary(yy))
-##' 	#plot(yy)
-##'
+##' \dontrun{
+##' 	data(gcSample)
+##' 	yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01)
+##' 	head(summary(yy))
+##' 	plot(yy)
+##' }
 enrichGO <- function(gene,
                      organism="human",
                      ont="MF",
@@ -65,10 +65,7 @@ enrichGO <- function(gene,
 ##' @return figure
 ##' @export
 ##' @author ygc
-enrichMap <- function(x, ...) {
-    ## DOSE::enrichMap(...)
-    plot(x, type="enrichMap", ...)
-}
+enrichMap <- DOSE::enrichMap
 
 ##' category-gene-net plot
 ##'
@@ -79,28 +76,26 @@ enrichMap <- function(x, ...) {
 ##' @return figure
 ##' @export
 ##' @author ygc
-cnetplot <- function(x, ...) {
-    plot(x, type="cnet", ...)
-}
+cnetplot <- DOSE::cnetplot
 
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID MF
 ##' @export
-EXTID2TERMID.MF <- function(gene, organism) {
+EXTID2TERMID.MF <- function(gene, organism, use.KEGG.db) {
     EXTID2TERMID.GO(gene=gene, ont="MF", organism=organism)
 }
 
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID BP
 ##' @export
-EXTID2TERMID.BP <- function(gene, organism) {
+EXTID2TERMID.BP <- function(gene, organism, use.KEGG.db) {
     EXTID2TERMID.GO(gene=gene, ont="BP", organism=organism)
 }
 
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID CC
 ##' @export
-EXTID2TERMID.CC <- function(gene, organism) {
+EXTID2TERMID.CC <- function(gene, organism, use.KEGG.db) {
     EXTID2TERMID.GO(gene=gene, ont="CC", organism=organism)
 }
 
@@ -170,27 +165,27 @@ EXTID2TERMID.GO <- function(gene, ont, organism) {
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID MF
 ##' @export
-TERMID2EXTID.MF <- function(term, organism) {
+TERMID2EXTID.MF <- function(term, organism, use.KEGG.db) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID BP
 ##' @export
-TERMID2EXTID.BP <- function(term, organism) {
+TERMID2EXTID.BP <- function(term, organism, use.KEGG.db) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID CC
 ##' @export
-TERMID2EXTID.CC <- function(term, organism) {
+TERMID2EXTID.CC <- function(term, organism, use.KEGG.db) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importFrom GOSemSim getSupported_Org
-TERMID2EXTID.GO <- function(term, organism) {
+TERMID2EXTID.GO <- function(term, organism, use.KEGG.db) {
     term <- as.character(term)
 
     GO2ALLEG <- GO2EXTID(organism)
@@ -233,14 +228,14 @@ GO2EXTID <- function(organism) {
 ##' @importFrom DOSE ALLEXTID
 ##' @method ALLEXTID MF
 ##' @export
-ALLEXTID.MF <- function(organism) {
+ALLEXTID.MF <- function(organism, use.KEGG.db) {
     ALLEXTID.GO(organism)
 }
 
 ##' @importFrom DOSE ALLEXTID
 ##' @method ALLEXTID BP
 ##' @export
-ALLEXTID.BP <- function(organism) {
+ALLEXTID.BP <- function(organism, use.KEGG.db) {
     ALLEXTID.GO(organism)
 }
 
@@ -248,7 +243,7 @@ ALLEXTID.BP <- function(organism) {
 ## @S3method ALLEXTID CC
 ##' @method ALLEXTID CC
 ##' @export
-ALLEXTID.CC <- function(organism) {
+ALLEXTID.CC <- function(organism, use.KEGG.db) {
     ALLEXTID.GO(organism)
 }
 
@@ -286,28 +281,28 @@ ALLEXTID.GO <- function(organism) {
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME MF
 ##' @export
-TERM2NAME.MF <- function(term, organism) {
+TERM2NAME.MF <- function(term, organism, use.KEGG.db) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME BP
 ##' @export
-TERM2NAME.BP <- function(term, organism) {
+TERM2NAME.BP <- function(term, organism, use.KEGG.db) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME CC
 ##' @export
-TERM2NAME.CC <- function(term, organism) {
+TERM2NAME.CC <- function(term, organism, use.KEGG.db) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom GO.db GOTERM
 ##' @importMethodsFrom AnnotationDbi Term
 ##' @importMethodsFrom AnnotationDbi mget
-TERM2NAME.GO <- function(term, organism) {
+TERM2NAME.GO <- function(term, organism, use.KEGG.db) {
     term <- as.character(term)
     go <- mget(term, GOTERM, ifnotfound=NA)
     termName <- sapply(go, Term)

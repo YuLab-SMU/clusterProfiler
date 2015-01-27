@@ -123,7 +123,7 @@ viewKEGG <- function(obj, pathwayID, foldChange,
 ##' @importFrom KEGG.db KEGGEXTID2PATHID
 ##' @method EXTID2TERMID KEGG
 ##' @export
-EXTID2TERMID.KEGG <- function(gene, organism) {
+EXTID2TERMID.KEGG <- function(gene, organism, use.KEGG.db=TRUE) {
     gene <- as.character(gene)
     qExtID2PathID <- mget(gene, KEGGEXTID2PATHID, ifnotfound=NA)
     notNA.idx <- unlist(lapply(qExtID2PathID, function(i) !all(is.na(i))))
@@ -136,7 +136,7 @@ EXTID2TERMID.KEGG <- function(gene, organism) {
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
 ##' @method TERMID2EXTID KEGG
 ##' @export
-TERMID2EXTID.KEGG <- function(term, organism) {
+TERMID2EXTID.KEGG <- function(term, organism, use.KEGG.db=TRUE) {
     pathID2ExtID <- mget(unique(term), KEGGPATHID2EXTID, ifnotfound=NA)
     return(pathID2ExtID)
 }
@@ -145,7 +145,7 @@ TERMID2EXTID.KEGG <- function(term, organism) {
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
 ##' @method ALLEXTID KEGG
 ##' @export
-ALLEXTID.KEGG <- function(organism) {
+ALLEXTID.KEGG <- function(organism, use.KEGG.db=TRUE) {
     ##pathID2ExtID <- as.list(KEGGPATHID2EXTID)
     ##pathID <- names(pathID2ExtID)
     pathID <- mappedkeys(KEGGPATHID2EXTID)
@@ -207,10 +207,55 @@ ALLEXTID.KEGG <- function(organism) {
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @method TERM2NAME KEGG
 ##' @export
-TERM2NAME.KEGG <- function(term, organism) {
+TERM2NAME.KEGG <- function(term, organism, use.KEGG.db=TRUE) {
     term <- as.character(term)
     pathIDs <- gsub("^\\D+", "",term, perl=T)
     path2name <- unlist(mget(pathIDs, KEGGPATHID2NAME))
     return(path2name)
 }
 
+##' download the latest version of KEGG pathway
+##'
+##' 
+##' @title download.KEGG
+##' @param species 
+##' @return list
+##' @author Guangchuang Yu
+##' @importFrom KEGGREST keggLink
+##' @importFrom KEGGREST keggList
+##' @export
+download.KEGG <- function(species) {
+    keggpathid2extid <- keggLink(species,"pathway")
+    keggpathid2extid %<>% gsub("[^:]+:", "", .)
+    names(keggpathid2extid) %<>% gsub("[^:]+:", "", .)
+
+    keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)
+    
+    
+    ##keggpathway2gene<-split(as.character(keggpathway2gene),names(keggpathway2gene))
+    keggpathid2name<-keggList("pathway")
+    names(keggpathid2name) %<>% gsub("path:map", "", .)
+
+    res <- list(keggpath2extid = keggpath2extid.df,
+                keggpathid2name = keggpathid2name)
+    return(res)
+}
+
+## kegg.hsa <- download.KEGG("hsa")
+## keggmap <- kegg.hsa[[1]]
+## id2name <- kegg.hsa[[2]]
+buildKEGGmap <- function(keggmap, id2name=NULL) {
+    if (is.null(id2name)) {
+        pathid <- keys(KEGGPATHID2NAME)
+        id <- keggmap[,1] %>% as.character %>% gsub("^[a-z]+", "", .)
+        keggmap <- keggmap[id %in% pathid, ]
+    } else {
+        KEGGPATHID2NAME <- id2name
+        save(KEGGPATHID2NAME, file="KEGGPATHID2NAME.rda")
+    }
+    
+    KEGGPATHID2EXTID <- split(as.character(keggmap[,2]), as.character(keggmap[,1]))
+    EXTID2KEGGPATHID <- split(as.character(keggmap[,1]), as.character(keggmap[,2]))
+    save(KEGGPATHID2EXTID, file="KEGGPATHID2EXTID.rda")
+    save(EXTID2KEGGPATHID, file="EXTID2KEGGPATHID.rda")
+}
