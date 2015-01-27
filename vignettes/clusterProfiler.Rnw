@@ -1,84 +1,49 @@
-% \VignetteEngine{knitr}
 % \VignetteIndexEntry{An introduction to clusterProfiler}
 % \VignettePackage{clusterProfiler}}
+% \VignetteEngine{knitr::knitr}
 
 % To compile this document, run the commands within R
-% require(cacheSweave); Sweave('clusterProfiler.Rnw', driver=cacheSweaveDriver()); tools::texi2dvi("clusterProfiler.tex", pdf=TRUE)
+% require(knitr); knit2pdf("clusterProfiler.Rnw")
+
 
 \documentclass[12pt]{article}
-\usepackage[a4paper,left=3cm,top=2cm,bottom=3cm,right=3cm,ignoreheadfoot]{geometry}
-\pagestyle{empty}
-\usepackage[usenames,dvipsnames]{xcolor}
-\usepackage{helvet}
-\usepackage[titletoc]{appendix}
-\usepackage{tocloft}
 
-\setlength{\parindent}{0em}
-\setlength{\parskip}{.5em}
+<<knitr, echo=FALSE, results="hide">>=
+knitr::opts_chunk$set(tidy         = FALSE,
+                      out.truncate = 80,
+                      out.lines    = 6,
+                      dev          = 'pdf',
+                      include      = TRUE,
+                      fig.width    = 6,
+                      fig.height   = 6,
+                      resolution   = 100,
+                      message      = FALSE)
+@ 
 
-\renewcommand{\familydefault}{\sfdefault}
-
-\newcommand{\Rcode}[1]{{\texttt{#1}}}
-\newcommand{\Robject}[1]{{\small\texttt{#1}}}
-\newcommand{\Rfunction}[1]{\Robject{#1}}
-\newcommand{\Rpackage}[1]{\textit{#1}}
-\newcommand{\Rparameter}[1]{\textit{#1}}
-\newcommand{\Rclass}[1]{\textit{#1}}
-\newcommand{\R}{\textsf{R}}
-
-\usepackage[
-  bookmarks,%
-  colorlinks,%
-  linktoc=section,%
-  linkcolor=RedViolet,%
-  citecolor=RedViolet,%
-  urlcolor=RedViolet,%
-  linkbordercolor={1 1 1},%
-  citebordercolor={1 1 1},%
-  urlbordercolor={1 1 1},%
-  raiselinks,%
-  plainpages,%
-  pdftex
-  ]{hyperref}
+<<style-Sweave, eval=TRUE, echo=FALSE, results="asis">>=
+BiocStyle::latex()
+@ 
 
 
-\usepackage{cite}
-\renewcommand{\floatpagefraction}{0.9}
-
-\usepackage{sectsty}
-\sectionfont{\sffamily\bfseries\color{RoyalBlue}\sectionrule{0pt}{0pt}{-1ex}{1pt}}
-\subsectionfont{\sffamily\bfseries\color{RoyalBlue}}
-\subsubsectionfont{\sffamily\bfseries\color{RoyalBlue}}
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhead{}
-\fancyfoot{}
-\lfoot{}\cfoot{}\rfoot{}
-\renewcommand{\headrule}{}
-
-\usepackage{graphicx}
-%\usepackage{xstring}
-
-
-
-<<include=FALSE>>=
+<<loadPKG, echo=FALSE>>=
 library(DOSE)
 library(GO.db)
 library(org.Hs.eg.db)
-library(pathview)
+## library(pathview)
 library(clusterProfiler)
-library(knitr)
-opts_chunk$set(tidy=TRUE,tidy.opts=list(keep.blank.line=FALSE, width.cutoff=50),out.truncate=80,out.lines=6,cache=TRUE,dev='pdf',include=TRUE,fig.width=6,fig.height=6,resolution=150)
 @
 
-\newcommand{\fixme}[1]{{\textbf{Fixme:} \textit{\textcolor{blue}{#1}}}}
 
 
-\title{\textsf{\textbf{Using \Rpackage{clusterProfiler} to identify and compare functional profiles of gene lists}}}
-\author{Guangchuang Yu \\
-School of Biological Sciences \\
-The University of Hong Kong, Hong Kong SAR, China \\
-email: \texttt{guangchuangyu@gmail.com}}
+\author{Guangchuang Yu \\[1em]
+  \small{School of Public Health} \\
+  \small{The University of Hong Kong} \\
+  \small{\email{guangchuangyu@gmail.com}}
+}
+
+
+\title{Using clusterProfiler to identify and compare functional profiles of gene lists}
+
 
 \begin{document}
 \maketitle
@@ -87,7 +52,30 @@ email: \texttt{guangchuangyu@gmail.com}}
 options(digits=3, width=80, prompt=" ", continue=" ")
 @
 
+
+\begin{center}
+  
+  \vspace{1em}
+  \textbf{\Biocpkg{clusterProfiler} version:} \Sexpr{packageVersion("clusterProfiler")}
+  \vspace{1em}
+  
+  \begin{tabular}{ | l | }
+    \hline
+    If you use \Biocpkg{clusterProfiler} in published research, please cite: \\
+    \\
+    G Yu, LG Wang, Y Han, QY He. \textbf{clusterProfiler: an R package for} \\
+    \textbf{comparing biological themes among gene clusters}. \\
+    \emph{Journal of Integrative Biology} 2012, 16(5):284-287. \\
+    \url{http://dx.doi.org/doi:10.1089/omi.2011.0118} \\
+    \hline
+  \end{tabular}
+  
+\end{center}
+
+
+\newpage
 \tableofcontents
+\newpage
 
 \section{Introduction}
 
@@ -108,18 +96,9 @@ whether there is a common theme of a particular gene cluster, but also
 to compare the biological themes among gene clusters. The manual step
 to choose interesting clusters followed by enrichment analysis on each
 selected cluster is slow and tedious. To bridge this gap, we designed
-\Rpackage{clusterProfiler} \cite{yu2012}, for comparing and visualizing functional
+\Biocpkg{clusterProfiler} \cite{yu2012}, for comparing and visualizing functional
 profiles among gene clusters.
 
-\section{Citation}
-
-Please cite the following articles when using
-\Rpackage{clusterProfiler}. \\
-
-
-G Yu, LG Wang, Y Han, QY He. clusterProfiler: an R package for
-comparing biological themes among gene clusters. \textit{OMICS: A
-  Journal of Integrative Biology}. 2012, 16(5), 284-287. \\
 
 \section{Supported organisms}
 At present, \Rpackage{clusterProfiler} about 20 species as shown below:
@@ -152,7 +131,7 @@ GO analyses also support \textit{Coelicolor} and \textit{Gondii}.
 
 
 \section{Gene Ontology Classification}
-In \Rpackage{clusterProfiler}, \Rfunction{groupGO} is designed for gene classification based on GO distribution at a specific level.
+In \Biocpkg{clusterProfiler}, \Rfunction{groupGO} is designed for gene classification based on GO distribution at a specific level.
 
 <<groupGO>>=
 require(DOSE)
@@ -173,7 +152,7 @@ expected.
 
 To determine whether any terms annotate a specified list of
     genes at frequency greater than that would be expected by chance,
-    \Rpackage{clusterProfiler} calculates a p-value using the hypergeometric distribution:
+    \Biocpkg{clusterProfiler} calculates a p-value using the hypergeometric distribution:
 
 $
 p = 1 - \displaystyle\sum_{i = 0}^{k-1}
@@ -209,7 +188,7 @@ The enrichment score (\textit{ES}) represent the degree to which a set \textit{S
 	\item Esimation of Significance Level of \textit{ES}.\\
 The \textit{p-value} of the \textit{ES} is calculated using permutation test. Specifically, we permute the gene labels of the gene list \textit{L} and recompute the \textit{ES} of the gene set for the permutated data, which generate a null distribution for the \textit{ES}. The \textit{p-value} of the observed ES is then calculated relative to this null distribution.
 	\item Adjustment for Multiple Hypothesis Testing.\\
-When the entire \textit{GO} or \textit{KEGG} gene sets is evaluated, \Rpackage{clusterProfiler} adjust the estimated significance level to account for multiple hypothesis testing and also \textit{q-values} were calculated for FDR control.
+When the entire \textit{GO} or \textit{KEGG} gene sets is evaluated, \Biocpkg{clusterProfiler} adjust the estimated significance level to account for multiple hypothesis testing and also \textit{q-values} were calculated for FDR control.
 \end{itemize}
 
 \subsection{GO enrichment analysis}
@@ -257,11 +236,11 @@ head(summary(kk2))
 
 \subsection{DO enrichment analysis}
 
-Disease Ontology (DO) enrichment analysis is implemented in \Rpackage{DOSE}, please refer to the package vignettes. The \Rfunction{enrichDO} function is very useful for identifying disease association of interesting genes, and function \Rfunction{gseAnalyzer} function is designed for gene set enrichment analysis of \textit{DO}.
+Disease Ontology (DO) enrichment analysis is implemented in \Biocpkg{DOSE}, please refer to the package vignettes. The \Rfunction{enrichDO} function is very useful for identifying disease association of interesting genes, and function \Rfunction{gseAnalyzer} function is designed for gene set enrichment analysis of \textit{DO}.
 
 \subsection{Reactome pathway enrichment analysis}
 
-With the demise of KEGG (at least without subscription), the KEGG pathway data in Bioconductor will not update and we encourage user to analyze pathway using \Rpackage{ReactomePA} which use Reactome as a source of pathway data. The function call of \Rfunction{enrichPathway} and \Rfunction{gsePathway} in \Rpackage{ReactomePA} is consistent with \Rfunction{enrichKEGG} and \Rfunction{gseKEGG}.
+With the demise of KEGG (at least without subscription), the KEGG pathway data in Bioconductor will not update and we encourage user to analyze pathway using \Biocpkg{ReactomePA} which use Reactome as a source of pathway data. The function call of \Rfunction{enrichPathway} and \Rfunction{gsePathway} in \Biocpkg{ReactomePA} is consistent with \Rfunction{enrichKEGG} and \Rfunction{gseKEGG}.
 
 \subsection{Function call}
 The function calls of \Rfunction{groupGO}, \Rfunction{enrichGO},
@@ -329,27 +308,27 @@ gseaplot(kk2, geneSetID = "hsa04145")
 
 
 \subsubsection{pathview from pathview package}
-\Rpackage{clusterProfiler} users can also use \Rfunction{pathview} from the \Rpackage{pathview} \cite{luo_pathview} to visualize KEGG pathway.
+\Biocpkg{clusterProfiler} users can also use \Rfunction{pathview} from the \Rpackage{pathview} \cite{luo_pathview} to visualize KEGG pathway.
 
 The following example illustrate how to visualize "hsa04110" pathway, which was enriched in our previous analysis.
 
-<<viewKEGG>>=
+<<viewKEGG, eval=FALSE>>=
 require(pathview)
 hsa04110 <- pathview(gene.data=geneList, pathway.id="hsa04110", species="hsa", limit=list(gene=max(abs(geneList)), cpd=1))
 @
 
-\begin{figure}[ht]
+\begin{figure}[h]
 \centering
-\includegraphics[width=.9\textwidth,type=png,ext=.png,read=.png]{hsa04110.pathview}
+\includegraphics[width=.9\textwidth]{figures/hsa04110_pathview.png}
 \caption{visualize KEGG pathway using pathview}
 \label{viewKEGG}
 \end{figure}
 
-For further information, please refer to the vignette of \Rpackage{pathview} \cite{luo_pathview}.
+For further information, please refer to the vignette of \Biocpkg{pathview} \cite{luo_pathview}.
 
 
 \section{Biological theme comparison}
-\Rpackage{clusterProfiler} was developed for biological theme comparison, and it provides a function, \Rfunction{compareCluster}, to automatically calculate enriched functional categories of each gene clusters.
+\Biocpkg{clusterProfiler} was developed for biological theme comparison, and it provides a function, \Rfunction{compareCluster}, to automatically calculate enriched functional categories of each gene clusters.
 
 <<compareCluster, fig.height=8, fig.width=8>>=
 data(gcSample)
@@ -398,17 +377,18 @@ by different viruses using \Rfunction{compareCluster}.
 
 The comparison function was designed as a general-package for
 comparing gene clusters of any kind of ontology associations, not
-only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} this package provided, but also other biological and biomedical ontologies, for instance, \Rfunction{enrichDO} from \Rpackage{DOSE} and \Rfunction{enrichPathway} from \Rpackage{ReactomePA} work fine with \Rfunction{compareCluster} for comparing biological themes in disease and reactome pathway perspective. More details can be
-  found in the vignettes of \Rpackage{DOSE} and \Rpackage{ReactomePA}.
+only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} this package provided, but also other biological and biomedical ontologies, for instance, \Rfunction{enrichDO} from \Biocpkg{DOSE} and \Rfunction{enrichPathway} from \Biocpkg{ReactomePA} work fine with \Rfunction{compareCluster} for comparing biological themes in disease and reactome pathway perspective. More details can be
+  found in the vignettes of \Biocpkg{DOSE} and \Biocpkg{ReactomePA}.
 
 \section{Session Information}
 
-The version number of R and packages loaded for generating the vignette were:
+
+Here is the output of \Rcode{sessionInfo()} on the system on which this document was compiled:
 
 <<sessInfo, results='asis', echo=FALSE>>=
 toLatex(sessionInfo())
 @
 
-\bibliographystyle{unsrt}
+
 \bibliography{clusterProfiler}
 \end{document}
