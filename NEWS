@@ -1,3 +1,8 @@
+CHANGES IN VERSION 2.1.2
+------------------------
+ o support downloading latest KEGG annotation data <2015-01-27, Tue> 
+ o update vignette to use BiocStyle <2015-01-27, Tue>
+ 
 CHANGES IN VERSION 2.1.1
 ------------------------
  o add BugReports URL <2014-12-17, Wed>

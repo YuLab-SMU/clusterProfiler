@@ -300,3 +300,7 @@ GI2EG <- function(GI, organism="D39") {
 }
 
 
+removeEmptyEntry.list <- function(x) {
+    notNA.idx <- unlist(lapply(x, function(i) !is.null(i) && !all(is.na(i))))
+    x[notNA.idx]
+}
