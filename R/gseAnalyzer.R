@@ -95,14 +95,13 @@ gseKEGG <- function(geneList,
 ##'
 ##' plotting function for gseaResult
 ##' @title gseaplot
-##' @param x gseaResult object
-##' @param ... additional parameters
-##' @return figure
+##' @param gseaResult gseaResult object
+##' @param geneSetID geneSet ID
+##' @param by one of "runningScore" or "position"
+##' @return ggplot2 object
 ##' @export
 ##' @author ygc
-gseaplot <- function(x, ...) {
-    plot(x, type="gseaplot", ...)
-}
+gseaplot <- DOSE::gseaplot
 
 ##' @title getGeneSet.KEGG
 ##' @param setType gene set type

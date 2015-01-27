@@ -9,15 +9,15 @@
 \documentclass[12pt]{article}
 
 <<knitr, echo=FALSE, results="hide">>=
-opts_chunk$set(tidy         = FALSE,
-               out.truncate = 80,
-               out.lines    = 6,
-               dev          = 'pdf',
-               include      = TRUE,
-               fig.width    = 6,
-               fig.height   = 6,
-               resolution   = 100,
-               message      = FALSE)
+knitr::opts_chunk$set(tidy         = FALSE,
+                      out.truncate = 80,
+                      out.lines    = 6,
+                      dev          = 'pdf',
+                      include      = TRUE,
+                      fig.width    = 6,
+                      fig.height   = 6,
+                      resolution   = 100,
+                      message      = FALSE)
 @ 
 
 <<style-Sweave, eval=TRUE, echo=FALSE, results="asis">>=

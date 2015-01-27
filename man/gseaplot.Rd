@@ -4,15 +4,17 @@
 \alias{gseaplot}
 \title{gseaplot}
 \usage{
-gseaplot(x, ...)
+gseaplot(gseaResult, geneSetID, by = "all")
 }
 \arguments{
-\item{x}{gseaResult object}
+\item{gseaResult}{gseaResult object}
 
-\item{...}{additional parameters}
+\item{geneSetID}{geneSet ID}
+
+\item{by}{one of "runningScore" or "position"}
 }
 \value{
-figure
+ggplot2 object
 }
 \description{
 visualize analyzing result of GSEA

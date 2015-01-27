@@ -4,15 +4,24 @@
 \alias{cnetplot}
 \title{cnetplot}
 \usage{
-cnetplot(x, ...)
+cnetplot(x, showCategory = 5, categorySize = "geneNum", foldChange = NULL,
+  fixed = TRUE, ...)
 }
 \arguments{
 \item{x}{enrichResult object}
 
+\item{showCategory}{number of category plotted}
+
+\item{categorySize}{one of geneNum or pvalue}
+
+\item{foldChange}{fold change of expression value}
+
+\item{fixed}{logical}
+
 \item{...}{additional parameter}
 }
 \value{
-figure
+plot
 }
 \description{
 category-gene-net plot

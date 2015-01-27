@@ -7,7 +7,7 @@
 download.KEGG(species)
 }
 \arguments{
-\item{species}{}
+\item{species}{species}
 }
 \value{
 list

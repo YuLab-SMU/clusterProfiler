@@ -4,10 +4,14 @@
 \alias{enrichMap}
 \title{enrichMap}
 \usage{
-enrichMap(x, ...)
+enrichMap(x, n = 50, fixed = TRUE, ...)
 }
 \arguments{
-\item{x}{enrichResult or gseaResult}
+\item{x}{gseaResult or enrichResult object}
+
+\item{n}{maximum number of category to shown}
+
+\item{fixed}{if set to FALSE, will invoke tkplot}
 
 \item{...}{additional parameter}
 }

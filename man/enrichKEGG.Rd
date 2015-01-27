@@ -8,7 +8,7 @@ categories with FDR control.}
 \usage{
 enrichKEGG(gene, organism = "human", pvalueCutoff = 0.05,
   pAdjustMethod = "BH", universe, minGSSize = 5, qvalueCutoff = 0.2,
-  readable = FALSE)
+  readable = FALSE, use.KEGG.db = TRUE)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
@@ -29,6 +29,8 @@ enrichKEGG(gene, organism = "human", pvalueCutoff = 0.05,
 \item{qvalueCutoff}{qvalue cutoff}
 
 \item{readable}{whether mapping gene ID to gene Name}
+
+\item{use.KEGG.db}{whether use KEGG.db for annotation}
 }
 \value{
 A \code{enrichResult} instance.
