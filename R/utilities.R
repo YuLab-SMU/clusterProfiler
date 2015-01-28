@@ -2,6 +2,181 @@
     assign("clusterProfilesEnv", new.env(),.GlobalEnv)
 }
 
+
+organismMapper <- function(organism) {
+    ## it only map those previous supported organism
+    
+    if (organism == "anopheles") {
+        species <- "aga"
+    } else if (organism == "arabidopsis") {
+        species <- "ath"
+    } else if (organism == "bovine") {
+        species <- "bta"
+    } else if (organism == "canine") {
+        species <- "cfa"
+    } else if (organism == "chicken") {
+        species <- "gga"
+    } else if (organism == "chipm") {
+        species <- "ptr"
+    } else if (organism == "ecolik12") {
+        species <- "eco"
+    } else if (organism == "ecsakai") {
+        species <- "ecs"
+    } else if (organism == "fly") {
+        species <- "dme"
+    } else if (organism == "human") {
+        species <- "hsa"
+    } else if (organism == "malaria") {
+        species <- "pfa"
+    } else if (organism == "mouse") {
+        species <- "mmu"
+    } else if (organism == "pig") {
+        species <- "ssc"
+    } else if (organism == "rat") {
+        species <- "rno"
+    } else if (organism == "rhesus") {
+        species <- "mcc"
+    } else if (organism == "worm" || organism == "celegans") {
+        species <- "cel"
+    } else if (organism == "xenopus") {
+        species <- "xla"
+    } else if (organism == "yeast") {
+        species <- "sce"
+    } else if (organism == "zebrafish") {
+        species <- "dre"
+    } else {
+        species <- organism
+    }
+    return(species)
+}
+
+KEGG_db_supported <- function() {
+    res <- c(
+        "aga",
+        "ath",
+        "bta",
+        "cfa",
+        "gga",
+        "ptr",
+        "eco",
+        "ecs",
+        "dme",
+        "hsa",
+        "pfa",
+        "mmu",
+        "ssc",
+        "rno",
+        "mcc",
+        "cel",
+        "xla",
+        "sce",
+        "dre")
+
+    return(res)
+}
+
+
+
+get_KEGG_Anno <- function(organism, key) {
+    buildKEGGmap_online(organism)
+    KEGG_clusterProfiler_Env <- get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
+    get(key, KEGG_clusterProfiler_Env)
+}
+
+buildKEGGmap_online <- function(organism) {
+    organism <- organismMapper(organism)
+
+    if (! exists("KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign("KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
+    }
+    KEGG_clusterProfiler_Env <- get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
+    
+    if (exists("organism", envir = KEGG_clusterProfiler_Env, inherits = FALSE)) {
+        org <- get("organism", envir=KEGG_clusterProfiler_Env)
+        if (org == organism &&
+            exists("KEGGPATHID2NAME", envir=KEGG_clusterProfiler_Env, inherits = FALSE) &&
+            exists("KEGGPATHID2EXTID", envir=KEGG_clusterProfiler_Env, inherits = FALSE) &&
+            exists("EXTID2KEGGPATHID", envir=KEGG_clusterProfiler_Env, inherits = FALSE)
+            ) {
+            ## do nothing
+        } else {
+            download_buildKEGGmap(organism)
+        }
+    } else {
+        download_buildKEGGmap(organism)
+    }
+    
+}
+
+
+download_buildKEGGmap <- function(organism) {
+    organism <- organismMapper(organism)
+    kegg <- download.KEGG(organism)
+    buildKEGGmap(kegg[[1]], kegg[[2]], organism)
+}
+
+
+##' download the latest version of KEGG pathway
+##'
+##' 
+##' @title download.KEGG
+##' @param species species
+##' @return list
+##' @author Guangchuang Yu
+##' @importFrom KEGGREST keggLink
+##' @importFrom KEGGREST keggList
+##' @importFrom magrittr %<>%
+download.KEGG <- function(species) {
+    keggpathid2extid <- keggLink(species,"pathway")
+    keggpathid2extid %<>% gsub("[^:]+:", "", .)
+    names(keggpathid2extid) %<>% gsub("[^:]+:", "", .)
+
+    keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)
+    
+    keggpathid2name<-keggList("pathway")
+    names(keggpathid2name) %<>% gsub("path:map", "", .)
+
+    res <- list(keggpath2extid = keggpath2extid.df,
+                keggpathid2name = keggpathid2name)
+    return(res)
+}
+
+
+##' build KEGG annotation files
+##'
+##' 
+##' @title buildKEGGmap
+##' @param keggmap pathway to external ID
+##' @param id2name pathway id to pathway name
+##' @param organism organism
+##' @return NULL
+##' @importFrom magrittr %>%
+##' @author Guangchuang Yu
+buildKEGGmap <- function(keggmap, id2name=NULL, organism) {
+    if (! exists("KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign("KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
+    }
+    KEGG_clusterProfiler_Env <- get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
+
+    if (is.null(id2name)) {
+        id2name <- as.list(KEGGPATHID2NAME) %>% unlist
+        pathid  <- names(id2name)
+        id      <- keggmap[,1] %>% as.character %>% gsub("^[a-z]+", "", .)
+        keggmap <- keggmap[id %in% pathid, ]
+        
+    }
+    
+    KEGGPATHID2NAME  <- id2name
+    KEGGPATHID2EXTID <- split(as.character(keggmap[,2]), as.character(keggmap[,1]))
+    EXTID2KEGGPATHID <- split(as.character(keggmap[,1]), as.character(keggmap[,2]))
+
+    assign("organism", organism, envir = KEGG_clusterProfiler_Env)
+    assign("KEGGPATHID2NAME", KEGGPATHID2NAME,  envir  = KEGG_clusterProfiler_Env)
+    assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir = KEGG_clusterProfiler_Env)
+    assign("EXTID2KEGGPATHID", EXTID2KEGGPATHID, envir = KEGG_clusterProfiler_Env)
+}
+
+
 excludeGOlevel <- function(x, ont, level) {
     lv <- unlist(lapply(level, getGOLevel, ont=ont))
     x <- excludeGOterm(x, lv)
