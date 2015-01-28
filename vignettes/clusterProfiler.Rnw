@@ -129,6 +129,8 @@ These species are all supported by GO and KEGG analyses.
 
 GO analyses also support \textit{Coelicolor} and \textit{Gondii}.
 
+For KEGG, now \Biocpkg{clusterProfiler} is not restricted to these supported organisms, it supports any species that have KEGG annotation available in KEGG database. Please refer to the full list of organisms via \url{http://www.genome.jp/kegg/catalog/org_list.html}.
+
 
 \section{Gene Ontology Classification}
 In \Biocpkg{clusterProfiler}, \Rfunction{groupGO} is designed for gene classification based on GO distribution at a specific level.
@@ -139,7 +141,7 @@ data(geneList)
 gene <- names(geneList)[abs(geneList) > 2]
 head(gene)
 ggo <- groupGO(gene=gene, organism="human",
-				ont="BP", level=3, readable=TRUE)
+               ont="BP", level=3, readable=TRUE)
 head(summary(ggo))
 @
 
@@ -215,6 +217,9 @@ head(summary(ego2))
 @
 
 \subsection{KEGG pathway enrichment analysis}
+The annotation package, KEGG.db, is not updated since 2012. It's now pretty old and in \Biocpkg{clusterProfiler}, \Rfunction{enrichKEGG} supports downloading latest online version of KEGG data for enrichment analysis. Using KEGG.db is also supported by setting \Robject{use.KEGG.db} parameter to \Robject{TRUE}, but it's not recommended. 
+
+With this new feature, organism is not restricted to those supported in previous release, it can be any species that have KEGG annotation data available in KEGG database. User should pass abbreviation of academic name to the \Robject{organism} parameter. The full list of KEGG supported organisms can be accessed via \url{http://www.genome.jp/kegg/catalog/org_list.html}.
 
 <<enrichKEGG>>=
 kk <- enrichKEGG(gene=gene,
