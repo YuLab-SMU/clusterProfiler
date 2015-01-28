@@ -66,7 +66,7 @@ options(digits=3, width=80, prompt=" ", continue=" ")
     G Yu, LG Wang, Y Han, QY He. \textbf{clusterProfiler: an R package for} \\
     \textbf{comparing biological themes among gene clusters}. \\
     \emph{Journal of Integrative Biology} 2012, 16(5):284-287. \\
-    \url{http://dx.doi.org/doi:10.1089/omi.2011.0118} \\
+    \url{http://dx.doi.org/10.1089/omi.2011.0118} \\
     \hline
   \end{tabular}
   
