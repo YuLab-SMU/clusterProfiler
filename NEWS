@@ -1,5 +1,6 @@
 CHANGES IN VERSION 2.1.3
 ------------------------
+ o update vignettes <2015-01-28, Wed>
  o fully support of using online version of KEGG in enrichKEGG,
    using online version is now by default of enrichKEGG <2015-01-28, Wed>
  o update CITATION <2015-01-28, Wed>
