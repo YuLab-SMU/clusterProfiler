@@ -46,7 +46,7 @@ enrichKEGG <- function(gene,
                        minGSSize     = 5,
                        qvalueCutoff  =0.2,
                        readable      =FALSE,
-                       use.KEGG.db   = TRUE) {
+                       use.KEGG.db   = FALSE) {
 
     enrich.internal(gene,
                     organism      = organism,
@@ -130,23 +130,14 @@ viewKEGG <- function(obj, pathwayID, foldChange,
 ##' @export
 EXTID2TERMID.KEGG <- function(gene, organism, use.KEGG.db=TRUE) {
     gene <- as.character(gene)
+    organism <- organismMapper(organism)
     
-    if (use.KEGG.db && organism %in% KEGG_supported_organism() ) {
+    if (use.KEGG.db && organism %in% KEGG_db_supported() ) {
         qExtID2PathID <- mget(gene, KEGGEXTID2PATHID, ifnotfound=NA)
-        ## notNA.idx <- unlist(lapply(qExtID2PathID, function(i) !all(is.na(i))))
-        ## qExtID2PathID <- qExtID2PathID[notNA.idx]
-    } else {
-        buildKEGGmap_supported_organism(organism)
-        
-        if (file.exists("EXTID2KEGGPATHID.rda")) {
-            EXTID2KEGGPATHID <- NULL
-            load("EXTID2KEGGPATHID.rda")
-            qExtID2PathID <- EXTID2KEGGPATHID[gene]
-        } else {
-            stop("KEGG mapping file not found in the working directory")
-        }
-        
-    }
+     } else {
+        EXTID2KEGGPATHID <- get_KEGG_Anno(organism, "EXTID2KEGGPATHID")
+        qExtID2PathID <- EXTID2KEGGPATHID[gene]
+     }
     removeEmptyEntry.list(qExtID2PathID)
 }
 
@@ -156,17 +147,12 @@ EXTID2TERMID.KEGG <- function(gene, organism, use.KEGG.db=TRUE) {
 ##' @method TERMID2EXTID KEGG
 ##' @export
 TERMID2EXTID.KEGG <- function(term, organism, use.KEGG.db=TRUE) {
-    if(use.KEGG.db && organism %in% KEGG_supported_organism()) {
+    organism <- organismMapper(organism)
+    if(use.KEGG.db && organism %in% KEGG_db_supported()) {
         pathID2ExtID <- mget(unique(term), KEGGPATHID2EXTID, ifnotfound=NA)
     } else {
-        buildKEGGmap_supported_organism(organism)
-        if(file.exists("KEGGPATHID2EXTID.rda")) {
-            KEGGPATHID2EXTID <- NULL
-            load("KEGGPATHID2EXTID.rda")
-            pathID2ExtID <- KEGGPATHID2EXTID[unique(term)]
-        } else {
-            stop("KEGG mapping file not found in the working directory")
-        }
+        KEGGPATHID2EXTID <- get_KEGG_Anno(organism, "KEGGPATHID2EXTID")
+        pathID2ExtID <- KEGGPATHID2EXTID[unique(term)]
     }
     removeEmptyEntry.list(pathID2ExtID)
 }
@@ -176,68 +162,17 @@ TERMID2EXTID.KEGG <- function(term, organism, use.KEGG.db=TRUE) {
 ##' @method ALLEXTID KEGG
 ##' @export
 ALLEXTID.KEGG <- function(organism, use.KEGG.db=TRUE) {
-    if (use.KEGG.db && organism %in% KEGG_supported_organism()) {
-        ##pathID2ExtID <- as.list(KEGGPATHID2EXTID)
-        ##pathID <- names(pathID2ExtID)
-        
+    organism <- organismMapper(organism)
+    
+    if (use.KEGG.db && organism %in% KEGG_db_supported()) {
         pathID <- mappedkeys(KEGGPATHID2EXTID)
-        
-        ## select species specific pathways
-        if (organism == "anopheles") {
-            idx <- grep("^aga", pathID)
-        } else if (organism == "arabidopsis") {
-            idx <- grep("^ath", pathID)
-        } else if (organism == "bovine") {
-            idx <- grep("^bta", pathID)
-        } else if (organism == "canine") {
-            idx <- grep("^cfa", pathID)
-        } else if (organism == "chicken") {
-            idx <- grep("^gga", pathID)
-        } else if (organism == "chipm") {
-            idx <- grep("^ptr", pathID)
-        } else if (organism == "ecolik12") {
-            idx <- grep("^eco", pathID)
-        } else if (organism == "ecsakai") {
-            idx <- grep("^ecs", pathID)
-        } else if (organism == "fly") {
-            idx <- grep("^dme", pathID)
-        } else if (organism == "human") {
-            idx <- grep("^hsa", pathID)
-        } else if (organism == "malaria") {
-            idx <- grep("^pfa", pathID)
-        } else if (organism == "mouse") {
-            idx <- grep("^mmu", pathID)
-        } else if (organism == "pig") {
-            idx <- grep("^ssc", pathID)
-        } else if (organism == "rat") {
-            idx <- grep("^rno", pathID)
-        } else if (organism == "rhesus") {
-            idx <- grep("^mcc", pathID)
-        } else if (organism == "worm" || organism == "celegans") {
-            idx <- grep("^cel", pathID)
-        } else if (organism == "xenopus") {
-            idx <- grep("^xla", pathID)
-        } else if (organism == "yeast") {
-            idx <- grep("^sce", pathID)
-        } else if (organism == "zebrafish") {
-            idx <- grep("^dre", pathID)
-        } else {
-            stop (" Not supported yet... \n" )
-        }
-        ##orgPath2ExtID <- pathID2ExtID[idx]
+        idx <- grep(paste0("^", organism), pathID)
         orgPathID <- pathID[idx]
         class(orgPathID) <- "KEGG"
         orgPath2ExtID <- TERMID2EXTID.KEGG(orgPathID, organism, use.KEGG.db)
         orgPath2ExtID <- lapply(orgPath2ExtID, function(i) unique(i))
     } else {
-        buildKEGGmap_supported_organism(organism)
-        if (file.exists("KEGGPATHID2EXTID.rda")) {
-            KEGGPATHID2EXTID <- NULL
-            load("KEGGPATHID2EXTID.rda")
-            orgPath2ExtID <- KEGGPATHID2EXTID
-        } else {
-            stop("KEGG mapping file not found in the working directory")
-        }
+        orgPath2ExtID <- get_KEGG_Anno(organism, "KEGGPATHID2EXTID")
     }
     orgExtID <- unique(unlist(orgPath2ExtID))
     return(orgExtID)
@@ -250,158 +185,18 @@ ALLEXTID.KEGG <- function(organism, use.KEGG.db=TRUE) {
 ##' @export
 TERM2NAME.KEGG <- function(term, organism, use.KEGG.db=TRUE) {
     term <- as.character(term)
-
+    organism <- organismMapper(organism)
     pathIDs <- gsub("^\\D+", "",term, perl=T)
 
-    if (use.KEGG.db && organism %in% KEGG_supported_organism()) {
+    if (use.KEGG.db && organism %in% KEGG_db_supported()) {
         path2name <- unlist(mget(pathIDs, KEGGPATHID2NAME, ifnotfound = NA))
     } else {
-        buildKEGGmap_supported_organism(organism)
-        if (file.exists("KEGGPATHID2NAME.rda")) {
-            KEGGPATHID2NAME <- NULL
-            load("KEGGPATHID2NAME.rda")
-            path2name <- KEGGPATHID2NAME[pathIDs]
-        } else {
-            path2name <- TERM2NAME.KEGG(term, organism, TRUE)
-        }
+        KEGGPATHID2NAME <- get_KEGG_Anno(organism, "KEGGPATHID2NAME")
+        path2name <- KEGGPATHID2NAME[pathIDs]
     }
     path2name <- path2name[!is.na(path2name)]
     return(path2name)
 }
 
-##' download the latest version of KEGG pathway
-##'
-##' 
-##' @title download.KEGG
-##' @param species species
-##' @return list
-##' @author Guangchuang Yu
-##' @importFrom KEGGREST keggLink
-##' @importFrom KEGGREST keggList
-##' @importFrom magrittr %<>%
-##' @export
-download.KEGG <- function(species) {
-    keggpathid2extid <- keggLink(species,"pathway")
-    keggpathid2extid %<>% gsub("[^:]+:", "", .)
-    names(keggpathid2extid) %<>% gsub("[^:]+:", "", .)
-
-    keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)
-    
-    
-    ##keggpathway2gene<-split(as.character(keggpathway2gene),names(keggpathway2gene))
-    keggpathid2name<-keggList("pathway")
-    names(keggpathid2name) %<>% gsub("path:map", "", .)
-
-    res <- list(keggpath2extid = keggpath2extid.df,
-                keggpathid2name = keggpathid2name)
-    return(res)
-}
 
 
-##' build KEGG annotation files
-##'
-##' 
-##' @title buildKEGGmap
-##' @param keggmap pathway to external ID
-##' @param id2name pathway id to pathway name
-##' @return NULL
-##' @importFrom magrittr %>%
-##' @author Guangchuang Yu
-##' @export
-buildKEGGmap <- function(keggmap, id2name=NULL) {
-    if (is.null(id2name)) {
-        pathid <- keys(KEGGPATHID2NAME)
-        id <- keggmap[,1] %>% as.character %>% gsub("^[a-z]+", "", .)
-        keggmap <- keggmap[id %in% pathid, ]
-    } else {
-        KEGGPATHID2NAME <- id2name
-        save(KEGGPATHID2NAME, file="KEGGPATHID2NAME.rda")
-    }
-    
-    KEGGPATHID2EXTID <- split(as.character(keggmap[,2]), as.character(keggmap[,1]))
-    EXTID2KEGGPATHID <- split(as.character(keggmap[,1]), as.character(keggmap[,2]))
-    save(KEGGPATHID2EXTID, file="KEGGPATHID2EXTID.rda")
-    save(EXTID2KEGGPATHID, file="EXTID2KEGGPATHID.rda")
-}
-
-
-buildKEGGmap_supported_organism <- function(organism) {
-    if (organism == "anopheles") {
-        species <- "aga"
-    } else if (organism == "arabidopsis") {
-        species <- "ath"
-    } else if (organism == "bovine") {
-        species <- "bta"
-    } else if (organism == "canine") {
-        species <- "cfa"
-    } else if (organism == "chicken") {
-        species <- "gga"
-    } else if (organism == "chipm") {
-        species <- "ptr"
-    } else if (organism == "ecolik12") {
-        species <- "eco"
-    } else if (organism == "ecsakai") {
-        species <- "ecs"
-    } else if (organism == "fly") {
-        species <- "dme"
-    } else if (organism == "human") {
-        species <- "hsa"
-    } else if (organism == "malaria") {
-        species <- "pfa"
-    } else if (organism == "mouse") {
-        species <- "mmu"
-    } else if (organism == "pig") {
-        species <- "ssc"
-    } else if (organism == "rat") {
-        species <- "rno"
-    } else if (organism == "rhesus") {
-        species <- "mcc"
-    } else if (organism == "worm" || organism == "celegans") {
-        species <- "cel"
-    } else if (organism == "xenopus") {
-        species <- "xla"
-    } else if (organism == "yeast") {
-        species <- "sce"
-    } else if (organism == "zebrafish") {
-        species <- "dre"
-    } else {
-        species <- NA
-    }
-
-    if (!is.na(species)) {
-        if (!file.exists("KEGGPATHID2NAME.rda") &&
-            !file.exists("KEGGPATHID2EXTID.rda") &&
-            !file.exists("EXTID2KEGGPATHID.rda") ) {
-            kegg <- download.KEGG(species)
-            buildKEGGmap(kegg[[1]], kegg[[2]])
-        }
-    }
-}
-
-
-KEGG_supported_organism <- function() {
-    res <- c(
-        "anopheles",
-        "arabidopsis",
-        "bovine",
-        "canine",
-        "chicken",
-        "chipm",
-        "ecolik12",
-        "ecsakai",
-        "ecs",
-        "fly",
-        "dme",
-        "human",
-        "malaria",
-        "mouse",
-        "pig",
-        "rat",
-        "rhesus",
-        "worm",
-        "celegans",
-        "xenopus",
-        "yeast",
-        "zebrafish")
-    return(res)
-}
