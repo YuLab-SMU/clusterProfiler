@@ -1,6 +1,6 @@
 ##' GO Enrichment Analysis of a gene set.
 ##' Given a vector of genes, this function will return the enrichment GO
-##' categories with FDR control.
+##' categories after FDR control.
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
