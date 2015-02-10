@@ -35,15 +35,25 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         } else {
 #            data[[all.vars(geneClusters)[1]]] = as.character(data[[all.vars(geneClusters)[1]]])
 ##            geneClusters = by(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]], function(x) list(as.character(x)))
-#            geneClusters = list(split(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]]))
+
+#            geneClusters = split(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]])
+            geneClusters = dlply(.data=data, all.vars(geneClusters)[2], .fun=function(x) {as.character(x[all.vars(geneClusters)[1]])})
 #            clProf <- dlply(geneClusters, .fun=function(i))
-            clProf.df <- aggregate(geneClusters, data, function(i) { print(head(i)); x=fun(as.character(i))})
-            geneClusters = unique(data[all.vars(geneClusters)[1]])
+#            clProf.df <- aggregate(geneClusters, data, function(i) { print(head(i)); x=fun(as.character(i))
+#                            if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
+#                                summary(x)
+#                            }
+#                        })
+#            geneClusters = unique(data[all.vars(geneClusters)[1]])
         }   
         print('dsadasd')
+#        print(clProf.df)
 #        print(summary(clProf.df))
-    } else {
+    }
+#    } else {
 
+        print(summary(geneClusters))
+        print('dasda')
         clProf <- llply(geneClusters,
                         .fun=function(i) {
                 x=fun(i, ...)
@@ -52,11 +62,13 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
                             }
                         }
                         )
-        clProf.df <- ldply(clProf, rbind)
-    }
+#    }
+    print(summary(clProf))
+    clProf.df <- ldply(clProf, rbind)
+    print(head(clProf.df %>% dplyr::select(-geneID)))
+    clProf.df <- rename(clProf.df, c(.id="Cluster"))
 
     ##colnames(clProf.df)[1] <- "Cluster"
-    clProf.df <- rename(clProf.df, c(.id="Cluster"))
     new("compareClusterResult",
         compareClusterResult = clProf.df,
         geneClusters = geneClusters,
