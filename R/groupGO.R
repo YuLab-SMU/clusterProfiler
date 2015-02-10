@@ -1,7 +1,7 @@
 
 ##' Functional Profile of a gene set at specific GO level.
 ##' Given a vector of genes, this function will return the GO profile at
-##' specific level.
+##' a specific level.
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
