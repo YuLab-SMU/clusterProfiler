@@ -24,16 +24,17 @@ cluster.
 }
 \examples{
 data(gcSample)
-	xx <- compareCluster(gcSample, fun="enrichKEGG", organism="human", pvalueCutoff=0.05)
-	#summary(xx)
-	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
+xx <- compareCluster(gcSample, fun="enrichKEGG",
+                     organism="human", pvalueCutoff=0.05)
+summary(xx)
+# plot(xx, type="dot", caption="KEGG Enrichment Comparison")
 
-# formula interface
-
-mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467', '100127206', '100128071'), group = c('A', 'A', 'A', 'B', 'B', 'B'))
-xx.formula   <- compareCluster(Entrez~group, data=mydf, fun='groupGO')
+## formula interface
+mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
+                            '100127206', '100128071'),
+                   group = c('A', 'A', 'A', 'B', 'B', 'B'))
+xx.formula <- compareCluster(Entrez~group, data=mydf, fun='groupGO')
 summary(xx.formula)
-
 }
 \author{
 Guangchuang Yu \url{http://ygc.name}
