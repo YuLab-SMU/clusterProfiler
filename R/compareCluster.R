@@ -1,10 +1,12 @@
 ##' Compare gene clusters functional profile
+##'
 ##' Given a list of gene set, this function will compute profiles of each gene
 ##' cluster.
 ##'
 ##'
-##' @param geneClusters a list of entrez gene id.
+##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type Entrez~group
 ##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .
+##' @param data if geneClusters is a formula, the data from which the clusters must be extracted.
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
@@ -23,7 +25,17 @@
 ##' 	#summary(xx)
 ##' 	#plot(xx, type="dot", caption="KEGG Enrichment Comparison")
 ##'
-compareCluster <- function(geneClusters, fun="enrichGO", ...) {
+compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
+
+    # Use formula interface for compareCluster
+    if (typeof(geneClusters) == 'language') {
+        if (!is.data.frame(data)) {
+            print ('no data provided with formula')
+        } else {
+            geneClusters = by(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]], list)
+        }   
+    }
+
     fun <- eval(parse(text=fun))
     clProf <- llply(geneClusters,
                     .fun=function(i) {
@@ -207,7 +219,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                   gsize <- as.numeric(sub("/\\d+$", "", as.character(result$GeneRatio)))
                   gcsize <- as.numeric(sub("^\\d+/", "", as.character(result$GeneRatio)))
                   result$GeneRatio = gsize/gcsize
-                  result$Cluster <- paste(as.character(result$Cluster),"\n", "(", gcsize, ")", sep="")
+                  result$Cluster <- paste(as.character(result$Cluster),"\n", "(", gcsize, ")", sep="")   # Transform to factor to keep the original order?
               } else {
                   ## nothing
               }
