@@ -9,7 +9,7 @@ Authors@R: c(person(given = "Guangchuang", family = "Yu",
 	     person(given = "Li-Gen", family = "Wang",
 	            email = "reeganwang020@gmail.com",
 		    role  = "ctb"),
-	     person(given = "Giovanni" family = "Dall'Olio",
+	     person(given = "Giovanni", family = "Dall'Olio",
 	            email = "giovanni.dallolio@upf.edu",
 		    role = "ctb"))
 Author: Guangchuang Yu <guangchuangyu@gmail.com> with contributions from
