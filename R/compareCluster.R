@@ -27,26 +27,34 @@
 ##'
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 
+    fun <- eval(parse(text=fun))
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
         if (!is.data.frame(data)) {
             print ('no data provided with formula')
         } else {
-            geneClusters = by(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]], list)
+#            data[[all.vars(geneClusters)[1]]] = as.character(data[[all.vars(geneClusters)[1]]])
+##            geneClusters = by(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]], function(x) list(as.character(x)))
+#            geneClusters = list(split(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]]))
+#            clProf <- dlply(geneClusters, .fun=function(i))
+            clProf.df <- aggregate(geneClusters, data, function(i) { print(head(i)); x=fun(as.character(i))})
+            geneClusters = unique(data[all.vars(geneClusters)[1]])
         }   
+        print('dsadasd')
+#        print(summary(clProf.df))
+    } else {
+
+        clProf <- llply(geneClusters,
+                        .fun=function(i) {
+                x=fun(i, ...)
+                            if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
+                                summary(x)
+                            }
+                        }
+                        )
+        clProf.df <- ldply(clProf, rbind)
     }
 
-    fun <- eval(parse(text=fun))
-    clProf <- llply(geneClusters,
-                    .fun=function(i) {
-			x=fun(i, ...)
-                        if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
-                            summary(x)
-                        }
-                    }
-                    )
-
-    clProf.df <- ldply(clProf, rbind)
     ##colnames(clProf.df)[1] <- "Cluster"
     clProf.df <- rename(clProf.df, c(.id="Cluster"))
     new("compareClusterResult",
