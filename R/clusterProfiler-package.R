@@ -1,4 +1,4 @@
-#' statistical analysis and visulization of functional profiles for genes and
+#' statistical analysis and visualization of functional profiles for genes and
 #' gene clusters
 #' The package implements methods to analyze and visualize functional profiles
 #' of gene and gene clusters.

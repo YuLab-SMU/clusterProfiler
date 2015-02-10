@@ -1,6 +1,6 @@
 ##' read GFF file and build gene information table
 ##'
-##' given the GFF file, this function will extract information and save it in working directory
+##' given a GFF file, this function extracts information from it and save it in working directory
 ##' @title Gff2GeneTable
 ##' @param gffFile GFF file
 ##' @param compress compress file or not
