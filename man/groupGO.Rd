@@ -4,7 +4,7 @@
 \alias{groupGO}
 \title{Functional Profile of a gene set at specific GO level.
 Given a vector of genes, this function will return the GO profile at
-specific level.}
+a specific level.}
 \usage{
 groupGO(gene, organism = "human", ont = "CC", level = 2,
   readable = FALSE)
@@ -30,7 +30,7 @@ A \code{groupGOResult} instance.
 \description{
 Functional Profile of a gene set at specific GO level.
 Given a vector of genes, this function will return the GO profile at
-specific level.
+a specific level.
 }
 \examples{
 data(gcSample)
