@@ -29,9 +29,18 @@ To install:
  * the latest released version:
    `biocLite("clusterProfiler")`
  * the latest development version:
-   `install_github(c("DOSE", "clusterProfiler"), "GuangchuangYu")`
+ `install_github(c("GuangchuangYu/DOSE", "GuangchuangYu/clusterProfiler"))
 
-Find out more at [http://www.bioconductor.org/packages/release/bioc/html/clusterProfiler.html](http://www.bioconductor.org/packages/release/bioc/html/clusterProfiler.html) and check out the [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/clusterProfiler/inst/doc/clusterProfiler.pdf).
+## Documentation ##
+
++ [Why clusterProfiler fails](http://ygc.name/2014/08/07/why-clusterprofiler-fails/)
++ [KEGG enrichment analysis with latest online data using clusterProfiler](http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
++ [Enrichment map](http://ygc.name/2014/08/03/enrichment-map/)
+
+To view the vignette of `clusterProfiler` installed in your system, start `R` and enter:
+```r
+vignette("clusterProfiler", package="clusterProfiler")
+```
 
 
 ## Bugs/Feature requests ##
