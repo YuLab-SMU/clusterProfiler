@@ -31,7 +31,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
         if (!is.data.frame(data)) {
-            print ('no data provided with formula')
+            stop ('no data provided with formula for compareCluster')
         } else {
             geneClusters = dlply(.data=data, all.vars(geneClusters)[2], .fun=function(x) {as.character(x[[all.vars(geneClusters)[1]]])})
         }   
