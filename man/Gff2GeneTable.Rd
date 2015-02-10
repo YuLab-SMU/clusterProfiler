@@ -18,7 +18,7 @@ file save.
 read GFF file and build gene information table
 }
 \details{
-given the GFF file, this function will extract information and save it in working directory
+given a GFF file, this function extracts information from it and save it in working directory
 }
 \author{
 Yu Guangchuang

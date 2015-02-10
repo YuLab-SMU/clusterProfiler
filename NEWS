@@ -1,3 +1,7 @@
+CHANGES IN VERSION 2.1.4
+------------------------
+ o formula interface for compareCluster contributed by Giovanni Dall'Olio <2015-02-11, Wed>
+ 
 CHANGES IN VERSION 2.1.3
 ------------------------
  o update vignettes <2015-01-28, Wed>
