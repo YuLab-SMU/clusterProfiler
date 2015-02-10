@@ -29,9 +29,14 @@
 ##' ## formula interface
 ##' mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
 ##'                             '100127206', '100128071'),
-##'                    group = c('A', 'A', 'A', 'B', 'B', 'B'))
+##'                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
+##'                    othergroup = c('good', 'good', 'bad', 'bad', 'good', 'bad'))
 ##' xx.formula <- compareCluster(Entrez~group, data=mydf, fun='groupGO')
 ##' summary(xx.formula)
+##'
+##' ## formula interface with more than one grouping variable
+##' xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf, fun='groupGO')
+##' summary(xx.formula.twogroups)
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 
     fun <- eval(parse(text=fun))
