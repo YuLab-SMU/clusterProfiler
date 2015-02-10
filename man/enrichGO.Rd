@@ -4,7 +4,7 @@
 \alias{enrichGO}
 \title{GO Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment GO
-categories with FDR control.}
+categories after FDR control.}
 \usage{
 enrichGO(gene, organism = "human", ont = "MF", pvalueCutoff = 0.05,
   pAdjustMethod = "BH", universe, qvalueCutoff = 0.2, minGSSize = 5,
@@ -38,7 +38,7 @@ A \code{enrichResult} instance.
 \description{
 GO Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment GO
-categories with FDR control.
+categories after FDR control.
 }
 \examples{
 \dontrun{

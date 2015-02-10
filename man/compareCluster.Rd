@@ -2,16 +2,16 @@
 % Please edit documentation in R/compareCluster.R
 \name{compareCluster}
 \alias{compareCluster}
-\title{Compare gene clusters functional profile
-Given a list of gene set, this function will compute profiles of each gene
-cluster.}
+\title{Compare gene clusters functional profile}
 \usage{
-compareCluster(geneClusters, fun = "enrichGO", ...)
+compareCluster(geneClusters, fun = "enrichGO", data = "", ...)
 }
 \arguments{
-\item{geneClusters}{a list of entrez gene id.}
+\item{geneClusters}{a list of entrez gene id. Alternatively, a formula of type Entrez~group}
 
 \item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .}
+
+\item{data}{if geneClusters is a formula, the data from which the clusters must be extracted.}
 
 \item{...}{Other arguments.}
 }
@@ -19,7 +19,6 @@ compareCluster(geneClusters, fun = "enrichGO", ...)
 A \code{clusterProfResult} instance.
 }
 \description{
-Compare gene clusters functional profile
 Given a list of gene set, this function will compute profiles of each gene
 cluster.
 }
