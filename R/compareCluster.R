@@ -37,7 +37,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 ##            geneClusters = by(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]], function(x) list(as.character(x)))
 
 #            geneClusters = split(data[all.vars(geneClusters)[1]], data[all.vars(geneClusters)[2]])
-            geneClusters = dlply(.data=data, all.vars(geneClusters)[2], .fun=function(x) {as.character(x[all.vars(geneClusters)[1]])})
+            geneClusters = dlply(.data=data, all.vars(geneClusters)[2], .fun=function(x) {as.character(x[[all.vars(geneClusters)[1]]])})
 #            clProf <- dlply(geneClusters, .fun=function(i))
 #            clProf.df <- aggregate(geneClusters, data, function(i) { print(head(i)); x=fun(as.character(i))
 #                            if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
@@ -46,14 +46,15 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 #                        })
 #            geneClusters = unique(data[all.vars(geneClusters)[1]])
         }   
-        print('dsadasd')
+#        print('dsadasd')
 #        print(clProf.df)
 #        print(summary(clProf.df))
     }
 #    } else {
+#        print(geneClusters)
 
-        print(summary(geneClusters))
-        print('dasda')
+#        print(summary(geneClusters))
+#        print('dasda')
         clProf <- llply(geneClusters,
                         .fun=function(i) {
                 x=fun(i, ...)
@@ -63,9 +64,9 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
                         }
                         )
 #    }
-    print(summary(clProf))
+#    print(summary(clProf))
     clProf.df <- ldply(clProf, rbind)
-    print(head(clProf.df %>% dplyr::select(-geneID)))
+#    print(head(clProf.df %>% dplyr::select(-geneID)))
     clProf.df <- rename(clProf.df, c(.id="Cluster"))
 
     ##colnames(clProf.df)[1] <- "Cluster"
