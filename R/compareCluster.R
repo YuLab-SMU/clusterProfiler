@@ -40,8 +40,13 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         if (!is.data.frame(data)) {
             stop ('no data provided with formula for compareCluster')
         } else {
-            geneClusters = dlply(.data=data, all.vars(geneClusters)[2], .fun=function(x) {as.character(x[[all.vars(geneClusters)[1]]])})
+            genes.var       = all.vars(geneClusters)[1]
+            grouping.var    = all.vars(geneClusters)[2]
+            geneClusters = dlply(.data=data, grouping.var, .fun=function(x) {as.character(x[[genes.var]])})
+            clusters.levels = unique(data[[grouping.var]])
         }   
+    } else {
+        clusters.levels = names(geneClusters)
     }
     clProf <- llply(geneClusters,
                     .fun=function(i) {
@@ -53,6 +58,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
                     )
     clProf.df <- ldply(clProf, rbind)
     clProf.df <- rename(clProf.df, c(.id="Cluster"))
+    clProf.df$Cluster = factor(clProf.df$Cluster, levels=clusters.levels)
 
     ##colnames(clProf.df)[1] <- "Cluster"
     new("compareClusterResult",
@@ -225,7 +231,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                   gsize <- as.numeric(sub("/\\d+$", "", as.character(result$GeneRatio)))
                   gcsize <- as.numeric(sub("^\\d+/", "", as.character(result$GeneRatio)))
                   result$GeneRatio = gsize/gcsize
-                  result$Cluster <- paste(as.character(result$Cluster),"\n", "(", gcsize, ")", sep="")   # Transform to factor to keep the original order?
+                  result$Cluster <- paste(as.character(result$Cluster),"\n", "(", gcsize, ")", sep="")
               } else {
                   ## nothing
               }
