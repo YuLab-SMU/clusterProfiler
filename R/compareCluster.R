@@ -29,9 +29,14 @@
 ##' ## formula interface
 ##' mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
 ##'                             '100127206', '100128071'),
-##'                    group = c('A', 'A', 'A', 'B', 'B', 'B'))
+##'                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
+##'                    othergroup = c('good', 'good', 'bad', 'bad', 'good', 'bad'))
 ##' xx.formula <- compareCluster(Entrez~group, data=mydf, fun='groupGO')
 ##' summary(xx.formula)
+##'
+##' ## formula interface with more than one grouping variable
+##' xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf, fun='groupGO')
+##' summary(xx.formula.twogroups)
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 
     fun <- eval(parse(text=fun))
@@ -40,7 +45,9 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         if (!is.data.frame(data)) {
             stop ('no data provided with formula for compareCluster')
         } else {
-            geneClusters = dlply(.data=data, all.vars(geneClusters)[2], .fun=function(x) {as.character(x[[all.vars(geneClusters)[1]]])})
+            genes.var       = all.vars(geneClusters)[1]
+            grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
+            geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {as.character(x[[genes.var]])})
         }   
     }
     clProf <- llply(geneClusters,
@@ -51,8 +58,10 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
                         }
                     }
                     )
+    clusters.levels = names(geneClusters)
     clProf.df <- ldply(clProf, rbind)
     clProf.df <- rename(clProf.df, c(.id="Cluster"))
+    clProf.df$Cluster = factor(clProf.df$Cluster, levels=clusters.levels)
 
     ##colnames(clProf.df)[1] <- "Cluster"
     new("compareClusterResult",
@@ -225,7 +234,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                   gsize <- as.numeric(sub("/\\d+$", "", as.character(result$GeneRatio)))
                   gcsize <- as.numeric(sub("^\\d+/", "", as.character(result$GeneRatio)))
                   result$GeneRatio = gsize/gcsize
-                  result$Cluster <- paste(as.character(result$Cluster),"\n", "(", gcsize, ")", sep="")   # Transform to factor to keep the original order?
+                  result$Cluster <- paste(as.character(result$Cluster),"\n", "(", gcsize, ")", sep="")
               } else {
                   ## nothing
               }
