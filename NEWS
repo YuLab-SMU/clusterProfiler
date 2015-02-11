@@ -1,5 +1,7 @@
 CHANGES IN VERSION 2.1.4
 ------------------------
+ o update vignette <2015-02-11, Wed>
+ o support formula like x ~ y + z, contributed by Giovanni Dall'Olio <2015-02-11, Wed>
  o add example of formula interface <2015-02-11, Wed>
  o formula interface for compareCluster contributed by Giovanni Dall'Olio <2015-02-11, Wed>
  
