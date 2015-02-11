@@ -71,23 +71,25 @@ gseGO <- function(geneList,
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
 gseKEGG <- function(geneList,
-                  organism      = "human",
-                  exponent      = 1,
-                  nPerm         = 1000,
-                  minGSSize     = 10,
-                  pvalueCutoff  = 0.05,
-                  pAdjustMethod = "BH",
-                  verbose       = TRUE) {
+                    organism          = "human",
+                    exponent          = 1,
+                    nPerm             = 1000,
+                    minGSSize         = 10,
+                    pvalueCutoff      = 0.05,
+                    pAdjustMethod     = "BH",
+                    use_internal_data = FALSE,
+                    verbose           = TRUE) {
     
-    gseAnalyzer(geneList      = geneList,
-                setType       = "KEGG",
-                organism      = organism,
-                exponent      = exponent,
-                nPerm         = nPerm,
-                minGSSize     = minGSSize,
-                pvalueCutoff  = pvalueCutoff,
-                pAdjustMethod = pAdjustMethod,
-                verbose       = verbose)
+    gseAnalyzer(geneList          = geneList,
+                setType           = "KEGG",
+                organism          = organism,
+                exponent          = exponent,
+                nPerm             = nPerm,
+                minGSSize         = minGSSize,
+                pvalueCutoff      = pvalueCutoff,
+                pAdjustMethod     = pAdjustMethod,
+                use_internal_data = use_internal_data,
+                verbose           = verbose)
 
 }
 
@@ -106,12 +108,17 @@ gseaplot <- DOSE::gseaplot
 ##' @title getGeneSet.KEGG
 ##' @param setType gene set type
 ##' @param organism organism
+##' @param use_internal_data logical 
 ##' @importFrom DOSE getGeneSet
 ##' @importFrom AnnotationDbi as.list
 ##' @method getGeneSet KEGG
 ##' @export
-getGeneSet.KEGG <- function(setType="KEGG", organism) {
-    gs <- as.list(KEGGPATHID2EXTID)
+getGeneSet.KEGG <- function(setType="KEGG", organism, use_internal_data=TRUE) {
+    if (use_internal_data) {
+        gs <- as.list(KEGGPATHID2EXTID)
+    } else {
+        gs <- get_KEGG_Anno(organism, "KEGGPATHID2EXTID")
+    }
     return(gs)
 }
 
@@ -119,11 +126,13 @@ getGeneSet.KEGG <- function(setType="KEGG", organism) {
 ##' @title getGeneSet.GO
 ##' @param setType gene set type
 ##' @param organism organism
+##' @param use_internal_data logical
 ##' @importFrom DOSE getGeneSet
 ##' @importFrom AnnotationDbi as.list
 ##' @method getGeneSet GO
 ##' @export
-getGeneSet.GO <- function(setType="GO", organism) {
+getGeneSet.GO <- function(setType="GO", organism,
+                          use_internal_data=TRUE) {
     GO2ALLEG <- GO2EXTID(organism)
     gs <- as.list(GO2ALLEG)
     return(gs)
@@ -132,13 +141,15 @@ getGeneSet.GO <- function(setType="GO", organism) {
 ##' @title getGeneSet.BP
 ##' @param setType gene set type
 ##' @param organism organism
+##' @param use_internal_data logical
 ##' @importFrom DOSE getGeneSet
 ##' @importFrom AnnotationDbi mget
 ##' @importFrom AnnotationDbi Ontology
 ##' @importFrom GO.db GOTERM
 ##' @method getGeneSet BP
 ##' @export
-getGeneSet.BP <- function(setType="BP", organism) {
+getGeneSet.BP <- function(setType="BP", organism,
+                          use_internal_data=TRUE) {
     gs <- getGeneSet.GO("GO", organism)
     ont <- lapply(mget(names(gs), GOTERM), Ontology)
     ont <- unlist(ont)
@@ -149,13 +160,15 @@ getGeneSet.BP <- function(setType="BP", organism) {
 ##' @title getGeneSet.MF
 ##' @param setType gene set type
 ##' @param organism organism
+##' @param use_internal_data logical
 ##' @importFrom DOSE getGeneSet
 ##' @importFrom AnnotationDbi mget
 ##' @importFrom AnnotationDbi Ontology
 ##' @importFrom GO.db GOTERM
 ##' @method getGeneSet MF
 ##' @export
-getGeneSet.MF <- function(setType="MF", organism) {
+getGeneSet.MF <- function(setType="MF", organism,
+                          use_internal_data=TRUE) {
     gs <- getGeneSet.GO("GO", organism)
     ont <- lapply(mget(names(gs), GOTERM), Ontology)
     ont <- unlist(ont)
@@ -166,13 +179,15 @@ getGeneSet.MF <- function(setType="MF", organism) {
 ##' @title getGeneSet.CC
 ##' @param setType gene set type
 ##' @param organism organism
+##' @param use_internal_data logical
 ##' @importFrom DOSE getGeneSet
 ##' @importFrom AnnotationDbi mget
 ##' @importFrom AnnotationDbi Ontology
 ##' @importFrom GO.db GOTERM
 ##' @method getGeneSet CC
 ##' @export
-getGeneSet.CC <- function(setType="CC", organism) {
+getGeneSet.CC <- function(setType="CC", organism,
+                          use_internal_data=TRUE) {
     gs <- getGeneSet.GO("GO", organism)
     ont <- lapply(mget(names(gs), GOTERM), Ontology)
     ont <- unlist(ont)

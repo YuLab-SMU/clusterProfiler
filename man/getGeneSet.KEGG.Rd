@@ -4,12 +4,15 @@
 \alias{getGeneSet.KEGG}
 \title{getGeneSet.KEGG}
 \usage{
-\method{getGeneSet}{KEGG}(setType = "KEGG", organism)
+\method{getGeneSet}{KEGG}(setType = "KEGG", organism,
+  use_internal_data = TRUE)
 }
 \arguments{
 \item{setType}{gene set type}
 
 \item{organism}{organism}
+
+\item{use_internal_data}{logical}
 }
 \description{
 getGeneSet.KEGG
