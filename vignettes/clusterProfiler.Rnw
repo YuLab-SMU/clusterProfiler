@@ -228,7 +228,7 @@ GSEA use permutation test, user can set \textit{nPerm} for number of permutation
 GO semantic similarity can be calculated by \Biocpkg{GOSemSim} \cite{yu2010}. We can use it to cluster genes/proteins into different clusters based on their functional similarity and can also use it to measure the similarities among GO terms to reduce the redundancy of GO enrichment results.
 
 \section{KEGG analysis}
-The annotation package, KEGG.db, is not updated since 2012. It's now pretty old and in \Biocpkg{clusterProfiler}, \Rfunction{enrichKEGG} supports downloading latest online version of KEGG data for enrichment analysis. Using KEGG.db is also supported by explicitly setting \Robject{use.KEGG.db} parameter to \Robject{TRUE}, but it's not recommended. 
+The annotation package, KEGG.db, is not updated since 2012. It's now pretty old and in \Biocpkg{clusterProfiler}, \Rfunction{enrichKEGG} supports downloading latest online version of KEGG data for enrichment analysis. Using KEGG.db is also supported by explicitly setting \textit{use\_internal\_data} parameter to \Robject{TRUE}, but it's not recommended. 
 
 With this new feature, organism is not restricted to those supported in previous release, it can be any species that have KEGG annotation data available in KEGG database. User should pass abbreviation of academic name to the \Robject{organism} parameter. The full list of KEGG supported organisms can be accessed via \url{http://www.genome.jp/kegg/catalog/org_list.html}.
 

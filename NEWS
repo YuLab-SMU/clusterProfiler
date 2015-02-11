@@ -1,3 +1,9 @@
+CHANGES IN VERSION 2.1.5
+------------------------
+ o gseKEGG is also use online KEGG data by default. <2015-02-11, Wed>
+ o change 'use.KEGG.db' parameter to 'use_internal_data', that can be used
+   when I implement GO analysis with user specific annotation data <2015-02-11, Wed>
+   
 CHANGES IN VERSION 2.1.4
 ------------------------
  o update vignette <2015-02-11, Wed>

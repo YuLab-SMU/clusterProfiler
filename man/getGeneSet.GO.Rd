@@ -4,12 +4,14 @@
 \alias{getGeneSet.GO}
 \title{getGeneSet.GO}
 \usage{
-\method{getGeneSet}{GO}(setType = "GO", organism)
+\method{getGeneSet}{GO}(setType = "GO", organism, use_internal_data = TRUE)
 }
 \arguments{
 \item{setType}{gene set type}
 
 \item{organism}{organism}
+
+\item{use_internal_data}{logical}
 }
 \description{
 getGeneSet.GO

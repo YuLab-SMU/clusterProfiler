@@ -4,12 +4,14 @@
 \alias{getGeneSet.CC}
 \title{getGeneSet.CC}
 \usage{
-\method{getGeneSet}{CC}(setType = "CC", organism)
+\method{getGeneSet}{CC}(setType = "CC", organism, use_internal_data = TRUE)
 }
 \arguments{
 \item{setType}{gene set type}
 
 \item{organism}{organism}
+
+\item{use_internal_data}{logical}
 }
 \description{
 getGeneSet.CC

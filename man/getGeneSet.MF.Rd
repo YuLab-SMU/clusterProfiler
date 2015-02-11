@@ -4,12 +4,14 @@
 \alias{getGeneSet.MF}
 \title{getGeneSet.MF}
 \usage{
-\method{getGeneSet}{MF}(setType = "MF", organism)
+\method{getGeneSet}{MF}(setType = "MF", organism, use_internal_data = TRUE)
 }
 \arguments{
 \item{setType}{gene set type}
 
 \item{organism}{organism}
+
+\item{use_internal_data}{logical}
 }
 \description{
 getGeneSet.MF
