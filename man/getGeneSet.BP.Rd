@@ -4,12 +4,14 @@
 \alias{getGeneSet.BP}
 \title{getGeneSet.BP}
 \usage{
-\method{getGeneSet}{BP}(setType = "BP", organism)
+\method{getGeneSet}{BP}(setType = "BP", organism, use_internal_data = TRUE)
 }
 \arguments{
 \item{setType}{gene set type}
 
 \item{organism}{organism}
+
+\item{use_internal_data}{logical}
 }
 \description{
 getGeneSet.BP

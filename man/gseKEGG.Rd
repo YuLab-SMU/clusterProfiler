@@ -6,7 +6,7 @@
 \usage{
 gseKEGG(geneList, organism = "human", exponent = 1, nPerm = 1000,
   minGSSize = 10, pvalueCutoff = 0.05, pAdjustMethod = "BH",
-  verbose = TRUE)
+  use_internal_data = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
