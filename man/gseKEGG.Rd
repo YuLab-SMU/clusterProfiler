@@ -26,6 +26,8 @@ gseKEGG(geneList, organism = "human", exponent = 1, nPerm = 1000,
 
 \item{pAdjustMethod}{pvalue adjustment method}
 
+\item{use_internal_data}{whether use KEGG.db or not}
+
 \item{verbose}{print message or not}
 }
 \value{

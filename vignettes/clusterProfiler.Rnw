@@ -345,7 +345,7 @@ head(summary(ck))
 
 
 \subsection{Formula interface of compareCluster}
-\Rfunction{compareCluster} also supports passing a formula\footnote{The code to support formula has been contributed by Giovanni Dall'Olio.} of type Entrez~group or Entrez~group+othergroup. 
+\Rfunction{compareCluster} also supports passing a formula\footnote{The code to support formula has been contributed by Giovanni Dall'Olio.} of type $Entrez \sim group$ or $Entrez \sim group + othergroup$. 
 
 <<formula>>=
 ## formula interface
