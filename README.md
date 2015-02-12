@@ -36,6 +36,7 @@ To install:
 + [Why clusterProfiler fails](http://ygc.name/2014/08/07/why-clusterprofiler-fails/)
 + [KEGG enrichment analysis with latest online data using clusterProfiler](http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
 + [Enrichment map](http://ygc.name/2014/08/03/enrichment-map/)
++ [a formula interface for GeneOntology analysis](http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/)
 
 To view the vignette of `clusterProfiler` installed in your system, start `R` and enter:
 ```r
