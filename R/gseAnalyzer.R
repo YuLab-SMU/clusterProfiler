@@ -60,6 +60,7 @@ gseGO <- function(geneList,
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param pvalueCutoff pvalue Cutoff
 ##' @param pAdjustMethod pvalue adjustment method
+##' @param use_internal_data whether use KEGG.db or not
 ##' @param verbose print message or not
 ##' @importFrom DOSE gsea
 ##' @importFrom DOSE gseAnalyzer
