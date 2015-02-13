@@ -236,7 +236,7 @@ With this new feature, organism is not restricted to those supported in previous
 <<enrichKEGG>>=
 kk <- enrichKEGG(gene         = gene,
                  organism     = "human",
-                 pvalueCutoff = 0.01, 
+                 pvalueCutoff = 0.05, 
                  readable     = TRUE)
 head(summary(kk))
 @
@@ -254,7 +254,7 @@ head(summary(kk2))
 
 \section{Disease Ontology analysis}
 
-\Biocpkg{DOSE} supports Disease Ontology (DO) Semantic and Enrichment analysis, please refer to the package vignettes. The \Rfunction{enrichDO} function is very useful for identifying disease association of interesting genes, and function \Rfunction{gseAnalyzer} function is designed for gene set enrichment analysis of \textit{DO}.
+\Biocpkg{DOSE} \cite{yu_dose_2015} supports Disease Ontology (DO) Semantic and Enrichment analysis, please refer to the package vignettes. The \Rfunction{enrichDO} function is very useful for identifying disease association of interesting genes, and function \Rfunction{gseAnalyzer} function is designed for gene set enrichment analysis of \textit{DO}.
 
 \section{Reactome pathway analysis}
 
@@ -387,7 +387,7 @@ User can refer to the example in \cite{yu2012}; we analyzed the publicly availab
 
 Another example was shown in \cite{yu2011}, we calculated functional similarities among viral miRNAs using method described in \cite{yu_new_2011}, and compared significant KEGG pathways regulated by different viruses using \Rfunction{compareCluster}.
 
-The comparison function was designed as a framework for comparing gene clusters of any kind of ontology associations, not only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} provided in this package, but also other biological and biomedical ontologies, for instance, \Rfunction{enrichDO} from \Biocpkg{DOSE} and \Rfunction{enrichPathway} from \Biocpkg{ReactomePA} work fine with \Rfunction{compareCluster} for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of \Biocpkg{DOSE} and \Biocpkg{ReactomePA}.
+The comparison function was designed as a framework for comparing gene clusters of any kind of ontology associations, not only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} provided in this package, but also other biological and biomedical ontologies, for instance, \Rfunction{enrichDO} from \Biocpkg{DOSE} \cite{yu_dose_2015} and \Rfunction{enrichPathway} from \Biocpkg{ReactomePA} work fine with \Rfunction{compareCluster} for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of \Biocpkg{DOSE} \cite{yu_dose_2015} and \Biocpkg{ReactomePA}.
 
 
 \section{External documents}
