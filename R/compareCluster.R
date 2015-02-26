@@ -157,7 +157,9 @@ setMethod("plot", signature(x="compareClusterResult"),
                    font.size=12,
                    showCategory=5,
                    by="geneRatio",
-                   colorBy="p.adjust") {
+                   colorBy="p.adjust",
+                   includeAll=F
+                   ) {
 
               clProf.df <- summary(x)
 
@@ -178,6 +180,10 @@ setMethod("plot", signature(x="compareClusterResult"),
                                   },
                                   N=showCategory
                                   )
+
+              }
+              if (includeAll == T) {
+                  result = subset(clProf.df, ID %in% result$ID)
               }
 
               ## remove zero count
