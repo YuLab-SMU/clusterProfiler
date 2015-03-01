@@ -150,6 +150,7 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
 ##' @param colorBy one of pvalue or p.adjust
+##' @param includeAll logical 
 setMethod("plot", signature(x="compareClusterResult"),
           function(x,
                    type="dot",
@@ -158,7 +159,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                    showCategory=5,
                    by="geneRatio",
                    colorBy="p.adjust",
-                   includeAll=F
+                   includeAll=FALSE
                    ) {
 
               clProf.df <- summary(x)
@@ -182,7 +183,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                                   )
 
               }
-              if (includeAll == T) {
+              if (includeAll == TRUE) {
                   result = subset(clProf.df, ID %in% result$ID)
               }
 
