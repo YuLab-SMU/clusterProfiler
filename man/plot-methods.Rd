@@ -8,7 +8,7 @@
 \usage{
 \S4method{plot}{compareClusterResult,ANY}(x, type = "dot", title = "",
   font.size = 12, showCategory = 5, by = "geneRatio",
-  colorBy = "p.adjust")
+  colorBy = "p.adjust", includeAll = FALSE)
 }
 \arguments{
 \item{x}{compareClusterResult object}
@@ -24,6 +24,8 @@
 \item{by}{one of geneRatio, Percentage or count}
 
 \item{colorBy}{one of pvalue or p.adjust}
+
+\item{includeAll}{logical}
 
 \item{...}{Additional argument list}
 }
