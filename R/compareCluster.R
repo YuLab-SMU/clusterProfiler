@@ -159,7 +159,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                    showCategory=5,
                    by="geneRatio",
                    colorBy="p.adjust",
-                   includeAll=FALSE
+                   includeAll=TRUE
                    ) {
 
               clProf.df <- summary(x)

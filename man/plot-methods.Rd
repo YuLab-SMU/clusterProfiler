@@ -8,7 +8,7 @@
 \usage{
 \S4method{plot}{compareClusterResult,ANY}(x, type = "dot", title = "",
   font.size = 12, showCategory = 5, by = "geneRatio",
-  colorBy = "p.adjust", includeAll = FALSE)
+  colorBy = "p.adjust", includeAll = TRUE)
 }
 \arguments{
 \item{x}{compareClusterResult object}
