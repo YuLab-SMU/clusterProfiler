@@ -1,5 +1,6 @@
 CHANGES IN VERSION 2.1.7
 ------------------------
+ o set includeAll = TRUE by default <2015-03-03, Tue>
  o added an includeAll option in plot(compareCluster) <2015-02-26, Thu>
      refer to: https://github.com/GuangchuangYu/clusterProfiler/issues/9
  o fixed typo in groupGO <2015-02-26, Thu>
