@@ -17,7 +17,8 @@ knitr::opts_chunk$set(tidy         = FALSE,
                       fig.width    = 6,
                       fig.height   = 6,
                       resolution   = 100,
-                      message      = FALSE)
+                      message      = FALSE,
+                      warning      = FALSE)
 @ 
 
 <<style-Sweave, eval=TRUE, echo=FALSE, results="asis">>=
@@ -260,6 +261,17 @@ head(summary(kk2))
 
 With the demise of KEGG (at least without subscription), the KEGG pathway data in Bioconductor will not update and we encourage user to analyze pathway using \Biocpkg{ReactomePA} which use Reactome as a source of pathway data. The function call of \Rfunction{enrichPathway} and \Rfunction{gsePathway} in \Biocpkg{ReactomePA} is consistent with \Rfunction{enrichKEGG} and \Rfunction{gseKEGG}.
 
+\section{DAVID functional analysis}
+
+\Biocpkg{clusterProfiler} provides enrichment and GSEA analysis with GO, KEGG, DO and Reactome pathway supported internally, some user may prefer GO and KEGG analysis with DAVID \cite{huang_david_2007} and still attracted by the visualization methods provided by \Biocpkg{clusterProfiler} \cite{paranjpe_genome_wid_2013}. To bridge the gap between DAVID and clusterProfiler, we implemented \Rfunction{enrichDAVID}. This function query enrichment analysis result from DAVID webserver via RDAVIDWebService \cite{fresno_rdavidwebservice_2013} and stored the result as an \Robject{enrichResult} instance, so that we can use all the visualization functions in \Biocpkg{clusterProfiler} to visualize DAVID results. \Rfunction{enrichDAVID} is fully compatible with \Rfunction{compareCluster} function and comparing enrichment results from different gene clusters is now available with DAVID.
+
+<<enrichDAVID>>=
+david <- enrichDAVID(gene = gene,
+                     idType = "ENTREZ_GENE_ID",
+                     listType = "Gene",
+                     annotation = "KEGG_PATHWAY")
+head(summary(david))
+@ 
 
 
 \section{Visualization}
@@ -300,7 +312,7 @@ cnetplot(kk, categorySize="geneNum", foldChange=geneList)
 
 \subsection{gseaplot}
 Running score of gene set enrichment analysis and its association of phenotype can be visualized by \Rfunction{gseaplot}.
-<<gseaplot, fig.cap="plotting gsea result", fig.align="center", fig.height=6, fig.width=6, out.width="0.6\\textwidth", fig.pos="h">>=  
+<<gseaplot, fig.cap="plotting gsea result", fig.align="center", fig.height=6, fig.width=8, out.width="0.6\\textwidth", fig.pos="h">>=  
 gseaplot(kk2, geneSetID = "hsa04145")
 @
 
