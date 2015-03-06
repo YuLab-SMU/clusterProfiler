@@ -1,3 +1,7 @@
+CHANGES IN VERSION 2.1.8
+------------------------
+ o implement enrichDAVID <2015-03-07, Fri>
+ 
 CHANGES IN VERSION 2.1.7
 ------------------------
  o set includeAll = TRUE by default <2015-03-03, Tue>
