@@ -60,6 +60,11 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
                     )
     clusters.levels = names(geneClusters)
     clProf.df <- ldply(clProf, rbind)
+
+    if (nrow(clProf.df) == 0) {
+        stop("No enrichment found in any of gene cluster, please check your input...")
+    }
+    
     clProf.df <- rename(clProf.df, c(.id="Cluster"))
     clProf.df$Cluster = factor(clProf.df$Cluster, levels=clusters.levels)
 
