@@ -45,6 +45,11 @@ enrichDAVID <- function(gene,
 
     x <- getFunctionalAnnotationChart(david, threshold=1, count=minGSSize)
 
+    if (length(x@.Data) == 0) {
+        warning("No significant enrichment found...")
+        return(NULL)
+    }
+    
     term <- x$Term
     if (length(grep("~", term[1])) == 0) {
         sep <- ":"
