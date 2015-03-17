@@ -407,6 +407,7 @@ The comparison function was designed as a framework for comparing gene clusters 
 \begin{itemize}
   \item \href{http://ygc.name/2014/08/07/why-clusterprofiler-fails/}{Why clusterProfiler fails}
   \item \href{http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/}{KEGG enrichment analysis with latest online data using clusterProfiler}
+  \item \href{http://ygc.name/2015/02/10/ggtree-updating-a-tree-view/}{DAVID functional analysis with clusterProfiler}
   \item \href{http://ygc.name/2014/08/03/enrichment-map/}{Enrichment map}
   \item \href{a formula interface for GeneOntology analysis}{http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/}
 \end{itemize}
