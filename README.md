@@ -35,6 +35,7 @@ To install:
 
 + [Why clusterProfiler fails](http://ygc.name/2014/08/07/why-clusterprofiler-fails/)
 + [KEGG enrichment analysis with latest online data using clusterProfiler](http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
++ [DAVID functional analysis with clusterProfiler](http://ygc.name/2015/02/10/ggtree-updating-a-tree-view/)
 + [Enrichment map](http://ygc.name/2014/08/03/enrichment-map/)
 + [a formula interface for GeneOntology analysis](http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/)
 
