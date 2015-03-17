@@ -29,7 +29,7 @@ To install:
  * the latest released version:
    `biocLite("clusterProfiler")`
  * the latest development version:
- `install_github(c("GuangchuangYu/DOSE", "GuangchuangYu/clusterProfiler"))
+ `install_github(c("GuangchuangYu/DOSE", "GuangchuangYu/clusterProfiler"))`
 
 ## Documentation ##
 
