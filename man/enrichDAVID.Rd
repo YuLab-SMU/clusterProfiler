@@ -7,7 +7,7 @@
 enrichDAVID(gene, idType = "ENTREZ_GENE_ID", listType = "Gene",
   minGSSize = 5, annotation = "GOTERM_BP_ALL", pvalueCutoff = 0.05,
   pAdjustMethod = "BH", qvalueCutoff = 0.2, species = NA,
-  david.user = "gcyu@connect.hku.hk")
+  david.user = "clusterProfiler@hku.hk")
 }
 \arguments{
 \item{gene}{input gene}
