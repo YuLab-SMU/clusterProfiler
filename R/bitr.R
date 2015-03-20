@@ -8,7 +8,7 @@
 ##' @export
 ##' @author Guangchuang Yu
 idType <- function(annoDb = "org.Hs.eg.db") {
-    db <- eval(parse(text=annoDb))
+    db <- get_db_obj(annoDb)
     keytypes(db)
 }
 
@@ -29,7 +29,7 @@ idType <- function(annoDb = "org.Hs.eg.db") {
 ##' @author Guangchuang Yu
 bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
     geneID %<>% as.character %>% unique
-    db <- eval(parse(text=annoDb))
+    db <- get_db_obj(annoDb)
     res <- suppressWarnings(select(db,
                                    keys = geneID,
                                    keytype = fromType, 
@@ -47,4 +47,9 @@ bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
     return(res)
 }
 
+
+get_db_obj <- function(annoDb) {
+    require(annoDb, character.only = TRUE)
+    eval(parse(text=annoDb))
+}
 
