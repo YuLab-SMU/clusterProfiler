@@ -1,0 +1,27 @@
+
+idType <- function(annoDb = "org.Hs.eg.db") {
+    db <- eval(parse(text=annoDb))
+    keytypes(db)
+}
+
+bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
+    geneID %<>% as.character %>% unique
+    db <- eval(parse(text=annoDb))
+    res <- suppressWarnings(select(db,
+                                   keys = geneID,
+                                   keytype = fromType, 
+                                   columns=c(fromType, toType)))
+    
+    ii <- which(is.na(res[,2]))
+    n <- res[ii, 1] %>% unique %>% length
+    if (n) {
+        warning(paste0(n/length(geneID)*100, "%"), "of input gene IDs are fail to map...")
+    }
+    
+    if (drop) {
+        res <- res[-ii, ]
+    }
+    return(res)
+}
+
+
