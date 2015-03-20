@@ -1,3 +1,7 @@
+CHANGES IN VERSION 2.1.10
+------------------------
+ o idType and bitr function for translating biological ID. <2015-03-20, Fri>
+ 
 CHANGES IN VERSION 2.1.9
 ------------------------
  o throw stop msg when gene can not be mapped by DAVID <2015-03-12, Thu>
