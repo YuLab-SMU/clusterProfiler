@@ -58,7 +58,8 @@ bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
 
 
 get_db_obj <- function(annoDb) {
-    require(annoDb, character.only = TRUE)
-    eval(parse(text=annoDb))
+    ## require(annoDb, character.only = TRUE)
+    requireNamespace(annoDb)
+    eval(parse(text=paste0(annoDb, "::", annoDb)))
 }
 
