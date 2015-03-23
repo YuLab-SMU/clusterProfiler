@@ -28,6 +28,15 @@ idType <- function(annoDb = "org.Hs.eg.db") {
 ##' @export
 ##' @author Guangchuang Yu
 bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
+    idTypes <- idType(annoDb)
+    msg <-  paste0("should be one of ", paste(idTypes, collapse=", "), ".")
+    if (! fromType %in% idTypes) {
+        stop("'fromType' ", msg)
+    }
+    if (! toType %in% idTypes) {
+        stop("'toType' ", msg)
+    }
+    
     geneID %<>% as.character %>% unique
     db <- get_db_obj(annoDb)
     res <- suppressWarnings(select(db,
