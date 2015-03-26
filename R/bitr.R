@@ -47,7 +47,7 @@ bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
     ii <- which(is.na(res[,2]))
     n <- res[ii, 1] %>% unique %>% length
     if (n) {
-        warning(paste0(n/length(geneID)*100, "%"), "of input gene IDs are fail to map...")
+        warning(paste0(round(n/length(geneID)*100, 2), "%"), " of input gene IDs are fail to map...")
     }
     
     if (drop) {
