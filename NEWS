@@ -1,3 +1,7 @@
+CHANGES IN VERSION 2.1.11
+------------------------
+ o add example of bitr in vignette <2015-03-31, Tue>
+ 
 CHANGES IN VERSION 2.1.10
 ------------------------
  o idType and bitr function for translating biological ID. <2015-03-20, Fri>
