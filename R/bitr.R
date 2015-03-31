@@ -33,7 +33,7 @@ bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
     if (! fromType %in% idTypes) {
         stop("'fromType' ", msg)
     }
-    if (! toType %in% idTypes) {
+    if (! all(toType %in% idTypes)) {
         stop("'toType' ", msg)
     }
     
@@ -45,13 +45,14 @@ bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
                                    columns=c(fromType, toType)))
     
     ii <- which(is.na(res[,2]))
-    n <- res[ii, 1] %>% unique %>% length
-    if (n) {
-        warning(paste0(round(n/length(geneID)*100, 2), "%"), " of input gene IDs are fail to map...")
-    }
-    
-    if (drop) {
-        res <- res[-ii, ]
+    if (length(ii)) {
+        n <- res[ii, 1] %>% unique %>% length
+        if (n) {
+            warning(paste0(round(n/length(geneID)*100, 2), "%"), " of input gene IDs are fail to map...")
+        }
+        if (drop) {
+            res <- res[-ii, ]
+        }
     }
     return(res)
 }
