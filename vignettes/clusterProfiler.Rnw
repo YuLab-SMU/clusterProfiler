@@ -101,6 +101,37 @@ selected cluster is slow and tedious. To bridge this gap, we designed
 \Biocpkg{clusterProfiler} \cite{yu2012}, for comparing and visualizing functional
 profiles among gene clusters.
 
+\section{bitr: Biological Id TranslatoR}
+
+Many new R user may find traslating ID is a tedious task and I have received many feedbacks from \Biocpkg{clusterProfiler} users that they don't know how to convert gene symbol, uniprot ID or other ID types to Entrez gene ID that used in \Biocpkg{clusterProfiler} for most of the species.
+
+To remove this obstacle, We provide \Rfunction{bitr} function for translating among different gene ID types.
+
+
+<<bitr>>=
+x <- c("GPX3",  "GLRX",   "LBP",   "CRYAB", "DEFB1", "HCLS1",   "SOD2",   "HSPA2", 
+       "ORM1",  "IGFBP1", "PTHLH", "GPC3",  "IGFBP3","TOB1",    "MITF",   "NDRG1", 
+       "NR1H4", "FGFR3",  "PVR",   "IL6",   "PTPRM", "ERBB2",   "NID2",   "LAMB1", 
+       "COMP",  "PLS3",   "MCAM",  "SPP1",  "LAMC1", "COL4A2",  "COL4A1", "MYOC",  
+       "ANXA4", "TFPI2",  "CST6",  "SLPI",  "TIMP2", "CPM",     "GGT1",   "NNMT",
+       "MAL",   "EEF1A2", "HGD",   "TCN2",  "CDA",   "PCCA",    "CRYM",   "PDXK",  
+       "STC1",  "WARS",  "HMOX1", "FXYD2", "RBP4",   "SLC6A12", "KDELR3", "ITM2B")
+eg = bitr(x, fromType="SYMBOL", toType="ENTREZID", annoDb="org.Hs.eg.db")
+head(eg)
+@ 
+
+User should provides an annotation package, both \textit{fromType} and \textit{toType} can accept any types that supported.
+
+User can use \Rfunction{idType} to list all supporting types.
+<<idType>>=
+idType("org.Hs.eg.db")
+@
+
+We can translate from one type to other types.
+<<bitr2>>=
+ids <- bitr(x, fromType="SYMBOL", toType=c("UNIPROT", "ENSEMBL"), annoDb="org.Hs.eg.db")
+head(ids)
+@ 
 
 \section{Gene Ontology analysis}
 \subsection{Supported organisms}
@@ -409,7 +440,7 @@ The comparison function was designed as a framework for comparing gene clusters 
   \item \href{http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/}{KEGG enrichment analysis with latest online data using clusterProfiler}
   \item \href{http://ygc.name/2015/02/10/ggtree-updating-a-tree-view/}{DAVID functional analysis with clusterProfiler}
   \item \href{http://ygc.name/2014/08/03/enrichment-map/}{Enrichment map}
-  \item \href{a formula interface for GeneOntology analysis}{http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/}
+  \item \href{http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/}{a formula interface for GeneOntology analysis}
 \end{itemize}
 
 \section{Session Information}
