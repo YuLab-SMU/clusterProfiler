@@ -1,3 +1,7 @@
+CHANGES IN VERSION 2.1.12
+------------------------
+ o change use_internal_data parameter to ... according to the change of DOSE <2015-04-01, Wed>
+ 
 CHANGES IN VERSION 2.1.11
 ------------------------
  o add example of bitr in vignette <2015-03-31, Tue>

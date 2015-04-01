@@ -2,6 +2,26 @@
     assign("clusterProfilesEnv", new.env(),.GlobalEnv)
 }
 
+build_Anno <- function(path2gene, path2name) {
+    if (!exists("Anno_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign("Anno_clusterProfiler_Env", new.env(), .GlobalEnv)
+    }
+    Anno_clusterProfiler_Env <- get("Anno_clusterProfiler_Env", envir= .GlobalEnv)
+
+    PATHID2EXTID <- split(as.character(path2gene[,2]), as.character(path2gene[,1]))
+    EXTID2PATHID <- split(as.character(path2gene[,1]), as.character(path2gene[,2]))
+    
+    assign("PATHID2EXTID", PATHID2EXTID, envir = Anno_clusterProfiler_Env)
+    assign("EXTID2PATHID", EXTID2PATHID, envir = Anno_clusterProfiler_Env)
+
+    if (! missing(path2name) || is.null(path2name) || is.na(path2name)) {
+        assign("PATHID2NAME", path2name, envir = Anno_clusterProfiler_Env)
+    } else {
+        assign("PATHID2NAME", NULL, envir = Anno_clusterProfiler_Env)
+    }
+    return(Anno_clusterProfiler_Env)
+}
+
 
 organismMapper <- function(organism) {
     ## it only map those previous supported organism
