@@ -1,5 +1,6 @@
 CHANGES IN VERSION 2.1.12
 ------------------------
+ o user input is now supported with enricher and GSEA function <2015-04-01, Wed>
  o change use_internal_data parameter to ... according to the change of DOSE <2015-04-01, Wed>
  
 CHANGES IN VERSION 2.1.11
