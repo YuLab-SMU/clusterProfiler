@@ -129,7 +129,11 @@ viewKEGG <- function(obj, pathwayID, foldChange,
 ##' @importFrom KEGG.db KEGGEXTID2PATHID
 ##' @method EXTID2TERMID KEGG
 ##' @export
-EXTID2TERMID.KEGG <- function(gene, organism, use_internal_data=TRUE) {
+EXTID2TERMID.KEGG <- function(gene, organism, ...) {
+    EXTID2TERMID.KEGG.internal(gene, organism, ...)
+}
+
+EXTID2TERMID.KEGG.internal <- function(gene, organism, use_internal_data=TRUE, ...) {
     gene <- as.character(gene)
     organism <- organismMapper(organism)
     
@@ -147,7 +151,11 @@ EXTID2TERMID.KEGG <- function(gene, organism, use_internal_data=TRUE) {
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
 ##' @method TERMID2EXTID KEGG
 ##' @export
-TERMID2EXTID.KEGG <- function(term, organism, use_internal_data=TRUE) {
+TERMID2EXTID.KEGG <- function(term, organism, ...) {
+    TERMID2EXTID.KEGG.internal(term, organism, ...)
+}
+
+TERMID2EXTID.KEGG <- function(term, organism, use_internal_data=TRUE, ...) {
     organism <- organismMapper(organism)
     if(use_internal_data && organism %in% KEGG_db_supported()) {
         pathID2ExtID <- mget(unique(term), KEGGPATHID2EXTID, ifnotfound=NA)
@@ -162,7 +170,11 @@ TERMID2EXTID.KEGG <- function(term, organism, use_internal_data=TRUE) {
 ##' @importFrom KEGG.db KEGGPATHID2EXTID
 ##' @method ALLEXTID KEGG
 ##' @export
-ALLEXTID.KEGG <- function(organism, use_internal_data=TRUE) {
+ALLEXTID.KEGG <- function(organism, ...) {
+    ALLEXTID.KEGG.internal(organism, ...)
+}
+
+ALLEXTID.KEGG.internal <- function(organism, use_internal_data=TRUE, ...) {
     organism <- organismMapper(organism)
     
     if (use_internal_data && organism %in% KEGG_db_supported()) {
@@ -184,7 +196,11 @@ ALLEXTID.KEGG <- function(organism, use_internal_data=TRUE) {
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @method TERM2NAME KEGG
 ##' @export
-TERM2NAME.KEGG <- function(term, organism, use_internal_data=TRUE) {
+TERM2NAME.KEGG <- function(term, organism, ...) {
+    TERM2NAME.KEGG.internal(term, organism, ...)
+}
+
+TERM2NAME.KEGG.internal <- function(term, organism, use_internal_data=TRUE, ...) {
     term <- as.character(term)
     organism <- organismMapper(organism)
     pathIDs <- gsub("^\\D+", "",term, perl=T)

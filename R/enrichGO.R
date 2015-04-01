@@ -87,21 +87,21 @@ cnetplot <- DOSE:::cnetplot.enrichResult
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID MF
 ##' @export
-EXTID2TERMID.MF <- function(gene, organism, use_internal_data) {
+EXTID2TERMID.MF <- function(gene, organism, ...) {
     EXTID2TERMID.GO(gene=gene, ont="MF", organism=organism)
 }
 
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID BP
 ##' @export
-EXTID2TERMID.BP <- function(gene, organism, use_internal_data) {
+EXTID2TERMID.BP <- function(gene, organism, ...) {
     EXTID2TERMID.GO(gene=gene, ont="BP", organism=organism)
 }
 
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID CC
 ##' @export
-EXTID2TERMID.CC <- function(gene, organism, use_internal_data) {
+EXTID2TERMID.CC <- function(gene, organism, ...) {
     EXTID2TERMID.GO(gene=gene, ont="CC", organism=organism)
 }
 
@@ -171,27 +171,27 @@ EXTID2TERMID.GO <- function(gene, ont, organism) {
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID MF
 ##' @export
-TERMID2EXTID.MF <- function(term, organism, use_internal_data) {
+TERMID2EXTID.MF <- function(term, organism, ...) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID BP
 ##' @export
-TERMID2EXTID.BP <- function(term, organism, use_internal_data) {
+TERMID2EXTID.BP <- function(term, organism, ...) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID CC
 ##' @export
-TERMID2EXTID.CC <- function(term, organism, use_internal_data) {
+TERMID2EXTID.CC <- function(term, organism, ...) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importFrom GOSemSim getSupported_Org
-TERMID2EXTID.GO <- function(term, organism, use_internal_data) {
+TERMID2EXTID.GO <- function(term, organism, ...) {
     term <- as.character(term)
 
     GO2ALLEG <- GO2EXTID(organism)
@@ -234,14 +234,14 @@ GO2EXTID <- function(organism) {
 ##' @importFrom DOSE ALLEXTID
 ##' @method ALLEXTID MF
 ##' @export
-ALLEXTID.MF <- function(organism, use_internal_data) {
+ALLEXTID.MF <- function(organism, ...) {
     ALLEXTID.GO(organism)
 }
 
 ##' @importFrom DOSE ALLEXTID
 ##' @method ALLEXTID BP
 ##' @export
-ALLEXTID.BP <- function(organism, use_internal_data) {
+ALLEXTID.BP <- function(organism, ...) {
     ALLEXTID.GO(organism)
 }
 
@@ -249,7 +249,7 @@ ALLEXTID.BP <- function(organism, use_internal_data) {
 ## @S3method ALLEXTID CC
 ##' @method ALLEXTID CC
 ##' @export
-ALLEXTID.CC <- function(organism, use_internal_data) {
+ALLEXTID.CC <- function(organism, ...) {
     ALLEXTID.GO(organism)
 }
 
@@ -287,28 +287,28 @@ ALLEXTID.GO <- function(organism) {
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME MF
 ##' @export
-TERM2NAME.MF <- function(term, organism, use_internal_data) {
+TERM2NAME.MF <- function(term, organism, ...) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME BP
 ##' @export
-TERM2NAME.BP <- function(term, organism, use_internal_data) {
+TERM2NAME.BP <- function(term, organism, ...) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME CC
 ##' @export
-TERM2NAME.CC <- function(term, organism, use_internal_data) {
+TERM2NAME.CC <- function(term, organism, ...) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom GO.db GOTERM
 ##' @importMethodsFrom AnnotationDbi Term
 ##' @importMethodsFrom AnnotationDbi mget
-TERM2NAME.GO <- function(term, organism, use_internal_data) {
+TERM2NAME.GO <- function(term, organism, ...) {
     term <- as.character(term)
     go <- mget(term, GOTERM, ifnotfound=NA)
     termName <- sapply(go, Term)
