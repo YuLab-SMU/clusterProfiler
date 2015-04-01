@@ -88,7 +88,7 @@ getGeneSet.USER_DEFINED <- function(setType = "USER_DEFINED", organism, ...) {
     getGeneSet.USER_DEFINED.internal(setType, organism, ...)
 }
 
-getGeneSet.USER_DEFINED.internal <- function(setType, organism, USER_DATA) {
+getGeneSet.USER_DEFINED.internal <- function(setType, organism, USER_DATA, ...) {
     gs <- get("PATHID2EXTID", envir = USER_DATA)
     return(gs)
 }
