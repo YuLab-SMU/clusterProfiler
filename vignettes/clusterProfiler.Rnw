@@ -296,12 +296,11 @@ With the demise of KEGG (at least without subscription), the KEGG pathway data i
 
 \Biocpkg{clusterProfiler} provides enrichment and GSEA analysis with GO, KEGG, DO and Reactome pathway supported internally, some user may prefer GO and KEGG analysis with DAVID \cite{huang_david_2007} and still attracted by the visualization methods provided by \Biocpkg{clusterProfiler} \cite{paranjpe_genome_wid_2013}. To bridge the gap between DAVID and clusterProfiler, we implemented \Rfunction{enrichDAVID}. This function query enrichment analysis result from DAVID webserver via RDAVIDWebService \cite{fresno_rdavidwebservice_2013} and stored the result as an \Robject{enrichResult} instance, so that we can use all the visualization functions in \Biocpkg{clusterProfiler} to visualize DAVID results. \Rfunction{enrichDAVID} is fully compatible with \Rfunction{compareCluster} function and comparing enrichment results from different gene clusters is now available with DAVID.
 
-<<enrichDAVID>>=
+<<enrichDAVID, eval=FALSE>>=
 david <- enrichDAVID(gene = gene,
                      idType = "ENTREZ_GENE_ID",
                      listType = "Gene",
                      annotation = "KEGG_PATHWAY")
-head(summary(david))
 @ 
 
 

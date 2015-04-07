@@ -1,3 +1,7 @@
+CHANGES IN VERSION 2.1.13
+------------------------
+ o update vignette <2015-03-07, Tue>
+ 
 CHANGES IN VERSION 2.1.12
 ------------------------
  o user input is now supported with enricher and GSEA function <2015-04-01, Wed>
