@@ -1,3 +1,7 @@
+CHANGES IN VERSION 2.1.14
+------------------------
+ o [enrichDAVID] report NA in qvalue column when it fail to calculate instead of throw error <2015-03-10, Fri>
+ 
 CHANGES IN VERSION 2.1.13
 ------------------------
  o update vignette <2015-03-07, Tue>
