@@ -113,7 +113,8 @@ enrichDAVID <- function(gene,
         Over$p.adjust <- x$Benjamini
     }
 
-    qobj = qvalue(p=Over$pvalue, lambda=0.05, pi0.method="bootstrap")
+    qobj <- tryCatch(qvalue(p=Over$pvalue, lambda=0.05, pi0.method="bootstrap"),
+                     error=function(e) NULL)
     if (class(qobj) == "qvalue") {
         qvalues <- qobj$qvalues
     } else {
@@ -144,8 +145,3 @@ enrichDAVID <- function(gene,
         geneInCategory = gc)
 }
     
-
-
-
-
-
