@@ -4,23 +4,21 @@
 \alias{buildGOmap}
 \title{buildGOmap}
 \usage{
-buildGOmap(gomap, compress = TRUE)
+buildGOmap(gomap)
 }
 \arguments{
-\item{gomap}{data.frame with two columns names "entrezgene", and "go_accession"}
-
-\item{compress}{logical, indicate file save in compress or not.}
+\item{gomap}{data.frame with two columns of GO and gene ID}
 }
 \value{
-files save in the the working directory
+GO annotation
 }
 \description{
 building GO mapping files
 }
 \details{
-provided by a data.frame of gene and GO directly annotation file
+provided by a data.frame of GO (column 1) and gene (column 2) direct annotation
 this function will building gene to GO and GO to gene mapping,
-with directly and undirectly annotation.
+with directly and undirectly (ancestor GO term) annotation.
 }
 \author{
 Yu Guangchuang
