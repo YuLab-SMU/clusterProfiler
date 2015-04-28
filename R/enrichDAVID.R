@@ -13,11 +13,11 @@
 ##' @param species species
 ##' @param david.user david user
 ##' @return A \code{enrichResult} instance
-##' @importFrom RDAVIDWebService DAVIDWebService
-##' @importFrom RDAVIDWebService addList
-##' @importFrom RDAVIDWebService setAnnotationCategories
-##' @importFrom RDAVIDWebService getFunctionalAnnotationChart
-##' @importFrom RDAVIDWebService getSpecieNames
+## @importFrom RDAVIDWebService DAVIDWebService
+## @importFrom RDAVIDWebService addList
+## @importFrom RDAVIDWebService setAnnotationCategories
+## @importFrom RDAVIDWebService getFunctionalAnnotationChart
+## @importFrom RDAVIDWebService getSpecieNames
 ##' @importFrom qvalue qvalue
 ##' @export
 ##' @author Guangchuang Yu
@@ -68,9 +68,22 @@ enrichDAVID <- function(gene,
                                   "WORMBASE_GENE_ID",
                                   "WORMPEP_ID",
                                   "ZFIN_ID"))
+
+    david.pkg <- "RDAVIDWebService"
+    pkgs <- installed.packages()[,1]
+    if (! david.pkg %in% pkgs) {
+        stop("You should have RDAVIDWebService package installed before using enrichDAVID...")
+    }
     
-    david <- DAVIDWebService$new(email=david.user)
+    require(david.pkg, character.only=TRUE)
+    DAVIDWebService <- eval(parse(text="DAVIDWebService"))
+    addList <- eval(parse(text="addList"))
+    setAnnotationCategories <- eval(parse(text="setAnnotationCategories"))
+    getFunctionalAnnotationChart <- eval(parse(text="getFunctionalAnnotationChart"))
+    getSpecieNames <- eval(parse(text="getSpecieNames"))
+
     
+    david <- DAVIDWebService$new(email=david.user)    
     david.res <- addList(david, gene, idType=idType,
                          listName="clusterProfiler",
                          listType=listType)
