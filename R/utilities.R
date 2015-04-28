@@ -414,10 +414,6 @@ plotting.clusterProfile <- function(clProf.reshape.df,
 ##' @export
 ##' @author Yu Guangchuang
 buildGOmap <- function(gomap) {
-    if (!exists("Anno_clusterProfiler_Env", envir = .GlobalEnv)) {
-        assign("Anno_clusterProfiler_Env", new.env(), .GlobalEnv)
-    }
-    Anno_clusterProfiler_Env <- get("Anno_clusterProfiler_Env", envir= .GlobalEnv)
 
     ## remove empty GO annotation
     gomap <- gomap[gomap[,1] != "", ]
