@@ -28,7 +28,6 @@
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importClassesFrom methods data.frame
-##' @importFrom KEGG.db KEGGPATHID2EXTID
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
@@ -123,10 +122,9 @@ viewKEGG <- function(obj, pathwayID, foldChange,
 }
 
 
-
 ##' @importFrom DOSE EXTID2TERMID
 ##' @importMethodsFrom AnnotationDbi mget
-##' @importFrom KEGG.db KEGGEXTID2PATHID
+## @importFrom KEGG.db KEGGEXTID2PATHID
 ##' @method EXTID2TERMID KEGG
 ##' @export
 EXTID2TERMID.KEGG <- function(gene, organism, ...) {
@@ -138,6 +136,7 @@ EXTID2TERMID.KEGG.internal <- function(gene, organism, use_internal_data=TRUE, .
     organism <- organismMapper(organism)
     
     if (use_internal_data && organism %in% KEGG_db_supported() ) {
+        KEGGEXTID2PATHID <- get_KEGG_db("KEGGEXTID2PATHID")
         qExtID2PathID <- mget(gene, KEGGEXTID2PATHID, ifnotfound=NA)
      } else {
         EXTID2KEGGPATHID <- get_KEGG_Anno(organism, "EXTID2KEGGPATHID")
@@ -148,7 +147,7 @@ EXTID2TERMID.KEGG.internal <- function(gene, organism, use_internal_data=TRUE, .
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @importMethodsFrom AnnotationDbi mget
-##' @importFrom KEGG.db KEGGPATHID2EXTID
+## @importFrom KEGG.db KEGGPATHID2EXTID
 ##' @method TERMID2EXTID KEGG
 ##' @export
 TERMID2EXTID.KEGG <- function(term, organism, ...) {
@@ -158,6 +157,7 @@ TERMID2EXTID.KEGG <- function(term, organism, ...) {
 TERMID2EXTID.KEGG <- function(term, organism, use_internal_data=TRUE, ...) {
     organism <- organismMapper(organism)
     if(use_internal_data && organism %in% KEGG_db_supported()) {
+        KEGGPATHID2EXTID <- get_KEGG_db("KEGGPATHID2EXTID")
         pathID2ExtID <- mget(unique(term), KEGGPATHID2EXTID, ifnotfound=NA)
     } else {
         KEGGPATHID2EXTID <- get_KEGG_Anno(organism, "KEGGPATHID2EXTID")
@@ -167,7 +167,7 @@ TERMID2EXTID.KEGG <- function(term, organism, use_internal_data=TRUE, ...) {
 }
 
 ##' @importFrom DOSE ALLEXTID
-##' @importFrom KEGG.db KEGGPATHID2EXTID
+## @importFrom KEGG.db KEGGPATHID2EXTID
 ##' @method ALLEXTID KEGG
 ##' @export
 ALLEXTID.KEGG <- function(organism, ...) {
@@ -178,6 +178,7 @@ ALLEXTID.KEGG.internal <- function(organism, use_internal_data=TRUE, ...) {
     organism <- organismMapper(organism)
     
     if (use_internal_data && organism %in% KEGG_db_supported()) {
+        KEGGPATHID2EXTID <- get_KEGG_db("KEGGPATHID2EXTID")
         pathID <- mappedkeys(KEGGPATHID2EXTID)
         idx <- grep(paste0("^", organism), pathID)
         orgPathID <- pathID[idx]
@@ -192,7 +193,7 @@ ALLEXTID.KEGG.internal <- function(organism, use_internal_data=TRUE, ...) {
 }
 
 ##' @importFrom DOSE TERM2NAME
-##' @importFrom KEGG.db KEGGPATHID2NAME
+## @importFrom KEGG.db KEGGPATHID2NAME
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @method TERM2NAME KEGG
 ##' @export
@@ -206,6 +207,7 @@ TERM2NAME.KEGG.internal <- function(term, organism, use_internal_data=TRUE, ...)
     pathIDs <- gsub("^\\D+", "",term, perl=T)
 
     if (use_internal_data && organism %in% KEGG_db_supported()) {
+        KEGGPATHID2NAME <- get_KEGG_db("KEGGPATHID2NAME")
         path2name <- unlist(mget(pathIDs, KEGGPATHID2NAME, ifnotfound = NA))
     } else {
         KEGGPATHID2NAME <- get_KEGG_Anno(organism, "KEGGPATHID2NAME")
