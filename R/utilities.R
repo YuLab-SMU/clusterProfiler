@@ -197,6 +197,13 @@ buildKEGGmap <- function(keggmap, id2name=NULL, organism) {
 }
 
 
+get_KEGG_db <- function(kw) {
+    annoDb <- "KEGG.db"
+    suppressMessages(requireNamespace(annoDb))
+    eval(parse(text=paste0(annoDb, "::", kw)))
+}
+
+
 excludeGOlevel <- function(x, ont, level) {
     lv <- unlist(lapply(level, getGOLevel, ont=ont))
     x <- excludeGOterm(x, lv)

@@ -117,6 +117,7 @@ getGeneSet.KEGG <- function(setType="KEGG", organism, ...) {
 
 getGeneSet.KEGG.internal <- function(setType="KEGG", organism, use_internal_data=TRUE, ...) {
     if (use_internal_data) {
+        KEGGPATHID2EXTID <- get_KEGG_db("KEGGPATHID2EXTID")
         gs <- as.list(KEGGPATHID2EXTID)
     } else {
         gs <- get_KEGG_Anno(organism, "KEGGPATHID2EXTID")
