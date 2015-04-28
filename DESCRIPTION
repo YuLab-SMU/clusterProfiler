@@ -29,16 +29,16 @@ Imports:
     ggplot2,
     GO.db,
     KEGGREST,
-    RDAVIDWebService,
     magrittr,
     qvalue
 Suggests:
-    org.Hs.eg.db,
-    ReactomePA,
-    pathview,
+    BiocStyle,
     KEGG.db,
     knitr,
-    BiocStyle
+    org.Hs.eg.db,
+    pathview,    
+    ReactomePA,
+    RDAVIDWebService
 VignetteBuilder: knitr
 License: Artistic-2.0
 URL: https://github.com/GuangchuangYu/clusterProfiler
