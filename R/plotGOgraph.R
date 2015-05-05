@@ -14,6 +14,8 @@
 ##' @importFrom topGO annFUN.gene2GO
 ##' @importFrom topGO groupGOTerms
 ##' @export
+##' @seealso
+##' \link[topGO]{showSigOfNodes}
 ##' @author Guangchuang Yu
 plotGOgraph <- function(x,
                         firstSigNodes=10,
