@@ -63,6 +63,7 @@ enrichGO <- function(gene,
 ##' @param x gseaResult or enrichResult object
 ##' @param n maximum number of category to shown
 ##' @param fixed if set to FALSE, will invoke tkplot
+##' @param vertex.label.font font size of vertex label
 ##' @param ... additional parameter
 ##' @return figure
 ##' @export
