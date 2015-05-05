@@ -53,10 +53,8 @@ plotGOgraph <- function(x,
     pvalue <- x@result$p.adjust
     names(pvalue) <- x@result$ID
 
-    sink(tempfile())
     groupGOTerms()
-    sink()
-    
+     
     GOdata <- new("topGOdata",
                   description="clusterProfiler enrichment results",
                   ontology = x@ontology,
