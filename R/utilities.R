@@ -17,7 +17,10 @@ build_Anno <- function(path2gene, path2name) {
     if ( missing(path2name) || is.null(path2name) || is.na(path2name)) {
         assign("PATHID2NAME", NULL, envir = Anno_clusterProfiler_Env)
     } else {
-        assign("PATHID2NAME", path2name, envir = Anno_clusterProfiler_Env)
+	path2name <- unique(path2name)
+	PATH2NAME <- as.character(path2name[,2])
+	names(PATH2NAME) <- as.character(path2name[,1]) 
+        assign("PATHID2NAME", PATH2NAME, envir = Anno_clusterProfiler_Env)
     }
     return(Anno_clusterProfiler_Env)
 }
