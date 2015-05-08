@@ -147,23 +147,23 @@ EXTID2TERMID.GO <- function(gene, ont, organism) {
         qExtID2GO <- dlply(qGO2ExtID.df, .(ExtID), function(i) as.character(i$GO))
     } else {
         oldwd <- getwd()
-        if(organism == "D39") {
-            dir <- system.file("extdata/D39/", package="clusterProfiler")
-            setwd(dir)
-        }
-        if(organism == "M5005") {
-            dir <- system.file("extdata/M5005/", package="clusterProfiler")
-            setwd(dir)
-        }
+
         if (file.exists("EG2ALLGO.rda")) {
             EG2ALLGO <- NULL # to satisfy codetools
             load("EG2ALLGO.rda")
             qExtID2GO <- EG2ALLGO[gene]
             qExtID2GO <- lapply(qExtID2GO, function(i) i[i %in% goterms])
+        } else if (organism == "D39") {            
+            dir <- system.file("extdata/D39/", package="clusterProfiler")
+            setwd(dir)
+        } else if (organism == "M5005") {
+            dir <- system.file("extdata/M5005/", package="clusterProfiler")
+            setwd(dir)
         } else {
             setwd(oldwd)
-            stop("GO mapping file not found in the working directory")
+            stop("GO mapping files not found in the working directory")
         }
+        
         setwd(oldwd)
     }
     return(qExtID2GO)
