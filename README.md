@@ -38,6 +38,7 @@ To install:
 + [DAVID functional analysis with clusterProfiler](http://ygc.name/2015/02/10/ggtree-updating-a-tree-view/)
 + [Enrichment map](http://ygc.name/2014/08/03/enrichment-map/)
 + [a formula interface for GeneOntology analysis](http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/)
++ [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/)
 
 To view the vignette of `clusterProfiler` installed in your system, start `R` and enter:
 ```r
