@@ -164,15 +164,7 @@ Over-representation test[@boyle2004] is a widely used approach to identify biolo
 
 To determine whether any terms annotate a specified list of genes at frequency greater than that would be expected by chance, `r Biocpkg("clusterProfiler")` calculates a p-value using the hypergeometric distribution:
 
-$
-p = 1 - \displaystyle\sum_{i = 0}^{k-1}
-  \frac{
-      {M \choose i}
-      {{N-M} \choose {n-i}}
-    } {
-      {N \choose n}
-    }
-$
+$p = 1 - \displaystyle\sum_{i = 0}^{k-1}\frac{{M \choose i}{{N-M} \choose {n-i}}} {{N \choose n}}$
 
 In this equation, __*N*__ is the total number of genes in the
 background distribution, __*M*__ is the number of genes within that
@@ -212,15 +204,14 @@ There are three key elements of the GSEA method:
 * Adjustment for Multiple Hypothesis Testing.
   + When the entire _GO_ or _KEGG_ gene sets is evaluated, `r Biocpkg("clusterProfiler")` adjust the estimated significance level to account for multiple hypothesis testing and also _q-values_ were calculated for FDR control.
 
-```{r}
+```{r eval=FALSE} 
 ego2 <- gseGO(geneList     = geneList,
               organism     = "human",
               ont          = "CC",
-              nPerm        = 100,
+              nPerm        = 1000,
               minGSSize    = 120,
               pvalueCutoff = 0.01,
               verbose      = FALSE)
-head(summary(ego2))
 ```
 
 GSEA use permutation test, user can set _nPerm_ for number of permutations. Gene Set size below _minGSSize_ will be omitted.
@@ -249,7 +240,7 @@ head(summary(kk))
 ```{r}
 kk2 <- gseKEGG(geneList     = geneList,
                organism     = "human",
-               nPerm        = 100,
+               nPerm        = 1000,
                minGSSize    = 120,
                pvalueCutoff = 0.01,
                verbose      = FALSE)
