@@ -1,0 +1,435 @@
+---
+title: "Statistical analysis and visualization of functional profiles for gene and gene clusters"
+author: "\\
+
+	Guangchuang Yu (<guangchuangyu@gmail.com>)\\
+
+        School of Public Health, The University of Hong Kong"
+date: "`r Sys.Date()`"
+bibliography: clusterProfiler.bib
+csl: nature.csl
+output: 
+  BiocStyle::html_document:
+    toc: true
+  BiocStyle::pdf_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Statistical analysis and visualization of functional profiles for genes and gene clusters}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r style, echo=FALSE, results="asis", message=FALSE}
+BiocStyle::markdown()
+knitr::opts_chunk$set(tidy = FALSE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+```{r echo=FALSE, results='hide', message=FALSE}
+library(DOSE)
+library(GO.db)
+library(org.Hs.eg.db)
+library(clusterProfiler)
+```
+
+# Abstract
+
+`r Biocpkg("clusterProfiler")` supports enrichment analysis of Gene Ontology (GO) and Kyoto Encyclopedia of genes and Genomes (KEGG) with either hypergeometric test or Gene Set Enrichment Analysis (GSEA). `r Biocpkg("clusterProfiler")` adjust the estimated significance level to account for multiple hypothesis testing and also _q-values_ were calculated for FDR control. It supports several visualization methods, including `barplot`, `cnetplot`, `enrichMap` and `gseaplot`. `r Biocpkg("clusterProfiler")` also supports comparing functional profiles among gene clusters. It supports comparing biological themes of GO, KEGG, Disease Ontology (via `r Biocpkg("DOSE")`) and Reactome pathways (via `r Biocpkg("ReactomePA")`).
+
+# Citation
+
+If you use `r Biocpkg("clusterProfiler")` in published research, please cite:
+
+G Yu, LG Wang, Y Han, QY He.
+
+clusterProfiler: an R package for comparing biological themes among gene clusters.
+
+__*Journal of Integrative Biology*__ 2012, 16(5):284-287.
+
+[http://dx.doi.org/10.1089/omi.2011.0118](http://dx.doi.org/10.1089/omi.2011.0118)
+
+
+# Introduction
+
+In recently years, high-throughput experimental techniques such as
+microarray, RNA-Seq and mass spectrometry can detect cellular
+molecules at systems-level. These kinds of analyses generate huge
+quantitaties of data, which need to be given a biological
+interpretation. A commonly used approach is via clustering in the gene
+dimension for grouping different genes based on their similarities[@yu2010].
+
+To search for shared functions among genes, a common way is to
+incorporate the biological knowledge, such as Gene Ontology (GO) and
+Kyoto Encyclopedia of Genes and Genomes (KEGG), for identifying
+predominant biological themes of a collection of genes.
+
+After clustering analysis, researchers not only want to determine
+whether there is a common theme of a particular gene cluster, but also
+to compare the biological themes among gene clusters. The manual step
+to choose interesting clusters followed by enrichment analysis on each
+selected cluster is slow and tedious. To bridge this gap, we designed
+`r Biocpkg("clusterProfiler")`[@yu2012], for comparing and visualizing functional
+profiles among gene clusters.
+
+# bitr: Biological Id TranslatoR
+
+Many new R user may find traslating ID is a tedious task and I have received many feedbacks from `r Biocpkg("clusterProfiler")` users that they don't know how to convert gene symbol, uniprot ID or other ID types to Entrez gene ID that used in `r Biocpkg("clusterProfiler")` for most of the species.
+
+To remove this obstacle, We provide `bitr` function for translating among different gene ID types.
+
+```{r}
+x <- c("GPX3",  "GLRX",   "LBP",   "CRYAB", "DEFB1", "HCLS1",   "SOD2",   "HSPA2", 
+       "ORM1",  "IGFBP1", "PTHLH", "GPC3",  "IGFBP3","TOB1",    "MITF",   "NDRG1", 
+       "NR1H4", "FGFR3",  "PVR",   "IL6",   "PTPRM", "ERBB2",   "NID2",   "LAMB1", 
+       "COMP",  "PLS3",   "MCAM",  "SPP1",  "LAMC1", "COL4A2",  "COL4A1", "MYOC",  
+       "ANXA4", "TFPI2",  "CST6",  "SLPI",  "TIMP2", "CPM",     "GGT1",   "NNMT",
+       "MAL",   "EEF1A2", "HGD",   "TCN2",  "CDA",   "PCCA",    "CRYM",   "PDXK",  
+       "STC1",  "WARS",  "HMOX1", "FXYD2", "RBP4",   "SLC6A12", "KDELR3", "ITM2B")
+eg = bitr(x, fromType="SYMBOL", toType="ENTREZID", annoDb="org.Hs.eg.db")
+head(eg)
+```
+
+User should provides an annotation package, both _fromType_ and _toType_ can accept any types that supported.
+
+User can use _idType_ to list all supporting types.
+```{r}
+idType("org.Hs.eg.db")
+```
+
+We can translate from one type to other types.
+```{r}
+ids <- bitr(x, fromType="SYMBOL", toType=c("UNIPROT", "ENSEMBL"), annoDb="org.Hs.eg.db")
+head(ids)
+```
+
+# Gene Ontology analysis
+
+## Supported organisms
+
+At present, GO analysis in `r Biocpkg("clusterProfiler")` supports about 20 species internally as shown below:
+    
+* Arabidopsis
+* Anopheles
+* Bovine
+* Canine
+* Chicken
+* Chimp
+* Coelicolor
+* E coli strain K12
+* E coli strain Sakai
+* Fly
+* Gondii
+* Human
+* Malaria
+* Mouse
+* Pig
+* Rat
+* Rhesus
+* Worm
+* Xenopus
+* Yeast
+* Zebrafish
+
+
+For un-supported organisms, user can use their own GO annotation data (in data.frame format with first column of gene ID and second column of GO ID) and passed it to `enricher` function (see [Universal enrichment analysis](#Universal-enrichment-analysis) section).
+
+If a gene is annotated by a GO ID (direction annotation), it should also annotated by its ancestor GO nodes (indirect annation). If user only has direct annotation, they can pass their annotation to `buildGOmap` function, which will infer indirection annotation and generate annotation file that suitable for `enrichGO` function. In future version, we may add functions to help user query annotation from public available database.
+
+
+## Gene Ontology Classification
+In `r Biocpkg("clusterProfiler")`, `groupGO` is designed for gene classification based on GO distribution at a specific level.
+
+```{r}
+library("DOSE")
+data(geneList)
+gene <- names(geneList)[abs(geneList) > 2]
+head(gene)
+ggo <- groupGO(gene     = gene,
+               organism = "human",
+               ont      = "BP",
+               level    = 3,
+               readable = TRUE)
+head(summary(ggo))
+```
+
+The input parameters of _gene_ is a vector of gene IDs. It expects entrezgene for most of the organisms. For yeast, it should be ORF IDs; _organism_ should be the common name of supported species.
+If _readable_ is setting to _TRUE_, the input gene IDs will be converted to gene symbols.
+
+
+
+## GO over-representation test
+
+Over-representation test[@boyle2004] is a widely used approach to identify biological themes. Here we implement hypergeometric model to assess whether the number of selected genes associated with disease is larger than expected. 
+
+To determine whether any terms annotate a specified list of genes at frequency greater than that would be expected by chance, `r Biocpkg("clusterProfiler")` calculates a p-value using the hypergeometric distribution:
+
+$
+p = 1 - \displaystyle\sum_{i = 0}^{k-1}
+  \frac{
+      {M \choose i}
+      {{N-M} \choose {n-i}}
+    } {
+      {N \choose n}
+    }
+$
+
+In this equation, __*N*__ is the total number of genes in the
+background distribution, __*M*__ is the number of genes within that
+distribution that are annotated (either directly or indirectly) to the
+node of interest, __*n*__ is the size of the list of genes of
+interest and __*k*__ is the number of genes within that list which
+are annotated to the node. The background distribution by default is
+all the genes that have annotation. User can set the background via __*universe*__ parameter.
+
+P-values were adjusted for multiple comparison, and q-values were also calculated for FDR control.
+
+```{r}
+ego <- enrichGO(gene          = gene,
+                universe      = names(geneList),
+                organism      = "human",
+                ont           = "CC",
+                pAdjustMethod = "BH",
+                pvalueCutoff  = 0.01,
+                qvalueCutoff  = 0.05,
+                readable      = TRUE)
+head(summary(ego))
+```
+
+The input parameter _universe_ is the background gene list. If user not explicitly setting this parameter, it will use all the genes that have GO annotation. _pAdjustMethod_ specify the method for adjusting p-values. The _pvalueCutoff_ parameter is use to restrict the result based on the p-values and the adjusted p values while _qvalueCutoff_ is used to control q-values.
+
+## GO Gene Set Enrichment Analysis
+A common approach in analyzing gene expression profiles was identifying differential expressed genes that are deemed interesting. The enrichment analysis we demonstrated previous were based on these differential expressed genes. This approach will find genes where the difference is large, but it will not detect a situation where the difference is small, but evidenced in coordinated way in a set of related genes. Gene Set Enrichment Analysis (GSEA)[@subramanian_gene_2005] directly addresses this limitation. All genes can be used in GSEA; GSEA aggregates the per gene statistics across genes within a gene set, therefore making it possible to detect situations where all genes in a predefined set change in a small but coordinated way. Since it is likely that many relevant phenotypic differences are manifested by small but consistent changes in a set of genes.
+
+Genes are ranked based on their phenotypes. Given a priori defined set of gens _S_ (e.g., genes shareing the same _GO_ or _KEGG_ category), the goal of GSEA is to determine whether the members of _S_ are randomly distributed throughout the ranked gene list (_L_) or primarily found at the top or bottom.
+
+There are three key elements of the GSEA method:
+
+* Calculation of an Enrichment Score.
+  + The enrichment score (_ES_) represent the degree to which a set _S_ is over-represented at the top or bottom of the ranked list _L_. The score is calculated by walking down the list _L_, increasing a running-sum statistic when we encounter a gene in _S_ and decreasing when it is not. The magnitude of the increment depends on the gene statistics (e.g., correlation of the gene with phenotype). The _ES_ is the maximum deviation from zero encountered in the random walk; it corresponds to a weighted Kolmogorov-Smirnov-like statistic[@subramanian_gene_2005].
+* Esimation of Significance Level of _ES_.
+  + The _p-value_ of the \textit{ES} is calculated using permutation test. Specifically, we permute the gene labels of the gene list _L_ and recompute the _ES_ of the gene set for the permutated data, which generate a null distribution for the _ES_. The _p-value_ of the observed ES is then calculated relative to this null distribution.
+* Adjustment for Multiple Hypothesis Testing.
+  + When the entire _GO_ or _KEGG_ gene sets is evaluated, `r Biocpkg("clusterProfiler")` adjust the estimated significance level to account for multiple hypothesis testing and also _q-values_ were calculated for FDR control.
+
+```{r}
+ego2 <- gseGO(geneList     = geneList,
+              organism     = "human",
+              ont          = "CC",
+              nPerm        = 100,
+              minGSSize    = 120,
+              pvalueCutoff = 0.01,
+              verbose      = FALSE)
+head(summary(ego2))
+```
+
+GSEA use permutation test, user can set _nPerm_ for number of permutations. Gene Set size below _minGSSize_ will be omitted.
+
+
+## GO Semantic Similarity Analysis
+GO semantic similarity can be calculated by `r Biocpkg("GOSemSim")`[@yu2010]. We can use it to cluster genes/proteins into different clusters based on their functional similarity and can also use it to measure the similarities among GO terms to reduce the redundancy of GO enrichment results.
+
+# KEGG analysis
+The annotation package, `r Biocannopkg("KEGG.db")`, is not updated since 2012. It's now pretty old and in `r Biocpkg("clusterProfiler")`, `enrichKEGG` supports downloading latest online version of KEGG data for enrichment analysis. Using `r Biocannopkg("KEGG.db")` is also supported by explicitly setting _use\_internal\_data_ parameter to _TRUE_, but it's not recommended. 
+
+With this new feature, organism is not restricted to those supported in previous release, it can be any species that have KEGG annotation data available in KEGG database. User should pass abbreviation of academic name to the _organism_ parameter. The full list of KEGG supported organisms can be accessed via [http://www.genome.jp/kegg/catalog/org_list.html](http://www.genome.jp/kegg/catalog/org_list.html).
+
+## KEGG over-representation test
+
+```{r}
+kk <- enrichKEGG(gene         = gene,
+                 organism     = "human",
+                 pvalueCutoff = 0.05, 
+                 readable     = TRUE)
+head(summary(kk))
+```
+
+## KEGG Gene Set Enrichment Analysis
+
+```{r}
+kk2 <- gseKEGG(geneList     = geneList,
+               organism     = "human",
+               nPerm        = 100,
+               minGSSize    = 120,
+               pvalueCutoff = 0.01,
+               verbose      = FALSE)
+head(summary(kk2))
+```
+
+# Disease Ontology analysis
+
+`r Biocpkg("DOSE")`[@yu_dose_2015] supports Disease Ontology (DO) Semantic and Enrichment analysis, please refer to the package vignettes. The `enrichDO` function is very useful for identifying disease association of interesting genes, and function `gseAnalyzer` function is designed for gene set enrichment analysis of _DO_.
+
+# Reactome pathway analysis
+
+`r Biocpkg("ReactomePA")` uses Reactome as a source of pathway data. The function call of `enrichPathway` and `gsePathway` in `r Biocpkg("ReactomePA")` is consistent with `enrichKEGG` and `gseKEGG`.
+
+# DAVID functional analysis
+
+`r Biocpkg("clusterProfiler")` provides enrichment and GSEA analysis with GO, KEGG, DO and Reactome pathway supported internally, some user may prefer GO and KEGG analysis with DAVID[@huang_david_2007] and still attracted by the visualization methods provided by `r Biocpkg("clusterProfiler")`[@paranjpe_genome_wid_2013]. To bridge the gap between DAVID and clusterProfiler, we implemented `enrichDAVID`. This function query enrichment analysis result from DAVID webserver via RDAVIDWebService[@fresno_rdavidwebservice_2013] and stored the result as an `enrichResult` instance, so that we can use all the visualization functions in `r Biocpkg("clusterProfiler")` to visualize DAVID results. `enrichDAVID` is fully compatible with `compareCluster` function and comparing enrichment results from different gene clusters is now available with DAVID.
+
+```{r eval=FALSE}
+david <- enrichDAVID(gene = gene,
+                     idType = "ENTREZ_GENE_ID",
+                     listType = "Gene",
+                     annotation = "KEGG_PATHWAY")
+```
+
+# Universal enrichment analysis
+
+`r Biocpkg("clusterProfiler")` supports both hypergeometric test and gene set enrichment analysis of many ontology/pathway, but it's still not enough for users may want to analyze their data with unsupported organisms, slim version of GO, novel functional annotation (e.g. GO via BlastGO or KEGG via KAAS), unsupported ontologies/pathways or customized annotations.
+
+`r Biocpkg("clusterProfiler")` provides `enricher` function for hypergeometric test and `GSEA` function for gene set enrichment analysis that are designed to accept user defined annotation. They accept two additional parameters _TERM2GENE_ and _TERM2NAME_. As indicated in the parameter names, _TERM2GENE_ is a data.frame with first column of term ID and second column of corresponding mapped gene and _TERM2NAME_ is a data.frame with first column of term ID and second column of corresponding term name. _TERM2NAME_ is optional.
+
+An example of using `enricher` and `GSEA` to analyze [DisGeNet](http://www.disgenet.org/web/DisGeNET/menu/home) annotation is presented in [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/).
+
+
+# Visualization
+
+The function calls of `groupGO`, `enrichGO`, `enrichKEGG`, `enrichDO` and `enrichPathway` are consistent and all the output can be visualized by bar plot, enrichment map and category-gene-network plot. It is very common to visualize the enrichment result in bar or pie chart. We believe the pie chart is misleading and only provide bar chart.
+
+## barplot
+```{r fig.height=5, fig.width=6}
+barplot(ggo, drop=TRUE, showCategory=12)
+```
+
+
+```{r fig.height=5, fig.width=8}
+barplot(ego, showCategory=8)
+```
+
+
+## enrichMap
+
+Enrichment map can be viusalized by `enrichMap`, which also support results obtained from hypergeometric test and gene set enrichment analysis.
+```{r fig.cap="enrichment map of enrichment result", fig.align="center", fig.height=16, fig.width=16}
+enrichMap(ego)
+```
+
+## cnetplot
+In order to consider the potentially biological complexities in which a gene may belong to multiple annotation categories and provide information of numeric changes if available, we developed `cnetplot` function to extract the complex association.
+```{r fig.height=14, fig.width=14}
+cnetplot(ego, categorySize="pvalue", foldChange=geneList)
+```
+
+
+```{r fig.height=14, fig.width=14}
+cnetplot(kk, categorySize="geneNum", foldChange=geneList)
+```
+
+## gseaplot
+
+Running score of gene set enrichment analysis and its association of phenotype can be visualized by `gseaplot`.
+```{r fig.cap="plotting gsea result", fig.align="center", fig.height=6, fig.width=8}
+gseaplot(kk2, geneSetID = "hsa04145")
+```
+
+## plotGOgraph
+
+`plotGOgraph`, which is based on `r Biocpkg("topGO")`, can accept output of `enrichGO` and visualized the enriched GO induced graph.
+```{r fig.height=12, fig.width=8}
+plotGOgraph(ego)
+```
+
+## pathview from pathview package
+
+`r Biocpkg("clusterProfiler")` users can also use `pathview` from the `r Biocpkg("pathview")`[@luo_pathview] to visualize KEGG pathway.
+
+The following example illustrate how to visualize "hsa04110" pathway, which was enriched in our previous analysis.
+
+```{r eval=FALSE}
+library("pathview")
+hsa04110 <- pathview(gene.data  = geneList,
+                     pathway.id = "hsa04110",
+                     species    = "hsa",
+                     limit      = list(gene=max(abs(geneList)), cpd=1))
+```
+![](figures/hsa04110_pathview.png)
+
+For further information, please refer to the vignette of `r Biocpkg("pathview")`[@luo_pathview].
+
+
+
+# Biological theme comparison
+`r Biocpkg("clusterProfiler")` was developed for biological theme comparison[@yu2012], and it provides a function, `compareCluster`, to automatically calculate enriched functional categories of each gene clusters.
+
+```{r}
+data(gcSample)
+lapply(gcSample, head)
+```
+
+The input for _geneCluster_ parameter should be a named list of gene IDs.
+
+```{r}
+ck <- compareCluster(geneCluster = gcSample, fun = "enrichKEGG")
+head(summary(ck))
+```
+
+
+## Formula interface of compareCluster
+
+`compareCluster` also supports passing a formula (the code to support formula has been contributed by Giovanni Dall'Olio) of type $Entrez \sim group$ or $Entrez \sim group + othergroup$. 
+
+```{r}
+## formula interface
+mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
+                       '100127206', '100128071'),
+                   group = c('A', 'A', 'A', 'B', 'B', 'B'),
+                   othergroup = c('good', 'good', 'bad', 'bad',
+                       'good', 'bad'))
+xx.formula <- compareCluster(Entrez~group, data=mydf, fun='groupGO')
+head(summary(xx.formula))
+
+## formula interface with more than one grouping variable
+xx.formula.twogroups <- compareCluster(Entrez~group+othergroup,
+                                       data=mydf, fun='groupGO')
+head(summary(xx.formula.twogroups))
+```
+
+## Visualization of profile comparison
+
+We can visualize the result using `plot` method.
+```{r fig.height=8, fig.width=8}
+plot(ck)
+```
+
+By default, only top 5 (most significant) categories of each cluster
+was plotted. User can changes the parameter _showCategory_ to
+specify how many categories of each cluster to be plotted, and if
+_showCategory_ was set to _NULL_, the whole result will
+be plotted.
+
+The _plot_ function accepts a parameter _by_ for setting the scale of dot sizes. The default parameter _by_ is setting to "geneRatio", which corresponding to the "GeneRatio" column of the output. If it was setting to _count_, the comparison will be based on gene counts, while if setting to _rowPercentage_, the dot sizes will be normalized by _count/(sum of each row)_
+
+To provide the full information, we also provide number of identified genes in each category (numbers in parentheses) when _by_ is setting to _rowPercentage_ and number of gene clusters in each cluster label (numbers in parentheses) when _by_ is setting to _geneRatio_, as shown in Figure 3. If the dot sizes were based on _count_, the row numbers will not shown.
+
+The p-values indicate that which categories are more likely to have biological meanings. The dots in the plot are color-coded based on their corresponding p-values. Color gradient ranging from red to blue correspond to in order of increasing p-values. That is, red indicate low p-values (high enrichment), and blue indicate high p-values (low enrichment). P-values and adjusted p-values were filtered out by the threshold giving by
+parameter _pvalueCutoff_, and FDR can be estimated by _qvalue_.
+
+User can refer to the example in [@yu2012]; we analyzed the publicly available expression dataset of breast tumour tissues from 200 patients (GSE11121, Gene Expression Omnibus)[@schmidt2008]. We identified 8 gene clusters from differentially expressed genes, and using `compareCluster` to compare these gene clusters by their enriched biological process.
+
+
+Another example was shown in [@yu2011], we calculated functional similarities among viral miRNAs using method described in [@yu_new_2011], and compared significant KEGG pathways regulated by different viruses using `compareCluster`.
+
+The comparison function was designed as a framework for comparing gene clusters of any kind of ontology associations, not only `groupGO`, `enrichGO`, `enrichKEGG` and `enricher` provided in this package, but also other biological and biomedical ontologies, for instance, `enrichDO` from `r Biocpkg("DOSE")`[@yu_dose_2015] and `enrichPathway` from `r Biocpkg("ReactomePA")` work fine with `compareCluster` for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of `r Biocpkg("DOSE")`[@yu_dose_2015] and `r Biocpkg("ReactomePA")`.
+
+
+# External documents
++ [Why clusterProfiler fails](http://ygc.name/2014/08/07/why-clusterprofiler-fails/)
++ [KEGG enrichment analysis with latest online data using clusterProfiler](http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
++ [DAVID functional analysis with clusterProfiler](http://ygc.name/2015/02/10/ggtree-updating-a-tree-view/)
++ [Enrichment map](http://ygc.name/2014/08/03/enrichment-map/)
++ [a formula interface for GeneOntology analysis](http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/)
++ [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/)
+
+
+# Session Information
+
+Here is the output of `sessionInfo()` on the system on which this document was compiled:
+
+```{r echo=FALSE}
+sessionInfo()
+```
+
+# References
+
