@@ -4,9 +4,9 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
+##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine", "celegans",
 ##'"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
-##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
+##'"malaria", "mouse", "pig", "rat","rhesus", "xenopus", "yeast" and
 ##'"zebrafish".
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param pvalueCutoff Cutoff value of pvalue.
