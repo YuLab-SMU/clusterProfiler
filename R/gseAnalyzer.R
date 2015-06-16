@@ -143,11 +143,7 @@ getGeneSet.GO <- function(setType="GO", organism, ...) {
 ##' @method getGeneSet BP
 ##' @export
 getGeneSet.BP <- function(setType="BP", organism, ...) {
-    gs <- getGeneSet.GO("GO", organism)
-    ont <- lapply(mget(names(gs), GOTERM), Ontology)
-    ont <- unlist(ont)
-    gs <- gs[ont == setType]
-    return(gs)
+    getGeneSet.GO_internal(setType, organism, ...)
 }
 
 
@@ -158,11 +154,7 @@ getGeneSet.BP <- function(setType="BP", organism, ...) {
 ##' @method getGeneSet MF
 ##' @export
 getGeneSet.MF <- function(setType="MF", organism, ...) {
-    gs <- getGeneSet.GO("GO", organism)
-    ont <- lapply(mget(names(gs), GOTERM), Ontology)
-    ont <- unlist(ont)
-    gs <- gs[ont == setType]
-    return(gs)
+    getGeneSet.GO_internal(setType, organism, ...)
 }
 
 
@@ -173,8 +165,16 @@ getGeneSet.MF <- function(setType="MF", organism, ...) {
 ##' @method getGeneSet CC
 ##' @export
 getGeneSet.CC <- function(setType="CC", organism, ...) {
+    getGeneSet.GO_internal(setType, organism, ...)
+}
+
+
+getGeneSet.GO_internal <- function(setType, organism, ...) {
     gs <- getGeneSet.GO("GO", organism)
-    ont <- lapply(mget(names(gs), GOTERM), Ontology)
+    term <- mget(names(gs), GOTERM, ifnotfound=NA)
+    gs <- gs[!is.na(term)]
+    term <- term[!is.na(term)]
+    ont <- lapply(term, Ontology)
     ont <- unlist(ont)
     gs <- gs[ont == setType]
     return(gs)
