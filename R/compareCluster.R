@@ -230,19 +230,6 @@ setMethod("plot", signature(x="compareClusterResult"),
               } else if (by == "count") {
                   ## nothing
               } else if (by == "geneRatio") {
-                  ## first try
-                  ## cls <- as.character(result$Cluster)
-                  ## clsu <- unique(cls)
-                  ## idx <- sapply(clsu, function(i) which(i == cls)[1])
-                  ## gcSize <- result$Count[idx]
-                  ## names(gcSize) <- clsu
-                  ## result$GeneRatio <- result$Count / gcSize[cls]
-                  ## result$Cluster <- paste(cls, "(", gcSize[cls], ")", sep="")
-
-                  ## second try
-                  ## result$GeneRatio <- sapply(as.character(result$GeneRatio), function(i) eval(parse(text=i)))
-
-                  ## final way
                   gsize <- as.numeric(sub("/\\d+$", "", as.character(result$GeneRatio)))
                   gcsize <- as.numeric(sub("^\\d+/", "", as.character(result$GeneRatio)))
                   result$GeneRatio = gsize/gcsize
