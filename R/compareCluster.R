@@ -145,104 +145,66 @@ setMethod("summary", signature(object="compareClusterResult"),
 
 ##' @rdname plot-methods
 ##' @aliases plot,compareClusterResult,ANY-method
-##' @importFrom plyr ddply
-##' @importFrom plyr mdply
-##' @importFrom plyr .
 ##' @param x compareClusterResult object
 ##' @param type one of bar or dot
-##' @param title figure title
-##' @param font.size font size
+##' @param colorBy one of pvalue or p.adjust
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
-##' @param colorBy one of pvalue or p.adjust
 ##' @param includeAll logical 
+##' @param font.size font size
+##' @param title figure title
 setMethod("plot", signature(x="compareClusterResult"),
           function(x,
                    type="dot",
-                   title="",
-                   font.size=12,
+                   colorBy="p.adjust",
                    showCategory=5,
                    by="geneRatio",
-                   colorBy="p.adjust",
-                   includeAll=TRUE
+                   includeAll=TRUE,
+                   font.size=12,
+                   title=""
                    ) {
-
-              clProf.df <- summary(x)
-
-              ## get top 5 (default) categories of each gene cluster.
-              if (is.null(showCategory)) {
-                  result <- clProf.df
+              if (type == "dot" || type == "dotplot") {
+                  dotplot(x, colorBy, showCategory, by, includeAll, font.size, title)
+              } else if (type == "bar" || type == "barplot") {
+                  barplot.enrichResult(x, colorBy, showCategory, by, includeAll, font.size, title)
               } else {
-                  Cluster <- NULL # to satisfy codetools
-                  result <- ddply(.data = clProf.df,
-                                  .variables = .(Cluster),
-                                  .fun = function(df, N) {
-                                      if (length(df$Count) > N) {
-                                          idx <- order(df$Count, decreasing=T)[1:N]
-                                          return(df[idx,])
-                                      } else {
-                                          return(df)
-                                      }
-                                  },
-                                  N=showCategory
-                                  )
+                  stop("type should be one of 'dot' or 'bar'...")
+              }              
+          })
+##' dot plot method
+##'
+##'
+##' @docType methods
+##' @title dotplot
+##' @rdname dotplot-methods
+##' @aliases dotplot,compareClusterResult,ANY-method
+##' @param object compareClusterResult object
+##' @param colorBy one of pvalue or p.adjust
+##' @param showCategory category numbers
+##' @param by one of geneRatio, Percentage or count
+##' @param includeAll logical 
+##' @param font.size font size
+##' @param title figure title
+##' @importFrom DOSE dotplot
+##' @exportMethod dotplot
+setMethod("dotplot", signature(object="compareClusterResult"),
+          function(object,
+                   colorBy="p.adjust",
+                   showCategory=5,
+                   by="geneRatio",
+                   includeAll=TRUE,
+                   font.size=12,
+                   title=""
+                   ) {
+              dotplot.compareClusterResult(x, colorBy, showCategory, by, includeAll, font.size, title)
+          })
 
-              }
-              if (includeAll == TRUE) {
-                  result = subset(clProf.df, ID %in% result$ID)
-              }
 
-              ## remove zero count
-              result$Description <- as.character(result$Description) ## un-factor
-              GOlevel <- result[,c(2,3)] ## GO ID and Term
-              GOlevel <- unique(GOlevel)
-
-              result <- result[result$Count != 0, ]
-              result$Description <- factor(result$Description,
-                                           levels=rev(GOlevel[,2]))
-
-
-              if (by=="rowPercentage") {
-                  Description <- Count <- NULL # to satisfy codetools
-                  result <- ddply(result,
-                                  .(Description),
-                                  transform,
-                                  Percentage = Count/sum(Count),
-                                  Total = sum(Count))
-
-                  ## label GO Description with gene counts.
-                  x <- mdply(result[, c("Description", "Total")], paste, sep=" (")
-                  y <- sapply(x[,3], paste, ")", sep="")
-                  result$Description <- y
-
-                  ## restore the original order of GO Description
-                  xx <- result[,c(2,3)]
-                  xx <- unique(xx)
-                  rownames(xx) <- xx[,1]
-                  Termlevel <- xx[as.character(GOlevel[,1]),2]
-
-                  ##drop the *Total* column
-                  result <- result[, colnames(result) != "Total"]
-
-                  result$Description <- factor(result$Description,
-                                               levels=rev(Termlevel))
-
-              } else if (by == "count") {
-                  ## nothing
-              } else if (by == "geneRatio") {
-                  gsize <- as.numeric(sub("/\\d+$", "", as.character(result$GeneRatio)))
-                  gcsize <- as.numeric(sub("^\\d+/", "", as.character(result$GeneRatio)))
-                  result$GeneRatio = gsize/gcsize
-                  result$Cluster <- paste(as.character(result$Cluster),"\n", "(", gcsize, ")", sep="")
-              } else {
-                  ## nothing
-              }
-              p <- plotting.clusterProfile(result,
-                                           type=type,
-                                           by=by,
-                                           colorBy=colorBy,
-                                           title=title,
-                                           font.size=font.size)
-              return(p)
-          }
-          )
+barplot.compareClusterResult <- function(height, colorBy="p.adjust", showCategory=5,
+                                         by="geneRatio", includeAll=TRUE, font.size=12, title="", ...) {
+    ## use *height* to satisy barplot generic definition
+    ## actually here is an compareClusterResult object.
+    df <- fortify(height, showCategory=showCategory, by=by, includeAll=includeAll)
+    plotting.clusterProfile(df, type="bar", colorBy=colorBy, by=by, title=title, font.size=font.size)
+}
+    

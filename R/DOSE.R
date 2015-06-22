@@ -13,20 +13,7 @@
 ##' @author ygc
 enrichMap <- DOSE::enrichMap
 
-##' dot plot of enrichResult
-##'
-##' 
-##' @title dotplot
-##' @param object an instance of enrichResult
-##' @param x variable for x axis
-##' @param colorBy one of 'pvalue', 'p.adjust' and 'qvalue'
-##' @param showCategory number of category
-##' @param font.size font size
-##' @param title plot title
-##' @return ggplot object
-##' @export
-##' @author Guangchuang Yu
-dotplot <- DOSE::dotplot
+
 
 ##' category-gene-net plot
 ##'
@@ -41,4 +28,5 @@ dotplot <- DOSE::dotplot
 ##' @return plot
 ##' @export
 ##' @author ygc
-cnetplot <- DOSE:::cnetplot.enrichResult
+cnetplot <- DOSE::cnetplot
+##cnetplot <- DOSE:::cnetplot.enrichResult

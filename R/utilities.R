@@ -349,8 +349,8 @@ getGOLevel <- function(ont, level) {
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,
                                     type = "dot",
-                                    by = "geneRatio",
                                     colorBy = "p.adjust",
+                                    by = "geneRatio",
                                     title="",
                                     font.size=12) {
     Description <- Percentage <- Count <- Cluster <- GeneRatio <- p.adjust <- pvalue <- NULL # to satisfy codetools

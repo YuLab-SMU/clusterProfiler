@@ -6,26 +6,26 @@
 \alias{plot,compareClusterResult,ANY-method}
 \title{plot method}
 \usage{
-\S4method{plot}{compareClusterResult,ANY}(x, type = "dot", title = "",
-  font.size = 12, showCategory = 5, by = "geneRatio",
-  colorBy = "p.adjust", includeAll = TRUE)
+\S4method{plot}{compareClusterResult,ANY}(x, type = "dot",
+  colorBy = "p.adjust", showCategory = 5, by = "geneRatio",
+  includeAll = TRUE, font.size = 12, title = "")
 }
 \arguments{
 \item{x}{compareClusterResult object}
 
 \item{type}{one of bar or dot}
 
-\item{title}{figure title}
-
-\item{font.size}{font size}
+\item{colorBy}{one of pvalue or p.adjust}
 
 \item{showCategory}{category numbers}
 
 \item{by}{one of geneRatio, Percentage or count}
 
-\item{colorBy}{one of pvalue or p.adjust}
-
 \item{includeAll}{logical}
+
+\item{font.size}{font size}
+
+\item{title}{figure title}
 
 \item{...}{Additional argument list}
 }
