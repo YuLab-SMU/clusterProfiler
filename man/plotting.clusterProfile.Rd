@@ -4,17 +4,17 @@
 \alias{plotting.clusterProfile}
 \title{plotting-clusterProfile}
 \usage{
-plotting.clusterProfile(clProf.reshape.df, type = "dot", by = "geneRatio",
-  colorBy = "p.adjust", title = "", font.size = 12)
+plotting.clusterProfile(clProf.reshape.df, type = "dot",
+  colorBy = "p.adjust", by = "geneRatio", title = "", font.size = 12)
 }
 \arguments{
 \item{clProf.reshape.df}{data frame of compareCluster result}
 
 \item{type}{one of dot and bar}
 
-\item{by}{one of percentage and count}
-
 \item{colorBy}{one of pvalue or p.adjust}
+
+\item{by}{one of percentage and count}
 
 \item{title}{graph title}
 
