@@ -196,7 +196,7 @@ setMethod("dotplot", signature(object="compareClusterResult"),
                    font.size=12,
                    title=""
                    ) {
-              dotplot.compareClusterResult(x, colorBy, showCategory, by, includeAll, font.size, title)
+              dotplot.compareClusterResult(object, colorBy, showCategory, by, includeAll, font.size, title)
           })
 
 
