@@ -240,8 +240,19 @@ head(summary(kk2))
 david <- enrichDAVID(gene = gene,
                      idType = "ENTREZ_GENE_ID",
                      listType = "Gene",
-                     annotation = "KEGG_PATHWAY")
+                     annotation = "KEGG_PATHWAY",
+                     david.user = "clusterProfiler@hku.hk")
 ```
+
+DAVID Web Service has the following limitations:
+
++ A job with more than 3000 genes to generate gene or term cluster report will not be handled by DAVID due to resource limit.
++ No more than 200 jobs in a day from one user or computer.
++ DAVID Team reserves right to suspend any improper uses of the web service without notice.
+
+For more details, please refer to [http://david.abcc.ncifcrf.gov/content.jsp?file=WS.html](http://david.abcc.ncifcrf.gov/content.jsp?file=WS.html).
+
+As user has limited usage, please [register](http://david.abcc.ncifcrf.gov/webservice/register.htm) and use your own user account to run __*enrichDAVID*__.
 
 # Universal enrichment analysis
 
