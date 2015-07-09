@@ -1,3 +1,79 @@
+CHANGES IN VERSION 2.3.6
+------------------------
+ o add citation of ChIPseeker <2015-07-09, Thu>
+ o add 'Functional analysis of NGS data' section in vignette <2015-06-29, Mon>
+ o update vignette <2015-06-24, Wed>
+ 
+CHANGES IN VERSION 2.3.5
+------------------------
+ o import dotplot from DOSE <2015-06-21, Sun>
+
+CHANGES IN VERSION 2.3.4
+------------------------
+ o bug fixed in getGeneSet.GO <2015-06-16, Tue>
+ 
+CHANGES IN VERSION 2.3.3
+------------------------
+ o convert vignette from Rnw to Rmd format <2015-05-17, Sun>
+ 
+CHANGES IN VERSION 2.3.2
+------------------------
+ o bug fixed of build_Anno <2015-05-07, Thu>
+ o add plotGOgraph function <2015-05-05, Tue>
+ 
+CHANGES IN VERSION 2.3.1
+------------------------
+ o remove import RDAVIDWebService <2015-04-29, Wed>
+ o update buildGOmap <2015-04-29, Wed>
+ o remove import KEGG.db <2015-04-29, Wed>
+ 
+CHANGES IN VERSION 2.1.14
+------------------------
+ o [enrichDAVID] report NA in qvalue column when it fail to calculate instead of throw error <2015-03-10, Fri>
+ 
+CHANGES IN VERSION 2.1.13
+------------------------
+ o update vignette <2015-03-07, Tue>
+ 
+CHANGES IN VERSION 2.1.12
+------------------------
+ o user input is now supported with enricher and GSEA function <2015-04-01, Wed>
+ o change use_internal_data parameter to ... according to the change of DOSE <2015-04-01, Wed>
+ 
+CHANGES IN VERSION 2.1.11
+------------------------
+ o add example of bitr in vignette <2015-03-31, Tue>
+ 
+CHANGES IN VERSION 2.1.10
+------------------------
+ o idType and bitr function for translating biological ID. <2015-03-20, Fri>
+ 
+CHANGES IN VERSION 2.1.9
+------------------------
+ o throw stop msg when gene can not be mapped by DAVID <2015-03-12, Thu>
+ o add return NULL when DAVID fail (no enrichment found or wrong ID type) <2015-03-11, Wed>
+ 
+CHANGES IN VERSION 2.1.8
+------------------------
+ o implement enrichDAVID <2015-03-07, Fri>
+ 
+CHANGES IN VERSION 2.1.7
+------------------------
+ o set includeAll = TRUE by default <2015-03-03, Tue>
+ o added an includeAll option in plot(compareCluster) <2015-02-26, Thu>
+     refer to: https://github.com/GuangchuangYu/clusterProfiler/issues/9
+ o fixed typo in groupGO <2015-02-26, Thu>
+ 
+CHANGES IN VERSION 2.1.6
+------------------------
+ o add DOSE citation <2015-02-13, Fri>
+ 
+CHANGES IN VERSION 2.1.5
+------------------------
+ o gseKEGG is also use online KEGG data by default. <2015-02-11, Wed>
+ o change 'use.KEGG.db' parameter to 'use_internal_data', that can be used
+   when I implement GO analysis with user specific annotation data <2015-02-11, Wed>
+   
 CHANGES IN VERSION 2.1.4
 ------------------------
  o update vignette <2015-02-11, Wed>
@@ -200,4 +276,3 @@ CHANGES IN VERSION 1.1.16
 CHANGES IN VERSION 1.1.15
 ------------------------
  o Modified plot method of groupGOResult, with colour coded. <2011-06-15 Wed>
-

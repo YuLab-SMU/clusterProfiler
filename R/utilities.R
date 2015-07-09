@@ -2,6 +2,29 @@
     assign("clusterProfilesEnv", new.env(),.GlobalEnv)
 }
 
+build_Anno <- function(path2gene, path2name) {
+    if (!exists("Anno_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign("Anno_clusterProfiler_Env", new.env(), .GlobalEnv)
+    }
+    Anno_clusterProfiler_Env <- get("Anno_clusterProfiler_Env", envir= .GlobalEnv)
+
+    PATHID2EXTID <- split(as.character(path2gene[,2]), as.character(path2gene[,1]))
+    EXTID2PATHID <- split(as.character(path2gene[,1]), as.character(path2gene[,2]))
+    
+    assign("PATHID2EXTID", PATHID2EXTID, envir = Anno_clusterProfiler_Env)
+    assign("EXTID2PATHID", EXTID2PATHID, envir = Anno_clusterProfiler_Env)
+
+    if ( missing(path2name) || is.null(path2name) || is.na(path2name)) {
+        assign("PATHID2NAME", NULL, envir = Anno_clusterProfiler_Env)
+    } else {
+	path2name <- unique(path2name)
+	PATH2NAME <- as.character(path2name[,2])
+	names(PATH2NAME) <- as.character(path2name[,1]) 
+        assign("PATHID2NAME", PATH2NAME, envir = Anno_clusterProfiler_Env)
+    }
+    return(Anno_clusterProfiler_Env)
+}
+
 
 organismMapper <- function(organism) {
     ## it only map those previous supported organism
@@ -177,6 +200,13 @@ buildKEGGmap <- function(keggmap, id2name=NULL, organism) {
 }
 
 
+get_KEGG_db <- function(kw) {
+    annoDb <- "KEGG.db"
+    suppressMessages(requireNamespace(annoDb))
+    eval(parse(text=paste0(annoDb, "::", kw)))
+}
+
+
 excludeGOlevel <- function(x, ont, level) {
     lv <- unlist(lapply(level, getGOLevel, ont=ont))
     x <- excludeGOterm(x, lv)
@@ -319,8 +349,8 @@ getGOLevel <- function(ont, level) {
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,
                                     type = "dot",
-                                    by = "geneRatio",
                                     colorBy = "p.adjust",
+                                    by = "geneRatio",
                                     title="",
                                     font.size=12) {
     Description <- Percentage <- Count <- Cluster <- GeneRatio <- p.adjust <- pvalue <- NULL # to satisfy codetools
@@ -374,71 +404,50 @@ plotting.clusterProfile <- function(clProf.reshape.df,
 
 ##' building GO mapping files
 ##'
-##' provided by a data.frame of gene and GO directly annotation file
+##' provided by a data.frame of GO (column 1) and gene (column 2) direct annotation
 ##' this function will building gene to GO and GO to gene mapping,
-##' with directly and undirectly annotation.
+##' with directly and undirectly (ancestor GO term) annotation.
 ##' @title buildGOmap
-##' @param gomap data.frame with two columns names "entrezgene", and "go_accession"
-##' @param compress logical, indicate file save in compress or not.
-##' @return files save in the the working directory
+##' @param gomap data.frame with two columns of GO and gene ID
+##' @return GO annotation
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importFrom GO.db GOMFANCESTOR
 ##' @importFrom GO.db GOBPANCESTOR
 ##' @importFrom GO.db GOCCANCESTOR
-##' @importFrom plyr dlply
 ##' @export
 ##' @author Yu Guangchuang
-buildGOmap <- function(gomap, compress=TRUE) {
-    if( any( colnames(gomap) %in% "go_id" ) ) {
-        colnames(gomap)[colnames(gomap) %in% "go_id"] <- "go_accession"
-    }
+buildGOmap <- function(gomap) {
 
     ## remove empty GO annotation
-    gomap <- gomap[gomap$go_accession != "", ]
+    gomap <- gomap[gomap[,1] != "", ]
 
+    GO2EG <- split(as.character(gomap[,2]), as.character(gomap[,1]))
+    EG2GO <- split(as.character(gomap[,1]), as.character(gomap[,2]))
 
-    GO2EG <- dlply(gomap,"go_accession",.fun=function(i) as.character(i$entrezgene))
-    EG2GO <- dlply(gomap,"entrezgene",.fun=function(i) as.character(i$go_accession))
-
-    if (compress) {
-      save(GO2EG, file="GO2EG.rda", compress="xz")
-      save(EG2GO, file="EG2GO.rda", compress="xz")
-    } else {
-      save(GO2EG, file="GO2EG.rda")
-      save(EG2GO, file="EG2GO.rda")
-
-    }
-
-
+    save(GO2EG, file="GO2EG.rda")
+    save(EG2GO, file="EG2GO.rda")
+    
     EG2ALLGO <- lapply(EG2GO,
-                        function(i) {
-                            mfans <- unlist(mget(i, GOMFANCESTOR, ifnotfound=NA))
-                            bpans <- unlist(mget(i, GOBPANCESTOR, ifnotfound=NA))
-                            ccans <- unlist(mget(i, GOCCANCESTOR, ifnotfound=NA))
-                            ans <- c(mfans, bpans, ccans)
-                            ans <- ans[ !is.na(ans) ]
-                            ans <- c(i, ans)
-                            ans <- unique(ans)
-                            ans <- ans[ans != "all"]
-                            return(ans)
-                        })
-    if (compress) {
-      save(EG2ALLGO, file="EG2ALLGO.rda", compress="xz")
-    } else {
-      save(EG2ALLGO, file="EG2ALLGO.rda")
-    }
-
+                       function(i) {
+                           mfans <- unlist(mget(i, GOMFANCESTOR, ifnotfound=NA))
+                           bpans <- unlist(mget(i, GOBPANCESTOR, ifnotfound=NA))
+                           ccans <- unlist(mget(i, GOCCANCESTOR, ifnotfound=NA))
+                           ans <- c(mfans, bpans, ccans)
+                           ans <- ans[ !is.na(ans) ]
+                           ans <- c(i, ans)
+                           ans <- unique(ans)
+                           ans <- ans[ans != "all"]
+                           return(ans)
+                       })
+    save(EG2ALLGO, file="EG2ALLGO.rda")
+    
     len <- lapply(EG2ALLGO,length)
     EG2ALLGO.df <- data.frame(EG=rep(names(EG2ALLGO), times=len),
                               GO=unlist(EG2ALLGO))
     GO <- NULL ## satisfy code tools
     GO2ALLEG <- dlply(EG2ALLGO.df, .(GO), function(i) as.character(i$EG))
     GO2ALLEG <- lapply(GO2ALLEG, unique)
-    if (compress) {
-      save(GO2ALLEG, file="GO2ALLEG.rda", compress="xz")
-    } else {
-      save(GO2ALLEG, file="GO2ALLEG.rda")
-    }
+    save(GO2ALLEG, file="GO2ALLEG.rda")    
     print("GO Annotation Mapping files save in the working directory.")
 }
 

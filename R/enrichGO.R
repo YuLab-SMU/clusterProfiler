@@ -4,9 +4,9 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
+##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine", "celegans",
 ##'"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
-##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
+##'"malaria", "mouse", "pig", "rat","rhesus", "xenopus", "yeast" and
 ##'"zebrafish".
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param pvalueCutoff Cutoff value of pvalue.
@@ -56,52 +56,24 @@ enrichGO <- function(gene,
 }
 
 
-##' enrichment map
-##'
-##' enrichMap
-##' @title enrichMap
-##' @param x gseaResult or enrichResult object
-##' @param n maximum number of category to shown
-##' @param fixed if set to FALSE, will invoke tkplot
-##' @param ... additional parameter
-##' @return figure
-##' @export
-##' @author ygc
-enrichMap <- DOSE::enrichMap
-
-##' category-gene-net plot
-##'
-##' category gene association
-##' @title cnetplot
-##' @param x enrichResult object
-##' @param showCategory number of category plotted
-##' @param categorySize one of geneNum or pvalue
-##' @param foldChange fold change of expression value
-##' @param fixed logical
-##' @param ... additional parameter
-##' @return plot
-##' @export
-##' @author ygc
-cnetplot <- DOSE:::cnetplot.enrichResult
-
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID MF
 ##' @export
-EXTID2TERMID.MF <- function(gene, organism, use.KEGG.db) {
+EXTID2TERMID.MF <- function(gene, organism, ...) {
     EXTID2TERMID.GO(gene=gene, ont="MF", organism=organism)
 }
 
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID BP
 ##' @export
-EXTID2TERMID.BP <- function(gene, organism, use.KEGG.db) {
+EXTID2TERMID.BP <- function(gene, organism, ...) {
     EXTID2TERMID.GO(gene=gene, ont="BP", organism=organism)
 }
 
 ##' @importFrom DOSE EXTID2TERMID
 ##' @method EXTID2TERMID CC
 ##' @export
-EXTID2TERMID.CC <- function(gene, organism, use.KEGG.db) {
+EXTID2TERMID.CC <- function(gene, organism, ...) {
     EXTID2TERMID.GO(gene=gene, ont="CC", organism=organism)
 }
 
@@ -146,23 +118,23 @@ EXTID2TERMID.GO <- function(gene, ont, organism) {
         qExtID2GO <- dlply(qGO2ExtID.df, .(ExtID), function(i) as.character(i$GO))
     } else {
         oldwd <- getwd()
-        if(organism == "D39") {
-            dir <- system.file("extdata/D39/", package="clusterProfiler")
-            setwd(dir)
-        }
-        if(organism == "M5005") {
-            dir <- system.file("extdata/M5005/", package="clusterProfiler")
-            setwd(dir)
-        }
+
         if (file.exists("EG2ALLGO.rda")) {
             EG2ALLGO <- NULL # to satisfy codetools
             load("EG2ALLGO.rda")
             qExtID2GO <- EG2ALLGO[gene]
             qExtID2GO <- lapply(qExtID2GO, function(i) i[i %in% goterms])
+        } else if (organism == "D39") {            
+            dir <- system.file("extdata/D39/", package="clusterProfiler")
+            setwd(dir)
+        } else if (organism == "M5005") {
+            dir <- system.file("extdata/M5005/", package="clusterProfiler")
+            setwd(dir)
         } else {
             setwd(oldwd)
-            stop("GO mapping file not found in the working directory")
+            stop("GO mapping files not found in the working directory")
         }
+        
         setwd(oldwd)
     }
     return(qExtID2GO)
@@ -171,27 +143,27 @@ EXTID2TERMID.GO <- function(gene, ont, organism) {
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID MF
 ##' @export
-TERMID2EXTID.MF <- function(term, organism, use.KEGG.db) {
+TERMID2EXTID.MF <- function(term, organism, ...) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID BP
 ##' @export
-TERMID2EXTID.BP <- function(term, organism, use.KEGG.db) {
+TERMID2EXTID.BP <- function(term, organism, ...) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERMID2EXTID
 ##' @method TERMID2EXTID CC
 ##' @export
-TERMID2EXTID.CC <- function(term, organism, use.KEGG.db) {
+TERMID2EXTID.CC <- function(term, organism, ...) {
     TERMID2EXTID.GO(term, organism)
 }
 
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importFrom GOSemSim getSupported_Org
-TERMID2EXTID.GO <- function(term, organism, use.KEGG.db) {
+TERMID2EXTID.GO <- function(term, organism, ...) {
     term <- as.character(term)
 
     GO2ALLEG <- GO2EXTID(organism)
@@ -234,14 +206,14 @@ GO2EXTID <- function(organism) {
 ##' @importFrom DOSE ALLEXTID
 ##' @method ALLEXTID MF
 ##' @export
-ALLEXTID.MF <- function(organism, use.KEGG.db) {
+ALLEXTID.MF <- function(organism, ...) {
     ALLEXTID.GO(organism)
 }
 
 ##' @importFrom DOSE ALLEXTID
 ##' @method ALLEXTID BP
 ##' @export
-ALLEXTID.BP <- function(organism, use.KEGG.db) {
+ALLEXTID.BP <- function(organism, ...) {
     ALLEXTID.GO(organism)
 }
 
@@ -249,7 +221,7 @@ ALLEXTID.BP <- function(organism, use.KEGG.db) {
 ## @S3method ALLEXTID CC
 ##' @method ALLEXTID CC
 ##' @export
-ALLEXTID.CC <- function(organism, use.KEGG.db) {
+ALLEXTID.CC <- function(organism, ...) {
     ALLEXTID.GO(organism)
 }
 
@@ -287,28 +259,28 @@ ALLEXTID.GO <- function(organism) {
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME MF
 ##' @export
-TERM2NAME.MF <- function(term, organism, use.KEGG.db) {
+TERM2NAME.MF <- function(term, organism, ...) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME BP
 ##' @export
-TERM2NAME.BP <- function(term, organism, use.KEGG.db) {
+TERM2NAME.BP <- function(term, organism, ...) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom DOSE TERM2NAME
 ##' @method TERM2NAME CC
 ##' @export
-TERM2NAME.CC <- function(term, organism, use.KEGG.db) {
+TERM2NAME.CC <- function(term, organism, ...) {
     TERM2NAME.GO(term, organism)
 }
 
 ##' @importFrom GO.db GOTERM
 ##' @importMethodsFrom AnnotationDbi Term
 ##' @importMethodsFrom AnnotationDbi mget
-TERM2NAME.GO <- function(term, organism, use.KEGG.db) {
+TERM2NAME.GO <- function(term, organism, ...) {
     term <- as.character(term)
     go <- mget(term, GOTERM, ifnotfound=NA)
     termName <- sapply(go, Term)

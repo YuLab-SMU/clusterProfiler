@@ -17,7 +17,8 @@ knitr::opts_chunk$set(tidy         = FALSE,
                       fig.width    = 6,
                       fig.height   = 6,
                       resolution   = 100,
-                      message      = FALSE)
+                      message      = FALSE,
+                      warning      = FALSE)
 @ 
 
 <<style-Sweave, eval=TRUE, echo=FALSE, results="asis">>=
@@ -100,6 +101,37 @@ selected cluster is slow and tedious. To bridge this gap, we designed
 \Biocpkg{clusterProfiler} \cite{yu2012}, for comparing and visualizing functional
 profiles among gene clusters.
 
+\section{bitr: Biological Id TranslatoR}
+
+Many new R user may find traslating ID is a tedious task and I have received many feedbacks from \Biocpkg{clusterProfiler} users that they don't know how to convert gene symbol, uniprot ID or other ID types to Entrez gene ID that used in \Biocpkg{clusterProfiler} for most of the species.
+
+To remove this obstacle, We provide \Rfunction{bitr} function for translating among different gene ID types.
+
+
+<<bitr>>=
+x <- c("GPX3",  "GLRX",   "LBP",   "CRYAB", "DEFB1", "HCLS1",   "SOD2",   "HSPA2", 
+       "ORM1",  "IGFBP1", "PTHLH", "GPC3",  "IGFBP3","TOB1",    "MITF",   "NDRG1", 
+       "NR1H4", "FGFR3",  "PVR",   "IL6",   "PTPRM", "ERBB2",   "NID2",   "LAMB1", 
+       "COMP",  "PLS3",   "MCAM",  "SPP1",  "LAMC1", "COL4A2",  "COL4A1", "MYOC",  
+       "ANXA4", "TFPI2",  "CST6",  "SLPI",  "TIMP2", "CPM",     "GGT1",   "NNMT",
+       "MAL",   "EEF1A2", "HGD",   "TCN2",  "CDA",   "PCCA",    "CRYM",   "PDXK",  
+       "STC1",  "WARS",  "HMOX1", "FXYD2", "RBP4",   "SLC6A12", "KDELR3", "ITM2B")
+eg = bitr(x, fromType="SYMBOL", toType="ENTREZID", annoDb="org.Hs.eg.db")
+head(eg)
+@ 
+
+User should provides an annotation package, both \textit{fromType} and \textit{toType} can accept any types that supported.
+
+User can use \Rfunction{idType} to list all supporting types.
+<<idType>>=
+idType("org.Hs.eg.db")
+@
+
+We can translate from one type to other types.
+<<bitr2>>=
+ids <- bitr(x, fromType="SYMBOL", toType=c("UNIPROT", "ENSEMBL"), annoDb="org.Hs.eg.db")
+head(ids)
+@ 
 
 \section{Gene Ontology analysis}
 \subsection{Supported organisms}
@@ -228,7 +260,7 @@ GSEA use permutation test, user can set \textit{nPerm} for number of permutation
 GO semantic similarity can be calculated by \Biocpkg{GOSemSim} \cite{yu2010}. We can use it to cluster genes/proteins into different clusters based on their functional similarity and can also use it to measure the similarities among GO terms to reduce the redundancy of GO enrichment results.
 
 \section{KEGG analysis}
-The annotation package, KEGG.db, is not updated since 2012. It's now pretty old and in \Biocpkg{clusterProfiler}, \Rfunction{enrichKEGG} supports downloading latest online version of KEGG data for enrichment analysis. Using KEGG.db is also supported by explicitly setting \Robject{use.KEGG.db} parameter to \Robject{TRUE}, but it's not recommended. 
+The annotation package, KEGG.db, is not updated since 2012. It's now pretty old and in \Biocpkg{clusterProfiler}, \Rfunction{enrichKEGG} supports downloading latest online version of KEGG data for enrichment analysis. Using KEGG.db is also supported by explicitly setting \textit{use\_internal\_data} parameter to \Robject{TRUE}, but it's not recommended. 
 
 With this new feature, organism is not restricted to those supported in previous release, it can be any species that have KEGG annotation data available in KEGG database. User should pass abbreviation of academic name to the \Robject{organism} parameter. The full list of KEGG supported organisms can be accessed via \url{http://www.genome.jp/kegg/catalog/org_list.html}.
 
@@ -236,7 +268,7 @@ With this new feature, organism is not restricted to those supported in previous
 <<enrichKEGG>>=
 kk <- enrichKEGG(gene         = gene,
                  organism     = "human",
-                 pvalueCutoff = 0.01, 
+                 pvalueCutoff = 0.05, 
                  readable     = TRUE)
 head(summary(kk))
 @
@@ -254,12 +286,22 @@ head(summary(kk2))
 
 \section{Disease Ontology analysis}
 
-\Biocpkg{DOSE} supports Disease Ontology (DO) Semantic and Enrichment analysis, please refer to the package vignettes. The \Rfunction{enrichDO} function is very useful for identifying disease association of interesting genes, and function \Rfunction{gseAnalyzer} function is designed for gene set enrichment analysis of \textit{DO}.
+\Biocpkg{DOSE} \cite{yu_dose_2015} supports Disease Ontology (DO) Semantic and Enrichment analysis, please refer to the package vignettes. The \Rfunction{enrichDO} function is very useful for identifying disease association of interesting genes, and function \Rfunction{gseAnalyzer} function is designed for gene set enrichment analysis of \textit{DO}.
 
 \section{Reactome pathway analysis}
 
 With the demise of KEGG (at least without subscription), the KEGG pathway data in Bioconductor will not update and we encourage user to analyze pathway using \Biocpkg{ReactomePA} which use Reactome as a source of pathway data. The function call of \Rfunction{enrichPathway} and \Rfunction{gsePathway} in \Biocpkg{ReactomePA} is consistent with \Rfunction{enrichKEGG} and \Rfunction{gseKEGG}.
 
+\section{DAVID functional analysis}
+
+\Biocpkg{clusterProfiler} provides enrichment and GSEA analysis with GO, KEGG, DO and Reactome pathway supported internally, some user may prefer GO and KEGG analysis with DAVID \cite{huang_david_2007} and still attracted by the visualization methods provided by \Biocpkg{clusterProfiler} \cite{paranjpe_genome_wid_2013}. To bridge the gap between DAVID and clusterProfiler, we implemented \Rfunction{enrichDAVID}. This function query enrichment analysis result from DAVID webserver via RDAVIDWebService \cite{fresno_rdavidwebservice_2013} and stored the result as an \Robject{enrichResult} instance, so that we can use all the visualization functions in \Biocpkg{clusterProfiler} to visualize DAVID results. \Rfunction{enrichDAVID} is fully compatible with \Rfunction{compareCluster} function and comparing enrichment results from different gene clusters is now available with DAVID.
+
+<<enrichDAVID, eval=FALSE>>=
+david <- enrichDAVID(gene = gene,
+                     idType = "ENTREZ_GENE_ID",
+                     listType = "Gene",
+                     annotation = "KEGG_PATHWAY")
+@ 
 
 
 \section{Visualization}
@@ -300,7 +342,7 @@ cnetplot(kk, categorySize="geneNum", foldChange=geneList)
 
 \subsection{gseaplot}
 Running score of gene set enrichment analysis and its association of phenotype can be visualized by \Rfunction{gseaplot}.
-<<gseaplot, fig.cap="plotting gsea result", fig.align="center", fig.height=6, fig.width=6, out.width="0.6\\textwidth", fig.pos="h">>=  
+<<gseaplot, fig.cap="plotting gsea result", fig.align="center", fig.height=6, fig.width=8, out.width="0.6\\textwidth", fig.pos="h">>=  
 gseaplot(kk2, geneSetID = "hsa04145")
 @
 
@@ -345,7 +387,7 @@ head(summary(ck))
 
 
 \subsection{Formula interface of compareCluster}
-\Rfunction{compareCluster} also supports passing a formula\footnote{The code to support formula has been contributed by Giovanni Dall'Olio.} of type Entrez~group or Entrez~group+othergroup. 
+\Rfunction{compareCluster} also supports passing a formula\footnote{The code to support formula has been contributed by Giovanni Dall'Olio.} of type $Entrez \sim group$ or $Entrez \sim group + othergroup$. 
 
 <<formula>>=
 ## formula interface
@@ -387,7 +429,7 @@ User can refer to the example in \cite{yu2012}; we analyzed the publicly availab
 
 Another example was shown in \cite{yu2011}, we calculated functional similarities among viral miRNAs using method described in \cite{yu_new_2011}, and compared significant KEGG pathways regulated by different viruses using \Rfunction{compareCluster}.
 
-The comparison function was designed as a framework for comparing gene clusters of any kind of ontology associations, not only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} provided in this package, but also other biological and biomedical ontologies, for instance, \Rfunction{enrichDO} from \Biocpkg{DOSE} and \Rfunction{enrichPathway} from \Biocpkg{ReactomePA} work fine with \Rfunction{compareCluster} for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of \Biocpkg{DOSE} and \Biocpkg{ReactomePA}.
+The comparison function was designed as a framework for comparing gene clusters of any kind of ontology associations, not only \Rfunction{groupGO}, \Rfunction{enrichGO}, and \Rfunction{enrichKEGG} provided in this package, but also other biological and biomedical ontologies, for instance, \Rfunction{enrichDO} from \Biocpkg{DOSE} \cite{yu_dose_2015} and \Rfunction{enrichPathway} from \Biocpkg{ReactomePA} work fine with \Rfunction{compareCluster} for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of \Biocpkg{DOSE} \cite{yu_dose_2015} and \Biocpkg{ReactomePA}.
 
 
 \section{External documents}
@@ -395,7 +437,10 @@ The comparison function was designed as a framework for comparing gene clusters 
 \begin{itemize}
   \item \href{http://ygc.name/2014/08/07/why-clusterprofiler-fails/}{Why clusterProfiler fails}
   \item \href{http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/}{KEGG enrichment analysis with latest online data using clusterProfiler}
+  \item \href{http://ygc.name/2015/02/10/ggtree-updating-a-tree-view/}{DAVID functional analysis with clusterProfiler}
   \item \href{http://ygc.name/2014/08/03/enrichment-map/}{Enrichment map}
+  \item \href{http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/}{a formula interface for GeneOntology analysis}
+  \item \href{http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/}{use clusterProfiler as an universal enrichment analysis tool}
 \end{itemize}
 
 \section{Session Information}

@@ -2,7 +2,7 @@ Package: clusterProfiler
 Type: Package
 Title: statistical analysis and visulization of functional profiles for
     genes and gene clusters
-Version: 2.1.4
+Version: 2.3.6
 Authors@R: c(person(given = "Guangchuang", family = "Yu",
 	            email = "guangchuangyu@gmail.com",
 		    role  = c("aut", "cre")),
@@ -28,19 +28,22 @@ Imports:
     plyr,
     ggplot2,
     GO.db,
-    KEGG.db,
     KEGGREST,
-    magrittr
+    magrittr,
+    qvalue,
+    topGO
 Suggests:
-    org.Hs.eg.db,
-    ReactomePA,
-    pathview,
+    BiocStyle,
+    KEGG.db,
     knitr,
-    BiocStyle
+    org.Hs.eg.db,
+    pathview,    
+    ReactomePA,
+    RDAVIDWebService
 VignetteBuilder: knitr
 License: Artistic-2.0
 URL: https://github.com/GuangchuangYu/clusterProfiler
 BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
-biocViews: Clustering, GO, Pathways, Visualization, MultipleComparison,
-    GeneSetEnrichment
+biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG, MultipleComparison, Pathways, Reactome, Visualization
+    
