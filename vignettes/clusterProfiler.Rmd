@@ -265,7 +265,7 @@ An example of using `enricher` and `GSEA` to analyze [DisGeNet](http://www.disge
 
 # Functional analysis of NGS data
 
-Functional analysis using NGS data (eg, RNA-Seq and ChIP-Seq) can be performed by linking coding and non-coding regions to coding genes via `r Biocpkg("ChIPseeker")` package, which can annotates genomic regions to their nearest genes, host genes, and flanking genes respectivly. In addtion, it provides a function, __*seq2gene*__, that simultaneously considering host genes, promoter region and flanking gene from intergenic region that may under control via cis-regulation. This function maps genomic regions to genes in a many-to-many manner and facilitate functional analysis. For more details, please refer to `r Biocpkg("ChIPseeker")`.
+Functional analysis using NGS data (eg, RNA-Seq and ChIP-Seq) can be performed by linking coding and non-coding regions to coding genes via `r Biocpkg("ChIPseeker")`[@yu_chipseeker_2015] package, which can annotates genomic regions to their nearest genes, host genes, and flanking genes respectivly. In addtion, it provides a function, __*seq2gene*__, that simultaneously considering host genes, promoter region and flanking gene from intergenic region that may under control via cis-regulation. This function maps genomic regions to genes in a many-to-many manner and facilitate functional analysis. For more details, please refer to `r Biocpkg("ChIPseeker")`.
 
 
 # Visualization
