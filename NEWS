@@ -1,5 +1,6 @@
 CHANGES IN VERSION 2.3.6
 ------------------------
+ o merge_result function <2015-07-15, Wed>
  o add citation of ChIPseeker <2015-07-09, Thu>
  o add 'Functional analysis of NGS data' section in vignette <2015-06-29, Mon>
  o update vignette <2015-06-24, Wed>

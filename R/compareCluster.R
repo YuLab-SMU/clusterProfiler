@@ -207,4 +207,30 @@ barplot.compareClusterResult <- function(height, colorBy="p.adjust", showCategor
     df <- fortify(height, showCategory=showCategory, by=by, includeAll=includeAll)
     plotting.clusterProfile(df, type="bar", colorBy=colorBy, by=by, title=title, font.size=font.size)
 }
+
+
+##' merge a list of enrichResult objects to compareClusterResult
+##'
+##'
+##' @title merge_result
+##' @param enrichResultList a list of enrichResult objects 
+##' @return a compareClusterResult instance
+##' @author Guangchuang Yu
+##' @importFrom plyr ldply
+##' @export
+merge_result <- function(enrichResultList) {
+    if ( !is(enrichResultList, "list")) {
+        stop("input should be a name list...")
+    }
+    if ( is.null(names(enrichResultList))) {
+        stop("input should be a name list...")
+    }
+    x <- lapply(enrichResultList, summary)
+    names(x) <- names(enrichResultList)
+    y <- ldply(x, "rbind")
+    y <- rename(y, c(.id="Cluster"))
+    y$Cluster = factor(y$Cluster, levels=names(enrichResultList))
+    new("compareClusterResult",
+        compareClusterResult = y)
     
+}
