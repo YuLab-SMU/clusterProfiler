@@ -240,8 +240,19 @@ head(summary(kk2))
 david <- enrichDAVID(gene = gene,
                      idType = "ENTREZ_GENE_ID",
                      listType = "Gene",
-                     annotation = "KEGG_PATHWAY")
+                     annotation = "KEGG_PATHWAY",
+                     david.user = "clusterProfiler@hku.hk")
 ```
+
+DAVID Web Service has the following limitations:
+
++ A job with more than 3000 genes to generate gene or term cluster report will not be handled by DAVID due to resource limit.
++ No more than 200 jobs in a day from one user or computer.
++ DAVID Team reserves right to suspend any improper uses of the web service without notice.
+
+For more details, please refer to [http://david.abcc.ncifcrf.gov/content.jsp?file=WS.html](http://david.abcc.ncifcrf.gov/content.jsp?file=WS.html).
+
+As user has limited usage, please [register](http://david.abcc.ncifcrf.gov/webservice/register.htm) and use your own user account to run __*enrichDAVID*__.
 
 # Universal enrichment analysis
 
@@ -250,6 +261,11 @@ david <- enrichDAVID(gene = gene,
 `r Biocpkg("clusterProfiler")` provides `enricher` function for hypergeometric test and `GSEA` function for gene set enrichment analysis that are designed to accept user defined annotation. They accept two additional parameters _TERM2GENE_ and _TERM2NAME_. As indicated in the parameter names, _TERM2GENE_ is a data.frame with first column of term ID and second column of corresponding mapped gene and _TERM2NAME_ is a data.frame with first column of term ID and second column of corresponding term name. _TERM2NAME_ is optional.
 
 An example of using `enricher` and `GSEA` to analyze [DisGeNet](http://www.disgenet.org/web/DisGeNET/menu/home) annotation is presented in [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/).
+
+
+# Functional analysis of NGS data
+
+Functional analysis using NGS data (eg, RNA-Seq and ChIP-Seq) can be performed by linking coding and non-coding regions to coding genes via `r Biocpkg("ChIPseeker")`[@yu_chipseeker_2015] package, which can annotates genomic regions to their nearest genes, host genes, and flanking genes respectivly. In addtion, it provides a function, __*seq2gene*__, that simultaneously considering host genes, promoter region and flanking gene from intergenic region that may under control via cis-regulation. This function maps genomic regions to genes in a many-to-many manner and facilitate functional analysis. For more details, please refer to `r Biocpkg("ChIPseeker")`.
 
 
 # Visualization

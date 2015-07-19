@@ -45,5 +45,5 @@ License: Artistic-2.0
 URL: https://github.com/GuangchuangYu/clusterProfiler
 BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
-biocViews: Clustering, GO, Pathways, Visualization, MultipleComparison,
-    GeneSetEnrichment
+biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG, MultipleComparison, Pathways, Reactome, Visualization
+    

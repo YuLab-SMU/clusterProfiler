@@ -29,7 +29,7 @@ fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRa
                         .variables = .(Cluster),
                         .fun = function(df, N) {
                             if (length(df$Count) > N) {
-                                idx <- order(df$Count, decreasing=T)[1:N]
+                                idx <- order(df$pvalue, decreasing=FALSE)[1:N]
                                 return(df[idx,])
                             } else {
                                 return(df)

@@ -1,5 +1,12 @@
 #  clusterProfiler
 
+[![platform](http://www.bioconductor.org/shields/availability/devel/clusterProfiler.svg)](http://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#archives)
+[![Build Status](http://www.bioconductor.org/shields/build/devel/bioc/clusterProfiler.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/clusterProfiler/)
+[![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](http://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
+[![post](http://www.bioconductor.org/shields/posts/clusterProfiler.svg)](https://support.bioconductor.org/t/clusterProfiler/)
+[![commit](http://www.bioconductor.org/shields/commits/bioc/clusterProfiler.svg)](http://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#svn_source)
+[![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](http://bioconductor.org/packages/stats/bioc/clusterProfiler.html)
+
 This package implements methods to analyze and visualize functional profiles (GO and KEGG) of gene and gene clusters.
 
 ## Authors ##
@@ -35,10 +42,12 @@ To install:
 
 + [Why clusterProfiler fails](http://ygc.name/2014/08/07/why-clusterprofiler-fails/)
 + [KEGG enrichment analysis with latest online data using clusterProfiler](http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
-+ [DAVID functional analysis with clusterProfiler](http://ygc.name/2015/02/10/ggtree-updating-a-tree-view/)
-+ [Enrichment map](http://ygc.name/2014/08/03/enrichment-map/)
-+ [a formula interface for GeneOntology analysis](http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/)
++ [DAVID functional analysis with clusterProfiler](http://ygc.name/2015/03/16/david-functional-analysis-with-clusterprofiler/)
 + [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/)
++ [a formula interface for GeneOntology analysis <- bioinfoblog.it](http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/)
++ [Enrichment map](http://ygc.name/2014/08/03/enrichment-map/)
++ [dotplot for enrichment result](http://ygc.name/2015/06/23/dotplot-for-enrichment-result/)
+
 
 To view the vignette of `clusterProfiler` installed in your system, start `R` and enter:
 ```r
