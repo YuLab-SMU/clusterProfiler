@@ -48,6 +48,7 @@ To install:
 + [Enrichment map](http://ygc.name/2014/08/03/enrichment-map/)
 + [dotplot for enrichment result](http://ygc.name/2015/06/23/dotplot-for-enrichment-result/)
 + [functional enrichment for GTEx paper](http://ygc.name/2015/08/13/functional-enrichment-for-gtex-paper/)
++ [functional enrichment analysis with NGS data](http://ygc.name/2015/08/21/functional-enrichment-analysis-with-ngs-data/)
 
 
 To view the vignette of `clusterProfiler` installed in your system, start `R` and enter:
