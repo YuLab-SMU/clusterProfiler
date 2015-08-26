@@ -1,5 +1,10 @@
 CHANGES IN VERSION 2.3.6
 ------------------------
+ o use_internal_data= TRUE in enrichKEGG and gseKEGG demonstrated in vignette due to the issue
+   https://github.com/GuangchuangYu/clusterProfiler/issues/20 <2015-08-26, Wed>		   
+ 
+CHANGES IN VERSION 2.3.6
+------------------------
  o merge_result function <2015-07-15, Wed>
  o add citation of ChIPseeker <2015-07-09, Thu>
  o add 'Functional analysis of NGS data' section in vignette <2015-06-29, Mon>
