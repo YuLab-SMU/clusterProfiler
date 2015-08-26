@@ -204,11 +204,14 @@ With this new feature, organism is not restricted to those supported in previous
 
 ## KEGG over-representation test
 
+To speed up the compilation of this document, we set `use_internal_data = TRUE`.
+
 ```{r}
 kk <- enrichKEGG(gene         = gene,
                  organism     = "human",
                  pvalueCutoff = 0.05, 
-                 readable     = TRUE)
+                 readable     = TRUE,
+                 use_internal_data = TRUE)
 head(summary(kk))
 ```
 
@@ -220,7 +223,8 @@ kk2 <- gseKEGG(geneList     = geneList,
                nPerm        = 1000,
                minGSSize    = 120,
                pvalueCutoff = 0.01,
-               verbose      = FALSE)
+               verbose      = FALSE,
+               use_internal_data = TRUE)
 head(summary(kk2))
 ```
 
