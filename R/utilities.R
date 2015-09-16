@@ -156,7 +156,7 @@ download.KEGG <- function(species) {
 
     keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)
     
-    keggpathid2name<-keggList("pathway")
+    keggpathid2name <- keggList("pathway")
     names(keggpathid2name) %<>% gsub("path:map", "", .)
 
     res <- list(keggpath2extid = keggpath2extid.df,
