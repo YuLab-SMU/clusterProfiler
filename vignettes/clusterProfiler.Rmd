@@ -354,10 +354,10 @@ data(gcSample)
 lapply(gcSample, head)
 ```
 
-The input for _geneCluster_ parameter should be a named list of gene IDs.
+The input for _geneCluster_ parameter should be a named list of gene IDs. To speed up the compilation of this document, we set `use_internal_data = TRUE`.
 
 ```{r}
-ck <- compareCluster(geneCluster = gcSample, fun = "enrichKEGG")
+ck <- compareCluster(geneCluster = gcSample, fun = "enrichKEGG", use_internal_data = TRUE)
 head(summary(ck))
 ```
 
