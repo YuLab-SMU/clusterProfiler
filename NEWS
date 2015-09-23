@@ -1,5 +1,11 @@
-CHANGES IN VERSION 2.3.6
+CHANGES IN VERSION 2.3.8
 ------------------------
+ o use_internal_data = TRUE in enrichKEGG example to speedup compilation of vignette and prevent error when online is not available <2015-09-23, Wed>
+ 
+CHANGES IN VERSION 2.3.7
+------------------------
+ o bug fixed in sorting pvalue of compareClusterResult. <2015-09-16, Wed>
+   For compareCluster(fun=groupGO), there is no pvalue, use Count for sorting
  o use_internal_data= TRUE in enrichKEGG and gseKEGG demonstrated in vignette due to the issue
    https://github.com/GuangchuangYu/clusterProfiler/issues/20 <2015-08-26, Wed>		   
  
