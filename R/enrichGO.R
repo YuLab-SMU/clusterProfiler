@@ -296,7 +296,7 @@ TERM2NAME.GO <- function(term, organism, ...) {
 ##' @param term GO term
 ##' @return modified version of x
 ##' @importFrom GO.db GOTERM
-##' @importFrom GO.db Ontology
+##' @importFrom AnnotationDbi Ontology
 ##' @export
 ##' @author Guangchuang Yu
 dropGO <- function(x, level=NULL, term=NULL) {
