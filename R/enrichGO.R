@@ -295,6 +295,8 @@ TERM2NAME.GO <- function(term, organism, ...) {
 ##' @param level GO level
 ##' @param term GO term
 ##' @return modified version of x
+##' @import GO.db GOTERM
+##' @import GO.db Ontology
 ##' @export
 ##' @author Guangchuang Yu
 dropGO <- function(x, level=NULL, term=NULL) {
@@ -303,7 +305,13 @@ dropGO <- function(x, level=NULL, term=NULL) {
     }
     
     if (!is.null(level)) {
-        tt <- getGOLevel(x@ontology, level)
+        if (is(x, "enrichResult")) {
+            ont <- x@ontology
+        } else {
+            ont <- get(x@compareClusterResult[1, "ID"], GOTERM) %>% Ontology
+        }
+        
+        tt <- getGOLevel(ont, level)
         term <- c(term, tt) %>% unique
     }
     if (is.null(term)) 
