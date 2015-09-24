@@ -39,7 +39,7 @@ library(clusterProfiler)
 
 # Citation
 
-If you use `r Biocpkg("clusterProfiler")` in published research, please cite:
+If you use `r Biocpkg("clusterProfiler")` in published research, please cite G. Yu(2012). In addition, please cite G. Yu (2010) when using `r Biocpkg("GOSemSim")` for GO semantic similarity analysis, G. Yu (2015) when using `r Biocpkg("DOSE")` for Disease Ontology analysis and G. Yu (2015) when applying enrichment analysis to NGS data by using `r Biocpkg("ChIPseeker")`.
 
 ```
 G Yu, LG Wang, Y Han, QY He.
@@ -48,6 +48,32 @@ OMICS: A Journal of Integrative Biology 2012, 16(5):284-287.
 ```
 
 URL: [http://dx.doi.org/10.1089/omi.2011.0118](http://dx.doi.org/10.1089/omi.2011.0118)
+
+```
+G Yu, F Li, Y Qin, X Bo, Y Wu, S Wang. 
+GOSemSim: an R package for measuring semantic similarity among GO terms and gene products.
+Bioinformatics 2010, 26(7):976-978.
+```
+
+URL: [http://dx.doi.org/10.1093/bioinformatics/btq064](http://dx.doi.org/10.1093/bioinformatics/btq064)
+
+
+```
+G Yu, LG Wang, GR Yan, QY He.
+DOSE: an R/Bioconductor package for Disease Ontology Semantic and Enrichment analysis.
+Bioinformatics 2015, 31(4):608-609.
+```
+
+URL: [http://dx.doi.org/10.1093/bioinformatics/btu684](http://dx.doi.org/10.1093/bioinformatics/btu684)
+
+
+```
+G Yu, LG Wang, QY He.
+ChIPseeker: an R/Bioconductor package for ChIP peak annotation, comparison and visualization.
+Bioinformatics 2015, 31(14):2382-2383.
+```
+
+URL: [http://dx.doi.org/10.1093/bioinformatics/btv145](http://dx.doi.org/10.1093/bioinformatics/btv145)
 
 
 # Introduction
