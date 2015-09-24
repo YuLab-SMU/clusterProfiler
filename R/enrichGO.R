@@ -286,3 +286,41 @@ TERM2NAME.GO <- function(term, organism, ...) {
     termName <- sapply(go, Term)
     return(termName)
 }
+
+##' drop GO term of specific level or specific terms (mostly too general).
+##'
+##' 
+##' @title dropGO
+##' @param x an instance of 'enrichResult' or 'compareClusterResult'
+##' @param level GO level
+##' @param term GO term
+##' @return modified version of x
+##' @export
+##' @author Guangchuang Yu
+dropGO <- function(x, level=NULL, term=NULL) {
+    if (! (is(x, "enrichResult") || is(x, "compareClusterResult")) ) {
+        stop("x should be an instance of 'enrichResult' or 'compareClusterResult' ...")
+    }
+    
+    if (!is.null(level)) {
+        tt <- getGOLevel(x@ontology, level)
+        term <- c(term, tt) %>% unique
+    }
+    if (is.null(term)) 
+        return(x)
+
+    if (is(x, "enrichResult")) {
+        gc <- x@geneInCategory
+        x@geneInCategory <- gc[!names(gc) %in% term]
+        
+        res <- x@result
+        res <- res[!res$ID %in% term, ]
+        x@result <- res
+    } else {
+        res <- x@compareClusterResult
+        res <- res[!res$ID %in% term,]
+        x@compareClusterResult <- res
+    }
+    
+    return(x)
+}
