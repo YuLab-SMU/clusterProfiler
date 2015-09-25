@@ -308,7 +308,7 @@ dropGO <- function(x, level=NULL, term=NULL) {
         if (is(x, "enrichResult")) {
             ont <- x@ontology
         } else {
-            ont <- get(x@compareClusterResult[1, "ID"], GOTERM) %>% Ontology
+            ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology
         }
         
         tt <- getGOLevel(ont, level)
