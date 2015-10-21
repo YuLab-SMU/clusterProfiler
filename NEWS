@@ -1,3 +1,12 @@
+CHANGES IN VERSION 2.5.1
+------------------------
+ o simplify function <2015-10-21, Wed>
+   + see https://github.com/GuangchuangYu/clusterProfiler/issues/28
+
+CHANGES IN VERSION 2.5.0
+------------------------
+ o BioC 3.3 branch
+ 
 CHANGES IN VERSION 2.3.8
 ------------------------
  o dropGO function <2015-09-24, Thu>

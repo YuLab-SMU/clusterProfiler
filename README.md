@@ -41,6 +41,7 @@ To install:
 ## Documentation ##
 
 + [Why clusterProfiler fails](http://ygc.name/2014/08/07/why-clusterprofiler-fails/)
++ [use simplify to remove redundancy of enriched GO terms](http://ygc.name/2015/10/21/use-simplify-to-remove-redundancy-of-enriched-go-terms/)
 + [KEGG enrichment analysis with latest online data using clusterProfiler](http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
 + [DAVID functional analysis with clusterProfiler](http://ygc.name/2015/03/16/david-functional-analysis-with-clusterprofiler/)
 + [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/)

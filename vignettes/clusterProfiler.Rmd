@@ -202,6 +202,11 @@ head(summary(ego))
 
 A detail explanation of the parameter can be found in the vignette of `r Biocpkg("DOSE")`.
 
+### reduce redundancy of enriched GO terms
+
+According to [issue #28](https://github.com/GuangchuangYu/clusterProfiler/issues/28), I implement a _simplify_ method to redundant GO terms obtained from _enrichGO_. An example can be found in [the blog post](http://ygc.name/2015/10/21/use-simplify-to-remove-redundancy-of-enriched-go-terms/). It internally call `r Biocpkg("GOSemSim")` to calculate similarities among GO terms and remove those highly similar terms by keeping one representative term. 
+
+
 ## GO Gene Set Enrichment Analysis
 A common approach in analyzing gene expression profiles was identifying differential expressed genes that are deemed interesting. The enrichment analysis we demonstrated previous were based on these differential expressed genes. This approach will find genes where the difference is large, but it will not detect a situation where the difference is small, but evidenced in coordinated way in a set of related genes. Gene Set Enrichment Analysis (GSEA)[@subramanian_gene_2005] directly addresses this limitation. All genes can be used in GSEA; GSEA aggregates the per gene statistics across genes within a gene set, therefore making it possible to detect situations where all genes in a predefined set change in a small but coordinated way. Since it is likely that many relevant phenotypic differences are manifested by small but consistent changes in a set of genes.
 
@@ -438,6 +443,7 @@ The comparison function was designed as a framework for comparing gene clusters 
 
 # External documents
 + [Why clusterProfiler fails](http://ygc.name/2014/08/07/why-clusterprofiler-fails/)
++ [use simplify to remove redundancy of enriched GO terms](http://ygc.name/2015/10/21/use-simplify-to-remove-redundancy-of-enriched-go-terms/)
 + [KEGG enrichment analysis with latest online data using clusterProfiler](http://ygc.name/2015/02/01/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
 + [DAVID functional analysis with clusterProfiler](http://ygc.name/2015/03/16/david-functional-analysis-with-clusterprofiler/)
 + [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/)

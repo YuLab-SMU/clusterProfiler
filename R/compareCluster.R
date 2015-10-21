@@ -166,7 +166,7 @@ setMethod("plot", signature(x="compareClusterResult"),
               if (type == "dot" || type == "dotplot") {
                   dotplot(x, colorBy, showCategory, by, includeAll, font.size, title)
               } else if (type == "bar" || type == "barplot") {
-                  barplot.enrichResult(x, colorBy, showCategory, by, includeAll, font.size, title)
+                  barplot.compareClusterResult(x, colorBy, showCategory, by, includeAll, font.size, title)
               } else {
                   stop("type should be one of 'dot' or 'bar'...")
               }              
