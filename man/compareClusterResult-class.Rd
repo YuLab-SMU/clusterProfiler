@@ -22,6 +22,8 @@ categories at specific level or GO enrichment analysis.
 \item{\code{geneClusters}}{a list of genes}
 
 \item{\code{fun}}{one of groupGO, enrichGO and enrichKEGG}
+
+\item{\code{.call}}{function call}
 }}
 \author{
 Guangchuang Yu \url{http://ygc.name}

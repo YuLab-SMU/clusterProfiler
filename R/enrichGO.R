@@ -308,7 +308,13 @@ dropGO <- function(x, level=NULL, term=NULL) {
         if (is(x, "enrichResult")) {
             ont <- x@ontology
         } else {
-            ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology
+            ont <- x@.call$ont
+            if (is.null(ont)) {
+                ## should be "MF", default value of enrichGO
+                ## it's safe to determine from the output
+                ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology                
+            }
+            
         }
         
         tt <- getGOLevel(ont, level)
@@ -316,7 +322,7 @@ dropGO <- function(x, level=NULL, term=NULL) {
     }
     if (is.null(term)) 
         return(x)
-
+    
     if (is(x, "enrichResult")) {
         gc <- x@geneInCategory
         x@geneInCategory <- gc[!names(gc) %in% term]

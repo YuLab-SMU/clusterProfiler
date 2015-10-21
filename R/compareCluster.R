@@ -38,7 +38,7 @@
 ##' xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf, fun='groupGO')
 ##' summary(xx.formula.twogroups)
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
-
+    fun_name <- fun
     fun <- eval(parse(text=fun))
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
@@ -72,7 +72,8 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     new("compareClusterResult",
         compareClusterResult = clProf.df,
         geneClusters = geneClusters,
-        fun = fun
+        fun = fun_name,
+        .call = match.call(expand.dots=TRUE)
 	)
 }
 
@@ -89,6 +90,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 ##' @slot compareClusterResult cluster comparing result
 ##' @slot geneClusters a list of genes
 ##' @slot fun one of groupGO, enrichGO and enrichKEGG
+##' @slot .call function call
 ##' @exportClass compareClusterResult
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @exportClass compareClusterResult
@@ -97,9 +99,10 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 ##' @keywords classes
 setClass("compareClusterResult",
          representation = representation(
-         compareClusterResult = "data.frame",
-         geneClusters = "list",
-         fun = "function"
+             compareClusterResult = "data.frame",
+             geneClusters = "list",
+             fun = "character",
+             .call = "call"
          )
          )
 
