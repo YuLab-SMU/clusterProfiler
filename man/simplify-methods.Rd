@@ -3,10 +3,14 @@
 \docType{methods}
 \name{simplify}
 \alias{simplify}
+\alias{simplify,compareClusterResult-method}
 \alias{simplify,enrichResult-method}
 \title{simplify method}
 \usage{
 \S4method{simplify}{enrichResult}(x, cutoff = 0.7, by = "p.adjust",
+  select_fun = min, measure = "Rel")
+
+\S4method{simplify}{compareClusterResult}(x, cutoff = 0.7, by = "p.adjust",
   select_fun = min, measure = "Rel")
 }
 \arguments{
@@ -22,11 +26,17 @@
 }
 \value{
 updated enrichResult object
+
+updated compareClusterResult object
 }
 \description{
 simplify output from enrichGO by removing redundancy of enriched GO terms
+
+simplify output from compareCluster by removing redundancy of enriched GO terms
 }
 \author{
+Guangchuang Yu
+
 Guangchuang Yu
 }
 \references{

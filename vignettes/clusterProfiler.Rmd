@@ -204,7 +204,12 @@ A detail explanation of the parameter can be found in the vignette of `r Biocpkg
 
 ### reduce redundancy of enriched GO terms
 
-According to [issue #28](https://github.com/GuangchuangYu/clusterProfiler/issues/28), I implement a _simplify_ method to redundant GO terms obtained from _enrichGO_. An example can be found in [the blog post](http://ygc.name/2015/10/21/use-simplify-to-remove-redundancy-of-enriched-go-terms/). It internally call `r Biocpkg("GOSemSim")` to calculate similarities among GO terms and remove those highly similar terms by keeping one representative term. 
+According to [issue #28](https://github.com/GuangchuangYu/clusterProfiler/issues/28), I implement a _simplify_ method to redundant GO terms obtained from _enrichGO_. An example can be found in [the blog post](http://ygc.name/2015/10/21/use-simplify-to-remove-redundancy-of-enriched-go-terms/). It internally call `r Biocpkg("GOSemSim")` to calculate similarities among GO terms and remove those highly similar terms by keeping one representative term. The _simplify_ method works with both outputs from _enrichGO_ and _compareCluster_.
+
+### drop specific GO terms or level
+
+_enrichGO_ test the whole GO corpus and enriched result may contains very general terms. With _dropGO_ function, user can remove specific GO terms or GO level from results obtained in both _enrichGO_ and _compareCluster_.
+
 
 
 ## GO Gene Set Enrichment Analysis
