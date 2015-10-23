@@ -88,17 +88,8 @@ simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, me
 setMethod("simplify", signature(x="compareClusterResult"),
           function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel") {
               res <- x@compareClusterResult
-              if (x@fun != "enrichGO") {
-                  stop("simplify only work for GO...")
-              }
-
-              ont <- x@.call$ont
-              if (is.null(ont)) {
-                  ## should be "MF", default value of enrichGO
-                  ## it's safe to determine from the output
-                  ont <- res$ID[1] %>% GOTERM[[.]] %>% Ontology
-              }
-
+              ont <- get_go_ontology(x)
+              
               organism <- x@.call$organism
               if (is.null(organism)) {
                   organism <- "human"
