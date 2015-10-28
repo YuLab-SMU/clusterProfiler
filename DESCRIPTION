@@ -29,6 +29,7 @@ Imports:
     plyr,
     ggplot2,
     GO.db,
+    GSEABase,
     KEGGREST,
     magrittr,
     qvalue,

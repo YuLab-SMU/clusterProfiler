@@ -167,8 +167,7 @@ If a gene is annotated by a GO ID (direction annotation), it should also annotat
 In `r Biocpkg("clusterProfiler")`, `groupGO` is designed for gene classification based on GO distribution at a specific level. Here we use dataset __*geneList*__ provided by `r Biocpkg("DOSE")`. Please refer to vignette of `r Biocpkg("DOSE")` for more details.
 
 ```{r}
-library("DOSE")
-data(geneList)
+data(geneList, package="DOSE")
 gene <- names(geneList)[abs(geneList) > 2]
 head(gene)
 ggo <- groupGO(gene     = gene,
@@ -302,6 +301,16 @@ As user has limited usage, please [register](http://david.abcc.ncifcrf.gov/webse
 
 An example of using `enricher` and `GSEA` to analyze [DisGeNet](http://www.disgenet.org/web/DisGeNET/menu/home) annotation is presented in [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/).
 
+## Using MSigDB gene set collections
+
+Users can use `enricher` and `GSEA` function to analyze gene set collections downloaded from Molecular Signatures Database ([MSigDb](http://www.broadinstitute.org/gsea/msigdb/index.jsp)). `r Biocpkg("clusterProfiler")` provides a function, `read.gmt`, to parse the [gmt file](www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#GMT:_Gene_Matrix_Transposed_file_format_.28.2A.gmt.29) into a _TERM2GENE_ `data.frame` that is ready for both `enricher` and `GSEA` functions.
+
+```{r}
+gmtfile <- system.file("extdata", "c5.cc.v5.0.entrez.gmt", package="clusterProfiler")
+c5 <- read.gmt(gmtfile)
+egmt <- enricher(gene, TERM2GENE=c5)
+head(summary(egmt))
+```
 
 # Functional analysis of NGS data
 

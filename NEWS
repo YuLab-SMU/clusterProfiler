@@ -1,5 +1,6 @@
 CHANGES IN VERSION 2.5.1
 ------------------------
+ o read.gmt function for parsing gmt file for enricher and GSEA <2015-10-28, Wed>
  o gofilter to filt result at specific GO level <2015-10-23, Fri>
  o simplify function <2015-10-21, Wed>
    + see https://github.com/GuangchuangYu/clusterProfiler/issues/28
