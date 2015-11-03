@@ -65,9 +65,21 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         stop("No enrichment found in any of gene cluster, please check your input...")
     }
     
-    clProf.df <- rename(clProf.df, c(.id="Cluster"))
+    clProf.df <- rename(clProf.df, c(.id="Cluster"))    
     clProf.df$Cluster = factor(clProf.df$Cluster, levels=clusters.levels)
 
+    if (is.data.frame(data) && grepl('+', grouping.formula)) {
+        groupVarName <- strsplit(grouping.formula, split="\\+") %>% unlist %>%
+            gsub("~", "", .) %>% gsub("^\\s*", "", .) %>% gsub("\\s*$", "", .)
+        groupVars <- sapply(as.character(clProf.df$Cluster), strsplit, split="\\.") %>% do.call(rbind, .)
+        for (i in seq_along(groupVarName)) {
+            clProf.df[, groupVarName[i]] <- groupVars[,i] 
+        }
+        i <- which(colnames(clProf.df) %in% groupVarName)
+        j <- (1:ncol(clProf.df))[-c(1, i)]
+        clProf.df <- clProf.df[, c(1, i, j)]
+    }
+    
     ##colnames(clProf.df)[1] <- "Cluster"
     new("compareClusterResult",
         compareClusterResult = clProf.df,
@@ -182,6 +194,7 @@ setMethod("plot", signature(x="compareClusterResult"),
 ##' @rdname dotplot-methods
 ##' @aliases dotplot,compareClusterResult,ANY-method
 ##' @param object compareClusterResult object
+##' @param x x variable
 ##' @param colorBy one of pvalue or p.adjust
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
@@ -192,6 +205,7 @@ setMethod("plot", signature(x="compareClusterResult"),
 ##' @exportMethod dotplot
 setMethod("dotplot", signature(object="compareClusterResult"),
           function(object,
+                   x = ~Cluster,
                    colorBy="p.adjust",
                    showCategory=5,
                    by="geneRatio",
@@ -199,7 +213,7 @@ setMethod("dotplot", signature(object="compareClusterResult"),
                    font.size=12,
                    title=""
                    ) {
-              dotplot.compareClusterResult(object, colorBy, showCategory, by, includeAll, font.size, title)
+              dotplot.compareClusterResult(object, x=x, colorBy, showCategory, by, includeAll, font.size, title)
           })
 
 

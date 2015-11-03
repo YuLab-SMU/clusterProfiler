@@ -1,6 +1,6 @@
-dotplot.compareClusterResult <- function(object, colorBy="p.adjust", showCategory=5, by="geneRatio", includeAll=TRUE, font.size=12, title="") {
+dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust", showCategory=5, by="geneRatio", includeAll=TRUE, font.size=12, title="") {
     df <- fortify(object, showCategory=showCategory, by=by, includeAll=includeAll)
-    plotting.clusterProfile(df, type="dot", colorBy=colorBy, by=by, title=title, font.size=font.size)
+    plotting.clusterProfile(df, x=x, type="dot", colorBy=colorBy, by=by, title=title, font.size=font.size)
 }
 
 ##' @title fortify
@@ -51,7 +51,7 @@ fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRa
     
     ## remove zero count
     result$Description <- as.character(result$Description) ## un-factor
-    GOlevel <- result[,c(2,3)] ## GO ID and Term
+    GOlevel <- result[,c("ID", "Description")] ## GO ID and Term
     GOlevel <- unique(GOlevel)
     
     result <- result[result$Count != 0, ]

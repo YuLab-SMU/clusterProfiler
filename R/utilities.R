@@ -333,6 +333,7 @@ getGOLevel <- function(ont, level) {
 ##' @return ggplot object
 ##' @importFrom ggplot2 ggplot
 ##' @importFrom ggplot2 aes
+##' @importFrom ggplot2 aes_
 ##' @importFrom ggplot2 aes_string
 ##' @importFrom ggplot2 geom_bar
 ##' @importFrom ggplot2 coord_flip
@@ -348,6 +349,7 @@ getGOLevel <- function(ont, level) {
 ##' @importFrom DOSE theme_dose
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,
+                                    x = ~Cluster,
                                     type = "dot",
                                     colorBy = "p.adjust",
                                     by = "geneRatio",
@@ -371,13 +373,13 @@ plotting.clusterProfile <- function(clProf.reshape.df,
     if (type == "dot") {
         if (by == "rowPercentage") {
             p <- ggplot(clProf.reshape.df,
-                        aes(x = Cluster, y = Description, size = Percentage))
+                        aes_(x = x, y = ~Description, size = ~Percentage))
         } else if (by == "count") {
             p <- ggplot(clProf.reshape.df,
-                        aes(x = Cluster, y = Description, size = Count))
+                        aes_(x = x, y = ~Description, size = ~Count))
         } else if (by == "geneRatio") {
             p <- ggplot(clProf.reshape.df,
-                        aes(x = Cluster, y = Description, size = GeneRatio))
+                        aes_(x = x, y = ~Description, size = ~GeneRatio))
         } else {
             ## nothing here
         }
