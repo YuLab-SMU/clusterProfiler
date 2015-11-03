@@ -179,7 +179,14 @@ setMethod("plot", signature(x="compareClusterResult"),
                    title=""
                    ) {
               if (type == "dot" || type == "dotplot") {
-                  dotplot(x, colorBy, showCategory, by, includeAll, font.size, title)
+                  dotplot(x,
+                          colorBy      = colorBy,
+                          showCategory = showCategory,
+                          by           = by,
+                          includeAll   = includeAll,
+                          font.size    = font.size,
+                          title        = title
+                          )
               } else if (type == "bar" || type == "barplot") {
                   barplot.compareClusterResult(x, colorBy, showCategory, by, includeAll, font.size, title)
               } else {

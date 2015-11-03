@@ -325,6 +325,7 @@ getGOLevel <- function(ont, level) {
 ##'
 ##' @title plotting-clusterProfile
 ##' @param clProf.reshape.df data frame of compareCluster result
+##' @param x x variable
 ##' @param type one of dot and bar
 ##' @param by one of percentage and count
 ##' @param title graph title

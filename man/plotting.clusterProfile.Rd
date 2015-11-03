@@ -10,6 +10,8 @@ plotting.clusterProfile(clProf.reshape.df, x = ~Cluster, type = "dot",
 \arguments{
 \item{clProf.reshape.df}{data frame of compareCluster result}
 
+\item{x}{x variable}
+
 \item{type}{one of dot and bar}
 
 \item{colorBy}{one of pvalue or p.adjust}

@@ -3,6 +3,10 @@ dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust",
     plotting.clusterProfile(df, x=x, type="dot", colorBy=colorBy, by=by, title=title, font.size=font.size)
 }
 
+##' convert compareClusterResult to a data.frame that ready for plot
+##'
+##' 
+##' @rdname fortify
 ##' @title fortify
 ##' @param model compareClusterResult object
 ##' @param data not use here
