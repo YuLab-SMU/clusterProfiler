@@ -50,4 +50,4 @@ BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
 biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,
     MultipleComparison, Pathways, Reactome, Visualization
-RoxygenNote: 5.0.0
+RoxygenNote: 5.0.1
