@@ -263,6 +263,24 @@ kk2 <- gseKEGG(geneList     = geneList,
 head(summary(kk2))
 ```
 
+
+## KEGG Module over-representation test
+
+[KEGG Module](http://www.genome.jp/kegg/module.html) is a collection of manually defined function units. In some situation, KEGG Modules have more more straightforward interpretation.
+
+```{r eval = FALSE}
+mkk <- enrichMKEGG(gene = gene,
+                   organism = "human")
+```
+                   
+## KEGG Module Gene Set Enrichment Analysis
+
+```{r eval=FALSE}
+mkk2 <- gseMKEGG(geneList = geneList,
+                 organism = "hman")
+```
+                 
+
 # Disease Ontology analysis
 
 `r Biocpkg("DOSE")`[@yu_dose_2015] supports Disease Ontology (DO) Semantic and Enrichment analysis, please refer to the package vignettes. The `enrichDO` function is very useful for identifying disease association of interesting genes, and function `gseAnalyzer` function is designed for gene set enrichment analysis of _DO_.

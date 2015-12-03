@@ -139,6 +139,24 @@ download_buildKEGGmap <- function(organism) {
 }
 
 
+download.KEGG_Module <- function(species) {
+    keggmodule2extid <- keggLink(species, "module")
+    keggmodule2extid %<>% gsub("[^:]+:", "", .)
+    names(keggmodule2extid) %<>% gsub("[^:]+:", "", .)
+    names(keggmodule2extid) %<>% gsub(species, "", .)
+    names(keggmodule2extid) %<>% gsub("^_", "", .)
+    keggmodule2extid.df <- data.frame(moduleID=names(keggmodule2extid),
+                                      extID = keggmodule2extid)
+
+    keggmodule2name <- keggList("module")
+    names(keggmodule2name) %<>% gsub("md:", "", .)
+    keggmodule2name.df <- data.frame(moduleID=names(keggmodule2name),
+                                     moduleName=keggmodule2name)
+    res <- list(keggmodule2extid = keggmodule2extid.df,
+                keggmodule2name  = keggmodule2name.df)
+    return(res)
+}
+
 ##' download the latest version of KEGG pathway
 ##'
 ##' 

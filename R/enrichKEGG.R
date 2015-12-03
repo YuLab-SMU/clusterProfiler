@@ -61,6 +61,42 @@ enrichKEGG <- function(gene,
 
 }
 
+##' KEGG Module Enrichment Analysis of a gene set.
+##' Given a vector of genes, this function will return the enrichment KEGG Module
+##' categories with FDR control.
+##'
+##'
+##' @param gene a vector of entrez gene id.
+##' @param organism all KEGG module supported organisms
+##' @param pvalueCutoff Cutoff value of pvalue.
+##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
+##' @param universe background genes
+##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
+##' @param qvalueCutoff qvalue cutoff
+##' @return A \code{enrichResult} instance.
+##' @export
+enrichMKEGG <- function(gene,
+                        organism = 'hsa',
+                        pvalueCutoff = 0.05,
+                        pAdjustMethod = 'BH',
+                        universe,
+                        minGSSize = 5,
+                        qvalueCutoff = 0.2) {
+    species <- organismMapper(organism)
+    keggModule <- download.KEGG_Module(species)
+    
+    res <- enricher(gene,
+                    pvalueCutoff = pvalueCutoff,
+                    pAdjustMethod = pAdjustMethod,
+                    universe = universe,
+                    minGSSize = minGSSize,
+                    qvalueCutoff = qvalueCutoff,
+                    TERM2GENE = keggModule$keggmodule2extid,
+                    TERM2NAME = keggModule$keggmodule2name)
+    res@ontology <- "MKEGG"
+    return(res)
+}
+                        
 ##' viewKEGG function is for visualize KEGG pathways
 ##' works with enrichResult object to visualize enriched KEGG pathway
 ##'
