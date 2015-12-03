@@ -80,6 +80,7 @@ gseMKEGG <- function(geneList,
                 TERM2NAME = keggModule$keggmodule2name,
                 verbose = verbose)
     res@setType <- "MKEGG"
+    res@params$organism <- organism
     return(res)
 }
 

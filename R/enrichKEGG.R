@@ -94,6 +94,7 @@ enrichMKEGG <- function(gene,
                     TERM2GENE = keggModule$keggmodule2extid,
                     TERM2NAME = keggModule$keggmodule2name)
     res@ontology <- "MKEGG"
+    res@organism <- organism
     return(res)
 }
                         
