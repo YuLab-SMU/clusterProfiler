@@ -266,7 +266,7 @@ head(summary(kk2))
 
 ## KEGG Module over-representation test
 
-[KEGG Module](http://www.genome.jp/kegg/module.html) is a collection of manually defined function units. In some situation, KEGG Modules have more more straightforward interpretation.
+[KEGG Module](http://www.genome.jp/kegg/module.html) is a collection of manually defined function units. In some situation, KEGG Modules have a more straightforward interpretation.
 
 ```{r eval = FALSE}
 mkk <- enrichMKEGG(gene = gene,
