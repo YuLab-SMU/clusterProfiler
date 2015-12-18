@@ -139,6 +139,24 @@ download_buildKEGGmap <- function(organism) {
 }
 
 
+download.KEGG_Module <- function(species) {
+    keggmodule2extid <- keggLink(species, "module")
+    keggmodule2extid %<>% gsub("[^:]+:", "", .)
+    names(keggmodule2extid) %<>% gsub("[^:]+:", "", .)
+    names(keggmodule2extid) %<>% gsub(species, "", .)
+    names(keggmodule2extid) %<>% gsub("^_", "", .)
+    keggmodule2extid.df <- data.frame(moduleID=names(keggmodule2extid),
+                                      extID = keggmodule2extid)
+
+    keggmodule2name <- keggList("module")
+    names(keggmodule2name) %<>% gsub("md:", "", .)
+    keggmodule2name.df <- data.frame(moduleID=names(keggmodule2name),
+                                     moduleName=keggmodule2name)
+    res <- list(keggmodule2extid = keggmodule2extid.df,
+                keggmodule2name  = keggmodule2name.df)
+    return(res)
+}
+
 ##' download the latest version of KEGG pathway
 ##'
 ##' 
@@ -334,6 +352,7 @@ getGOLevel <- function(ont, level) {
 ##' @return ggplot object
 ##' @importFrom ggplot2 ggplot
 ##' @importFrom ggplot2 aes
+##' @importFrom ggplot2 aes_
 ##' @importFrom ggplot2 aes_string
 ##' @importFrom ggplot2 geom_bar
 ##' @importFrom ggplot2 coord_flip
@@ -370,17 +389,16 @@ plotting.clusterProfile <- function(clProf.reshape.df,
             geom_bar() +
                 coord_flip()
     }
-    x <- gsub("~", "", as.character(as.expression(x)))
     if (type == "dot") {
         if (by == "rowPercentage") {
             p <- ggplot(clProf.reshape.df,
-                        aes_string(x = x, y = "Description", size = "Percentage"))
+                        aes_(x = x, y = ~Description, size = ~Percentage))
         } else if (by == "count") {
             p <- ggplot(clProf.reshape.df,
-                        aes_string(x = x, y = "Description", size = "Count"))
+                        aes_(x = x, y = ~Description, size = ~Count))
         } else if (by == "geneRatio") {
             p <- ggplot(clProf.reshape.df,
-                        aes_string(x = x, y = "Description", size = "GeneRatio"))
+                        aes_(x = x, y = ~Description, size = ~GeneRatio))
         } else {
             ## nothing here
         }

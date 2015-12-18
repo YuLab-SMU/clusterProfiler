@@ -45,6 +45,45 @@ gseGO <- function(geneList,
     
 }
 
+##' Gene Set Enrichment Analysis of KEGG Module
+##'
+##'
+##' @title gseMKEGG
+##' @param geneList order ranked geneList
+##' @param organism all KEGG Module supported organisms
+##' @param exponent weight of each step
+##' @param nPerm permutation numbers
+##' @param minGSSize minimal size of each geneSet for analyzing
+##' @param pvalueCutoff pvalue Cutoff
+##' @param pAdjustMethod pvalue adjustment method
+##' @param verbose print message or not
+##' @export
+##' @return gseaResult object
+##' @author Yu Guangchuang
+gseMKEGG <- function(geneList,
+                    organism          = "human",
+                    exponent          = 1,
+                    nPerm             = 1000,
+                    minGSSize         = 10,
+                    pvalueCutoff      = 0.05,
+                    pAdjustMethod     = "BH",
+                    verbose           = TRUE) {
+    species <- organismMapper(organism)
+    keggModule <- download.KEGG_Module(species)
+    res <- GSEA(geneList = geneList,
+                exponent = exponent,
+                nPerm = nPerm,
+                minGSSize = minGSSize,
+                pvalueCutoff = pvalueCutoff,
+                pAdjustMethod = pAdjustMethod,
+                TERM2GENE = keggModule$keggmodule2extid,
+                TERM2NAME = keggModule$keggmodule2name,
+                verbose = verbose)
+    res@setType <- "MKEGG"
+    res@params$organism <- organism
+    return(res)
+}
+
 
 ##' Gene Set Enrichment Analysis of KEGG
 ##'
