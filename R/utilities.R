@@ -26,203 +26,37 @@ build_Anno <- function(path2gene, path2name) {
 }
 
 
-organismMapper <- function(organism) {
-    ## it only map those previous supported organism
-    
-    if (organism == "anopheles") {
-        species <- "aga"
-    } else if (organism == "arabidopsis") {
-        species <- "ath"
-    } else if (organism == "bovine") {
-        species <- "bta"
-    } else if (organism == "canine") {
-        species <- "cfa"
-    } else if (organism == "chicken") {
-        species <- "gga"
-    } else if (organism == "chipm") {
-        species <- "ptr"
-    } else if (organism == "ecolik12") {
-        species <- "eco"
-    } else if (organism == "ecsakai") {
-        species <- "ecs"
-    } else if (organism == "fly") {
-        species <- "dme"
-    } else if (organism == "human") {
-        species <- "hsa"
-    } else if (organism == "malaria") {
-        species <- "pfa"
-    } else if (organism == "mouse") {
-        species <- "mmu"
-    } else if (organism == "pig") {
-        species <- "ssc"
-    } else if (organism == "rat") {
-        species <- "rno"
-    } else if (organism == "rhesus") {
-        species <- "mcc"
-    } else if (organism == "worm" || organism == "celegans") {
-        species <- "cel"
-    } else if (organism == "xenopus") {
-        species <- "xla"
-    } else if (organism == "yeast") {
-        species <- "sce"
-    } else if (organism == "zebrafish") {
-        species <- "dre"
-    } else {
-        species <- organism
-    }
-    return(species)
-}
 
-KEGG_db_supported <- function() {
-    res <- c(
-        "aga",
-        "ath",
-        "bta",
-        "cfa",
-        "gga",
-        "ptr",
-        "eco",
-        "ecs",
-        "dme",
-        "hsa",
-        "pfa",
-        "mmu",
-        "ssc",
-        "rno",
-        "mcc",
-        "cel",
-        "xla",
-        "sce",
-        "dre")
+## buildKEGGmap <- function(keggmap, id2name=NULL, organism) {
+##     if (! exists("KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
+##         assign("KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
+##     }
+##     KEGG_clusterProfiler_Env <- get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
 
-    return(res)
-}
-
-
-
-get_KEGG_Anno <- function(organism, key) {
-    buildKEGGmap_online(organism)
-    KEGG_clusterProfiler_Env <- get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
-    get(key, KEGG_clusterProfiler_Env)
-}
-
-buildKEGGmap_online <- function(organism) {
-    organism <- organismMapper(organism)
-
-    if (! exists("KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
-        assign("KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
-    }
-    KEGG_clusterProfiler_Env <- get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
-    
-    if (exists("organism", envir = KEGG_clusterProfiler_Env, inherits = FALSE)) {
-        org <- get("organism", envir=KEGG_clusterProfiler_Env)
-        if (org == organism &&
-            exists("KEGGPATHID2NAME", envir=KEGG_clusterProfiler_Env, inherits = FALSE) &&
-            exists("KEGGPATHID2EXTID", envir=KEGG_clusterProfiler_Env, inherits = FALSE) &&
-            exists("EXTID2KEGGPATHID", envir=KEGG_clusterProfiler_Env, inherits = FALSE)
-            ) {
-            ## do nothing
-        } else {
-            download_buildKEGGmap(organism)
-        }
-    } else {
-        download_buildKEGGmap(organism)
-    }
-    
-}
-
-
-download_buildKEGGmap <- function(organism) {
-    organism <- organismMapper(organism)
-    kegg <- download.KEGG(organism)
-    buildKEGGmap(kegg[[1]], kegg[[2]], organism)
-}
-
-
-download.KEGG_Module <- function(species) {
-    keggmodule2extid <- keggLink(species, "module")
-    keggmodule2extid %<>% gsub("[^:]+:", "", .)
-    names(keggmodule2extid) %<>% gsub("[^:]+:", "", .)
-    names(keggmodule2extid) %<>% gsub(species, "", .)
-    names(keggmodule2extid) %<>% gsub("^_", "", .)
-    keggmodule2extid.df <- data.frame(moduleID=names(keggmodule2extid),
-                                      extID = keggmodule2extid)
-
-    keggmodule2name <- keggList("module")
-    names(keggmodule2name) %<>% gsub("md:", "", .)
-    keggmodule2name.df <- data.frame(moduleID=names(keggmodule2name),
-                                     moduleName=keggmodule2name)
-    res <- list(keggmodule2extid = keggmodule2extid.df,
-                keggmodule2name  = keggmodule2name.df)
-    return(res)
-}
-
-##' download the latest version of KEGG pathway
-##'
-##' 
-##' @title download.KEGG
-##' @param species species
-##' @return list
-##' @author Guangchuang Yu
-##' @importFrom KEGGREST keggLink
-##' @importFrom KEGGREST keggList
-##' @importFrom magrittr %<>%
-download.KEGG <- function(species) {
-    keggpathid2extid <- keggLink(species,"pathway")
-    keggpathid2extid %<>% gsub("[^:]+:", "", .)
-    names(keggpathid2extid) %<>% gsub("[^:]+:", "", .)
-
-    keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)
-    
-    keggpathid2name <- keggList("pathway")
-    names(keggpathid2name) %<>% gsub("path:map", "", .)
-
-    res <- list(keggpath2extid = keggpath2extid.df,
-                keggpathid2name = keggpathid2name)
-    return(res)
-}
-
-
-##' build KEGG annotation files
-##'
-##' 
-##' @title buildKEGGmap
-##' @param keggmap pathway to external ID
-##' @param id2name pathway id to pathway name
-##' @param organism organism
-##' @return NULL
-##' @importFrom magrittr %>%
-##' @author Guangchuang Yu
-buildKEGGmap <- function(keggmap, id2name=NULL, organism) {
-    if (! exists("KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
-        assign("KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
-    }
-    KEGG_clusterProfiler_Env <- get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
-
-    if (is.null(id2name)) {
-        id2name <- as.list(KEGGPATHID2NAME) %>% unlist
-        pathid  <- names(id2name)
-        id      <- keggmap[,1] %>% as.character %>% gsub("^[a-z]+", "", .)
-        keggmap <- keggmap[id %in% pathid, ]
+##     if (is.null(id2name)) {
+##         id2name <- as.list(KEGGPATHID2NAME) %>% unlist
+##         pathid  <- names(id2name)
+##         id      <- keggmap[,1] %>% as.character %>% gsub("^[a-z]+", "", .)
+##         keggmap <- keggmap[id %in% pathid, ]
         
-    }
+##     }
     
-    KEGGPATHID2NAME  <- id2name
-    KEGGPATHID2EXTID <- split(as.character(keggmap[,2]), as.character(keggmap[,1]))
-    EXTID2KEGGPATHID <- split(as.character(keggmap[,1]), as.character(keggmap[,2]))
+##     KEGGPATHID2NAME  <- id2name
+##     KEGGPATHID2EXTID <- split(as.character(keggmap[,2]), as.character(keggmap[,1]))
+##     EXTID2KEGGPATHID <- split(as.character(keggmap[,1]), as.character(keggmap[,2]))
 
-    assign("organism", organism, envir = KEGG_clusterProfiler_Env)
-    assign("KEGGPATHID2NAME", KEGGPATHID2NAME,  envir  = KEGG_clusterProfiler_Env)
-    assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir = KEGG_clusterProfiler_Env)
-    assign("EXTID2KEGGPATHID", EXTID2KEGGPATHID, envir = KEGG_clusterProfiler_Env)
-}
+##     assign("organism", organism, envir = KEGG_clusterProfiler_Env)
+##     assign("KEGGPATHID2NAME", KEGGPATHID2NAME,  envir  = KEGG_clusterProfiler_Env)
+##     assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir = KEGG_clusterProfiler_Env)
+##     assign("EXTID2KEGGPATHID", EXTID2KEGGPATHID, envir = KEGG_clusterProfiler_Env)
+## }
 
 
-get_KEGG_db <- function(kw) {
-    annoDb <- "KEGG.db"
-    suppressMessages(requireNamespace(annoDb))
-    eval(parse(text=paste0(annoDb, "::", kw)))
-}
+## get_KEGG_db <- function(kw) {
+##     annoDb <- "KEGG.db"
+##     suppressMessages(requireNamespace(annoDb))
+##     eval(parse(text=paste0(annoDb, "::", kw)))
+## }
 
 
 excludeGOlevel <- function(x, ont, level) {
@@ -257,45 +91,6 @@ keepGOterm <- function(x, term) {
         stop("x should be one of enrichResult of compareClusterResult...")
     }
     return(x)
-}
-
-##' @importFrom GOSemSim getDb
-getGO2ALLEG_MappedDb <- function(organism) {
-    annoDb <- getDb(organism)
-    require(annoDb, character.only = TRUE)
-
-    mappedDb <- switch(organism,
-                       anopheles    = "org.Ag.egGO2ALLEGS",
-                       arabidopsis  = "org.At.tairGO2ALLTAIRS",
-                       bovine       = "org.Bt.egGO2ALLEGS",
-                       canine       = "org.Cf.egGO2ALLEGS",
-                       chicken      = "org.Gg.egGO2ALLEGS",
-                       chimp        = "org.Pt.egGO2ALLEGS",
-                       coelicolor   = "org.Sco.egGO2ALLEGS",
-                       ecolik12     = "org.EcK12.egGO2ALLEGS",
-                       ecsakai      = "org.EcSakai.egGO2ALLEGS",
-                       fly          = "org.Dm.egGO2ALLEGS",
-                       gondii       = "org.Tgondii.egGO2ALLEGS",
-                       human        = "org.Hs.egGO2ALLEGS",
-                       malaria      = "org.Pf.plasmoGO2ALLORFS",
-                       mouse        = "org.Mm.egGO2ALLEGS",
-                       pig          = "org.Ss.egGO2ALLEGS",
-                       rat          = "org.Rn.egGO2ALLEGS",
-                       rhesus       = "org.Mmu.egGO2ALLEGS",
-                       worm         = "org.Ce.egGO2ALLEGS",
-                       xenopus      = "org.Xl.egGO2ALLEGS",
-                       yeast        = "org.Sc.sgdGO2ALLORFS",
-                       zebrafish    = "org.Dr.egGO2ALLEGS"
-                       )
-    mappedDb <- eval(parse(text=mappedDb))
-    return(mappedDb)
-}
-
-##' @importFrom GOSemSim loadGOMap
-getEG2GO_MappedDb <- function(organism) {
-    loadGOMap(organism)
-    mappedDb <- get("gomap", envir=eval(parse(text="GOSemSimEnv")))
-    return(mappedDb)
 }
 
 
@@ -459,7 +254,7 @@ get_go_ontology <- function(x) {
 ##' @importFrom GO.db GOMFANCESTOR
 ##' @importFrom GO.db GOBPANCESTOR
 ##' @importFrom GO.db GOCCANCESTOR
-##' @export
+## @export
 ##' @author Yu Guangchuang
 buildGOmap <- function(gomap) {
 
@@ -532,4 +327,21 @@ GI2EG <- function(GI, organism="D39") {
 removeEmptyEntry.list <- function(x) {
     notNA.idx <- unlist(lapply(x, function(i) !is.null(i) && !all(is.na(i))))
     x[notNA.idx]
+}
+
+
+##' @importFrom S4Vectors metadata
+get_organism <- function(OrgDb) {
+    OrgDb <- load_OrgDb(OrgDb)
+    md <- metadata(OrgDb)
+    md[md[,1] == "ORGANISM", 2]
+}
+
+add_GO_Ontology <- function(obj, GO_DATA) {
+    obj@setType <- "GOALL"
+    df <- obj@result
+    GO2ONT <- get("GO2ONT", envir=GO_DATA)
+    df <- cbind(ONTOLOGY=GO2ONT[df$ID], df)
+    obj@result <- df
+    return(obj)
 }

@@ -4,14 +4,14 @@
 \alias{gseMKEGG}
 \title{gseMKEGG}
 \usage{
-gseMKEGG(geneList, organism = "human", exponent = 1, nPerm = 1000,
+gseMKEGG(geneList, species = "hsa", exponent = 1, nPerm = 1000,
   minGSSize = 10, pvalueCutoff = 0.05, pAdjustMethod = "BH",
-  verbose = TRUE)
+  verbose = TRUE, seed = FALSE)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{organism}{all KEGG Module supported organisms}
+\item{species}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
 
 \item{exponent}{weight of each step}
 
@@ -24,6 +24,8 @@ gseMKEGG(geneList, organism = "human", exponent = 1, nPerm = 1000,
 \item{pAdjustMethod}{pvalue adjustment method}
 
 \item{verbose}{print message or not}
+
+\item{seed}{logical}
 }
 \value{
 gseaResult object

@@ -6,7 +6,7 @@
 \usage{
 GSEA(geneList, exponent = 1, nPerm = 1000, minGSSize = 10,
   pvalueCutoff = 0.05, pAdjustMethod = "BH", TERM2GENE, TERM2NAME = NA,
-  verbose = TRUE)
+  verbose = TRUE, seed = FALSE)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
@@ -26,6 +26,8 @@ GSEA(geneList, exponent = 1, nPerm = 1000, minGSSize = 10,
 \item{TERM2NAME}{user input of TERM TO NAME mapping, a data.frame of 2 column with term and name}
 
 \item{verbose}{logical}
+
+\item{seed}{logical}
 }
 \value{
 gseaResult object

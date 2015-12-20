@@ -4,17 +4,14 @@
 \alias{gseKEGG}
 \title{gseKEGG}
 \usage{
-gseKEGG(geneList, organism = "human", exponent = 1, nPerm = 1000,
+gseKEGG(geneList, species = "hsa", exponent = 1, nPerm = 1000,
   minGSSize = 10, pvalueCutoff = 0.05, pAdjustMethod = "BH",
-  use_internal_data = FALSE, verbose = TRUE)
+  verbose = TRUE, seed = FALSE)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine",
-"chicken", "chimp", "ecolik12","ecsakai", "fly", "human",
-"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus",
-"yeast" and "zebrafish".}
+\item{species}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
 
 \item{exponent}{weight of each step}
 
@@ -26,9 +23,9 @@ gseKEGG(geneList, organism = "human", exponent = 1, nPerm = 1000,
 
 \item{pAdjustMethod}{pvalue adjustment method}
 
-\item{use_internal_data}{whether use KEGG.db or not}
-
 \item{verbose}{print message or not}
+
+\item{seed}{logical}
 }
 \value{
 gseaResult object

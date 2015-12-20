@@ -6,17 +6,13 @@
 Given a vector of genes, this function will return the enrichment KEGG
 categories with FDR control.}
 \usage{
-enrichKEGG(gene, organism = "human", pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", universe, minGSSize = 5, qvalueCutoff = 0.2,
-  readable = FALSE, use_internal_data = FALSE)
+enrichKEGG(gene, species = "hsa", pvalueCutoff = 0.05,
+  pAdjustMethod = "BH", universe, minGSSize = 5, qvalueCutoff = 0.2)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine",
-"chicken", "chimp", "ecolik12","ecsakai", "fly", "human",
-"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus",
-"yeast" and "zebrafish".}
+\item{species}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
 
 \item{pvalueCutoff}{Cutoff value of pvalue.}
 
@@ -27,11 +23,6 @@ enrichKEGG(gene, organism = "human", pvalueCutoff = 0.05,
 \item{minGSSize}{minimal size of genes annotated by Ontology term for testing.}
 
 \item{qvalueCutoff}{qvalue cutoff}
-
-\item{readable}{whether mapping gene ID to gene Name}
-
-\item{use_internal_data}{logical, if TRUE, use KEGG.db.
-default is FALSE, will download online KEGG data}
 }
 \value{
 A \code{enrichResult} instance.

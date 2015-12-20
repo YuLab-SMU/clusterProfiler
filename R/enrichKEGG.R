@@ -4,27 +4,18 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
-##'"chicken", "chimp", "ecolik12","ecsakai", "fly", "human",
-##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus",
-##' "yeast" and "zebrafish".
+##' @param species supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param qvalueCutoff qvalue cutoff
-##' @param readable whether mapping gene ID to gene Name
-##' @param use_internal_data logical, if TRUE, use KEGG.db.
-##'                default is FALSE, will download online KEGG data
 ##' @return A \code{enrichResult} instance.
 ##' @export
-##' @importFrom DOSE enrich.internal
 ##' @importClassesFrom DOSE enrichResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
 ##' @importMethodsFrom DOSE plot
-##' @importFrom DOSE setReadable
-##' @importFrom DOSE EXTID2NAME
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importClassesFrom methods data.frame
@@ -39,65 +30,127 @@
 ##' 	#plot(yy)
 ##'
 enrichKEGG <- function(gene,
-                       organism          = "human",
+                       species           = "hsa",
                        pvalueCutoff      = 0.05,
                        pAdjustMethod     = "BH",
                        universe,
                        minGSSize         = 5,
-                       qvalueCutoff      = 0.2,
-                       readable          = FALSE,
-                       use_internal_data = FALSE) {
+                       qvalueCutoff      = 0.2) {
 
-    enrich.internal(gene,
-                    organism      = organism,
-                    pvalueCutoff  =pvalueCutoff,
-                    pAdjustMethod =pAdjustMethod,
-                    ont           = "KEGG",
-                    universe      = universe,
-                    minGSSize     = minGSSize,
-                    qvalueCutoff  = qvalueCutoff,
-                    readable      = readable,
-                    use_internal_data)
-
-}
-
-##' KEGG Module Enrichment Analysis of a gene set.
-##' Given a vector of genes, this function will return the enrichment KEGG Module
-##' categories with FDR control.
-##'
-##'
-##' @param gene a vector of entrez gene id.
-##' @param organism all KEGG module supported organisms
-##' @param pvalueCutoff Cutoff value of pvalue.
-##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
-##' @param universe background genes
-##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
-##' @param qvalueCutoff qvalue cutoff
-##' @return A \code{enrichResult} instance.
-##' @export
-enrichMKEGG <- function(gene,
-                        organism = 'hsa',
-                        pvalueCutoff = 0.05,
-                        pAdjustMethod = 'BH',
-                        universe,
-                        minGSSize = 5,
-                        qvalueCutoff = 0.2) {
-    species <- organismMapper(organism)
-    keggModule <- download.KEGG_Module(species)
-    
-    res <- enricher(gene,
-                    pvalueCutoff = pvalueCutoff,
-                    pAdjustMethod = pAdjustMethod,
-                    universe = universe,
-                    minGSSize = minGSSize,
-                    qvalueCutoff = qvalueCutoff,
-                    TERM2GENE = keggModule$keggmodule2extid,
-                    TERM2NAME = keggModule$keggmodule2name)
-    res@ontology <- "MKEGG"
-    res@organism <- organism
+    KEGG_DATA <- download.KEGG(species, "KEGG")
+    res <- enricher_internal(gene,
+                             pvalueCutoff  =pvalueCutoff,
+                             pAdjustMethod =pAdjustMethod,
+                             universe      = universe,
+                             minGSSize     = minGSSize,
+                             qvalueCutoff  = qvalueCutoff,
+                             USER_DATA = KEGG_DATA)
+    res@ontology <- "KEGG"
+    res@organism <- species
     return(res)
 }
-                        
+
+get_KEGG_Env <- function() {
+    if (! exists("KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign("KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
+    }
+    get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
+}
+
+##' download the latest version of KEGG pathway
+##'
+##' 
+##' @title download.KEGG
+##' @param species species
+##' @param KEGG_Type one of 'KEGG' or 'MKEGG'
+##' @return list
+##' @author Guangchuang Yu
+##' @importFrom KEGGREST keggLink
+##' @importFrom KEGGREST keggList
+##' @importFrom magrittr %<>%
+download.KEGG <- function(species, KEGG_Type="KEGG") {
+    KEGG_Env <- get_KEGG_Env()
+    
+    use_cached <- FALSE
+    
+    if (exists("organism", envir = KEGG_Env, inherits = FALSE) &&
+        exists("_type_", envir = KEGG_Env, inherits = FALSE) ) {
+        
+        org <- get("organism", envir=KEGG_Env)
+        type <- get("_type_", envir=KEGG_Env)
+        
+        if (org == species && type == KEGG_Type &&
+            exists("KEGGPATHID2NAME", envir=KEGG_Env, inherits = FALSE) &&
+            exists("KEGGPATHID2EXTID", envir=KEGG_Env, inherits = FALSE)) {
+            
+            use_cached <- TRUE
+        } 
+    }
+    
+    if (use_cached) {
+        KEGGPATHID2EXTID <- get("KEGGPATHID2EXTID", envir=KEGG_Env)
+        KEGGPATHID2NAME <- get("KEGGPATHID2NAME", envir=KEGG_Env)
+    } else {
+        if (KEGG_Type == "KEGG") {
+            kres <- download.KEGG.Path(species)
+        } else {
+            kres <- download.KEGG.Module(species)
+        }
+        
+        KEGGPATHID2EXTID <- kres$KEGGPATHID2EXTID
+        KEGGPATHID2NAME <- kres$KEGGPATHID2NAME
+
+        assign("organism", species, envir=KEGG_Env)
+        assign("_type_", KEGG_Type, envir=KEGG_Env)
+        assign("KEGGPATHID2NAME", KEGGPATHID2NAME, envir=KEGG_Env)
+        assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir=KEGG_Env)
+    }
+        
+    build_Anno(KEGGPATHID2EXTID,
+               KEGGPATHID2NAME)
+}
+
+download.KEGG.Path <- function(species) {
+    keggpathid2extid <- tryCatch(keggLink(species,"pathway"), error=function(e) NULL)
+    
+    if (is.null(keggpathid2extid)) {
+        stop("'species' should be one of organisms listed in 'http://www.genome.jp/kegg/catalog/org_list.html'...")
+    }
+    
+    keggpathid2extid %<>% gsub("[^:]+:", "", .)
+    names(keggpathid2extid) %<>% gsub("[^:]+:", "", .)
+    
+    keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)
+    
+    keggpathid2name <- keggList("pathway")
+    names(keggpathid2name) %<>% gsub("path:map", species, .)
+    keggpathid2name.df <- data.frame(keggID=names(keggpathid2name),
+                                     keggName=keggpathid2name)
+    return(list(KEGGPATHID2EXTID=keggpath2extid.df,
+                KEGGPATHID2NAME=keggpathid2name.df))
+}
+
+download.KEGG.Module <- function(species) {
+    keggmodule2extid <- tryCatch(keggLink(species, "module"), error=function(e) NULL)
+    if (is.null(keggmodule2extid)) {
+        stop("'species' should be one of organisms listed in 'http://www.genome.jp/kegg/catalog/org_list.html'...")
+    }
+    keggmodule2extid %<>% gsub("[^:]+:", "", .)
+    names(keggmodule2extid) %<>% gsub("[^:]+:", "", .)
+    names(keggmodule2extid) %<>% gsub(species, "", .)
+    names(keggmodule2extid) %<>% gsub("^_", "", .)
+    keggmodule2extid.df <- data.frame(moduleID=names(keggmodule2extid),
+                                      extID = keggmodule2extid)
+
+    keggmodule2name <- keggList("module")
+    names(keggmodule2name) %<>% gsub("md:", "", .)
+    keggmodule2name.df <- data.frame(moduleID=names(keggmodule2name),
+                                     moduleName=keggmodule2name)
+    return(list(KEGGPATHID2EXTID=keggmodule2extid.df,
+                KEGGPATHID2NAME =keggmodule2name.df))
+}
+
+
 ##' viewKEGG function is for visualize KEGG pathways
 ##' works with enrichResult object to visualize enriched KEGG pathway
 ##'
@@ -159,100 +212,7 @@ viewKEGG <- function(obj, pathwayID, foldChange,
 }
 
 
-##' @importFrom DOSE EXTID2TERMID
-##' @importMethodsFrom AnnotationDbi mget
-## @importFrom KEGG.db KEGGEXTID2PATHID
-##' @method EXTID2TERMID KEGG
-##' @export
-EXTID2TERMID.KEGG <- function(gene, organism, ...) {
-    EXTID2TERMID.KEGG.internal(gene, organism, ...)
-}
 
-EXTID2TERMID.KEGG.internal <- function(gene, organism, use_internal_data=TRUE, ...) {
-    gene <- as.character(gene)
-    organism <- organismMapper(organism)
-    
-    if (use_internal_data && organism %in% KEGG_db_supported() ) {
-        KEGGEXTID2PATHID <- get_KEGG_db("KEGGEXTID2PATHID")
-        qExtID2PathID <- mget(gene, KEGGEXTID2PATHID, ifnotfound=NA)
-     } else {
-        EXTID2KEGGPATHID <- get_KEGG_Anno(organism, "EXTID2KEGGPATHID")
-        qExtID2PathID <- EXTID2KEGGPATHID[gene]
-     }
-    removeEmptyEntry.list(qExtID2PathID)
-}
-
-##' @importFrom DOSE TERMID2EXTID
-##' @importMethodsFrom AnnotationDbi mget
-## @importFrom KEGG.db KEGGPATHID2EXTID
-##' @method TERMID2EXTID KEGG
-##' @export
-TERMID2EXTID.KEGG <- function(term, organism, ...) {
-    TERMID2EXTID.KEGG.internal(term, organism, ...)
-}
-
-TERMID2EXTID.KEGG <- function(term, organism, use_internal_data=TRUE, ...) {
-    organism <- organismMapper(organism)
-    if(use_internal_data && organism %in% KEGG_db_supported()) {
-        KEGGPATHID2EXTID <- get_KEGG_db("KEGGPATHID2EXTID")
-        pathID2ExtID <- mget(unique(term), KEGGPATHID2EXTID, ifnotfound=NA)
-    } else {
-        KEGGPATHID2EXTID <- get_KEGG_Anno(organism, "KEGGPATHID2EXTID")
-        pathID2ExtID <- KEGGPATHID2EXTID[unique(term)]
-    }
-    removeEmptyEntry.list(pathID2ExtID)
-}
-
-##' @importFrom DOSE ALLEXTID
-## @importFrom KEGG.db KEGGPATHID2EXTID
-##' @method ALLEXTID KEGG
-##' @export
-ALLEXTID.KEGG <- function(organism, ...) {
-    ALLEXTID.KEGG.internal(organism, ...)
-}
-
-ALLEXTID.KEGG.internal <- function(organism, use_internal_data=TRUE, ...) {
-    organism <- organismMapper(organism)
-    
-    if (use_internal_data && organism %in% KEGG_db_supported()) {
-        KEGGPATHID2EXTID <- get_KEGG_db("KEGGPATHID2EXTID")
-        pathID <- mappedkeys(KEGGPATHID2EXTID)
-        idx <- grep(paste0("^", organism), pathID)
-        orgPathID <- pathID[idx]
-        class(orgPathID) <- "KEGG"
-        orgPath2ExtID <- TERMID2EXTID.KEGG(orgPathID, organism, use_internal_data)
-        orgPath2ExtID <- lapply(orgPath2ExtID, function(i) unique(i))
-    } else {
-        orgPath2ExtID <- get_KEGG_Anno(organism, "KEGGPATHID2EXTID")
-    }
-    orgExtID <- unique(unlist(orgPath2ExtID))
-    return(orgExtID)
-}
-
-##' @importFrom DOSE TERM2NAME
-## @importFrom KEGG.db KEGGPATHID2NAME
-##' @importMethodsFrom AnnotationDbi mget
-##' @method TERM2NAME KEGG
-##' @export
-TERM2NAME.KEGG <- function(term, organism, ...) {
-    TERM2NAME.KEGG.internal(term, organism, ...)
-}
-
-TERM2NAME.KEGG.internal <- function(term, organism, use_internal_data=TRUE, ...) {
-    term <- as.character(term)
-    organism <- organismMapper(organism)
-    pathIDs <- gsub("^\\D+", "",term, perl=T)
-
-    if (use_internal_data && organism %in% KEGG_db_supported()) {
-        KEGGPATHID2NAME <- get_KEGG_db("KEGGPATHID2NAME")
-        path2name <- unlist(mget(pathIDs, KEGGPATHID2NAME, ifnotfound = NA))
-    } else {
-        KEGGPATHID2NAME <- get_KEGG_Anno(organism, "KEGGPATHID2NAME")
-        path2name <- KEGGPATHID2NAME[pathIDs]
-    }
-    path2name <- path2name[!is.na(path2name)]
-    return(path2name)
-}
 
 
 

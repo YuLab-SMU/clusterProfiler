@@ -112,7 +112,7 @@ x <- c("GPX3",  "GLRX",   "LBP",   "CRYAB", "DEFB1", "HCLS1",   "SOD2",   "HSPA2
        "ANXA4", "TFPI2",  "CST6",  "SLPI",  "TIMP2", "CPM",     "GGT1",   "NNMT",
        "MAL",   "EEF1A2", "HGD",   "TCN2",  "CDA",   "PCCA",    "CRYM",   "PDXK",  
        "STC1",  "WARS",  "HMOX1", "FXYD2", "RBP4",   "SLC6A12", "KDELR3", "ITM2B")
-eg = bitr(x, fromType="SYMBOL", toType="ENTREZID", annoDb="org.Hs.eg.db")
+eg = bitr(x, fromType="SYMBOL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
 head(eg)
 ```
 
@@ -125,7 +125,7 @@ idType("org.Hs.eg.db")
 
 We can translate from one type to other types.
 ```{r}
-ids <- bitr(x, fromType="SYMBOL", toType=c("UNIPROT", "ENSEMBL"), annoDb="org.Hs.eg.db")
+ids <- bitr(x, fromType="SYMBOL", toType=c("UNIPROT", "ENSEMBL"), OrgDb="org.Hs.eg.db")
 head(ids)
 ```
 
@@ -171,7 +171,7 @@ data(geneList, package="DOSE")
 gene <- names(geneList)[abs(geneList) > 2]
 head(gene)
 ggo <- groupGO(gene     = gene,
-               organism = "human",
+               OrgDb    = 'org.Hs.eg.db',
                ont      = "BP",
                level    = 3,
                readable = TRUE)
@@ -190,7 +190,7 @@ Over-representation test[@boyle2004] were implemented in `r Biocpkg("clusterProf
 ```{r}
 ego <- enrichGO(gene          = gene,
                 universe      = names(geneList),
-                organism      = "human",
+                OrgDb         = 'org.Hs.eg.db',
                 ont           = "CC",
                 pAdjustMethod = "BH",
                 pvalueCutoff  = 0.01,
@@ -218,7 +218,7 @@ For algorithm details, please refer to the vignette of `r Biocpkg("DOSE")`.
 
 ```{r eval=FALSE} 
 ego2 <- gseGO(geneList     = geneList,
-              organism     = "human",
+              OrgDb        = 'org.Hs.eg.db',
               ont          = "CC",
               nPerm        = 1000,
               minGSSize    = 120,
@@ -239,14 +239,11 @@ With this new feature, organism is not restricted to those supported in previous
 
 ## KEGG over-representation test
 
-To speed up the compilation of this document, we set `use_internal_data = TRUE`.
 
 ```{r}
 kk <- enrichKEGG(gene         = gene,
-                 organism     = "human",
-                 pvalueCutoff = 0.05, 
-                 readable     = TRUE,
-                 use_internal_data = TRUE)
+                 species      = 'hsa',
+                 pvalueCutoff = 0.05)
 head(summary(kk))
 ```
 
@@ -254,12 +251,11 @@ head(summary(kk))
 
 ```{r}
 kk2 <- gseKEGG(geneList     = geneList,
-               organism     = "human",
+               species      = 'hsa',
                nPerm        = 1000,
                minGSSize    = 120,
                pvalueCutoff = 0.01,
-               verbose      = FALSE,
-               use_internal_data = TRUE)
+               verbose      = FALSE)
 head(summary(kk2))
 ```
 
@@ -270,14 +266,14 @@ head(summary(kk2))
 
 ```{r eval = FALSE}
 mkk <- enrichMKEGG(gene = gene,
-                   organism = "human")
+                   species = 'hsa')
 ```
                    
 ## KEGG Module Gene Set Enrichment Analysis
 
 ```{r eval=FALSE}
 mkk2 <- gseMKEGG(geneList = geneList,
-                 organism = "hman")
+                 species = 'hsa')
 ```
                  
 
@@ -420,7 +416,7 @@ lapply(gcSample, head)
 The input for _geneCluster_ parameter should be a named list of gene IDs. To speed up the compilation of this document, we set `use_internal_data = TRUE`.
 
 ```{r}
-ck <- compareCluster(geneCluster = gcSample, fun = "enrichKEGG", use_internal_data = TRUE)
+ck <- compareCluster(geneCluster = gcSample, fun = "enrichKEGG")
 head(summary(ck))
 ```
 
@@ -436,12 +432,12 @@ mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
                    othergroup = c('good', 'good', 'bad', 'bad',
                        'good', 'bad'))
-xx.formula <- compareCluster(Entrez~group, data=mydf, fun='groupGO')
+xx.formula <- compareCluster(Entrez~group, data=mydf, fun='groupGO', OrgDb='org.Hs.eg.db')
 head(summary(xx.formula))
 
 ## formula interface with more than one grouping variable
 xx.formula.twogroups <- compareCluster(Entrez~group+othergroup,
-                                       data=mydf, fun='groupGO')
+                                       data=mydf, fun='groupGO', OrgDb='org.Hs.eg.db')
 head(summary(xx.formula.twogroups))
 ```
 

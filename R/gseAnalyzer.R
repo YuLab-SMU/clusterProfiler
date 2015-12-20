@@ -4,18 +4,15 @@
 ##' @title gseGO
 ##' @param geneList order ranked geneList
 ##' @param ont one of "BP", "MF", "CC" or "GO"
-##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
-##'"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
-##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
-##'"zebrafish".
+##' @param OrgDb OrgDb
+##' @param keytype keytype of gene
 ##' @param exponent weight of each step
 ##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param pvalueCutoff pvalue Cutoff
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
-##' @importFrom DOSE gsea
-##' @importFrom DOSE gseAnalyzer
+##' @param seed logical
 ##' @importClassesFrom DOSE gseaResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
@@ -25,62 +22,80 @@
 ##' @author Yu Guangchuang
 gseGO <- function(geneList,
                   ont           = "BP", 
-                  organism      = "human",
+                  OrgDb,
+                  keytype       = "ENTREZID",
                   exponent      = 1,
                   nPerm         = 1000,
                   minGSSize     = 10,
                   pvalueCutoff  = 0.05,
                   pAdjustMethod = "BH",
-                  verbose       = TRUE) {
+                  verbose       = TRUE,
+                  seed          = FALSE) {
+
+    ont %<>% toupper
+    ont <- match.arg(ont, c("BP", "CC", "MF", "ALL"))
     
-    gseAnalyzer(geneList      = geneList,
-                setType       = ont,
-                organism      = organism,
-                exponent      = exponent,
-                nPerm         = nPerm,
-                minGSSize     = minGSSize,
-                pvalueCutoff  = pvalueCutoff,
-                pAdjustMethod = pAdjustMethod,
-                verbose       = verbose)
+    GO_DATA <- get_GO_data(OrgDb, ont, keytype)
+
+    res <-  GSEA_internal(geneList = geneList,
+                          exponent = exponent,
+                          nPerm = nPerm,
+                          minGSSize = minGSSize,
+                          pvalueCutoff = pvalueCutoff,
+                          pAdjustMethod = pAdjustMethod,
+                          verbose = verbose,
+                          USER_DATA = GO_DATA,
+                          seed = seed)
+    res@organism <- get_organism(OrgDb)
+    res@setType <- ont
     
+    if (ont == "ALL") {
+        res <- add_GO_Ontology(res, GO_DATA)
+    } 
+    return(res)
 }
+
 
 ##' Gene Set Enrichment Analysis of KEGG Module
 ##'
 ##'
 ##' @title gseMKEGG
 ##' @param geneList order ranked geneList
-##' @param organism all KEGG Module supported organisms
+##' @param species supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param exponent weight of each step
 ##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param pvalueCutoff pvalue Cutoff
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
+##' @param seed logical
 ##' @export
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
 gseMKEGG <- function(geneList,
-                    organism          = "human",
-                    exponent          = 1,
-                    nPerm             = 1000,
-                    minGSSize         = 10,
-                    pvalueCutoff      = 0.05,
-                    pAdjustMethod     = "BH",
-                    verbose           = TRUE) {
-    species <- organismMapper(organism)
-    keggModule <- download.KEGG_Module(species)
-    res <- GSEA(geneList = geneList,
-                exponent = exponent,
-                nPerm = nPerm,
-                minGSSize = minGSSize,
-                pvalueCutoff = pvalueCutoff,
-                pAdjustMethod = pAdjustMethod,
-                TERM2GENE = keggModule$keggmodule2extid,
-                TERM2NAME = keggModule$keggmodule2name,
-                verbose = verbose)
+                     species          = 'hsa',
+                     exponent          = 1,
+                     nPerm             = 1000,
+                     minGSSize         = 10,
+                     pvalueCutoff      = 0.05,
+                     pAdjustMethod     = "BH",
+                     verbose           = TRUE,
+                     seed = FALSE) {
+
+    KEGG_DATA <- download.KEGG(species, "MKEGG")
+
+    res <-  GSEA_internal(geneList = geneList,
+                          exponent = exponent,
+                          nPerm = nPerm,
+                          minGSSize = minGSSize,
+                          pvalueCutoff = pvalueCutoff,
+                          pAdjustMethod = pAdjustMethod,
+                          verbose = verbose,
+                          USER_DATA = KEGG_DATA,
+                          seed = seed)
+    res@organism <- species
     res@setType <- "MKEGG"
-    res@params$organism <- organism
+
     return(res)
 }
 
@@ -89,20 +104,7 @@ gseMKEGG <- function(geneList,
 ##'
 ##'
 ##' @title gseKEGG
-##' @param geneList order ranked geneList
-##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
-##'"chicken", "chimp", "ecolik12","ecsakai", "fly", "human",
-##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus",
-##' "yeast" and "zebrafish".
-##' @param exponent weight of each step
-##' @param nPerm permutation numbers
-##' @param minGSSize minimal size of each geneSet for analyzing
-##' @param pvalueCutoff pvalue Cutoff
-##' @param pAdjustMethod pvalue adjustment method
-##' @param use_internal_data whether use KEGG.db or not
-##' @param verbose print message or not
-##' @importFrom DOSE gsea
-##' @importFrom DOSE gseAnalyzer
+##' @inheritParams gseMKEGG
 ##' @importClassesFrom DOSE gseaResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
@@ -111,26 +113,31 @@ gseMKEGG <- function(geneList,
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
 gseKEGG <- function(geneList,
-                    organism          = "human",
+                    species           = 'hsa',
                     exponent          = 1,
                     nPerm             = 1000,
                     minGSSize         = 10,
                     pvalueCutoff      = 0.05,
                     pAdjustMethod     = "BH",
-                    use_internal_data = FALSE,
-                    verbose           = TRUE) {
-    
-    gseAnalyzer(geneList          = geneList,
-                setType           = "KEGG",
-                organism          = organism,
-                exponent          = exponent,
-                nPerm             = nPerm,
-                minGSSize         = minGSSize,
-                pvalueCutoff      = pvalueCutoff,
-                pAdjustMethod     = pAdjustMethod,
-                use_internal_data = use_internal_data,
-                verbose           = verbose)
+                    verbose           = TRUE,
+                    seed              = FALSE) {
 
+    
+    KEGG_DATA <- download.KEGG(species, "KEGG")
+
+    res <-  GSEA_internal(geneList = geneList,
+                          exponent = exponent,
+                          nPerm = nPerm,
+                          minGSSize = minGSSize,
+                          pvalueCutoff = pvalueCutoff,
+                          pAdjustMethod = pAdjustMethod,
+                          verbose = verbose,
+                          USER_DATA = KEGG_DATA,
+                          seed = seed)
+    res@organism <- species
+    res@setType <- "KEGG"
+
+    return(res)
 }
 
 ##' visualize analyzing result of GSEA
@@ -146,75 +153,3 @@ gseKEGG <- function(geneList,
 gseaplot <- DOSE::gseaplot
 
 
-##' @importFrom DOSE getGeneSet
-##' @importFrom AnnotationDbi as.list
-##' @method getGeneSet KEGG
-##' @export
-getGeneSet.KEGG <- function(setType="KEGG", organism, ...) {
-    getGeneSet.KEGG.internal(setType, organism, ...)
-}
-
-getGeneSet.KEGG.internal <- function(setType="KEGG", organism, use_internal_data=TRUE, ...) {
-    if (use_internal_data) {
-        KEGGPATHID2EXTID <- get_KEGG_db("KEGGPATHID2EXTID")
-        gs <- as.list(KEGGPATHID2EXTID)
-    } else {
-        gs <- get_KEGG_Anno(organism, "KEGGPATHID2EXTID")
-    }
-    return(gs)
-}
-
-
-##' @importFrom DOSE getGeneSet
-##' @importFrom AnnotationDbi as.list
-##' @method getGeneSet GO
-##' @export
-getGeneSet.GO <- function(setType="GO", organism, ...) {
-    GO2ALLEG <- GO2EXTID(organism)
-    gs <- as.list(GO2ALLEG)
-    return(gs)
-}
-
-##' @importFrom DOSE getGeneSet
-##' @importFrom AnnotationDbi mget
-##' @importFrom AnnotationDbi Ontology
-##' @importFrom GO.db GOTERM
-##' @method getGeneSet BP
-##' @export
-getGeneSet.BP <- function(setType="BP", organism, ...) {
-    getGeneSet.GO_internal(setType, organism, ...)
-}
-
-
-##' @importFrom DOSE getGeneSet
-##' @importFrom AnnotationDbi mget
-##' @importFrom AnnotationDbi Ontology
-##' @importFrom GO.db GOTERM
-##' @method getGeneSet MF
-##' @export
-getGeneSet.MF <- function(setType="MF", organism, ...) {
-    getGeneSet.GO_internal(setType, organism, ...)
-}
-
-
-##' @importFrom DOSE getGeneSet
-##' @importFrom AnnotationDbi mget
-##' @importFrom AnnotationDbi Ontology
-##' @importFrom GO.db GOTERM
-##' @method getGeneSet CC
-##' @export
-getGeneSet.CC <- function(setType="CC", organism, ...) {
-    getGeneSet.GO_internal(setType, organism, ...)
-}
-
-
-getGeneSet.GO_internal <- function(setType, organism, ...) {
-    gs <- getGeneSet.GO("GO", organism)
-    term <- mget(names(gs), GOTERM, ifnotfound=NA)
-    gs <- gs[!is.na(term)]
-    term <- term[!is.na(term)]
-    ont <- lapply(term, Ontology)
-    ont <- unlist(ont)
-    gs <- gs[ont == setType]
-    return(gs)
-}
