@@ -129,108 +129,18 @@ ids <- bitr(x, fromType="SYMBOL", toType=c("UNIPROT", "ENSEMBL"), OrgDb="org.Hs.
 head(ids)
 ```
 
-# Gene Ontology analysis
-
-## Supported organisms
-
-At present, GO analysis in `r Biocpkg("clusterProfiler")` supports about 20 species internally as shown below:
-    
-* Arabidopsis
-* Anopheles
-* Bovine
-* Canine
-* Chicken
-* Chimp
-* Coelicolor
-* E coli strain K12
-* E coli strain Sakai
-* Fly
-* Gondii
-* Human
-* Malaria
-* Mouse
-* Pig
-* Rat
-* Rhesus
-* Worm
-* Xenopus
-* Yeast
-* Zebrafish
-
-
-For un-supported organisms, user can use their own GO annotation data (in data.frame format with first column of gene ID and second column of GO ID) and passed it to `enricher` function (see [Universal enrichment analysis](#Universal-enrichment-analysis) section).
-
-If a gene is annotated by a GO ID (direction annotation), it should also annotated by its ancestor GO nodes (indirect annation). If user only has direct annotation, they can pass their annotation to `buildGOmap` function, which will infer indirection annotation and generate annotation file that suitable for `enrichGO` function. In future version, we may add functions to help user query annotation from public available database.
-
-
-## Gene Ontology Classification
-In `r Biocpkg("clusterProfiler")`, `groupGO` is designed for gene classification based on GO distribution at a specific level. Here we use dataset __*geneList*__ provided by `r Biocpkg("DOSE")`. Please refer to vignette of `r Biocpkg("DOSE")` for more details.
-
-```{r}
-data(geneList, package="DOSE")
-gene <- names(geneList)[abs(geneList) > 2]
-head(gene)
-ggo <- groupGO(gene     = gene,
-               OrgDb    = 'org.Hs.eg.db',
-               ont      = "BP",
-               level    = 3,
-               readable = TRUE)
-head(summary(ggo))
-```
-
-The input parameters of _gene_ is a vector of gene IDs. It expects entrezgene for most of the organisms. For yeast, it should be ORF IDs; _organism_ should be the common name of supported species.
-If _readable_ is setting to _TRUE_, the input gene IDs will be converted to gene symbols.
 
 
 
-## GO over-representation test
-
-Over-representation test[@boyle2004] were implemented in `r Biocpkg("clusterProfiler")`. For calculation details, please refer to the vignette of `r Biocpkg("DOSE")`.
-
-```{r}
-ego <- enrichGO(gene          = gene,
-                universe      = names(geneList),
-                OrgDb         = 'org.Hs.eg.db',
-                ont           = "CC",
-                pAdjustMethod = "BH",
-                pvalueCutoff  = 0.01,
-                qvalueCutoff  = 0.05,
-                readable      = TRUE)
-head(summary(ego))
-```
-
-A detail explanation of the parameter can be found in the vignette of `r Biocpkg("DOSE")`.
-
-### reduce redundancy of enriched GO terms
-
-According to [issue #28](https://github.com/GuangchuangYu/clusterProfiler/issues/28), I implement a _simplify_ method to redundant GO terms obtained from _enrichGO_. An example can be found in [the blog post](http://ygc.name/2015/10/21/use-simplify-to-remove-redundancy-of-enriched-go-terms/). It internally call `r Biocpkg("GOSemSim")` to calculate similarities among GO terms and remove those highly similar terms by keeping one representative term. The _simplify_ method works with both outputs from _enrichGO_ and _compareCluster_.
-
-### drop specific GO terms or level
-
-_enrichGO_ test the whole GO corpus and enriched result may contains very general terms. With _dropGO_ function, user can remove specific GO terms or GO level from results obtained in both _enrichGO_ and _compareCluster_.
 
 
 
-## GO Gene Set Enrichment Analysis
-A common approach in analyzing gene expression profiles was identifying differential expressed genes that are deemed interesting. The enrichment analysis we demonstrated previous were based on these differential expressed genes. This approach will find genes where the difference is large, but it will not detect a situation where the difference is small, but evidenced in coordinated way in a set of related genes. Gene Set Enrichment Analysis (GSEA)[@subramanian_gene_2005] directly addresses this limitation. All genes can be used in GSEA; GSEA aggregates the per gene statistics across genes within a gene set, therefore making it possible to detect situations where all genes in a predefined set change in a small but coordinated way. Since it is likely that many relevant phenotypic differences are manifested by small but consistent changes in a set of genes.
-
-For algorithm details, please refer to the vignette of `r Biocpkg("DOSE")`.
-
-```{r eval=FALSE} 
-ego2 <- gseGO(geneList     = geneList,
-              OrgDb        = 'org.Hs.eg.db',
-              ont          = "CC",
-              nPerm        = 1000,
-              minGSSize    = 120,
-              pvalueCutoff = 0.01,
-              verbose      = FALSE)
-```
-
-GSEA use permutation test, user can set _nPerm_ for number of permutations. Gene Set size below _minGSSize_ will be omitted.
 
 
-## GO Semantic Similarity Analysis
-GO semantic similarity can be calculated by `r Biocpkg("GOSemSim")`[@yu2010]. We can use it to cluster genes/proteins into different clusters based on their functional similarity and can also use it to measure the similarities among GO terms to reduce the redundancy of GO enrichment results.
+
+
+
+
 
 # KEGG analysis
 The annotation package, `r Biocannopkg("KEGG.db")`, is not updated since 2012. It's now pretty old and in `r Biocpkg("clusterProfiler")`, `enrichKEGG` supports downloading latest online version of KEGG data for enrichment analysis. Using `r Biocannopkg("KEGG.db")` is also supported by explicitly setting _use\_internal\_data_ parameter to _TRUE_, but it's not recommended. 
@@ -367,9 +277,14 @@ In order to consider the potentially biological complexities in which a gene may
 cnetplot(ego, categorySize="pvalue", foldChange=geneList)
 ```
 
-
 ```{r fig.height=14, fig.width=14}
 cnetplot(kk, categorySize="geneNum", foldChange=geneList)
+```
+## plotGOgraph
+
+`plotGOgraph`, which is based on `r Biocpkg("topGO")`, can accept output of `enrichGO` and visualized the enriched GO induced graph.
+```{r fig.height=12, fig.width=8}
+plotGOgraph(ego)
 ```
 
 ## gseaplot
@@ -379,12 +294,6 @@ Running score of gene set enrichment analysis and its association of phenotype c
 gseaplot(kk2, geneSetID = "hsa04145")
 ```
 
-## plotGOgraph
-
-`plotGOgraph`, which is based on `r Biocpkg("topGO")`, can accept output of `enrichGO` and visualized the enriched GO induced graph.
-```{r fig.height=12, fig.width=8}
-plotGOgraph(ego)
-```
 
 ## pathview from pathview package
 

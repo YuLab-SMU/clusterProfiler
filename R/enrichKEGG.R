@@ -10,6 +10,7 @@
 ##' @param universe background genes
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param qvalueCutoff qvalue cutoff
+##' @param use_internal_data logical, use KEGG.db or latest online KEGG data
 ##' @return A \code{enrichResult} instance.
 ##' @export
 ##' @importClassesFrom DOSE enrichResult
@@ -30,14 +31,20 @@
 ##' 	#plot(yy)
 ##'
 enrichKEGG <- function(gene,
-                       species           = "hsa",
+                       organism          = "hsa",
                        pvalueCutoff      = 0.05,
                        pAdjustMethod     = "BH",
                        universe,
                        minGSSize         = 5,
-                       qvalueCutoff      = 0.2) {
+                       qvalueCutoff      = 0.2,
+                       use_internal_data = FALSE) {
 
-    KEGG_DATA <- download.KEGG(species, "KEGG")
+    species <- organismMapper(organism)
+    if (use_internal_data) {
+        KEGG_DATA <- get_data_from_KEGG_db(species)
+    } else {
+        KEGG_DATA <- download.KEGG(species, "KEGG")
+    }
     res <- enricher_internal(gene,
                              pvalueCutoff  =pvalueCutoff,
                              pAdjustMethod =pAdjustMethod,
@@ -211,7 +218,73 @@ viewKEGG <- function(obj, pathwayID, foldChange,
     return (res)
 }
 
+##' @importFrom AnnotationDbi as.list
+get_data_from_KEGG_db <- function(species) {
+    PATHID2EXTID <- as.list(get_KEGG_db("KEGGPATHID2EXTID"))
+    if (!any(grepl(species, names(PATHID2EXTID)))) {
+        stop("input species is not supported by KEGG.db...")
+    }
+    idx <- grep(species, names(PATHID2EXTID))
+    PATHID2EXTID <- PATHID2EXTID[idx]
+    PATHID2EXTID.df <- stack(PATHID2EXTID)
+    PATHID2EXTID.df <- PATHID2EXTID.df[, c(2,1)]
+    PATHID2NAME <- as.list(get_KEGG_db("KEGGPATHID2NAME"))
+    PATHID2NAME.df <- data.frame(path=names(PATHID2NAME), name=unlist(PATHID2NAME))
+    build_Anno(PATHID2EXTID.df, PATHID2NAME.df)
+}
 
+get_KEGG_db <- function(kw) {
+    annoDb <- "KEGG.db"
+    suppressMessages(requireNamespace(annoDb))
+    eval(parse(text=paste0(annoDb, "::", kw)))
+}
+
+organismMapper <- function(organism) {
+    ## it only map those previous supported organism
+    
+    if (organism == "anopheles") {
+        species <- "aga"
+    } else if (organism == "arabidopsis") {
+        species <- "ath"
+    } else if (organism == "bovine") {
+        species <- "bta"
+    } else if (organism == "canine") {
+        species <- "cfa"
+    } else if (organism == "chicken") {
+        species <- "gga"
+    } else if (organism == "chipm") {
+        species <- "ptr"
+    } else if (organism == "ecolik12") {
+        species <- "eco"
+    } else if (organism == "ecsakai") {
+        species <- "ecs"
+    } else if (organism == "fly") {
+        species <- "dme"
+    } else if (organism == "human") {
+        species <- "hsa"
+    } else if (organism == "malaria") {
+        species <- "pfa"
+    } else if (organism == "mouse") {
+        species <- "mmu"
+    } else if (organism == "pig") {
+        species <- "ssc"
+    } else if (organism == "rat") {
+        species <- "rno"
+    } else if (organism == "rhesus") {
+        species <- "mcc"
+    } else if (organism == "worm" || organism == "celegans") {
+        species <- "cel"
+    } else if (organism == "xenopus") {
+        species <- "xla"
+    } else if (organism == "yeast") {
+        species <- "sce"
+    } else if (organism == "zebrafish") {
+        species <- "dre"
+    } else {
+        species <- organism
+    }
+    return(species)
+}
 
 
 

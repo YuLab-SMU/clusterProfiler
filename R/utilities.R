@@ -52,11 +52,6 @@ build_Anno <- function(path2gene, path2name) {
 ## }
 
 
-## get_KEGG_db <- function(kw) {
-##     annoDb <- "KEGG.db"
-##     suppressMessages(requireNamespace(annoDb))
-##     eval(parse(text=paste0(annoDb, "::", kw)))
-## }
 
 
 excludeGOlevel <- function(x, ont, level) {

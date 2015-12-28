@@ -75,31 +75,67 @@ enrichGO <- function(gene,
 ##' @importFrom AnnotationDbi toTable
 ##' @importFrom GO.db GOTERM
 get_GO_data <- function(OrgDb, ont, keytype) {
-    OrgDb <- load_OrgDb(OrgDb)
-    kt <- keytypes(OrgDb)
-    if (! keytype %in% kt) {
-        stop("keytype is not supported...")
+    GO_Env <- get_GO_Env()
+    use_cached <- FALSE
+
+    if (exists("organism", envir=GO_Env, inherits=FALSE) &&
+        exists("keytype", envir=GO_Env, inherits=FALSE)) {
+
+        org <- get("organism", envir=GO_Env)
+        kt <- get("keytype", envir=GO_Env)
+        
+        if (org == get_organism(OrgDb) &&
+            keytype == kt &&
+            exists("goAnno", envir=GO_Env, inherits=FALSE) &&
+            exists("GO2TERM", envir=GO_Env, inherits=FALSE)){
+            
+            use_cached <- TRUE
+        }
     }
     
-    kk <- keys(OrgDb, keytype=keytype)    
-    goAnno <- select(OrgDb, keys=kk, keytype=keytype,
-                     columns=c("GOALL", "ONTOLOGYALL"))
-
+    if (use_cached) {
+        goAnno <- get("goAnno", envir=GO_Env)
+        GO2TERM <- get("GO2TERM", envir=GO_Env)
+    } else {
+        OrgDb <- load_OrgDb(OrgDb)
+        kt <- keytypes(OrgDb)
+        if (! keytype %in% kt) {
+            stop("keytype is not supported...")
+        }
+        
+        kk <- keys(OrgDb, keytype=keytype)    
+        goAnno <- suppressMessages(
+            select(OrgDb, keys=kk, keytype=keytype,
+                   columns=c("GOALL", "ONTOLOGYALL")))
+        
+        goids <- toTable(GOTERM)
+        GO2TERM <- goids[, c("go_id", "Term")] %>% unique
+        assign("goAnno", goAnno, envir=GO_Env)
+        assign("GO2TERM", GO2TERM, envir=GO_Env)
+        assign("keytype", keytype, envir=GO_Env)
+        assign("organism", get_organism(OrgDb), envir=GO_Env)
+    }
+    
     if (ont == "ALL") {
         GO2GENE <- goAnno[, c(2,1)]
     } else {    
         GO2GENE <- goAnno[goAnno$ONTOLOGYALL == ont, c(2,1)]
     }
-
-    goids <- toTable(GOTERM)
-    GO2TERM <- goids[, c("go_id", "Term")] %>% unique
+    
     GO_DATA <- build_Anno(GO2GENE, GO2TERM)
-
+    
     goOnt.df <- goAnno[, c("GOALL", "ONTOLOGYALL")] %>% unique
     goOnt <- goOnt.df[,2]
     names(goOnt) <- goOnt.df[,1]
     assign("GO2ONT", goOnt, envir=GO_DATA)
     return(GO_DATA)
+}
+
+get_GO_Env <- function () {
+    if (!exists("GO_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign("GO_clusterProfiler_Env", new.env(), .GlobalEnv)
+    }
+    get("GO_clusterProfiler_Env", envir = .GlobalEnv)
 }
 
 

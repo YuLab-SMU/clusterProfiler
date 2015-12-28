@@ -18,9 +18,9 @@ Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
 Description: This package implements methods to analyze and visualize
     functional profiles (GO and KEGG) of gene and gene clusters.
 Depends:
-    R (>= 3.1.0)
+    R (>= 3.1.0),
+    DOSE
 Imports:
-    DOSE,
     GOSemSim,
     AnnotationDbi,
     methods,
