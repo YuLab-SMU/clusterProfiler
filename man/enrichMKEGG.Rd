@@ -6,13 +6,13 @@
 Given a vector of genes, this function will return the enrichment KEGG Module
 categories with FDR control.}
 \usage{
-enrichMKEGG(gene, species = "hsa", pvalueCutoff = 0.05,
+enrichMKEGG(gene, organism = "hsa", pvalueCutoff = 0.05,
   pAdjustMethod = "BH", universe, minGSSize = 5, qvalueCutoff = 0.2)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{species}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
 
 \item{pvalueCutoff}{Cutoff value of pvalue.}
 

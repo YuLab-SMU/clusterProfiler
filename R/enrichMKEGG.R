@@ -7,13 +7,14 @@
 ##' @return A \code{enrichResult} instance.
 ##' @export
 enrichMKEGG <- function(gene,
-                        species = 'hsa',
+                        organism = 'hsa',
                         pvalueCutoff = 0.05,
                         pAdjustMethod = 'BH',
                         universe,
                         minGSSize = 5,
                         qvalueCutoff = 0.2) {
-    
+
+    species <- organismMapper(organism)
     KEGG_DATA <- download.KEGG(species, "MKEGG")
     res <- enricher_internal(gene,
                              pvalueCutoff  =pvalueCutoff,
@@ -25,5 +26,7 @@ enrichMKEGG <- function(gene,
     
     res@ontology <- "MKEGG"
     res@organism <- species
+    res@keytype <- "UNKNOWN"
+    
     return(res)
 }

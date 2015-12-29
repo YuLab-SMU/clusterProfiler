@@ -4,7 +4,7 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param species supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
+##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
@@ -54,6 +54,8 @@ enrichKEGG <- function(gene,
                              USER_DATA = KEGG_DATA)
     res@ontology <- "KEGG"
     res@organism <- species
+    res@keytype <- "UNKNOWN"
+    
     return(res)
 }
 

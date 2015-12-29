@@ -13,6 +13,8 @@ enrichKEGG(gene, organism = "hsa", pvalueCutoff = 0.05,
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
+\item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+
 \item{pvalueCutoff}{Cutoff value of pvalue.}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
@@ -24,8 +26,6 @@ enrichKEGG(gene, organism = "hsa", pvalueCutoff = 0.05,
 \item{qvalueCutoff}{qvalue cutoff}
 
 \item{use_internal_data}{logical, use KEGG.db or latest online KEGG data}
-
-\item{species}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
 }
 \value{
 A \code{enrichResult} instance.

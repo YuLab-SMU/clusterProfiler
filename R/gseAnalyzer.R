@@ -48,6 +48,7 @@ gseGO <- function(geneList,
                           seed = seed)
     res@organism <- get_organism(OrgDb)
     res@setType <- ont
+    res@keytype <- keytype
     
     if (ont == "ALL") {
         res <- add_GO_Ontology(res, GO_DATA)
@@ -61,7 +62,7 @@ gseGO <- function(geneList,
 ##'
 ##' @title gseMKEGG
 ##' @param geneList order ranked geneList
-##' @param species supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
+##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param exponent weight of each step
 ##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
@@ -73,7 +74,7 @@ gseGO <- function(geneList,
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
 gseMKEGG <- function(geneList,
-                     species          = 'hsa',
+                     organism          = 'hsa',
                      exponent          = 1,
                      nPerm             = 1000,
                      minGSSize         = 10,
@@ -82,6 +83,7 @@ gseMKEGG <- function(geneList,
                      verbose           = TRUE,
                      seed = FALSE) {
 
+    species <- organismMapper(organism)    
     KEGG_DATA <- download.KEGG(species, "MKEGG")
 
     res <-  GSEA_internal(geneList = geneList,
@@ -95,7 +97,8 @@ gseMKEGG <- function(geneList,
                           seed = seed)
     res@organism <- species
     res@setType <- "MKEGG"
-
+    res@keytype <- "UNKNOWN"
+    
     return(res)
 }
 
@@ -113,7 +116,7 @@ gseMKEGG <- function(geneList,
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
 gseKEGG <- function(geneList,
-                    species           = 'hsa',
+                    organism          = 'hsa',
                     exponent          = 1,
                     nPerm             = 1000,
                     minGSSize         = 10,
@@ -122,7 +125,7 @@ gseKEGG <- function(geneList,
                     verbose           = TRUE,
                     seed              = FALSE) {
 
-    
+    species <- organismMapper(organism)
     KEGG_DATA <- download.KEGG(species, "KEGG")
 
     res <-  GSEA_internal(geneList = geneList,
@@ -136,7 +139,8 @@ gseKEGG <- function(geneList,
                           seed = seed)
     res@organism <- species
     res@setType <- "KEGG"
-
+    res@keytype <- "UNKNOWN"
+    
     return(res)
 }
 

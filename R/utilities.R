@@ -237,54 +237,8 @@ get_go_ontology <- function(x) {
 }
 
 
-##' building GO mapping files
-##'
-##' provided by a data.frame of GO (column 1) and gene (column 2) direct annotation
-##' this function will building gene to GO and GO to gene mapping,
-##' with directly and undirectly (ancestor GO term) annotation.
-##' @title buildGOmap
-##' @param gomap data.frame with two columns of GO and gene ID
-##' @return GO annotation
-##' @importMethodsFrom AnnotationDbi mget
-##' @importFrom GO.db GOMFANCESTOR
-##' @importFrom GO.db GOBPANCESTOR
-##' @importFrom GO.db GOCCANCESTOR
-## @export
-##' @author Yu Guangchuang
-buildGOmap <- function(gomap) {
 
-    ## remove empty GO annotation
-    gomap <- gomap[gomap[,1] != "", ]
 
-    GO2EG <- split(as.character(gomap[,2]), as.character(gomap[,1]))
-    EG2GO <- split(as.character(gomap[,1]), as.character(gomap[,2]))
-
-    save(GO2EG, file="GO2EG.rda")
-    save(EG2GO, file="EG2GO.rda")
-    
-    EG2ALLGO <- lapply(EG2GO,
-                       function(i) {
-                           mfans <- unlist(mget(i, GOMFANCESTOR, ifnotfound=NA))
-                           bpans <- unlist(mget(i, GOBPANCESTOR, ifnotfound=NA))
-                           ccans <- unlist(mget(i, GOCCANCESTOR, ifnotfound=NA))
-                           ans <- c(mfans, bpans, ccans)
-                           ans <- ans[ !is.na(ans) ]
-                           ans <- c(i, ans)
-                           ans <- unique(ans)
-                           ans <- ans[ans != "all"]
-                           return(ans)
-                       })
-    save(EG2ALLGO, file="EG2ALLGO.rda")
-    
-    len <- lapply(EG2ALLGO,length)
-    EG2ALLGO.df <- data.frame(EG=rep(names(EG2ALLGO), times=len),
-                              GO=unlist(EG2ALLGO))
-    GO <- NULL ## satisfy code tools
-    GO2ALLEG <- dlply(EG2ALLGO.df, .(GO), function(i) as.character(i$EG))
-    GO2ALLEG <- lapply(GO2ALLEG, unique)
-    save(GO2ALLEG, file="GO2ALLEG.rda")    
-    print("GO Annotation Mapping files save in the working directory.")
-}
 
 GI2EG <- function(GI, organism="D39") {
     gi <- as.character(GI)

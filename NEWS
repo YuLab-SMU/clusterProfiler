@@ -1,7 +1,6 @@
 CHANGES IN VERSION 2.5.4
 ------------------------
- o vignette for GO analysis <2015-12-28, Mon>
-   + GO.Rmd
+ o update vignette <2015-12-29, Tue>
  o re-designed internal function <2015-12-20, Sun>
  
 CHANGES IN VERSION 2.5.3

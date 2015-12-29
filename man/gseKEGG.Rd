@@ -4,14 +4,14 @@
 \alias{gseKEGG}
 \title{gseKEGG}
 \usage{
-gseKEGG(geneList, species = "hsa", exponent = 1, nPerm = 1000,
+gseKEGG(geneList, organism = "hsa", exponent = 1, nPerm = 1000,
   minGSSize = 10, pvalueCutoff = 0.05, pAdjustMethod = "BH",
   verbose = TRUE, seed = FALSE)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{species}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
 
 \item{exponent}{weight of each step}
 

@@ -26,7 +26,7 @@ cluster.
 
 data(gcSample)
 xx <- compareCluster(gcSample, fun="enrichKEGG",
-                     species="hsa", pvalueCutoff=0.05)
+                     organism="hsa", pvalueCutoff=0.05)
 summary(xx)
 # plot(xx, type="dot", caption="KEGG Enrichment Comparison")
 
