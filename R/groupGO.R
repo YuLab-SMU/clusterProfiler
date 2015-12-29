@@ -5,10 +5,8 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism One of "anopheles", "arabidopsis", "bovine", "canine",
-##'"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
-##'"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
-##'"zebrafish".
+##' @param OrgDb OrgDb
+##' @param keytype keytype of input gene
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param level Specific GO Level.
 ##' @param readable if readable is TRUE, the gene IDs will mapping to gene
@@ -18,24 +16,31 @@
 ##' @keywords manip
 ##' @importFrom methods new
 ##' @importClassesFrom methods data.frame
-##' @importFrom DOSE EXTID2NAME
-##' @importFrom DOSE TERMID2EXTID
-##' @importFrom DOSE TERM2NAME
 ##' @importFrom DOSE setReadable
 ##' @export
 ##' @author Guangchuang Yu \url{http://ygc.name}
 ##' @examples
 ##'
 ##' 	data(gcSample)
-##' 	yy <- groupGO(gcSample[[1]], organism="human", ont="BP", level=2)
+##' 	yy <- groupGO(gcSample[[1]], 'org.Hs.eg.db', ont="BP", level=2)
 ##' 	head(summary(yy))
 ##' 	#plot(yy)
 ##'
-groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE) {
+groupGO <- function(gene, OrgDb, keytype="ENTREZID", ont="CC", level = 2, readable=FALSE) {
+    ont %<>% toupper
+    ont <- match.arg(ont, c("BP", "CC", "MF"))
+    
+    GO_DATA <- get_GO_data(OrgDb, ont, keytype)
+    
     GOLevel <- getGOLevel(ont, level) ##get GO IDs of specific level.
 
-    class(GOLevel) <- ont
-    GO2ExtID <- TERMID2EXTID(GOLevel, organism) ## mapping GOID to External Gene IDs.
+    DOSE <- "DOSE"
+    require(DOSE, character.only = TRUE)
+    TERMID2EXTID <- eval(parse(text=paste0(DOSE, ":::", "TERMID2EXTID")))
+    TERM2NAME <- eval(parse(text=paste0(DOSE, ":::", "TERM2NAME")))
+
+    
+    GO2ExtID <- TERMID2EXTID(GOLevel, GO_DATA) ## mapping GOID to External Gene IDs.
 
     geneID.list <- lapply(GO2ExtID, function(x) gene[gene %in% x]) ## retain External Gene IDs which appear in *gene*
 
@@ -47,7 +52,7 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
 
     Count <- unlist(lapply(geneID.list, length))
     GeneRatio <- paste(Count, length(unique(unlist(gene))), sep="/")
-    Descriptions <- TERM2NAME(GOLevel)
+    Descriptions <- TERM2NAME(GOLevel, GO_DATA)
     result = data.frame(ID=as.character(GOLevel),
         Description=Descriptions,
         Count=Count,
@@ -58,13 +63,14 @@ groupGO <- function(gene, organism="human", ont="CC", level = 2, readable=FALSE)
              result=result,
              ontology = ont,
              level = level,
-             organism = organism,
+             organism = get_organism(OrgDb),
              gene = gene,
+             keytype = keytype,
              geneInCategory = geneID.list
              )
     if(readable == TRUE) 
-        x <- setReadable(x)
-
+        x <- setReadable(x, OrgDb)
+    
     return(x)
 }
 

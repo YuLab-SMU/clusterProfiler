@@ -4,7 +4,7 @@
 \alias{bitr}
 \title{bitr}
 \usage{
-bitr(geneID, fromType, toType, annoDb, drop = TRUE)
+bitr(geneID, fromType, toType, OrgDb, drop = TRUE)
 }
 \arguments{
 \item{geneID}{input gene id}
@@ -13,7 +13,7 @@ bitr(geneID, fromType, toType, annoDb, drop = TRUE)
 
 \item{toType}{output id type}
 
-\item{annoDb}{annotation db}
+\item{OrgDb}{annotation db}
 
 \item{drop}{drop NA or not}
 }

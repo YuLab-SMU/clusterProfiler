@@ -4,19 +4,18 @@
 \alias{gseGO}
 \title{gseGO}
 \usage{
-gseGO(geneList, ont = "BP", organism = "human", exponent = 1,
+gseGO(geneList, ont = "BP", OrgDb, keytype = "ENTREZID", exponent = 1,
   nPerm = 1000, minGSSize = 10, pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", verbose = TRUE)
+  pAdjustMethod = "BH", verbose = TRUE, seed = FALSE)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
 
 \item{ont}{one of "BP", "MF", "CC" or "GO"}
 
-\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine",
-"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
-"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
-"zebrafish".}
+\item{OrgDb}{OrgDb}
+
+\item{keytype}{keytype of gene}
 
 \item{exponent}{weight of each step}
 
@@ -29,6 +28,8 @@ gseGO(geneList, ont = "BP", organism = "human", exponent = 1,
 \item{pAdjustMethod}{pvalue adjustment method}
 
 \item{verbose}{print message or not}
+
+\item{seed}{logical}
 }
 \value{
 gseaResult object

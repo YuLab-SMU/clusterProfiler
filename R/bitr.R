@@ -2,13 +2,13 @@
 ##'
 ##' 
 ##' @title idType
-##' @param annoDb annotation db
+##' @param OrgDb annotation db
 ##' @return character vector
 ##' @importFrom AnnotationDbi keytypes
 ##' @export
 ##' @author Guangchuang Yu
-idType <- function(annoDb = "org.Hs.eg.db") {
-    db <- get_db_obj(annoDb)
+idType <- function(OrgDb = "org.Hs.eg.db") {
+    db <- load_OrgDb(OrgDb)
     keytypes(db)
 }
 
@@ -19,7 +19,7 @@ idType <- function(annoDb = "org.Hs.eg.db") {
 ##' @param geneID input gene id
 ##' @param fromType input id type
 ##' @param toType output id type
-##' @param annoDb annotation db
+##' @param OrgDb annotation db
 ##' @param drop drop NA or not
 ##' @return data.frame
 ##' @importFrom magrittr %>%
@@ -27,8 +27,8 @@ idType <- function(annoDb = "org.Hs.eg.db") {
 ##' @importFrom AnnotationDbi select
 ##' @export
 ##' @author Guangchuang Yu
-bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
-    idTypes <- idType(annoDb)
+bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
+    idTypes <- idType(OrgDb)
     msg <-  paste0("should be one of ", paste(idTypes, collapse=", "), ".")
     if (! fromType %in% idTypes) {
         stop("'fromType' ", msg)
@@ -38,7 +38,7 @@ bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
     }
     
     geneID %<>% as.character %>% unique
-    db <- get_db_obj(annoDb)
+    db <- load_OrgDb(OrgDb)
     res <- suppressWarnings(select(db,
                                    keys = geneID,
                                    keytype = fromType, 
@@ -57,10 +57,4 @@ bitr <- function(geneID, fromType, toType, annoDb, drop=TRUE) {
     return(res)
 }
 
-
-get_db_obj <- function(annoDb) {
-    ## require(annoDb, character.only = TRUE)
-    requireNamespace(annoDb)
-    eval(parse(text=paste0(annoDb, "::", annoDb)))
-}
 

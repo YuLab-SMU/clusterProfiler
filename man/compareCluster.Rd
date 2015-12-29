@@ -26,7 +26,7 @@ cluster.
 
 data(gcSample)
 xx <- compareCluster(gcSample, fun="enrichKEGG",
-                     organism="human", pvalueCutoff=0.05)
+                     organism="hsa", pvalueCutoff=0.05)
 summary(xx)
 # plot(xx, type="dot", caption="KEGG Enrichment Comparison")
 
@@ -35,11 +35,11 @@ mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
                             '100127206', '100128071'),
                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
                    othergroup = c('good', 'good', 'bad', 'bad', 'good', 'bad'))
-xx.formula <- compareCluster(Entrez~group, data=mydf, fun='groupGO')
+xx.formula <- compareCluster(Entrez~group, data=mydf, fun='groupGO', OrgDb='org.Hs.eg.db')
 summary(xx.formula)
 
 ## formula interface with more than one grouping variable
-xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf, fun='groupGO')
+xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf, fun='groupGO', OrgDb='org.Hs.eg.db')
 summary(xx.formula.twogroups)
 }
 \author{

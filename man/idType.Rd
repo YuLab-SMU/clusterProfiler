@@ -4,10 +4,10 @@
 \alias{idType}
 \title{idType}
 \usage{
-idType(annoDb = "org.Hs.eg.db")
+idType(OrgDb = "org.Hs.eg.db")
 }
 \arguments{
-\item{annoDb}{annotation db}
+\item{OrgDb}{annotation db}
 }
 \value{
 character vector

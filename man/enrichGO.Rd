@@ -6,17 +6,16 @@
 Given a vector of genes, this function will return the enrichment GO
 categories after FDR control.}
 \usage{
-enrichGO(gene, organism = "human", ont = "MF", pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", universe, qvalueCutoff = 0.2, minGSSize = 5,
-  readable = FALSE)
+enrichGO(gene, OrgDb, keytype = "ENTREZID", ont = "MF",
+  pvalueCutoff = 0.05, pAdjustMethod = "BH", universe, qvalueCutoff = 0.2,
+  minGSSize = 5, readable = FALSE)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine", "celegans",
-"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
-"malaria", "mouse", "pig", "rat","rhesus", "xenopus", "yeast" and
-"zebrafish".}
+\item{OrgDb}{OrgDb}
+
+\item{keytype}{keytype of input gene}
 
 \item{ont}{One of "MF", "BP", and "CC" subontologies.}
 
@@ -43,7 +42,7 @@ categories after FDR control.
 \examples{
 \dontrun{
 	data(gcSample)
-	yy <- enrichGO(gcSample[[1]], organism="human", ont="BP", pvalueCutoff=0.01)
+	yy <- enrichGO(gcSample[[1]], 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
 	head(summary(yy))
 	plot(yy)
 }

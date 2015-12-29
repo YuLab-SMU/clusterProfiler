@@ -6,16 +6,15 @@
 Given a vector of genes, this function will return the GO profile at
 a specific level.}
 \usage{
-groupGO(gene, organism = "human", ont = "CC", level = 2,
+groupGO(gene, OrgDb, keytype = "ENTREZID", ont = "CC", level = 2,
   readable = FALSE)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{One of "anopheles", "arabidopsis", "bovine", "canine",
-"chicken", "chimp", "coelicolor", "ecolik12","ecsakai", "fly", "gondii","human",
-"malaria", "mouse", "pig", "rat","rhesus", "worm", "xenopus", "yeast" and
-"zebrafish".}
+\item{OrgDb}{OrgDb}
+
+\item{keytype}{keytype of input gene}
 
 \item{ont}{One of "MF", "BP", and "CC" subontologies.}
 
@@ -35,7 +34,7 @@ a specific level.
 \examples{
 
 	data(gcSample)
-	yy <- groupGO(gcSample[[1]], organism="human", ont="BP", level=2)
+	yy <- groupGO(gcSample[[1]], 'org.Hs.eg.db', ont="BP", level=2)
 	head(summary(yy))
 	#plot(yy)
 

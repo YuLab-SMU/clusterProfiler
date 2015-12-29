@@ -12,6 +12,7 @@
 ##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
 ##' @return A \code{enrichResult} instance
 ##' @author Guangchuang Yu
+##' @importFrom DOSE enricher_internal
 ##' @export
 enricher <- function(gene,
                      pvalueCutoff = 0.05,
@@ -22,16 +23,13 @@ enricher <- function(gene,
                      TERM2GENE,
                      TERM2NAME = NA) {
     USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
-    enrich.internal(gene = gene,
-                    organism = "UNKNOWN",
-                    pvalueCutoff = pvalueCutoff,
-                    pAdjustMethod = pAdjustMethod,
-                    ont = "USER_DEFINED",
-                    universe = universe,
-                    minGSSize = minGSSize,
-                    qvalueCutoff = qvalueCutoff,
-                    readable = FALSE,
-                    USER_DATA = USER_DATA)
+    enricher_internal(gene = gene,
+                      pvalueCutoff = pvalueCutoff,
+                      pAdjustMethod = pAdjustMethod,
+                      universe = universe,
+                      minGSSize = minGSSize,
+                      qvalueCutoff = qvalueCutoff,
+                      USER_DATA = USER_DATA)
 }
                      
                      
@@ -48,8 +46,10 @@ enricher <- function(gene,
 ##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
 ##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
 ##' @param verbose logical
+##' @param seed logical
 ##' @return gseaResult object
 ##' @author Guangchuang Yu
+##' @importFrom DOSE GSEA_internal
 ##' @export
 GSEA <- function(geneList,
                  exponent = 1,
@@ -59,37 +59,19 @@ GSEA <- function(geneList,
                  pAdjustMethod = "BH",
                  TERM2GENE,
                  TERM2NAME = NA,
-                 verbose = TRUE) {
-    if(verbose)
-        cat("preparing geneSet collections...\n")
+                 verbose = TRUE,
+                 seed = FALSE) {
 
-    organism = "UNKNOWN"
-    setType <- "USER_DEFINED"
-    class(setType) <- setType
     USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
-    geneSets <- getGeneSet(setType, organism, USER_DATA = USER_DATA)
-
-    gsea(geneList = geneList,
-         geneSets = geneSets,
-         setType = setType,
-         organism = organism,
-         exponent = exponent,
-         nPerm = nPerm,
-         minGSSize = minGSSize,
-         pvalueCutoff = pvalueCutoff,
-         pAdjustMethod = pAdjustMethod,
-         verbose = verbose,
-         USER_DATA = USER_DATA)
-}
-
-##' @method getGeneSet USER_DEFINED
-##' @export
-getGeneSet.USER_DEFINED <- function(setType = "USER_DEFINED", organism, ...) {
-    getGeneSet.USER_DEFINED.internal(setType, organism, ...)
-}
-
-getGeneSet.USER_DEFINED.internal <- function(setType, organism, USER_DATA, ...) {
-    gs <- get("PATHID2EXTID", envir = USER_DATA)
-    return(gs)
+ 
+    GSEA_internal(geneList = geneList,
+          exponent = exponent,
+          nPerm = nPerm,
+          minGSSize = minGSSize,
+          pvalueCutoff = pvalueCutoff,
+          pAdjustMethod = pAdjustMethod,
+          verbose = verbose,
+          USER_DATA = USER_DATA,
+          seed = seed)
 }
 
