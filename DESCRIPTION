@@ -37,6 +37,7 @@ Imports:
     IRanges,
     S4Vectors
 Suggests:
+    AnnotationHub,
     BiocStyle,
     KEGG.db,
     knitr,
