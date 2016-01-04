@@ -337,7 +337,7 @@ As user has limited usage, please [register](http://david.abcc.ncifcrf.gov/webse
 
 `r Biocpkg("clusterProfiler")` provides `enricher` function for hypergeometric test and `GSEA` function for gene set enrichment analysis that are designed to accept user defined annotation. They accept two additional parameters _TERM2GENE_ and _TERM2NAME_. As indicated in the parameter names, _TERM2GENE_ is a data.frame with first column of term ID and second column of corresponding mapped gene and _TERM2NAME_ is a data.frame with first column of term ID and second column of corresponding term name. _TERM2NAME_ is optional.
 
-An example of using `enricher` and `GSEA` to analyze [DisGeNet](http://www.disgenet.org/web/DisGeNET/menu/home) annotation is presented in [use clusterProfiler as an universal enrichment analysis tool](http://ygc.name/2015/05/11/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/).
+An example of using `enricher` and `GSEA` to analyze [DisGeNet](http://www.disgenet.org/web/DisGeNET/menu/home) annotation is presented in the post, [use clusterProfiler as an universal enrichment analysis tool](http://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/).
 
 ## Using MSigDB gene set collections
 
@@ -372,7 +372,7 @@ barplot(ego, showCategory=8)
 ## dotplot
 
 
-[__*dotplot*__](http://ygc.name/2015/06/23/dotplot-for-enrichment-result/) is a good alternative to __*barplot*__.
+[__*dotplot*__](http://guangchuangyu.github.io/2015/06/dotplot-for-enrichment-result/) is a good alternative to __*barplot*__.
 
 ```{r}
 dotplot(ego)
