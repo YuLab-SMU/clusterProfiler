@@ -1,5 +1,6 @@
 CHANGES IN VERSION 2.5.4
 ------------------------
+ o fixed bug in simplify for organism extracted from OrgDb is not consistent to GOSemSim. <2016-01-05, Tue>
  o update vignette <2015-12-29, Tue>
  o re-designed internal function <2015-12-20, Sun>
  
