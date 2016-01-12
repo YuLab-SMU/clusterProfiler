@@ -46,6 +46,10 @@ gseGO <- function(geneList,
                           verbose = verbose,
                           USER_DATA = GO_DATA,
                           seed = seed)
+
+    if (is.null(res))
+        return(res)
+    
     res@organism <- get_organism(OrgDb)
     res@setType <- ont
     res@keytype <- keytype
@@ -95,6 +99,11 @@ gseMKEGG <- function(geneList,
                           verbose = verbose,
                           USER_DATA = KEGG_DATA,
                           seed = seed)
+
+    if (is.null(res))
+        return(res)
+
+    
     res@organism <- species
     res@setType <- "MKEGG"
     res@keytype <- "UNKNOWN"
@@ -137,6 +146,10 @@ gseKEGG <- function(geneList,
                           verbose = verbose,
                           USER_DATA = KEGG_DATA,
                           seed = seed)
+
+    if (is.null(res))
+        return(res)
+    
     res@organism <- species
     res@setType <- "KEGG"
     res@keytype <- "UNKNOWN"

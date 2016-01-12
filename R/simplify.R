@@ -33,12 +33,43 @@ setMethod("simplify", signature(x="enrichResult"),
 ##' @importFrom GOSemSim mgoSim
 ##' @importFrom tidyr gather
 simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel", ont, organism) {
+    
+    org2org <- c('Anopheles gambiae' = 'anopheles',
+                 'Arabidopsis thaliana' = 'arabidopsis',
+                 'Bos taurus' = 'bovine',
+                 'Canis familiaris' = 'canine',
+                 'Caenorhabditis elegans' = 'celegans',
+                 'Gallus gallus' = 'chicken',
+                 'Pan troglodytes' = 'chimp',
+                 'Escherichia coli' = 'ecolik12',
+                 'Escherichia coli' = 'ecsakai',
+                 'Drosophila melanogaster' = 'fly',
+                 'Toxoplasma gondii' = 'gondii',
+                 'Homo sapiens' = 'human',
+                 'Plasmodium falciparum' = 'malaria',
+                 'Mus musculus' = 'mouse',
+                 'Sus scrofa' = 'pig',
+                 'Rattus norvegicus' = 'rat',
+                 'Macaca mulatta' = 'rhesus',
+                 'Xenopus laevis' = 'xenopus',
+                 'Saccharomyces cerevisiae' = 'yeast',
+                 'Danio rerio' = 'zebrafish'
+                 )
+    if (organism %in% names(org2org)) {
+        organism = org2org[organism]
+    } else {
+        if (measure != "Wang") {
+            message("organism is not supported by ", measure, " measure...\nusing measure='Wang' instead...")
+            measure <- "Wang"
+        }
+    }
+    
     sim <- mgoSim(res$ID, res$ID,
                   ont=ont, 
                   organism=organism,
                   measure=measure,
                   combine=NULL)
-
+    
     ## to satisfy codetools for calling gather
     go1 <- go2 <- similarity <- NULL
     
