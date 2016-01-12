@@ -54,6 +54,10 @@ enrichGO <- function(gene,
                              minGSSize = minGSSize,
                              USER_DATA = GO_DATA
                              )
+
+    if (is.null(res))
+        return(res)
+    
     res@keytype <- keytype
     res@organism <- get_organism(OrgDb)
     if(readable) {

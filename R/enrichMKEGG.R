@@ -23,6 +23,10 @@ enrichMKEGG <- function(gene,
                              minGSSize     = minGSSize,
                              qvalueCutoff  = qvalueCutoff,
                              USER_DATA = KEGG_DATA)
+
+    if (is.null(res))
+        return(res)
+    
     
     res@ontology <- "MKEGG"
     res@organism <- species
