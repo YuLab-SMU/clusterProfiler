@@ -6,7 +6,7 @@
 \usage{
 gseKEGG(geneList, organism = "hsa", exponent = 1, nPerm = 1000,
   minGSSize = 10, pvalueCutoff = 0.05, pAdjustMethod = "BH",
-  verbose = TRUE, seed = FALSE)
+  verbose = TRUE, use_internal_data = FALSE, seed = FALSE)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
@@ -24,6 +24,8 @@ gseKEGG(geneList, organism = "hsa", exponent = 1, nPerm = 1000,
 \item{pAdjustMethod}{pvalue adjustment method}
 
 \item{verbose}{print message or not}
+
+\item{use_internal_data}{logical, use KEGG.db or latest online KEGG data}
 
 \item{seed}{logical}
 }
