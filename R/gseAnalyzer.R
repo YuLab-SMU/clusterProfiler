@@ -117,6 +117,7 @@ gseMKEGG <- function(geneList,
 ##'
 ##' @title gseKEGG
 ##' @inheritParams gseMKEGG
+##' @param use_internal_data logical, use KEGG.db or latest online KEGG data
 ##' @importClassesFrom DOSE gseaResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
@@ -132,10 +133,15 @@ gseKEGG <- function(geneList,
                     pvalueCutoff      = 0.05,
                     pAdjustMethod     = "BH",
                     verbose           = TRUE,
+                    use_internal_data = FALSE,
                     seed              = FALSE) {
 
     species <- organismMapper(organism)
-    KEGG_DATA <- download.KEGG(species, "KEGG")
+    if (use_internal_data) {
+        KEGG_DATA <- get_data_from_KEGG_db(species)
+    } else {
+        KEGG_DATA <- download.KEGG(species, "KEGG")
+    }
 
     res <-  GSEA_internal(geneList = geneList,
                           exponent = exponent,
