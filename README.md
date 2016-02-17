@@ -40,23 +40,13 @@ To install:
 
 ## Documentation ##
 
-+ [Why clusterProfiler fails](http://guangchuangyu.github.io/2014/08/why-clusterprofiler-fails/)
-+ [use simplify to remove redundancy of enriched GO terms](http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/)
-+ [KEGG enrichment analysis with latest online data using clusterProfiler](http://guangchuangyu.github.io/2015/02/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
-+ [DAVID functional analysis with clusterProfiler](http://guangchuangyu.github.io/2015/03/david-functional-analysis-with-clusterprofiler/)
-+ [use clusterProfiler as an universal enrichment analysis tool](http://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/)
-+ [a formula interface for GeneOntology analysis <- bioinfoblog.it](http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/)
-+ [Enrichment map](http://guangchuangyu.github.io/2014/08/enrichment-map/)
-+ [dotplot for enrichment result](http://guangchuangyu.github.io/2015/06/dotplot-for-enrichment-result/)
-+ [functional enrichment for GTEx paper](http://guangchuangyu.github.io/2015/08/functional-enrichment-for-gtex-paper/)
-+ [functional enrichment analysis with NGS data](http://guangchuangyu.github.io/2015/08/functional-enrichment-analysis-with-ngs-data/)
-+ [Comparison of clusterProfiler and GSEA-P](http://guangchuangyu.github.io/2015/11/comparison-of-clusterprofiler-and-gsea-p/)
-
-
 To view the vignette of `clusterProfiler` installed in your system, start `R` and enter:
 ```r
 vignette("clusterProfiler", package="clusterProfiler")
 ```
+
+More documents can be found in <http://guangchuangyu.github.io/categories/clusterprofiler>.
+
 
 
 ## Bugs/Feature requests ##
