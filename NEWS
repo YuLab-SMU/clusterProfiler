@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.5.5
+------------------------
+ o update ReactomePA citation info <2016-02-17, Wed>
+
 CHANGES IN VERSION 2.5.4
 ------------------------
  o add use_internal_data=FALSE parameter in gseKEGG <2016-01-19, Tue>

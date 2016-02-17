@@ -41,7 +41,7 @@ library(clusterProfiler)
 
 # Citation
 
-If you use `r Biocpkg("clusterProfiler")` in published research, please cite G. Yu(2012). In addition, please cite G. Yu (2010) when using `r Biocpkg("GOSemSim")` for GO semantic similarity analysis, G. Yu (2015) when using `r Biocpkg("DOSE")` for Disease Ontology analysis and G. Yu (2015) when applying enrichment analysis to NGS data by using `r Biocpkg("ChIPseeker")`.
+If you use `r Biocpkg("clusterProfiler")` in published research, please cite G. Yu(2012). In addition, please cite G. Yu (2010) when using `r Biocpkg("GOSemSim")` for GO semantic similarity analysis, G. Yu (2015) when using `r Biocpkg("DOSE")` for Disease Ontology analysis, G. Yu (2016) when using `r Biocpkg("ReactomePA")` for Reactome pathway analysis and G. Yu (2015) when applying enrichment analysis to NGS data by using `r Biocpkg("ChIPseeker")`.
 
 ```
 G Yu, LG Wang, Y Han, QY He.
@@ -67,6 +67,14 @@ Bioinformatics 2015, 31(4):608-609.
 ```
 
 URL: [http://dx.doi.org/10.1093/bioinformatics/btu684](http://dx.doi.org/10.1093/bioinformatics/btu684)
+
+```
+G Yu, QY He,
+ReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization.
+Molecular BioSystems 2016, 12(2):477-479.
+```
+
+URL: [http://dx.doi.org/10.1039/C5MB00663E](http://dx.doi.org/10.1039/C5MB00663E)
 
 
 ```
@@ -307,7 +315,7 @@ mkk2 <- gseMKEGG(geneList = geneList,
 
 # Reactome pathway analysis
 
-`r Biocpkg("ReactomePA")` uses Reactome as a source of pathway data. The function call of `enrichPathway` and `gsePathway` in `r Biocpkg("ReactomePA")` is consistent with `enrichKEGG` and `gseKEGG`.
+`r Biocpkg("ReactomePA")`[@yu_reactomepa_2016] uses Reactome as a source of pathway data. The function call of `enrichPathway` and `gsePathway` in `r Biocpkg("ReactomePA")` is consistent with `enrichKEGG` and `gseKEGG`.
 
 # DAVID functional analysis
 
@@ -494,17 +502,7 @@ The comparison function was designed as a framework for comparing gene clusters 
 
 # External documents
 
-+ [Why clusterProfiler fails](http://guangchuangyu.github.io/2014/08/why-clusterprofiler-fails/)
-+ [use simplify to remove redundancy of enriched GO terms](http://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/)
-+ [KEGG enrichment analysis with latest online data using clusterProfiler](http://guangchuangyu.github.io/2015/02/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/)
-+ [DAVID functional analysis with clusterProfiler](http://guangchuangyu.github.io/2015/03/david-functional-analysis-with-clusterprofiler/)
-+ [use clusterProfiler as an universal enrichment analysis tool](http://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/)
-+ [a formula interface for GeneOntology analysis <- bioinfoblog.it](http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/)
-+ [Enrichment map](http://guangchuangyu.github.io/2014/08/enrichment-map/)
-+ [dotplot for enrichment result](http://guangchuangyu.github.io/2015/06/dotplot-for-enrichment-result/)
-+ [functional enrichment for GTEx paper](http://guangchuangyu.github.io/2015/08/functional-enrichment-for-gtex-paper/)
-+ [functional enrichment analysis with NGS data](http://guangchuangyu.github.io/2015/08/functional-enrichment-analysis-with-ngs-data/)
-+ [Comparison of clusterProfiler and GSEA-P](http://guangchuangyu.github.io/2015/11/comparison-of-clusterprofiler-and-gsea-p/)
+More documents can be found in <http://guangchuangyu.github.io/categories/clusterprofiler>.
 
 
 ## Bugs/Feature requests ##
