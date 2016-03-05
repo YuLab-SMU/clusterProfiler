@@ -21,21 +21,23 @@ Depends:
     R (>= 3.2.0),
     DOSE (>= 2.9.0)
 Imports:
-    GOSemSim,
     AnnotationDbi,
-    methods,
-    stats4,
-    tidyr,
-    plyr,
     ggplot2,
     GO.db,
+    GOSemSim,
     GSEABase,
+    IRanges,
     KEGGREST,
     magrittr,
+    methods,
+    plyr,
     qvalue,
+    stats,
+    stats4,
+    S4Vectors,
+    tidyr,
     topGO,
-    IRanges,
-    S4Vectors
+    utils
 Suggests:
     AnnotationHub,
     BiocStyle,

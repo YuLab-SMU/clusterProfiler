@@ -10,6 +10,7 @@
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
+##' @importFrom stats formula
 ##' @importFrom plyr llply
 ##' @importFrom plyr ldply
 ##' @importFrom plyr dlply

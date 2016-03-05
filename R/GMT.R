@@ -5,6 +5,7 @@
 ##' @param gmtfile gmt file
 ##' @importFrom GSEABase getGmt
 ##' @importFrom GSEABase geneIds
+##' @importFrom utils stack
 ##' @export
 ##' @return data.frame 
 ##' @author Guangchuang Yu

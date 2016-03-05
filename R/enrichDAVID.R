@@ -19,6 +19,7 @@
 ## @importFrom RDAVIDWebService getFunctionalAnnotationChart
 ## @importFrom RDAVIDWebService getSpecieNames
 ##' @importFrom qvalue qvalue
+##' @importFrom utils installed.packages
 ##' @export
 ##' @author Guangchuang Yu
 enrichDAVID <- function(gene,
