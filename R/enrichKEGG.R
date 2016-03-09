@@ -176,6 +176,7 @@ download.KEGG.Module <- function(species) {
 ##' @param out.suffix suffix of output file
 ## @importFrom pathview pathview
 ## @importFrom pathview kegg.species.code
+##' @importFrom utils citation
 ##' @references Luo et al. (2013) Pathview: an R/Bioconductor package for 
 ##'pathway-based data integration and visualization. \emph{Bioinformatics} (Oxford,
 ##'England), 29:14 1830--1831, 2013. ISSN 1367-4803
@@ -224,6 +225,7 @@ viewKEGG <- function(obj, pathwayID, foldChange,
 }
 
 ##' @importFrom AnnotationDbi as.list
+##' @importFrom utils stack
 get_data_from_KEGG_db <- function(species) {
     PATHID2EXTID <- as.list(get_KEGG_db("KEGGPATHID2EXTID"))
     if (!any(grepl(species, names(PATHID2EXTID)))) {

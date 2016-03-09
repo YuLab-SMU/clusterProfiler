@@ -10,12 +10,13 @@
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
+##' @importFrom stats formula
 ##' @importFrom plyr llply
 ##' @importFrom plyr ldply
 ##' @importFrom plyr dlply
 ##' @importFrom plyr rename
 ##' @export
-##' @author Guangchuang Yu \url{http://ygc.name}
+##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
 ##' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
 ##'   \code{\link{enrichGO}}
 ##' @keywords manip
@@ -105,7 +106,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 ##' @slot fun one of groupGO, enrichGO and enrichKEGG
 ##' @slot .call function call
 ##' @exportClass compareClusterResult
-##' @author Guangchuang Yu \url{http://ygc.name}
+##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
 ##' @exportClass compareClusterResult
 ##' @seealso \code{\linkS4class{groupGOResult}}
 ##'   \code{\linkS4class{enrichResult}} \code{\link{compareCluster}}
@@ -131,13 +132,50 @@ setClass("compareClusterResult",
 ## @param object A \code{compareClusterResult} instance.
 ## @return message
 ## @importFrom methods show
-## @author Guangchuang Yu \url{http://ygc.name}
+## @author Guangchuang Yu \url{http://guangchuangyu.github.io}
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
+              cmsg <- paste("  Guangchuang Yu, Li-Gen Wang, Yanyan Han and Qing-Yu He.",
+                            "  clusterProfiler: an R package for comparing biological themes among",
+                            "  gene clusters. OMICS: A Journal of Integrative Biology 2012,",
+                            "  16(5):284-287",
+                            sep="\n", collapse="\n")
+
               geneClusterLen <- length(object@geneClusters)
-              cat ("Result of Comparing", geneClusterLen, "gene clusters", "\n")
-          }
-          )
+              fun <- object@fun
+              result <- object@compareClusterResult
+              clusts <- split(result, result$Cluster)
+              nterms <- sapply(clusts, nrow)
+              
+              cat("#\n# Result of Comparing", geneClusterLen, "gene clusters", "\n#\n")
+              cat("#.. @fun", "\t", fun, "\n")
+              cat("#.. @geneClusters", "\t")
+              str(object@geneClusters)
+              cat("#...Result", "\t")
+              str(result)
+              cat("#.. number of enriched terms found for each gene cluster:\n")
+              for (i in seq_along(clusts)) {
+                  cat("#..  ", paste0(names(nterms)[i], ":"), nterms[i], "\n")
+              }
+              cat("#\n#...Citation\n")
+              citation_msg <- NULL
+              if (fun == "enrichDO" || fun == "enrichNCG") {
+                  citation_msg <- paste("  Guangchuang Yu, Li-Gen Wang, Guang-Rong Yan, Qing-Yu He. DOSE: an",
+                                        "  R/Bioconductor package for Disease Ontology Semantic and Enrichment",
+                                        "  analysis. Bioinformatics 2015 31(4):608-609",
+                                        sep="\n", collapse="\n")
+              } else if (fun == "enrichPathway") {
+                  citation_msg <- paste("  Guangchuang Yu, Qing-Yu He. ReactomePA: an R/Bioconductor package for",
+                                        "  reactome pathway analysis and visualization. Molecular BioSystems",
+                                        "  2015 accepted", sep="\n", collapse="\n")
+              }
+              if (!is.null(citation_msg)) {
+                  cat(paste0("1.", citation_msg), "\n\n")
+                  cat(paste0("2.", cmsg), "\n\n")
+              } else {
+                  cat(cmsg, "\n\n")
+              }
+          })
 
 ## summary method for \code{compareClusterResult} instance
 ##
@@ -152,7 +190,7 @@ setMethod("show", signature(object="compareClusterResult"),
 ## @return A data frame
 ## @importFrom stats4 summary
 ## @exportMethod summary
-## @author Guangchuang Yu \url{http://ygc.name}
+## @author Guangchuang Yu \url{http://guangchuangyu.github.io}
 setMethod("summary", signature(object="compareClusterResult"),
           function(object) {
               return(object@compareClusterResult)
