@@ -5,8 +5,9 @@
 \title{gseKEGG}
 \usage{
 gseKEGG(geneList, organism = "hsa", exponent = 1, nPerm = 1000,
-  minGSSize = 10, pvalueCutoff = 0.05, pAdjustMethod = "BH",
-  verbose = TRUE, use_internal_data = FALSE, seed = FALSE)
+  minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
+  pAdjustMethod = "BH", verbose = TRUE, use_internal_data = FALSE,
+  seed = FALSE)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
@@ -18,6 +19,8 @@ gseKEGG(geneList, organism = "hsa", exponent = 1, nPerm = 1000,
 \item{nPerm}{permutation numbers}
 
 \item{minGSSize}{minimal size of each geneSet for analyzing}
+
+\item{maxGSSize}{maximal size of genes annotated for testing}
 
 \item{pvalueCutoff}{pvalue Cutoff}
 

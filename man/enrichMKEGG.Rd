@@ -7,7 +7,8 @@ Given a vector of genes, this function will return the enrichment KEGG Module
 categories with FDR control.}
 \usage{
 enrichMKEGG(gene, organism = "hsa", pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", universe, minGSSize = 5, qvalueCutoff = 0.2)
+  pAdjustMethod = "BH", universe, minGSSize = 10, maxGSSize = 500,
+  qvalueCutoff = 0.2)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
@@ -21,6 +22,8 @@ enrichMKEGG(gene, organism = "hsa", pvalueCutoff = 0.05,
 \item{universe}{background genes}
 
 \item{minGSSize}{minimal size of genes annotated by Ontology term for testing.}
+
+\item{maxGSSize}{maximal size of genes annotated for testing}
 
 \item{qvalueCutoff}{qvalue cutoff}
 }
