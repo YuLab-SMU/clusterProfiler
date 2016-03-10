@@ -126,21 +126,31 @@ download.KEGG <- function(species, KEGG_Type="KEGG") {
 }
 
 download.KEGG.Path <- function(species) {
-    keggpathid2extid <- tryCatch(keggLink(species,"pathway"), error=function(e) NULL)
-    
+    ## keggpathid2extid <- tryCatch(keggLink(species,"pathway"), error=function(e) NULL)
+    ## keggpathid2extid %<>% gsub("[^:]+:", "", .)
+    ## names(keggpathid2extid) %<>% gsub("[^:]+:", "", .)
+    ## keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)    
+
+    keggpathid2extid <- readLines(paste0("http://rest.kegg.jp/link/", species, "/pathway", collapse=""))
     if (is.null(keggpathid2extid)) {
         stop("'species' should be one of organisms listed in 'http://www.genome.jp/kegg/catalog/org_list.html'...")
     }
+
+    ## matrix
+    keggpathid2extid %<>% strsplit(., "\t") %>% do.call('rbind', .) %>% gsub("[^:]+:", "", .)
+    keggpathid2extid.df <- data.frame(pathID = keggpathid2extid[,1],
+                                      extID  = keggpathid2extid[,2])
     
-    keggpathid2extid %<>% gsub("[^:]+:", "", .)
-    names(keggpathid2extid) %<>% gsub("[^:]+:", "", .)
+    ## keggpathid2name <- keggList("pathway")
+    ## names(keggpathid2name) %<>% gsub("path:map", species, .)
+    ## keggpathid2name.df <- data.frame(keggID=names(keggpathid2name),
+    ##                                  keggName=keggpathid2name)
+
+    keggpathid2name <- readLines("http://rest.kegg.jp/list/pathway")
+    keggpathid2name %<>% strsplit(., "\t") %>% do.call('rbind', .) %>% gsub("path:map", species, .)
+    keggpathid2name.df <- data.frame(keggID = keggpathid2name[,1],
+                                     keggName = keggpathid2name[,2])
     
-    keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)
-    
-    keggpathid2name <- keggList("pathway")
-    names(keggpathid2name) %<>% gsub("path:map", species, .)
-    keggpathid2name.df <- data.frame(keggID=names(keggpathid2name),
-                                     keggName=keggpathid2name)
     return(list(KEGGPATHID2EXTID=keggpath2extid.df,
                 KEGGPATHID2NAME=keggpathid2name.df))
 }
