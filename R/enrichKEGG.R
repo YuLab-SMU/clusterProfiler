@@ -80,8 +80,6 @@ get_KEGG_Env <- function() {
 ##' @param KEGG_Type one of 'KEGG' or 'MKEGG'
 ##' @return list
 ##' @author Guangchuang Yu
-##' @importFrom KEGGREST keggLink
-##' @importFrom KEGGREST keggList
 ##' @importFrom magrittr %<>%
 download.KEGG <- function(species, KEGG_Type="KEGG") {
     KEGG_Env <- get_KEGG_Env()
@@ -125,56 +123,58 @@ download.KEGG <- function(species, KEGG_Type="KEGG") {
                KEGGPATHID2NAME)
 }
 
-download.KEGG.Path <- function(species) {
-    ## keggpathid2extid <- tryCatch(keggLink(species,"pathway"), error=function(e) NULL)
-    ## keggpathid2extid %<>% gsub("[^:]+:", "", .)
-    ## names(keggpathid2extid) %<>% gsub("[^:]+:", "", .)
-    ## keggpath2extid.df <- data.frame(pathID=names(keggpathid2extid), extID=keggpathid2extid)    
-
-    keggpathid2extid <- readLines(paste0("http://rest.kegg.jp/link/", species, "/pathway", collapse=""))
-    if (is.null(keggpathid2extid)) {
+download.KEGG.Path <- function(species) {    
+    keggpathid2extid.df <- kegg_link(species, "pathway")
+    if (is.null(keggpathid2extid.df))
         stop("'species' should be one of organisms listed in 'http://www.genome.jp/kegg/catalog/org_list.html'...")
-    }
-
-    ## matrix
-    keggpathid2extid %<>% strsplit(., "\t") %>% do.call('rbind', .) %>% gsub("[^:]+:", "", .)
-    keggpathid2extid.df <- data.frame(pathID = keggpathid2extid[,1],
-                                      extID  = keggpathid2extid[,2])
+    keggpathid2extid.df[,1] %<>% gsub("[^:]+:", "", .)
+    keggpathid2extid.df[,2] %<>% gsub("[^:]+:", "", .)
     
-    ## keggpathid2name <- keggList("pathway")
-    ## names(keggpathid2name) %<>% gsub("path:map", species, .)
-    ## keggpathid2name.df <- data.frame(keggID=names(keggpathid2name),
-    ##                                  keggName=keggpathid2name)
-
-    keggpathid2name <- readLines("http://rest.kegg.jp/list/pathway")
-    keggpathid2name %<>% strsplit(., "\t") %>% do.call('rbind', .) %>% gsub("path:map", species, .)
-    keggpathid2name.df <- data.frame(keggID = keggpathid2name[,1],
-                                     keggName = keggpathid2name[,2])
+    keggpathid2name.df <- kegg_list("pathway")
+    keggpathid2name.df[,1] %<>% gsub("path:map", species, .)
     
-    return(list(KEGGPATHID2EXTID=keggpath2extid.df,
+    return(list(KEGGPATHID2EXTID=keggpathid2extid.df,
                 KEGGPATHID2NAME=keggpathid2name.df))
 }
 
 download.KEGG.Module <- function(species) {
-    keggmodule2extid <- tryCatch(keggLink(species, "module"), error=function(e) NULL)
-    if (is.null(keggmodule2extid)) {
+    keggmodule2extid.df <- kegg_link(species, "module")
+    if (is.null(keggmodule2extid.df)) {
         stop("'species' should be one of organisms listed in 'http://www.genome.jp/kegg/catalog/org_list.html'...")
     }
-    keggmodule2extid %<>% gsub("[^:]+:", "", .)
-    names(keggmodule2extid) %<>% gsub("[^:]+:", "", .)
-    names(keggmodule2extid) %<>% gsub(species, "", .)
-    names(keggmodule2extid) %<>% gsub("^_", "", .)
-    keggmodule2extid.df <- data.frame(moduleID=names(keggmodule2extid),
-                                      extID = keggmodule2extid)
 
-    keggmodule2name <- keggList("module")
-    names(keggmodule2name) %<>% gsub("md:", "", .)
-    keggmodule2name.df <- data.frame(moduleID=names(keggmodule2name),
-                                     moduleName=keggmodule2name)
+    keggmodule2extid.df[,1] %<>% gsub("[^:]+:", "", .) %>% gsub(species, "", .) %>% gsub("^_", "", .)
+    keggmodule2extid.df[,2] %<>% gsub("[^:]+:", "", .)
+    
+    keggmodule2name.df <- kegg_list("module")
+    keggmodule2name.df[,1] %<>% gsub("md:", "", .)
     return(list(KEGGPATHID2EXTID=keggmodule2extid.df,
                 KEGGPATHID2NAME =keggmodule2name.df))
 }
 
+kegg_rest <- function(rest_url) {
+    content <- tryCatch(readLines(rest_url), error=function(e) NULL)
+    if (is.null(content))
+        return(content)
+
+    content %<>% strsplit(., "\t") %>% do.call('rbind', .)
+    res <- data.frame(from=content[,1],
+                      to=content[,2])
+    return(res)
+}
+
+## http://www.genome.jp/kegg/rest/keggapi.html
+## kegg_link('hsa', 'pathway')
+kegg_link <- function(target_db, source_db) {
+    url <- paste0("http://rest.kegg.jp/link/", target_db, "/", source_db, collapse="")
+    kegg_rest(url)
+}
+
+
+kegg_list <- function(db) {
+    url <- paste0("http://rest.kegg.jp/list/", db, collapse="")
+    kegg_rest(url)
+}
 
 ##' viewKEGG function is for visualize KEGG pathways
 ##' works with enrichResult object to visualize enriched KEGG pathway
