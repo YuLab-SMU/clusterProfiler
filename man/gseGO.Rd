@@ -5,7 +5,7 @@
 \title{gseGO}
 \usage{
 gseGO(geneList, ont = "BP", OrgDb, keytype = "ENTREZID", exponent = 1,
-  nPerm = 1000, minGSSize = 10, pvalueCutoff = 0.05,
+  nPerm = 1000, minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
   pAdjustMethod = "BH", verbose = TRUE, seed = FALSE)
 }
 \arguments{
@@ -22,6 +22,8 @@ gseGO(geneList, ont = "BP", OrgDb, keytype = "ENTREZID", exponent = 1,
 \item{nPerm}{permutation numbers}
 
 \item{minGSSize}{minimal size of each geneSet for analyzing}
+
+\item{maxGSSize}{maximal size of genes annotated for testing}
 
 \item{pvalueCutoff}{pvalue Cutoff}
 

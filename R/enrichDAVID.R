@@ -5,7 +5,8 @@
 ##' @param gene input gene
 ##' @param idType id type
 ##' @param listType list Type
-##' @param minGSSize minGSSize
+##' @param minGSSize minimal size of genes annotated for testing
+##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param annotation david annotation
 ##' @param pvalueCutoff pvalueCutoff
 ##' @param pAdjustMethod one of "BH" and "bonferroni"
@@ -25,7 +26,8 @@
 enrichDAVID <- function(gene,
                         idType        = "ENTREZ_GENE_ID", 
                         listType      = "Gene",
-                        minGSSize     = 5,
+                        minGSSize     = 10,
+                        maxGSSize     = 500,
                         annotation    = "GOTERM_BP_ALL",
                         pvalueCutoff  = 0.05,
                         pAdjustMethod = "BH",

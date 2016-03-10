@@ -9,6 +9,7 @@
 ##' @param exponent weight of each step
 ##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
+##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param pvalueCutoff pvalue Cutoff
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
@@ -27,6 +28,7 @@ gseGO <- function(geneList,
                   exponent      = 1,
                   nPerm         = 1000,
                   minGSSize     = 10,
+                  maxGSSize     = 500,
                   pvalueCutoff  = 0.05,
                   pAdjustMethod = "BH",
                   verbose       = TRUE,
@@ -41,6 +43,7 @@ gseGO <- function(geneList,
                           exponent = exponent,
                           nPerm = nPerm,
                           minGSSize = minGSSize,
+                          maxGSSize = maxGSSize,
                           pvalueCutoff = pvalueCutoff,
                           pAdjustMethod = pAdjustMethod,
                           verbose = verbose,
@@ -70,6 +73,7 @@ gseGO <- function(geneList,
 ##' @param exponent weight of each step
 ##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
+##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param pvalueCutoff pvalue Cutoff
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
@@ -82,6 +86,7 @@ gseMKEGG <- function(geneList,
                      exponent          = 1,
                      nPerm             = 1000,
                      minGSSize         = 10,
+                     maxGSSize         = 500,
                      pvalueCutoff      = 0.05,
                      pAdjustMethod     = "BH",
                      verbose           = TRUE,
@@ -94,6 +99,7 @@ gseMKEGG <- function(geneList,
                           exponent = exponent,
                           nPerm = nPerm,
                           minGSSize = minGSSize,
+                          maxGSSize = maxGSSize,
                           pvalueCutoff = pvalueCutoff,
                           pAdjustMethod = pAdjustMethod,
                           verbose = verbose,
@@ -130,6 +136,7 @@ gseKEGG <- function(geneList,
                     exponent          = 1,
                     nPerm             = 1000,
                     minGSSize         = 10,
+                    maxGSSize         = 500,
                     pvalueCutoff      = 0.05,
                     pAdjustMethod     = "BH",
                     verbose           = TRUE,
@@ -147,6 +154,7 @@ gseKEGG <- function(geneList,
                           exponent = exponent,
                           nPerm = nPerm,
                           minGSSize = minGSSize,
+                          maxGSSize = maxGSSize,
                           pvalueCutoff = pvalueCutoff,
                           pAdjustMethod = pAdjustMethod,
                           verbose = verbose,
@@ -163,16 +171,5 @@ gseKEGG <- function(geneList,
     return(res)
 }
 
-##' visualize analyzing result of GSEA
-##'
-##' plotting function for gseaResult
-##' @title gseaplot
-##' @param gseaResult gseaResult object
-##' @param geneSetID geneSet ID
-##' @param by one of "runningScore" or "position"
-##' @return ggplot2 object
-##' @export
-##' @author ygc
-gseaplot <- DOSE::gseaplot
 
 

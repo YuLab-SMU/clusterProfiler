@@ -11,16 +11,18 @@ enrichMKEGG <- function(gene,
                         pvalueCutoff = 0.05,
                         pAdjustMethod = 'BH',
                         universe,
-                        minGSSize = 5,
+                        minGSSize = 10,
+                        maxGSSize = 500,
                         qvalueCutoff = 0.2) {
 
     species <- organismMapper(organism)
     KEGG_DATA <- download.KEGG(species, "MKEGG")
     res <- enricher_internal(gene,
-                             pvalueCutoff  =pvalueCutoff,
-                             pAdjustMethod =pAdjustMethod,
+                             pvalueCutoff  = pvalueCutoff,
+                             pAdjustMethod = pAdjustMethod,
                              universe      = universe,
                              minGSSize     = minGSSize,
+                             maxGSSize     = maxGSSize,
                              qvalueCutoff  = qvalueCutoff,
                              USER_DATA = KEGG_DATA)
 

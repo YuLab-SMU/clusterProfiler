@@ -26,7 +26,7 @@ categories at specific level or GO enrichment analysis.
 \item{\code{.call}}{function call}
 }}
 \author{
-Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://guangchuangyu.github.io}
 }
 \seealso{
 \code{\linkS4class{groupGOResult}}

@@ -8,7 +8,7 @@ categories after FDR control.}
 \usage{
 enrichGO(gene, OrgDb, keytype = "ENTREZID", ont = "MF",
   pvalueCutoff = 0.05, pAdjustMethod = "BH", universe, qvalueCutoff = 0.2,
-  minGSSize = 5, readable = FALSE)
+  minGSSize = 10, maxGSSize = 500, readable = FALSE)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
@@ -28,6 +28,8 @@ enrichGO(gene, OrgDb, keytype = "ENTREZID", ont = "MF",
 \item{qvalueCutoff}{qvalue cutoff}
 
 \item{minGSSize}{minimal size of genes annotated by Ontology term for testing.}
+
+\item{maxGSSize}{maximal size of genes annotated for testing}
 
 \item{readable}{whether mapping gene ID to gene Name}
 }

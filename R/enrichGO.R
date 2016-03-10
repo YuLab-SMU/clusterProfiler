@@ -12,6 +12,7 @@
 ##' @param universe background genes
 ##' @param qvalueCutoff qvalue cutoff
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
+##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param readable whether mapping gene ID to gene Name
 ##' @return A \code{enrichResult} instance.
 ##' @importClassesFrom DOSE enrichResult
@@ -38,7 +39,8 @@ enrichGO <- function(gene,
                      pAdjustMethod="BH",
                      universe,
                      qvalueCutoff = 0.2,
-                     minGSSize = 5,
+                     minGSSize = 10,
+                     maxGSSize = 500,
                      readable=FALSE) {
 
     ont %<>% toupper
@@ -52,6 +54,7 @@ enrichGO <- function(gene,
                              universe = universe,
                              qvalueCutoff = qvalueCutoff,
                              minGSSize = minGSSize,
+                             maxGSSize = maxGSSize,
                              USER_DATA = GO_DATA
                              )
 

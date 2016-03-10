@@ -9,6 +9,7 @@
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
+##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param qvalueCutoff qvalue cutoff
 ##' @param use_internal_data logical, use KEGG.db or latest online KEGG data
 ##' @return A \code{enrichResult} instance.
@@ -35,7 +36,8 @@ enrichKEGG <- function(gene,
                        pvalueCutoff      = 0.05,
                        pAdjustMethod     = "BH",
                        universe,
-                       minGSSize         = 5,
+                       minGSSize         = 10,
+                       maxGSSize         = 500,
                        qvalueCutoff      = 0.2,
                        use_internal_data = FALSE) {
 
@@ -46,10 +48,11 @@ enrichKEGG <- function(gene,
         KEGG_DATA <- download.KEGG(species, "KEGG")
     }
     res <- enricher_internal(gene,
-                             pvalueCutoff  =pvalueCutoff,
-                             pAdjustMethod =pAdjustMethod,
+                             pvalueCutoff  = pvalueCutoff,
+                             pAdjustMethod = pAdjustMethod,
                              universe      = universe,
                              minGSSize     = minGSSize,
+                             maxGSSize     = maxGSSize,
                              qvalueCutoff  = qvalueCutoff,
                              USER_DATA = KEGG_DATA)
     if (is.null(res))

@@ -7,6 +7,7 @@
 ##' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
 ##' @param minGSSize minimal size of genes annotated for testing
+##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param qvalueCutoff qvalue cutoff
 ##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
 ##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
@@ -18,7 +19,8 @@ enricher <- function(gene,
                      pvalueCutoff = 0.05,
                      pAdjustMethod = "BH",
                      universe,
-                     minGSSize=5,
+                     minGSSize=10,
+                     maxGSSize=500,
                      qvalueCutoff = 0.2,
                      TERM2GENE,
                      TERM2NAME = NA) {
@@ -28,6 +30,7 @@ enricher <- function(gene,
                       pAdjustMethod = pAdjustMethod,
                       universe = universe,
                       minGSSize = minGSSize,
+                      maxGSSize = maxGSSize,
                       qvalueCutoff = qvalueCutoff,
                       USER_DATA = USER_DATA)
 }
@@ -41,6 +44,7 @@ enricher <- function(gene,
 ##' @param exponent weight of each step
 ##' @param nPerm number of permutations
 ##' @param minGSSize minimal size of each geneSet for analyzing
+##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param pvalueCutoff pvalue cutoff
 ##' @param pAdjustMethod p value adjustment method
 ##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
@@ -55,6 +59,7 @@ GSEA <- function(geneList,
                  exponent = 1,
                  nPerm = 1000,
                  minGSSize = 10,
+                 maxGSSize = 500,
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
                  TERM2GENE,
@@ -68,6 +73,7 @@ GSEA <- function(geneList,
           exponent = exponent,
           nPerm = nPerm,
           minGSSize = minGSSize,
+          maxGSSize = maxGSSize,
           pvalueCutoff = pvalueCutoff,
           pAdjustMethod = pAdjustMethod,
           verbose = verbose,

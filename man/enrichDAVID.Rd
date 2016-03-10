@@ -5,9 +5,9 @@
 \title{enrichDAVID}
 \usage{
 enrichDAVID(gene, idType = "ENTREZ_GENE_ID", listType = "Gene",
-  minGSSize = 5, annotation = "GOTERM_BP_ALL", pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", qvalueCutoff = 0.2, species = NA,
-  david.user = "clusterProfiler@hku.hk")
+  minGSSize = 10, maxGSSize = 500, annotation = "GOTERM_BP_ALL",
+  pvalueCutoff = 0.05, pAdjustMethod = "BH", qvalueCutoff = 0.2,
+  species = NA, david.user = "clusterProfiler@hku.hk")
 }
 \arguments{
 \item{gene}{input gene}
@@ -16,7 +16,9 @@ enrichDAVID(gene, idType = "ENTREZ_GENE_ID", listType = "Gene",
 
 \item{listType}{list Type}
 
-\item{minGSSize}{minGSSize}
+\item{minGSSize}{minimal size of genes annotated for testing}
+
+\item{maxGSSize}{maximal size of genes annotated for testing}
 
 \item{annotation}{david annotation}
 

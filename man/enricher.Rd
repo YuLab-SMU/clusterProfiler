@@ -5,7 +5,8 @@
 \title{enricher}
 \usage{
 enricher(gene, pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
-  minGSSize = 5, qvalueCutoff = 0.2, TERM2GENE, TERM2NAME = NA)
+  minGSSize = 10, maxGSSize = 500, qvalueCutoff = 0.2, TERM2GENE,
+  TERM2NAME = NA)
 }
 \arguments{
 \item{gene}{a vector of gene id}
@@ -17,6 +18,8 @@ enricher(gene, pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
 \item{universe}{background genes}
 
 \item{minGSSize}{minimal size of genes annotated for testing}
+
+\item{maxGSSize}{maximal size of genes annotated for testing}
 
 \item{qvalueCutoff}{qvalue cutoff}
 
