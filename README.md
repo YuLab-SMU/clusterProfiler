@@ -11,7 +11,7 @@ This package implements methods to analyze and visualize functional profiles (GO
 
 ## Authors ##
 
-Guangchuang YU, School of Public Health, The University of Hong Kong [http://ygc.name](http://ygc.name)
+Guangchuang YU, School of Public Health, The University of Hong Kong <http://guangchuangyu.github.io>
 
 ## Citation ##
 
