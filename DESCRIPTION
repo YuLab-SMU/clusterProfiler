@@ -45,8 +45,7 @@ Suggests:
     knitr,
     org.Hs.eg.db,
     pathview,
-    ReactomePA,
-    RDAVIDWebService
+    ReactomePA
 VignetteBuilder: knitr
 License: Artistic-2.0
 URL: https://github.com/GuangchuangYu/clusterProfiler
