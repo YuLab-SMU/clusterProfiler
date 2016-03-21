@@ -1,3 +1,9 @@
+CHANGES IN VERSION 2.5.6
+------------------------
+ o write my own code to parse KEGG REST instead of using KEGGREST package <2016-03-10, Thu>
+   + due to the issue of KEGGREST can't work with network of HTTP proxy with password
+   + see: http://guangchuangyu.github.io/2015/02/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler/#comment-2561443364
+
 CHANGES IN VERSION 2.5.5
 ------------------------
  o update show method of compareClusterResult <2016-03-06, Sun> 
