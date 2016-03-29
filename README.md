@@ -6,6 +6,8 @@
 [![post](http://www.bioconductor.org/shields/posts/clusterProfiler.svg)](https://support.bioconductor.org/t/clusterProfiler/)
 [![commit](http://www.bioconductor.org/shields/commits/bioc/clusterProfiler.svg)](http://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#svn_source)
 [![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](http://bioconductor.org/packages/stats/bioc/clusterProfiler.html)
+[![gitter](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/GuangchuangYu/Bioinformatics)
+
 
 This package implements methods to analyze and visualize functional profiles (GO and KEGG) of gene and gene clusters.
 
