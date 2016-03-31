@@ -1,3 +1,10 @@
+CHANGES IN VERSION 2.99.0
+------------------------
+ o version bump, ready to release version 3.
+   + KEGG pathway and module support all species listed in KEGG website.
+   + GO supports all species that have OrgDb which can be accessed online by AnnotationHub
+   + User's defined/customized annotation is supported via enricher & GSEA
+   
 CHANGES IN VERSION 2.5.6
 ------------------------
  o write my own code to parse KEGG REST instead of using KEGGREST package <2016-03-10, Thu>
@@ -6,6 +13,7 @@ CHANGES IN VERSION 2.5.6
 
 CHANGES IN VERSION 2.5.5
 ------------------------
+ o maxGSSize paramter <2016-03-9, Wed>
  o update show method of compareClusterResult <2016-03-06, Sun> 
  o fixed R check <2016-03-06, Sun>
  o update ReactomePA citation info <2016-02-17, Wed>
