@@ -9,7 +9,7 @@
 [![gitter](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/GuangchuangYu/Bioinformatics)
 
 
-This package implements methods to analyze and visualize functional profiles (GO and KEGG) of gene and gene clusters.
+This package implements methods to analyze and visualize functional profiles (GO, KEGG and user's customized annotation) of gene and gene clusters.
 
 ## Authors ##
 
