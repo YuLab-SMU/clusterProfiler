@@ -10,6 +10,7 @@
 ##' @importFrom GO.db GOMFANCESTOR
 ##' @importFrom GO.db GOBPANCESTOR
 ##' @importFrom GO.db GOCCANCESTOR
+##' @importFrom utils stack
 ## @export
 ##' @author Yu Guangchuang
 buildGOmap <- function(gomap) {
@@ -17,25 +18,23 @@ buildGOmap <- function(gomap) {
     ## remove empty GO annotation
     gomap <- gomap[gomap[,1] != "", ]
     
-    ## GO2EG <- split(as.character(gomap[,2]), as.character(gomap[,1]))
-    EG2GO <- split(as.character(gomap[,1]), as.character(gomap[,2]))
+    Gene2GO <- split(as.character(gomap[,1]), as.character(gomap[,2]))
     
-    EG2ALLGO <- lapply(EG2GO,
-                       function(i) {
-                           mfans <- unlist(mget(i, GOMFANCESTOR, ifnotfound=NA))
-                           bpans <- unlist(mget(i, GOBPANCESTOR, ifnotfound=NA))
-                           ccans <- unlist(mget(i, GOCCANCESTOR, ifnotfound=NA))
-                           ans <- c(mfans, bpans, ccans)
-                           ans <- ans[ !is.na(ans) ]
-                           ans <- c(i, ans)
-                           ans <- unique(ans)
-                           ans <- ans[ans != "all"]
-                           return(ans)
-                       })
+    Gene2ALLGO <- lapply(Gene2GO,
+                         function(i) {
+                             mfans <- unlist(mget(i, GOMFANCESTOR, ifnotfound=NA))
+                             bpans <- unlist(mget(i, GOBPANCESTOR, ifnotfound=NA))
+                             ccans <- unlist(mget(i, GOCCANCESTOR, ifnotfound=NA))
+                             ans <- c(mfans, bpans, ccans)
+                             ans <- ans[ !is.na(ans) ]
+                             ans <- c(i, ans)
+                             ans <- unique(ans)
+                             ans <- ans[ans != "all"]
+                             return(ans)
+                         })
 
-    len <- sapply(EG2ALLGO,length)
-    go2gene <- data.frame(GO=unlist(EG2ALLGO),
-                          Gene=rep(names(EG2ALLGO), times=len))
+    go2gene <- stack(Gene2ALLGO)
+    colnames(go2gene) <- c("GO", "Gene")
     
     return(go2gene)
 }
