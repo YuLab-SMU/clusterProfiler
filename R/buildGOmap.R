@@ -11,7 +11,7 @@
 ##' @importFrom GO.db GOBPANCESTOR
 ##' @importFrom GO.db GOCCANCESTOR
 ##' @importFrom utils stack
-## @export
+##' @export
 ##' @author Yu Guangchuang
 buildGOmap <- function(gomap) {
 
