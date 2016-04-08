@@ -28,7 +28,7 @@ enrichDAVID <- function(gene,
                         listType      = "Gene",
                         minGSSize     = 10,
                         maxGSSize     = 500,
-                        annotation    = "GOTERM_BP_ALL",
+                        annotation    = "GOTERM_BP_FAT",
                         pvalueCutoff  = 0.05,
                         pAdjustMethod = "BH",
                         qvalueCutoff  = 0.2,
@@ -164,8 +164,9 @@ enrichDAVID <- function(gene,
         pvalueCutoff   = pvalueCutoff,
         pAdjustMethod  = pAdjustMethod,
         organism       = org,
-        ontology       = as.character(x$Category[1]),
+        ontology       = annotation, ## as.character(x$Category[1]),
         gene           = as.character(gene),
-        geneInCategory = gc)
+        geneInCategory = gc,
+        keytype        = idType)
 }
     

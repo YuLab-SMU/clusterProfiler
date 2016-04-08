@@ -5,9 +5,9 @@
 \title{enrichDAVID}
 \usage{
 enrichDAVID(gene, idType = "ENTREZ_GENE_ID", listType = "Gene",
-  minGSSize = 10, maxGSSize = 500, annotation = "GOTERM_BP_ALL",
+  minGSSize = 10, maxGSSize = 500, annotation = "GOTERM_BP_FAT",
   pvalueCutoff = 0.05, pAdjustMethod = "BH", qvalueCutoff = 0.2,
-  species = NA, david.user = "clusterProfiler@hku.hk")
+  species = NA, david.user)
 }
 \arguments{
 \item{gene}{input gene}
