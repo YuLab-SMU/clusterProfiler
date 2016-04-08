@@ -33,7 +33,7 @@ enrichDAVID <- function(gene,
                         pAdjustMethod = "BH",
                         qvalueCutoff  = 0.2,
                         species       = NA,
-                        david.user    = "clusterProfiler@hku.hk") {
+                        david.user){
 
     Count <- List.Total <- Pop.Hits <- Pop.Total <- NULL
     
@@ -86,7 +86,8 @@ enrichDAVID <- function(gene,
     getSpecieNames <- eval(parse(text="getSpecieNames"))
 
     
-    david <- DAVIDWebService$new(email=david.user)    
+    david <- DAVIDWebService$new(email=david.user,
+                                 url="https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/")
     david.res <- addList(david, gene, idType=idType,
                          listName="clusterProfiler",
                          listType=listType)
@@ -120,7 +121,8 @@ enrichDAVID <- function(gene,
                        Description = Description,
                        GeneRatio   = GeneRatio,
                        BgRatio     = BgRatio,
-                       pvalue      = x$PValue)
+                       pvalue      = x$PValue,
+                       stringsAsFactors = FALSE)
     row.names(Over) <- ID
 
     if (pAdjustMethod == "bonferroni") {
@@ -151,6 +153,12 @@ enrichDAVID <- function(gene,
 
     gc <- strsplit(Over$geneID, "/")
     names(gc) <- Over$ID
+
+    if (!is.na(maxGSSize) || !is.null(maxGSSize)) {
+        idx <- x$Pop.Hits <= maxGSSize
+        Over <- Over[idx,]
+    }
+    
     new("enrichResult",
         result         = Over,
         pvalueCutoff   = pvalueCutoff,
