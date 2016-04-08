@@ -1,6 +1,10 @@
+CHANGES IN VERSION 2.99.1
+------------------------
+ o export buildGOmap <2016-04-08, Fri>
+ 
 CHANGES IN VERSION 2.99.0
 ------------------------
- o version bump, ready to release version 3.
+ o version bump, ready to release version 3. <2016-03-29, Tue>
    + KEGG pathway and module support all species listed in KEGG website.
    + GO supports all species that have OrgDb which can be accessed online by AnnotationHub
    + User's defined/customized annotation is supported via enricher & GSEA
