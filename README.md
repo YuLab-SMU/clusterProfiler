@@ -9,7 +9,7 @@
 [![gitter](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/GuangchuangYu/Bioinformatics)
 
 
-This package implements methods to analyze and visualize functional profiles of gene and gene clusters.
+This package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](http://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
 
 It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for many ontologies/pathways, including:
 
