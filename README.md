@@ -9,7 +9,47 @@
 [![gitter](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/GuangchuangYu/Bioinformatics)
 
 
-This package implements methods to analyze and visualize functional profiles (GO, KEGG and user's customized annotation) of gene and gene clusters.
+This package implements methods to analyze and visualize functional profiles of gene and gene clusters.
+
+It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for many ontologies/pathways, including:
+
++ Disease Ontology (via [DOSE](http://www.bioconductor.org/packages/DOSE))
++ [Network of Cancer Gene](http://ncg.kcl.ac.uk/) (via [DOSE](http://www.bioconductor.org/packages/DOSE))
++ Gene Ontology (supports many species with GO annotation query online via [AnnotationHub](https://bioconductor.org/packages/AnnotationHub/))
++ KEGG Pathway and Module with latest online data (supports more than 2000 species listed in <http://www.genome.jp/kegg/catalog/org_list.html>)
++ Reactome Pathway (via [ReactomePA](http://www.bioconductor.org/packages/ReactomePA))
++ [Molecular Signatures Database](http://software.broadinstitute.org/gsea/msigdb)
+  * hallmark gene sets
+  * positional gene sets
+  * curated gene sets
+  * motif gene sets
+  * computational gene sets
+  * GO gene sets
+  * oncogenic signatures
+  * immunologic signatures
++ DAVID (via [RDAVIDWebService](http://www.bioconductor.org/packages/RDAVIDWebService)
++ Other Annotations
+  * from other sources (e.g. [DisGeNET](http://www.disgenet.org/web/DisGeNET/menu/home) as [an example](http://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/))
+  * User's annotation
+  * customized ontology
+  * and others
+  
+*clusterProfiler* also provides several visualization methods to help interpreting enriched results, including:
+
++ plotGOgraph (via [topGO](http://www.bioconductor.org/packages/topGO) package)
++ barplot
++ dotplot
++ cnetplot
++ enrichMap
++ gseaplot
+
+*clusterProfiler* provides several useful utilities:
+
++ gofilter (to restrict the result at specific GO level)
++ dropGO (to screen out GO term of specific level or specific term)
++ simplify (to remove redundant GO terms)
+
+A discussion forum can be found at <https://groups.google.com/forum/#!forum/clusterprofiler>.
 
 ## Authors ##
 
