@@ -27,12 +27,12 @@ It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for ma
   * GO gene sets
   * oncogenic signatures
   * immunologic signatures
-+ DAVID (via [RDAVIDWebService](http://www.bioconductor.org/packages/RDAVIDWebService)
++ DAVID (via [RDAVIDWebService](http://www.bioconductor.org/packages/RDAVIDWebService))
 + Other Annotations
   * from other sources (e.g. [DisGeNET](http://www.disgenet.org/web/DisGeNET/menu/home) as [an example](http://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/))
-  * User's annotation
+  * user's annotation
   * customized ontology
-  * and others
+  * and many others
   
 *clusterProfiler* also provides several visualization methods to help interpreting enriched results, including:
 
@@ -43,7 +43,7 @@ It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for ma
 + enrichMap
 + gseaplot
 
-*clusterProfiler* provides several useful utilities:
+and several useful utilities:
 
 + gofilter (to restrict the result at specific GO level)
 + dropGO (to screen out GO term of specific level or specific term)
