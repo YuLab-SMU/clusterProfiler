@@ -47,7 +47,7 @@ and several useful utilities:
 
 + gofilter (to restrict the result at specific GO level)
 + dropGO (to screen out GO term of specific level or specific term)
-+ simplify (to remove redundant GO terms)
++ simplify (to remove redundant GO terms, supported via [GOSemSim](http://www.bioconductor.org/packages/GOSemSim))
 
 A discussion forum can be found at <https://groups.google.com/forum/#!forum/clusterprofiler>.
 
