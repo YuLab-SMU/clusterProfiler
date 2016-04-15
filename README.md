@@ -18,6 +18,7 @@ It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for ma
 + Gene Ontology (supports many species with GO annotation query online via [AnnotationHub](https://bioconductor.org/packages/AnnotationHub/))
 + KEGG Pathway and Module with latest online data (supports more than 2000 species listed in <http://www.genome.jp/kegg/catalog/org_list.html>)
 + Reactome Pathway (via [ReactomePA](http://www.bioconductor.org/packages/ReactomePA))
++ DAVID (via [RDAVIDWebService](http://www.bioconductor.org/packages/RDAVIDWebService))
 + [Molecular Signatures Database](http://software.broadinstitute.org/gsea/msigdb)
   * hallmark gene sets
   * positional gene sets
@@ -27,7 +28,6 @@ It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for ma
   * GO gene sets
   * oncogenic signatures
   * immunologic signatures
-+ DAVID (via [RDAVIDWebService](http://www.bioconductor.org/packages/RDAVIDWebService))
 + Other Annotations
   * from other sources (e.g. [DisGeNET](http://www.disgenet.org/web/DisGeNET/menu/home) as [an example](http://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/))
   * user's annotation
@@ -36,17 +36,20 @@ It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for ma
   
 *clusterProfiler* also provides several visualization methods to help interpreting enriched results, including:
 
-+ plotGOgraph (via [topGO](http://www.bioconductor.org/packages/topGO) package)
 + barplot
-+ dotplot
 + cnetplot
++ dotplot
 + enrichMap
 + gseaplot
++ plotGOgraph (via [topGO](http://www.bioconductor.org/packages/topGO) package)
 
 and several useful utilities:
 
-+ gofilter (restrict the result at specific GO level)
++ bitr (Biological Id TranslatoR)
++ compareCluster (biological theme comparison)
 + dropGO (screen out GO term of specific level or specific term)
++ gofilter (restrict result at specific GO level)
++ gsfilter (restrict result by gene set size)
 + simplify (remove redundant GO terms, supported via [GOSemSim](http://www.bioconductor.org/packages/GOSemSim))
 
 A discussion forum can be found at <https://groups.google.com/forum/#!forum/clusterprofiler>.
