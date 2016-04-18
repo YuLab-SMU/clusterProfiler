@@ -42,7 +42,8 @@ It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for ma
 + enrichMap
 + gseaplot
 + plotGOgraph (via [topGO](http://www.bioconductor.org/packages/topGO) package)
-
++ upsetplot
+  
 and several useful utilities:
 
 + bitr (Biological Id TranslatoR)
