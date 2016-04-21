@@ -3,10 +3,10 @@
 }
 
 build_Anno <- function(path2gene, path2name) {
-    if (!exists("Anno_clusterProfiler_Env", envir = .GlobalEnv)) {
-        assign("Anno_clusterProfiler_Env", new.env(), .GlobalEnv)
+    if (!exists(".Anno_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign(".Anno_clusterProfiler_Env", new.env(), .GlobalEnv)
     }
-    Anno_clusterProfiler_Env <- get("Anno_clusterProfiler_Env", envir= .GlobalEnv)
+    Anno_clusterProfiler_Env <- get(".Anno_clusterProfiler_Env", envir= .GlobalEnv)
 
     PATHID2EXTID <- split(as.character(path2gene[,2]), as.character(path2gene[,1]))
     EXTID2PATHID <- split(as.character(path2gene[,1]), as.character(path2gene[,2]))
