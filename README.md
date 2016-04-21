@@ -49,6 +49,7 @@ and several useful utilities:
 + bitr (Biological Id TranslatoR)
 + compareCluster (biological theme comparison)
 + dropGO (screen out GO term of specific level or specific term)
++ go2term (convet GO ID to descriptive term)
 + gofilter (restrict result at specific GO level)
 + gsfilter (restrict result by gene set size)
 + simplify (remove redundant GO terms, supported via [GOSemSim](http://www.bioconductor.org/packages/GOSemSim))

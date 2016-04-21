@@ -102,7 +102,6 @@ get_GO_data <- function(OrgDb, ont, keytype) {
     
     if (use_cached) {
         goAnno <- get("goAnno", envir=GO_Env)
-        GO2TERM <- get("GO2TERM", envir=GO_Env)
     } else {
         OrgDb <- load_OrgDb(OrgDb)
         kt <- keytypes(OrgDb)
@@ -115,10 +114,7 @@ get_GO_data <- function(OrgDb, ont, keytype) {
             select(OrgDb, keys=kk, keytype=keytype,
                    columns=c("GOALL", "ONTOLOGYALL")))
         
-        goids <- toTable(GOTERM)
-        GO2TERM <- goids[, c("go_id", "Term")] %>% unique
         assign("goAnno", goAnno, envir=GO_Env)
-        assign("GO2TERM", GO2TERM, envir=GO_Env)
         assign("keytype", keytype, envir=GO_Env)
         assign("organism", get_organism(OrgDb), envir=GO_Env)
     }
@@ -129,7 +125,7 @@ get_GO_data <- function(OrgDb, ont, keytype) {
         GO2GENE <- goAnno[goAnno$ONTOLOGYALL == ont, c(2,1)]
     }
     
-    GO_DATA <- build_Anno(GO2GENE, GO2TERM)
+    GO_DATA <- build_Anno(GO2GENE, get_GO2TERM_table())
     
     goOnt.df <- goAnno[, c("GOALL", "ONTOLOGYALL")] %>% unique
     goOnt <- goOnt.df[,2]
@@ -138,11 +134,40 @@ get_GO_data <- function(OrgDb, ont, keytype) {
     return(GO_DATA)
 }
 
-get_GO_Env <- function () {
-    if (!exists("GO_clusterProfiler_Env", envir = .GlobalEnv)) {
-        assign("GO_clusterProfiler_Env", new.env(), .GlobalEnv)
+get_GO2TERM_table <- function() {
+    if (!exists(".GO2TERM_Env", envir=.GlobalEnv)) {
+        assign(".GO2TERM_Env", new.env(), .GlobalEnv)
     }
-    get("GO_clusterProfiler_Env", envir = .GlobalEnv)
+    GO2TERM_Env <- get(".GO2TERM_Env", envir = .GlobalEnv)
+    if (exists("GO2TERM", envir = GO2TERM_Env)) {
+        GO2TERM <- get("GO2TERM", envir=GO2TERM_Env)
+    } else {
+        goids <- toTable(GOTERM)
+        GO2TERM <- goids[, c("go_id", "Term")] %>% unique
+        assign("GO2TERM", GO2TERM, envir = GO2TERM_Env)
+    }
+    return(GO2TERM)
+}
+
+##' convert goid to descriptive term
+##'
+##' 
+##' @title go2term
+##' @param goid a vector of GO IDs
+##' @return data.frame
+##' @export
+##' @author Guangchuang Yu
+go2term <- function(goid) {
+    GO2TERM <- get_GO2TERM_table()
+    GO2TERM[GO2TERM[,1] %in% goid, ]
+}
+
+
+get_GO_Env <- function () {
+    if (!exists(".GO_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign(".GO_clusterProfiler_Env", new.env(), .GlobalEnv)
+    }
+    get(".GO_clusterProfiler_Env", envir = .GlobalEnv)
 }
 
 
