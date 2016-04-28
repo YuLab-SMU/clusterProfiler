@@ -47,7 +47,7 @@ Suggests:
     ReactomePA
 VignetteBuilder: knitr
 License: Artistic-2.0
-URL: https://github.com/GuangchuangYu/clusterProfiler
+URL: http://guangchuangyu.github.io/clusterProfiler
 BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
 biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,
