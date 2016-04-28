@@ -1,5 +1,7 @@
 CHANGES IN VERSION 2.99.1
 ------------------------
+ o go2ont function <2016-04-28, Thu>
+   + https://www.biostars.org/p/188863/
  o go2term function <2016-04-21, Thu>
  o export buildGOmap <2016-04-08, Fri>
  o fixed enrichDAVID according to https://support.bioconductor.org/p/72188/ <2016-04-08, Fri>
