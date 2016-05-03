@@ -58,3 +58,47 @@ bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
 }
 
 
+bitr_kegg <- function(geneID, fromType, toType, species, drop=TRUE) {
+    id_types <- c("ncbi-proteinid", "ncbi-geneid", "uniprot", "kegg")
+    fromType <- match.arg(fromType, id_types)
+    toType <- match.arg(toType, id_types)
+
+    if (fromType == toType)
+        stop("fromType and toType should not be identical...")
+    
+    if (fromType == "kegg") {
+        turl <- paste("http://rest.kegg.jp/conv", toType, species, sep='/')
+        tidconv <- kegg_rest(turl)
+        idconv <- tidconv
+    }
+
+    if (toType == "kegg") {
+        furl <- paste("http://rest.kegg.jp/conv", fromType, species, sep='/')
+        fidconv <- kegg_rest(furl)
+        idconv <- fidconv
+    }
+
+    if (fromType != "kegg" && toType != "kegg") {
+        idconv <- merge(fidconv, tidconv, by.x='from', by.y='from')
+        idconv <- idconv[, -1]
+        colnames(idconv) <- c("from", "to")
+    }
+    
+    idconv[,1] %<>% gsub("[^:]+:", "", .)
+    idconv[,2] %<>% gsub("[^:]+:", "", .)
+    
+    res <- idconv[idconv[,1] %in% geneID, ]
+    n <- sum(!geneID %in% res[,1])
+    if (n > 0) {
+        warning(paste0(round(n/length(geneID)*100, 2), "%"), " of input gene IDs are fail to map...")
+    }
+    
+    if (! drop && n > 0) {
+        misHit <- data.frame(from = geneID[!geneID %in% res[,1]],
+                             to = NA)
+        res <- rbind(res, misHit)
+    }
+    colnames(res) <- c(fromType, toType)
+    rownames(res) <- NULL
+    return(res)
+}
