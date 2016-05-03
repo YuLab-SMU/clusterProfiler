@@ -138,7 +138,7 @@ download.KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
         }
         colnames(KEGGPATHID2EXTID) <- c("from", "kegg")
         KEGGPATHID2EXTID <- merge(KEGGPATHID2EXTID, idconv, by.x='kegg', by.y='from')
-        KEGGPATHID2EXTID <- KEGGPATHID2EXTID[, -1]
+        KEGGPATHID2EXTID <- unique(KEGGPATHID2EXTID[, -1])
     }
     
     build_Anno(KEGGPATHID2EXTID,
