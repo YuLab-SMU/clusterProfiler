@@ -1,7 +1,8 @@
 CHANGES IN VERSION 2.99.2
 ------------------------
  o bitr_kegg function <2016-05-03, Tue>
- 
+ o get_kegg_species function <2016-05-03, Tue>
+   
 CHANGES IN VERSION 2.99.1
 ------------------------
  o go2ont function <2016-04-28, Thu>
