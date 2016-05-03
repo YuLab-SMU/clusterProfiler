@@ -57,8 +57,19 @@ bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
     return(res)
 }
 
-
-bitr_kegg <- function(geneID, fromType, toType, species, drop=TRUE) {
+##' convert biological ID using KEGG API
+##'
+##' 
+##' @title bitr_kegg
+##' @param geneID input gene id
+##' @param fromType input id type
+##' @param toType output id type
+##' @param organism supported organism, can be search using search_kegg_organism function
+##' @param drop drop NA or not
+##' @return data.frame
+##' @export
+##' @author Guangchuang Yu
+bitr_kegg <- function(geneID, fromType, toType, organism, drop=TRUE) {
     id_types <- c("ncbi-proteinid", "ncbi-geneid", "uniprot", "kegg")
     fromType <- match.arg(fromType, id_types)
     toType <- match.arg(toType, id_types)
@@ -66,26 +77,7 @@ bitr_kegg <- function(geneID, fromType, toType, species, drop=TRUE) {
     if (fromType == toType)
         stop("fromType and toType should not be identical...")
     
-    if (fromType == "kegg") {
-        turl <- paste("http://rest.kegg.jp/conv", toType, species, sep='/')
-        tidconv <- kegg_rest(turl)
-        idconv <- tidconv
-    }
-
-    if (toType == "kegg") {
-        furl <- paste("http://rest.kegg.jp/conv", fromType, species, sep='/')
-        fidconv <- kegg_rest(furl)
-        idconv <- fidconv
-    }
-
-    if (fromType != "kegg" && toType != "kegg") {
-        idconv <- merge(fidconv, tidconv, by.x='from', by.y='from')
-        idconv <- idconv[, -1]
-        colnames(idconv) <- c("from", "to")
-    }
-    
-    idconv[,1] %<>% gsub("[^:]+:", "", .)
-    idconv[,2] %<>% gsub("[^:]+:", "", .)
+    idconv <- KEGG_convert(fromType, toType, organism)
     
     res <- idconv[idconv[,1] %in% geneID, ]
     n <- sum(!geneID %in% res[,1])
@@ -101,4 +93,32 @@ bitr_kegg <- function(geneID, fromType, toType, species, drop=TRUE) {
     colnames(res) <- c(fromType, toType)
     rownames(res) <- NULL
     return(res)
+}
+
+KEGG_convert <- function(fromType, toType, species) {
+    if (fromType == "kegg" || toType != "kegg") {
+        turl <- paste("http://rest.kegg.jp/conv", toType, species, sep='/')
+        tidconv <- kegg_rest(turl)
+        if (is.null(tidconv))
+            stop(toType, " is not supported for ", species, " ...")
+        idconv <- tidconv
+    }
+    
+    if (toType == "kegg" || fromType != "kegg") {
+        furl <- paste("http://rest.kegg.jp/conv", fromType, species, sep='/')
+        fidconv <- kegg_rest(furl)
+        if (is.null(fidconv))
+            stop(fromType, " is not supported for ", species, " ...")
+        idconv <- fidconv
+    }
+    
+    if (fromType != "kegg" && toType != "kegg") {
+        idconv <- merge(fidconv, tidconv, by.x='from', by.y='from')
+        idconv <- idconv[, -1]
+        colnames(idconv) <- c("from", "to")
+    }
+    
+    idconv[,1] %<>% gsub("[^:]+:", "", .)
+    idconv[,2] %<>% gsub("[^:]+:", "", .)
+    return(idconv)
 }

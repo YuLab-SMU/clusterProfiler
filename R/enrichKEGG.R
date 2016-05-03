@@ -5,6 +5,7 @@
 ##'
 ##' @param gene a vector of entrez gene id.
 ##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
+##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
@@ -33,6 +34,7 @@
 ##'
 enrichKEGG <- function(gene,
                        organism          = "hsa",
+                       keyType           = "kegg",
                        pvalueCutoff      = 0.05,
                        pAdjustMethod     = "BH",
                        universe,
@@ -45,7 +47,7 @@ enrichKEGG <- function(gene,
     if (use_internal_data) {
         KEGG_DATA <- get_data_from_KEGG_db(species)
     } else {
-        KEGG_DATA <- download.KEGG(species, "KEGG")
+        KEGG_DATA <- download.KEGG(species, "KEGG", keyType)
     }
     res <- enricher_internal(gene,
                              pvalueCutoff  = pvalueCutoff,
@@ -60,16 +62,16 @@ enrichKEGG <- function(gene,
     
     res@ontology <- "KEGG"
     res@organism <- species
-    res@keytype <- "UNKNOWN"
+    res@keytype <- keyType
     
     return(res)
 }
 
 get_KEGG_Env <- function() {
-    if (! exists("KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
-        assign("KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
+    if (! exists(".KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
+        assign(".KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
     }
-    get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
+    get(".KEGG_clusterProfiler_Env", envir = .GlobalEnv)
 }
 
 ##' download the latest version of KEGG pathway
@@ -78,10 +80,11 @@ get_KEGG_Env <- function() {
 ##' @title download.KEGG
 ##' @param species species
 ##' @param KEGG_Type one of 'KEGG' or 'MKEGG'
+##' @param keyType supported keyType, see bitr_kegg
 ##' @return list
 ##' @author Guangchuang Yu
 ##' @importFrom magrittr %<>%
-download.KEGG <- function(species, KEGG_Type="KEGG") {
+download.KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
     KEGG_Env <- get_KEGG_Env()
     
     use_cached <- FALSE
@@ -112,13 +115,32 @@ download.KEGG <- function(species, KEGG_Type="KEGG") {
         
         KEGGPATHID2EXTID <- kres$KEGGPATHID2EXTID
         KEGGPATHID2NAME <- kres$KEGGPATHID2NAME
-
+        
         assign("organism", species, envir=KEGG_Env)
         assign("_type_", KEGG_Type, envir=KEGG_Env)
         assign("KEGGPATHID2NAME", KEGGPATHID2NAME, envir=KEGG_Env)
         assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir=KEGG_Env)
     }
-        
+
+    if (keyType != "kegg") {
+        if (use_cached &&
+            exists("key", envir=KEGG_Env, inherits = FALSE) &&
+            exists("idconv", envir=KEGG_Env, inherits = FALSE)) {
+
+            key <- get("key", envir=KEGG_Env)
+            if (key == keyType) {
+                idconv <- get("idconv", envir=KEGG_Env)
+            }
+        } else {
+            idconv <- KEGG_convert("kegg", keyType, species)
+            assign("key", keyType, envir=KEGG_Env)
+            assign("idconv", idconv, envir=KEGG_Env)
+        }
+        colnames(KEGGPATHID2EXTID) <- c("from", "kegg")
+        KEGGPATHID2EXTID <- merge(KEGGPATHID2EXTID, idconv, by.x='kegg', by.y='from')
+        KEGGPATHID2EXTID <- KEGGPATHID2EXTID[, -1]
+    }
+    
     build_Anno(KEGGPATHID2EXTID,
                KEGGPATHID2NAME)
 }
@@ -152,29 +174,6 @@ download.KEGG.Module <- function(species) {
                 KEGGPATHID2NAME =keggmodule2name.df))
 }
 
-kegg_rest <- function(rest_url) {
-    content <- tryCatch(readLines(rest_url), error=function(e) NULL)
-    if (is.null(content))
-        return(content)
-
-    content %<>% strsplit(., "\t") %>% do.call('rbind', .)
-    res <- data.frame(from=content[,1],
-                      to=content[,2])
-    return(res)
-}
-
-## http://www.genome.jp/kegg/rest/keggapi.html
-## kegg_link('hsa', 'pathway')
-kegg_link <- function(target_db, source_db) {
-    url <- paste0("http://rest.kegg.jp/link/", target_db, "/", source_db, collapse="")
-    kegg_rest(url)
-}
-
-
-kegg_list <- function(db) {
-    url <- paste0("http://rest.kegg.jp/list/", db, collapse="")
-    kegg_rest(url)
-}
 
 ##' viewKEGG function is for visualize KEGG pathways
 ##' works with enrichResult object to visualize enriched KEGG pathway

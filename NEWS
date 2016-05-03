@@ -1,7 +1,8 @@
 CHANGES IN VERSION 2.99.2
 ------------------------
+ o add keyType parameter in enrichKEGG, enrichMKEGG, gseKEGG and gseMKEGG <2016-05-03, Tue>
+ o search_kegg_species function <2016-05-03, Tue>
  o bitr_kegg function <2016-05-03, Tue>
- o get_kegg_species function <2016-05-03, Tue>
    
 CHANGES IN VERSION 2.99.1
 ------------------------

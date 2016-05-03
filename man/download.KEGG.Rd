@@ -4,12 +4,14 @@
 \alias{download.KEGG}
 \title{download.KEGG}
 \usage{
-download.KEGG(species, KEGG_Type = "KEGG")
+download.KEGG(species, KEGG_Type = "KEGG", keyType = "kegg")
 }
 \arguments{
 \item{species}{species}
 
 \item{KEGG_Type}{one of 'KEGG' or 'MKEGG'}
+
+\item{keyType}{supported keyType, see bitr_kegg}
 }
 \value{
 list

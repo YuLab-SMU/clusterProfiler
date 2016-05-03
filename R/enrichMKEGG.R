@@ -8,6 +8,7 @@
 ##' @export
 enrichMKEGG <- function(gene,
                         organism = 'hsa',
+                        keyType = 'kegg',
                         pvalueCutoff = 0.05,
                         pAdjustMethod = 'BH',
                         universe,
