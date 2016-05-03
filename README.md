@@ -47,12 +47,15 @@ It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for ma
 and several useful utilities:
 
 + bitr (Biological Id TranslatoR)
++ bitr_kegg (bitr using KEGG source)
 + compareCluster (biological theme comparison)
 + dropGO (screen out GO term of specific level or specific term)
 + go2ont (convert GO ID to Ontology)
 + go2term (convert GO ID to descriptive term)
 + gofilter (restrict result at specific GO level)
 + gsfilter (restrict result by gene set size)
++ search_kegg_organism (search kegg supported organism)
++ setReadable (convert IDs stored `enrichResult` object to gene symbol)
 + simplify (remove redundant GO terms, supported via [GOSemSim](http://www.bioconductor.org/packages/GOSemSim))
 
 A discussion forum can be found at <https://groups.google.com/forum/#!forum/clusterprofiler>.
