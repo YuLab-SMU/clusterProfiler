@@ -70,6 +70,7 @@ gseGO <- function(geneList,
 ##' @title gseMKEGG
 ##' @param geneList order ranked geneList
 ##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
+##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 ##' @param exponent weight of each step
 ##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
@@ -83,6 +84,7 @@ gseGO <- function(geneList,
 ##' @author Yu Guangchuang
 gseMKEGG <- function(geneList,
                      organism          = 'hsa',
+                     keyType           = 'kegg',
                      exponent          = 1,
                      nPerm             = 1000,
                      minGSSize         = 10,
@@ -93,7 +95,7 @@ gseMKEGG <- function(geneList,
                      seed = FALSE) {
 
     species <- organismMapper(organism)    
-    KEGG_DATA <- download.KEGG(species, "MKEGG")
+    KEGG_DATA <- download.KEGG(species, "MKEGG", keyType)
 
     res <-  GSEA_internal(geneList = geneList,
                           exponent = exponent,
@@ -133,6 +135,7 @@ gseMKEGG <- function(geneList,
 ##' @author Yu Guangchuang
 gseKEGG <- function(geneList,
                     organism          = 'hsa',
+                    keyType           = 'kegg',
                     exponent          = 1,
                     nPerm             = 1000,
                     minGSSize         = 10,
@@ -147,7 +150,7 @@ gseKEGG <- function(geneList,
     if (use_internal_data) {
         KEGG_DATA <- get_data_from_KEGG_db(species)
     } else {
-        KEGG_DATA <- download.KEGG(species, "KEGG")
+        KEGG_DATA <- download.KEGG(species, "KEGG", keyType)
     }
 
     res <-  GSEA_internal(geneList = geneList,

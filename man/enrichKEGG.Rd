@@ -6,7 +6,7 @@
 Given a vector of genes, this function will return the enrichment KEGG
 categories with FDR control.}
 \usage{
-enrichKEGG(gene, organism = "hsa", pvalueCutoff = 0.05,
+enrichKEGG(gene, organism = "hsa", keyType = "kegg", pvalueCutoff = 0.05,
   pAdjustMethod = "BH", universe, minGSSize = 10, maxGSSize = 500,
   qvalueCutoff = 0.2, use_internal_data = FALSE)
 }
@@ -14,6 +14,8 @@ enrichKEGG(gene, organism = "hsa", pvalueCutoff = 0.05,
 \item{gene}{a vector of entrez gene id.}
 
 \item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+
+\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
 \item{pvalueCutoff}{Cutoff value of pvalue.}
 

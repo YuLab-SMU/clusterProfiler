@@ -4,8 +4,8 @@
 \alias{gseKEGG}
 \title{gseKEGG}
 \usage{
-gseKEGG(geneList, organism = "hsa", exponent = 1, nPerm = 1000,
-  minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
+gseKEGG(geneList, organism = "hsa", keyType = "kegg", exponent = 1,
+  nPerm = 1000, minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
   pAdjustMethod = "BH", verbose = TRUE, use_internal_data = FALSE,
   seed = FALSE)
 }
@@ -13,6 +13,8 @@ gseKEGG(geneList, organism = "hsa", exponent = 1, nPerm = 1000,
 \item{geneList}{order ranked geneList}
 
 \item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+
+\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
 \item{exponent}{weight of each step}
 

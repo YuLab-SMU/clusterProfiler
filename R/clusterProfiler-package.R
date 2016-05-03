@@ -34,4 +34,14 @@ NULL
 #' @keywords datasets
 NULL
 
+#' Datasets
+#' kegg_species contains kegg species information
+#'
+#'
+#' @name DataSet
+#' @aliases kegg_species
+#' @docType data
+#' @keywords datasets
+NULL
+
 
