@@ -1,3 +1,11 @@
+CHANGES IN VERSION 3.1.1
+------------------------
+ o https://github.com/Bioconductor-mirror/clusterProfiler/commit/2949fe8db5464c419c9d1665cb24f43c49ac54ec
+
+CHANGES IN VERSION 3.0.0
+------------------------
+ o BioC 3.3 released <2016-05-05, Thu>
+
 CHANGES IN VERSION 2.99.2
 ------------------------
  o add keyType parameter in enrichKEGG, enrichMKEGG, gseKEGG and gseMKEGG <2016-05-03, Tue>
