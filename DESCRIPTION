@@ -46,6 +46,7 @@ Suggests:
     pathview,
     ReactomePA
 VignetteBuilder: knitr
+ByteCompile: true
 License: Artistic-2.0
 URL: http://guangchuangyu.github.io/clusterProfiler
 BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
