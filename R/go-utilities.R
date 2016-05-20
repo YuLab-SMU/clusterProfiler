@@ -53,3 +53,86 @@ get_GO2Ontology_table <- function() {
     GOTERM.df <- get_GOTERM()
     GOTERM.df[, c("go_id", "Ontology")] %>% unique
 }
+
+
+excludeGOlevel <- function(x, ont, level) {
+    lv <- unlist(lapply(level, getGOLevel, ont=ont))
+    x <- excludeGOterm(x, lv)
+    return(x)
+}
+
+excludeGOterm <- function(x, term) {
+    if ( is(x, "enrichResult") ) {
+        x@result <- x@result[! x@result[, "ID"] %in% term, ]
+    } else if ( is(x, "compareClusterResult") ) {
+        x@compareClusterResult <- x@compareClusterResult[! x@compareClusterResult[, "ID"] %in% term, ]
+    } else {
+        stop("x should be one of enrichResult of compareClusterResult...")
+    }
+    return(x)
+}
+
+keepGOlevel <- function(x, ont, level) {
+    lv <- unlist(lapply(level, getGOLevel, ont=ont))
+    x <- keepGOterm(x, lv)
+    return(x)
+}
+
+keepGOterm <- function(x, term) {
+    if ( is(x, "enrichResult") ) {
+        x@result <- x@result[x@result[, "ID"] %in% term, ]
+    } else if ( is(x, "compareClusterResult") ) {
+        x@compareClusterResult <- x@compareClusterResult[x@compareClusterResult[, "ID"] %in% term, ]
+    } else {
+        stop("x should be one of enrichResult of compareClusterResult...")
+    }
+    return(x)
+}
+
+##' query GOIDs at a specific level.
+##'
+##'
+##' @title get GOIDs at a specific level
+##' @param ont Ontology
+##' @param level GO level
+##' @return a vector of GOIDs
+##' @importFrom GO.db GOBPCHILDREN
+##' @importFrom GO.db GOCCCHILDREN
+##' @importFrom GO.db GOMFCHILDREN
+##' @importMethodsFrom AnnotationDbi mget
+##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+getGOLevel <- function(ont, level) {
+    switch(ont,
+           MF = {
+               topNode <- "GO:0003674"
+               Children <- GOMFCHILDREN
+           },
+           BP = {
+               topNode <- "GO:0008150"
+               Children <- GOBPCHILDREN
+           },
+           CC = {
+               topNode <- "GO:0005575"
+               Children <- GOCCCHILDREN
+           }
+           )
+
+    max_level <- max(level)
+    if (any(level == 1)) {
+        all_nodes <- topNode
+    } else {
+        all_nodes <- c()
+    }
+
+    Node <- topNode
+    for (i in seq_len(max_level-1)) {
+        Node <- mget(Node, Children, ifnotfound=NA)
+        Node <- unique(unlist(Node))
+        Node <- as.vector(Node)
+        Node <- Node[!is.na(Node)]
+        if ((i+1) %in% level) {
+            all_nodes <- c(all_nodes, Node)
+        }
+    }
+    return(all_nodes)
+}
