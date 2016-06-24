@@ -1,6 +1,6 @@
 Package: clusterProfiler
 Type: Package
-Title: statistical analysis and visulization of functional profiles for
+Title: statistical analysis and visualization of functional profiles for
     genes and gene clusters
 Version: 3.1.1
 Authors@R: c(person(given = "Guangchuang", family = "Yu",
