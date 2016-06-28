@@ -2,7 +2,7 @@ Package: clusterProfiler
 Type: Package
 Title: statistical analysis and visualization of functional profiles for
     genes and gene clusters
-Version: 3.1.1
+Version: 3.1.2
 Authors@R: c(person(given = "Guangchuang", family = "Yu",
 	            email = "guangchuangyu@gmail.com",
 		    role  = c("aut", "cre")),
@@ -18,8 +18,8 @@ Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
 Description: This package implements methods to analyze and visualize
     functional profiles (GO and KEGG) of gene and gene clusters.
 Depends:
-    R (>= 3.2.0),
-    DOSE (>= 2.9.0)
+    R (>= 3.3.0),
+    DOSE (>= 2.10.0)
 Imports:
     AnnotationDbi,
     ggplot2,

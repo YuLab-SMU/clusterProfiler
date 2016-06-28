@@ -1,3 +1,10 @@
+CHANGES IN VERSION 3.1.2
+------------------------
+ o duplicated KEGG path id for KEGG orthology, only use ko <2016-06-28, Tue>
+   + e.g. map00010 and ko00010
+   + http://www.kegg.jp/dbget-bin/www_bget?ko+ko00010
+   + http://www.kegg.jp/dbget-bin/www_bget?ko+map00010
+   
 CHANGES IN VERSION 3.1.1
 ------------------------
  o getGOLevel and dropGO support using a vector of GO level <2016-05-20, Fri>

@@ -96,7 +96,7 @@ To view the vignette of `clusterProfiler` installed in your system, start `R` an
 vignette("clusterProfiler", package="clusterProfiler")
 ```
 
-More documents can be found in <http://www.bioconductor.org/packages/DOSE>, <http://www.bioconductor.org/packages/clusterProfiler> and <http://guangchuangyu.github.io/clusterProfiler>.
+More documents can be found in <https://www.bioconductor.org/packages/DOSE>, <https://www.bioconductor.org/packages/clusterProfiler> and <https://guangchuangyu.github.io/clusterProfiler>.
 
 
 
