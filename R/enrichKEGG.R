@@ -154,6 +154,13 @@ download.KEGG.Path <- function(species) {
     
     keggpathid2name.df <- kegg_list("pathway")
     keggpathid2name.df[,1] %<>% gsub("path:map", species, .)
+
+    ## if 'species="ko"', ko and map path are duplicated, only keep ko path.
+    ##
+    ## http://www.kegg.jp/dbget-bin/www_bget?ko+ko00010
+    ## http://www.kegg.jp/dbget-bin/www_bget?ko+map0001
+    ##
+    keggpathid2extid.df <- keggpathid2extid.df[keggpathid2extid.df[,1] %in% keggpathid2name.df[,1],]
     
     return(list(KEGGPATHID2EXTID=keggpathid2extid.df,
                 KEGGPATHID2NAME=keggpathid2name.df))
