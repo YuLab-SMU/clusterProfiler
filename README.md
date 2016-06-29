@@ -99,8 +99,9 @@ vignette("clusterProfiler", package="clusterProfiler")
 More documents can be found in <https://www.bioconductor.org/packages/DOSE>, <https://www.bioconductor.org/packages/clusterProfiler> and <https://guangchuangyu.github.io/clusterProfiler>.
 
 
+## Feedback ##
 
-## Bugs/Feature requests ##
+ - For bugs or feature request, please post to [github issue](https://github.com/GuangchuangYu/clusterProfiler/issues).
+ - For user questions, please post to [google group](https://groups.google.com/forum/#!forum/clusterprofiler) or post to [Bioconductor support site](https://support.bioconductor.org/) or [Biostars](https://www.biostars.org/). We are following every post tagged with **clusterProfiler**.
 
- - If you have any, [let me know](https://github.com/GuangchuangYu/clusterProfiler/issues). Thx!
 
