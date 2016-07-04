@@ -43,7 +43,7 @@ xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf, fun='
 summary(xx.formula.twogroups)
 }
 \author{
-Guangchuang Yu \url{http://guangchuangyu.github.io}
+Guangchuang Yu \url{https://guangchuangyu.github.io}
 }
 \seealso{
 \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
