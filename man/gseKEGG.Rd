@@ -7,7 +7,7 @@
 gseKEGG(geneList, organism = "hsa", keyType = "kegg", exponent = 1,
   nPerm = 1000, minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
   pAdjustMethod = "BH", verbose = TRUE, use_internal_data = FALSE,
-  seed = FALSE)
+  seed = FALSE, by = "fgsea")
 }
 \arguments{
 \item{geneList}{order ranked geneList}
@@ -33,6 +33,8 @@ gseKEGG(geneList, organism = "hsa", keyType = "kegg", exponent = 1,
 \item{use_internal_data}{logical, use KEGG.db or latest online KEGG data}
 
 \item{seed}{logical}
+
+\item{by}{one of 'fgsea' or 'DOSE'}
 }
 \value{
 gseaResult object

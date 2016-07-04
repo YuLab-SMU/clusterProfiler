@@ -6,7 +6,7 @@
 \usage{
 GSEA(geneList, exponent = 1, nPerm = 1000, minGSSize = 10,
   maxGSSize = 500, pvalueCutoff = 0.05, pAdjustMethod = "BH", TERM2GENE,
-  TERM2NAME = NA, verbose = TRUE, seed = FALSE)
+  TERM2NAME = NA, verbose = TRUE, seed = FALSE, by = "fgsea")
 }
 \arguments{
 \item{geneList}{order ranked geneList}
@@ -30,6 +30,8 @@ GSEA(geneList, exponent = 1, nPerm = 1000, minGSSize = 10,
 \item{verbose}{logical}
 
 \item{seed}{logical}
+
+\item{by}{one of 'fgsea' or 'DOSE'}
 }
 \value{
 gseaResult object

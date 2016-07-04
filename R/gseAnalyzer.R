@@ -14,6 +14,7 @@
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
 ##' @param seed logical
+##' @param by one of 'fgsea' or 'DOSE'
 ##' @importClassesFrom DOSE gseaResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
@@ -32,7 +33,8 @@ gseGO <- function(geneList,
                   pvalueCutoff  = 0.05,
                   pAdjustMethod = "BH",
                   verbose       = TRUE,
-                  seed          = FALSE) {
+                  seed          = FALSE,
+                  by = 'fgsea') {
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "CC", "MF", "ALL"))
@@ -48,7 +50,8 @@ gseGO <- function(geneList,
                           pAdjustMethod = pAdjustMethod,
                           verbose = verbose,
                           USER_DATA = GO_DATA,
-                          seed = seed)
+                          seed = seed,
+                          by = by)
 
     if (is.null(res))
         return(res)
@@ -79,6 +82,7 @@ gseGO <- function(geneList,
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
 ##' @param seed logical
+##' @param by one of 'fgsea' or 'DOSE'
 ##' @export
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
@@ -92,7 +96,8 @@ gseMKEGG <- function(geneList,
                      pvalueCutoff      = 0.05,
                      pAdjustMethod     = "BH",
                      verbose           = TRUE,
-                     seed = FALSE) {
+                     seed = FALSE,
+                     by = 'fgsea') {
 
     species <- organismMapper(organism)    
     KEGG_DATA <- download.KEGG(species, "MKEGG", keyType)
@@ -106,7 +111,8 @@ gseMKEGG <- function(geneList,
                           pAdjustMethod = pAdjustMethod,
                           verbose = verbose,
                           USER_DATA = KEGG_DATA,
-                          seed = seed)
+                          seed = seed,
+                          by = by)
 
     if (is.null(res))
         return(res)
@@ -144,7 +150,8 @@ gseKEGG <- function(geneList,
                     pAdjustMethod     = "BH",
                     verbose           = TRUE,
                     use_internal_data = FALSE,
-                    seed              = FALSE) {
+                    seed              = FALSE,
+                    by = 'fgsea') {
 
     species <- organismMapper(organism)
     if (use_internal_data) {
@@ -162,7 +169,8 @@ gseKEGG <- function(geneList,
                           pAdjustMethod = pAdjustMethod,
                           verbose = verbose,
                           USER_DATA = KEGG_DATA,
-                          seed = seed)
+                          seed = seed,
+                          by = by)
 
     if (is.null(res))
         return(res)

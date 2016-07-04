@@ -47,7 +47,7 @@ Gff2GeneTable <- function(gffFile, compress=TRUE) {
 ## Gff2GeneTable("NC_007297.gff")
 ##
 ##
-
+##' @importFrom utils read.table
 readGff <- function(gffFile, nrows = -1) {
     cat("Reading ", gffFile, ": ", sep="")
     gff <- read.table(gffFile, sep="\t", as.is=TRUE, quote="\"", fill=TRUE,

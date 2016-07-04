@@ -6,7 +6,7 @@
 \usage{
 gseMKEGG(geneList, organism = "hsa", keyType = "kegg", exponent = 1,
   nPerm = 1000, minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", verbose = TRUE, seed = FALSE)
+  pAdjustMethod = "BH", verbose = TRUE, seed = FALSE, by = "fgsea")
 }
 \arguments{
 \item{geneList}{order ranked geneList}
@@ -30,6 +30,8 @@ gseMKEGG(geneList, organism = "hsa", keyType = "kegg", exponent = 1,
 \item{verbose}{print message or not}
 
 \item{seed}{logical}
+
+\item{by}{one of 'fgsea' or 'DOSE'}
 }
 \value{
 gseaResult object

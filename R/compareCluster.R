@@ -16,7 +16,7 @@
 ##' @importFrom plyr dlply
 ##' @importFrom plyr rename
 ##' @export
-##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
 ##' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
 ##'   \code{\link{enrichGO}}
 ##' @keywords manip
@@ -106,7 +106,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 ##' @slot fun one of groupGO, enrichGO and enrichKEGG
 ##' @slot .call function call
 ##' @exportClass compareClusterResult
-##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
 ##' @exportClass compareClusterResult
 ##' @seealso \code{\linkS4class{groupGOResult}}
 ##'   \code{\linkS4class{enrichResult}} \code{\link{compareCluster}}
@@ -132,7 +132,8 @@ setClass("compareClusterResult",
 ## @param object A \code{compareClusterResult} instance.
 ## @return message
 ## @importFrom methods show
-## @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+## @author Guangchuang Yu \url{https://guangchuangyu.github.io}
+##' @importFrom utils str
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
               cmsg <- paste("  Guangchuang Yu, Li-Gen Wang, Yanyan Han and Qing-Yu He.",
@@ -190,7 +191,7 @@ setMethod("show", signature(object="compareClusterResult"),
 ## @return A data frame
 ## @importFrom stats4 summary
 ## @exportMethod summary
-## @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+## @author Guangchuang Yu \url{https://guangchuangyu.github.io}
 setMethod("summary", signature(object="compareClusterResult"),
           function(object) {
               return(object@compareClusterResult)

@@ -1,5 +1,6 @@
 CHANGES IN VERSION 3.1.2
 ------------------------
+ o 'by' parameter for GSEA analysis <2016-07-04, Mon>
  o duplicated KEGG path id for KEGG orthology, only use ko <2016-06-28, Tue>
    + e.g. map00010 and ko00010
    + http://www.kegg.jp/dbget-bin/www_bget?ko+ko00010

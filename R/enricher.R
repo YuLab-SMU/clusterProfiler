@@ -51,6 +51,7 @@ enricher <- function(gene,
 ##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
 ##' @param verbose logical
 ##' @param seed logical
+##' @param by one of 'fgsea' or 'DOSE'
 ##' @return gseaResult object
 ##' @author Guangchuang Yu
 ##' @importFrom DOSE GSEA_internal
@@ -65,7 +66,8 @@ GSEA <- function(geneList,
                  TERM2GENE,
                  TERM2NAME = NA,
                  verbose = TRUE,
-                 seed = FALSE) {
+                 seed = FALSE,
+                 by = 'fgsea') {
 
     USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
  
@@ -78,6 +80,7 @@ GSEA <- function(geneList,
           pAdjustMethod = pAdjustMethod,
           verbose = verbose,
           USER_DATA = USER_DATA,
-          seed = seed)
+          seed = seed,
+          by = by)
 }
 

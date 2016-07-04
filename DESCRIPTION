@@ -19,7 +19,7 @@ Description: This package implements methods to analyze and visualize
     functional profiles (GO and KEGG) of gene and gene clusters.
 Depends:
     R (>= 3.3.0),
-    DOSE (>= 2.10.0)
+    DOSE (>= 2.11.4)
 Imports:
     AnnotationDbi,
     ggplot2,
