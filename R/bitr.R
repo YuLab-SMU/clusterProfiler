@@ -4,6 +4,7 @@
 ##' @title idType
 ##' @param OrgDb annotation db
 ##' @return character vector
+##' @importFrom GOSemSim load_OrgDb
 ##' @importFrom AnnotationDbi keytypes
 ##' @export
 ##' @author Guangchuang Yu
