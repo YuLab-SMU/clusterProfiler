@@ -10,6 +10,7 @@
 ##' @param by feature to select representative term, selected by 'select_fun' function
 ##' @param select_fun function to select feature passed by 'by' parameter
 ##' @param measure method to measure similarity
+##' @param godata GOSemSimDATA object
 ##' @importFrom IRanges simplify
 ##' @return updated enrichResult object
 ##' @exportMethod simplify
@@ -18,55 +19,37 @@
 ##' @aliases simplify,enrichResult-method
 ##' @author Guangchuang Yu
 setMethod("simplify", signature(x="enrichResult"),
-          function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel") {
+          function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", godata = NULL) {
               if (!x@ontology %in% c("BP", "MF", "CC"))
                   stop("simplify only applied to output from enrichGO...")
-
-
+              
+              
               x@result %<>% simplify_internal(., cutoff, by, select_fun,
-                                              measure, x@ontology, x@organism)
-
+                                              measure, x@ontology, godata)
+              
               return(x)
           }
           )
 
 ##' @importFrom GOSemSim mgoSim
+##' @importFrom GOSemSim godata
 ##' @importFrom tidyr gather
-simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel", ont, organism) {
-    
-    org2org <- c('Anopheles gambiae' = 'anopheles',
-                 'Arabidopsis thaliana' = 'arabidopsis',
-                 'Bos taurus' = 'bovine',
-                 'Canis familiaris' = 'canine',
-                 'Caenorhabditis elegans' = 'celegans',
-                 'Gallus gallus' = 'chicken',
-                 'Pan troglodytes' = 'chimp',
-                 'Escherichia coli' = 'ecolik12',
-                 'Escherichia coli' = 'ecsakai',
-                 'Drosophila melanogaster' = 'fly',
-                 'Toxoplasma gondii' = 'gondii',
-                 'Homo sapiens' = 'human',
-                 'Plasmodium falciparum' = 'malaria',
-                 'Mus musculus' = 'mouse',
-                 'Sus scrofa' = 'pig',
-                 'Rattus norvegicus' = 'rat',
-                 'Macaca mulatta' = 'rhesus',
-                 'Xenopus laevis' = 'xenopus',
-                 'Saccharomyces cerevisiae' = 'yeast',
-                 'Danio rerio' = 'zebrafish'
-                 )
-    if (organism %in% names(org2org)) {
-        organism = org2org[organism]
+simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel", ontology, godata) {
+    if (missing(godata) || is.null(godata)) {
+        if (measure == "Wang") {
+            godata <- godata(ont = ontology)
+        } else {
+            stop("godata should be provided for IC-based methods...")
+        }
     } else {
-        if (measure != "Wang") {
-            message("organism is not supported by ", measure, " measure...\nusing measure='Wang' instead...")
-            measure <- "Wang"
+        if (ontology != godata@ont) {
+            msg <- paste("godata is for", godata@ont, "ontology, while enrichment result is for", ontology)
+            stop(msg)
         }
     }
-    
+
     sim <- mgoSim(res$ID, res$ID,
-                  ont=ont, 
-                  organism=organism,
+                  godata = godata,
                   measure=measure,
                   combine=NULL)
     

@@ -74,8 +74,6 @@ enrichGO <- function(gene,
     return(res)
 }
 
-
-##' @importFrom DOSE load_OrgDb
 ##' @importFrom AnnotationDbi keys
 ##' @importFrom AnnotationDbi select
 ##' @importFrom AnnotationDbi keytypes
