@@ -111,6 +111,8 @@ get_GO_data <- function(OrgDb, ont, keytype) {
         goAnno <- suppressMessages(
             select(OrgDb, keys=kk, keytype=keytype,
                    columns=c("GOALL", "ONTOLOGYALL")))
+
+        goAnno <- unique(goAnno[!is.na(goAnno$GOALL), ])
         
         assign("goAnno", goAnno, envir=GO_Env)
         assign("keytype", keytype, envir=GO_Env)
@@ -118,9 +120,9 @@ get_GO_data <- function(OrgDb, ont, keytype) {
     }
     
     if (ont == "ALL") {
-        GO2GENE <- goAnno[, c(2,1)]
+        GO2GENE <- unique(goAnno[, c(2,1)])
     } else {    
-        GO2GENE <- goAnno[goAnno$ONTOLOGYALL == ont, c(2,1)]
+        GO2GENE <- unique(goAnno[goAnno$ONTOLOGYALL == ont, c(2,1)])
     }
     
     GO_DATA <- build_Anno(GO2GENE, get_GO2TERM_table())
