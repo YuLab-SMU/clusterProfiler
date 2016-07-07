@@ -11,6 +11,5 @@
 
 This package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](http://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
 
-It supports both *hypergeometric test* and *Gene Set Enrichment Analysis* for many ontologies/pathways, including:
 
 For details, please visit our project website, <https://guangchuangyu.github.io/clusterProfiler>.
