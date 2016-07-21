@@ -48,7 +48,7 @@ Suggests:
 VignetteBuilder: knitr
 ByteCompile: true
 License: Artistic-2.0
-URL: http://guangchuangyu.github.io/clusterProfiler
+URL: https://guangchuangyu.github.io/clusterProfiler
 BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
 biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,
