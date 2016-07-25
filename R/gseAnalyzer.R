@@ -100,7 +100,7 @@ gseMKEGG <- function(geneList,
                      by = 'fgsea') {
 
     species <- organismMapper(organism)    
-    KEGG_DATA <- download.KEGG(species, "MKEGG", keyType)
+    KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)
 
     res <-  GSEA_internal(geneList = geneList,
                           exponent = exponent,
@@ -157,7 +157,7 @@ gseKEGG <- function(geneList,
     if (use_internal_data) {
         KEGG_DATA <- get_data_from_KEGG_db(species)
     } else {
-        KEGG_DATA <- download.KEGG(species, "KEGG", keyType)
+        KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
     }
 
     res <-  GSEA_internal(geneList = geneList,
