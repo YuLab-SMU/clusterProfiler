@@ -34,7 +34,7 @@ enrichGO(gene, OrgDb, keytype = "ENTREZID", ont = "MF",
 \item{readable}{whether mapping gene ID to gene Name}
 }
 \value{
-A \code{enrichResult} instance.
+An \code{enrichResult} instance.
 }
 \description{
 GO Enrichment Analysis of a gene set.

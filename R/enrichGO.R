@@ -14,7 +14,7 @@
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param readable whether mapping gene ID to gene Name
-##' @return A \code{enrichResult} instance.
+##' @return An \code{enrichResult} instance.
 ##' @importClassesFrom DOSE enrichResult
 ##' @importMethodsFrom DOSE show
 ##' @importMethodsFrom DOSE summary
