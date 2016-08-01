@@ -31,33 +31,6 @@ build_Anno <- function(path2gene, path2name) {
     return(Anno_clusterProfiler_Env)
 }
 
-
-
-## buildKEGGmap <- function(keggmap, id2name=NULL, organism) {
-##     if (! exists("KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
-##         assign("KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
-##     }
-##     KEGG_clusterProfiler_Env <- get("KEGG_clusterProfiler_Env", envir = .GlobalEnv)
-
-##     if (is.null(id2name)) {
-##         id2name <- as.list(KEGGPATHID2NAME) %>% unlist
-##         pathid  <- names(id2name)
-##         id      <- keggmap[,1] %>% as.character %>% gsub("^[a-z]+", "", .)
-##         keggmap <- keggmap[id %in% pathid, ]
-        
-##     }
-    
-##     KEGGPATHID2NAME  <- id2name
-##     KEGGPATHID2EXTID <- split(as.character(keggmap[,2]), as.character(keggmap[,1]))
-##     EXTID2KEGGPATHID <- split(as.character(keggmap[,1]), as.character(keggmap[,2]))
-
-##     assign("organism", organism, envir = KEGG_clusterProfiler_Env)
-##     assign("KEGGPATHID2NAME", KEGGPATHID2NAME,  envir  = KEGG_clusterProfiler_Env)
-##     assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir = KEGG_clusterProfiler_Env)
-##     assign("EXTID2KEGGPATHID", EXTID2KEGGPATHID, envir = KEGG_clusterProfiler_Env)
-## }
-
-
 ##' Internal plot function for plotting compareClusterResult
 ##'
 ##'
@@ -167,9 +140,6 @@ get_go_ontology <- function(x) {
 }
 
 
-
-
-
 GI2EG <- function(GI, organism="D39") {
     gi <- as.character(GI)
     ## remove blank
@@ -224,3 +194,9 @@ add_GO_Ontology <- function(obj, GO_DATA) {
     obj@result <- df
     return(obj)
 }
+
+
+GSEA_internal <- DOSE:::GSEA_internal
+enricher_internal <- DOSE:::enricher_internal
+get_fun_from_pkg <- DOSE:::get_fun_from_pkg
+
