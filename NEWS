@@ -1,5 +1,10 @@
+CHANGES IN VERSION 3.1.4
+------------------------
+ o MeSH term enrichment analysis (enrichMeSH and gseMeSH) <2016-07-28, Thu>
+ 
 CHANGES IN VERSION 3.1.3
 ------------------------
+ o export download_KEGG <2016-07-25, Mon>
  o according to the changes of GOSemSim and DOSE <2016-07-05, Tue>
  
 CHANGES IN VERSION 3.1.2

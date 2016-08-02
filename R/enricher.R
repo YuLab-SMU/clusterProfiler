@@ -13,7 +13,6 @@
 ##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
 ##' @return A \code{enrichResult} instance
 ##' @author Guangchuang Yu
-##' @importFrom DOSE enricher_internal
 ##' @export
 enricher <- function(gene,
                      pvalueCutoff = 0.05,
@@ -54,7 +53,6 @@ enricher <- function(gene,
 ##' @param by one of 'fgsea' or 'DOSE'
 ##' @return gseaResult object
 ##' @author Guangchuang Yu
-##' @importFrom DOSE GSEA_internal
 ##' @export
 GSEA <- function(geneList,
                  exponent = 1,

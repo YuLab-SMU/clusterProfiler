@@ -47,7 +47,7 @@ enrichKEGG <- function(gene,
     if (use_internal_data) {
         KEGG_DATA <- get_data_from_KEGG_db(species)
     } else {
-        KEGG_DATA <- download.KEGG(species, "KEGG", keyType)
+        KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
     }
     res <- enricher_internal(gene,
                              pvalueCutoff  = pvalueCutoff,
@@ -74,17 +74,18 @@ get_KEGG_Env <- function() {
     get(".KEGG_clusterProfiler_Env", envir = .GlobalEnv)
 }
 
-##' download the latest version of KEGG pathway
+##' download the latest version of KEGG pathway/module
 ##'
 ##' 
-##' @title download.KEGG
+##' @title download_KEGG
 ##' @param species species
-##' @param KEGG_Type one of 'KEGG' or 'MKEGG'
+##' @param keggType one of 'KEGG' or 'MKEGG'
 ##' @param keyType supported keyType, see bitr_kegg
 ##' @return list
 ##' @author Guangchuang Yu
 ##' @importFrom magrittr %<>%
-download.KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
+##' @export
+download_KEGG <- function(species, keggType="KEGG", keyType="kegg") {
     KEGG_Env <- get_KEGG_Env()
     
     use_cached <- FALSE
@@ -95,7 +96,7 @@ download.KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
         org <- get("organism", envir=KEGG_Env)
         type <- get("_type_", envir=KEGG_Env)
         
-        if (org == species && type == KEGG_Type &&
+        if (org == species && type == keggType &&
             exists("KEGGPATHID2NAME", envir=KEGG_Env, inherits = FALSE) &&
             exists("KEGGPATHID2EXTID", envir=KEGG_Env, inherits = FALSE)) {
             
@@ -107,7 +108,7 @@ download.KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
         KEGGPATHID2EXTID <- get("KEGGPATHID2EXTID", envir=KEGG_Env)
         KEGGPATHID2NAME <- get("KEGGPATHID2NAME", envir=KEGG_Env)
     } else {
-        if (KEGG_Type == "KEGG") {
+        if (keggType == "KEGG") {
             kres <- download.KEGG.Path(species)
         } else {
             kres <- download.KEGG.Module(species)
@@ -117,7 +118,7 @@ download.KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
         KEGGPATHID2NAME <- kres$KEGGPATHID2NAME
         
         assign("organism", species, envir=KEGG_Env)
-        assign("_type_", KEGG_Type, envir=KEGG_Env)
+        assign("_type_", keggType, envir=KEGG_Env)
         assign("KEGGPATHID2NAME", KEGGPATHID2NAME, envir=KEGG_Env)
         assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir=KEGG_Env)
     }
@@ -140,9 +141,15 @@ download.KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
         KEGGPATHID2EXTID <- merge(KEGGPATHID2EXTID, idconv, by.x='kegg', by.y='from')
         KEGGPATHID2EXTID <- unique(KEGGPATHID2EXTID[, -1])
     }
-    
-    build_Anno(KEGGPATHID2EXTID,
-               KEGGPATHID2NAME)
+
+    return(list(KEGGPATHID2EXTID = KEGGPATHID2EXTID,
+                KEGGPATHID2NAME  = KEGGPATHID2NAME))
+}
+
+prepare_KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
+    kegg <- download_KEGG(species, KEGG_Type, keyType)
+    build_Anno(kegg$KEGGPATHID2EXTID,
+               kegg$KEGGPATHID2NAME)
 }
 
 download.KEGG.Path <- function(species) {    
