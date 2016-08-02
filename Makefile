@@ -22,3 +22,7 @@ check: build
 clean:
 	cd ..;\
 	$(RM) -r $(PKGNAME).Rcheck/
+
+svnignore:
+	svn propset svn:ignore -F .svnignore .
+
