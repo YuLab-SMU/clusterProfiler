@@ -10,7 +10,7 @@
 ##' @param by feature to select representative term, selected by 'select_fun' function
 ##' @param select_fun function to select feature passed by 'by' parameter
 ##' @param measure method to measure similarity
-##' @param godata GOSemSimDATA object
+##' @param semData GOSemSimDATA object
 ##' @importFrom IRanges simplify
 ##' @return updated enrichResult object
 ##' @exportMethod simplify
@@ -19,13 +19,13 @@
 ##' @aliases simplify,enrichResult-method
 ##' @author Guangchuang Yu
 setMethod("simplify", signature(x="enrichResult"),
-          function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", godata = NULL) {
+          function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData = NULL) {
               if (!x@ontology %in% c("BP", "MF", "CC"))
                   stop("simplify only applied to output from enrichGO...")
               
               
               x@result %<>% simplify_internal(., cutoff, by, select_fun,
-                                              measure, x@ontology, godata)
+                                              measure, x@ontology, semData)
               
               return(x)
           }
@@ -34,22 +34,22 @@ setMethod("simplify", signature(x="enrichResult"),
 ##' @importFrom GOSemSim mgoSim
 ##' @importFrom GOSemSim godata
 ##' @importFrom tidyr gather
-simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel", ontology, godata) {
-    if (missing(godata) || is.null(godata)) {
+simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel", ontology, semData) {
+    if (missing(semData) || is.null(semData)) {
         if (measure == "Wang") {
-            godata <- godata(ont = ontology)
+            semData <- godata(ont = ontology)
         } else {
             stop("godata should be provided for IC-based methods...")
         }
     } else {
-        if (ontology != godata@ont) {
-            msg <- paste("godata is for", godata@ont, "ontology, while enrichment result is for", ontology)
+        if (ontology != semData@ont) {
+            msg <- paste("semData is for", semData@ont, "ontology, while enrichment result is for", ontology)
             stop(msg)
         }
     }
 
     sim <- mgoSim(res$ID, res$ID,
-                  godata = godata,
+                  semData = semData,
                   measure=measure,
                   combine=NULL)
     

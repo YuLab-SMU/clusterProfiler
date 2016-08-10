@@ -8,7 +8,7 @@
 \title{simplify method}
 \usage{
 \S4method{simplify}{enrichResult}(x, cutoff = 0.7, by = "p.adjust",
-  select_fun = min, measure = "Wang", godata = NULL)
+  select_fun = min, measure = "Wang", semData = NULL)
 
 \S4method{simplify}{compareClusterResult}(x, cutoff = 0.7, by = "p.adjust",
   select_fun = min, measure = "Rel")
@@ -24,7 +24,7 @@
 
 \item{measure}{method to measure similarity}
 
-\item{godata}{GOSemSimDATA object}
+\item{semData}{GOSemSimDATA object}
 }
 \value{
 updated enrichResult object
