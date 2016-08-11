@@ -1,3 +1,7 @@
+CHANGES IN VERSION 3.1.5
+------------------------
+ o move enrichMeSH & gseMeSH to meshes <2016-08-11, Thu>
+ 
 CHANGES IN VERSION 3.1.4
 ------------------------
  o MeSH term enrichment analysis (enrichMeSH and gseMeSH) <2016-07-28, Thu>

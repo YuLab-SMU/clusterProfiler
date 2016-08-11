@@ -19,6 +19,10 @@ check: build
 	cd ..;\
 	R CMD check $(PKGNAME)_$(PKGVERS).tar.gz
 
+bioccheck:
+	cd ..;\
+	Rscript -e 'BiocCheck::BiocCheck("$(PKGNAME)_$(PKGVERS).tar.gz")'
+
 clean:
 	cd ..;\
 	$(RM) -r $(PKGNAME).Rcheck/
