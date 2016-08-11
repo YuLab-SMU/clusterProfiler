@@ -1,5 +1,6 @@
 inst/extdata/for_unsupported.md
 inst/extdata/for_unsupported.rmd
 .svnignore
+^.*\.DS_Store
 README.md
 Makefile
