@@ -2,7 +2,7 @@ Package: clusterProfiler
 Type: Package
 Title: statistical analysis and visualization of functional profiles for
     genes and gene clusters
-Version: 3.1.5
+Version: 3.1.6
 Authors@R: c(person(given = "Guangchuang", family = "Yu",
 	            email = "guangchuangyu@gmail.com",
 		    role  = c("aut", "cre")),
@@ -25,7 +25,6 @@ Imports:
     ggplot2,
     GO.db,
     GOSemSim (>= 1.99.3),
-    GSEABase,
     IRanges,
     magrittr,
     methods,
@@ -34,16 +33,18 @@ Imports:
     stats,
     stats4,
     tidyr,
-    topGO,
     utils
 Suggests:
     AnnotationHub,
     BiocStyle,
+    GSEABase,
     KEGG.db,
     knitr,
     org.Hs.eg.db,
     pathview,
-    ReactomePA
+    ReactomePA,
+    testthat,
+    topGO
 VignetteBuilder: knitr
 ByteCompile: true
 License: Artistic-2.0

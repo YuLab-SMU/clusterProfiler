@@ -9,10 +9,10 @@
 ##' @param useFullNames logical
 ##' @param ... additional parameter of showSigOfNodes, please refer to topGO
 ##' @return GO DAG graph
-##' @importClassesFrom topGO topGOdata
-##' @importFrom topGO showSigOfNodes
-##' @importFrom topGO annFUN.gene2GO
-##' @importFrom topGO groupGOTerms
+## @importClassesFrom topGO topGOdata
+## @importFrom topGO showSigOfNodes
+## @importFrom topGO annFUN.gene2GO
+## @importFrom topGO groupGOTerms
 ##' @export
 ##' @seealso
 ##' \link[topGO]{showSigOfNodes}
@@ -23,10 +23,15 @@ plotGOgraph <- function(x,
                         sigForAll=TRUE,
                         useFullNames=TRUE, ...) {
 
+    requireNamespace("topGO") || stop("package topGO is required")
+    groupGOTerms <- get_fun_from_pkg("topGO", "groupGOTerms")
+    annFUN.gene2GO <- get_fun_from_pkg("topGO", "annFUN.gene2GO")
+    showSigOfNodes <- get_fun_from_pkg("topGO", "showSigOfNodes")
+    
     if (! class(x) %in% c("gseaResult", "enrichResult")) {
         stop("x should be output of gseGO or enrichGO...")
     }
-
+    
     gs <- x@geneSets
     gs.df <- data.frame(gene = unlist(gs),
                         go   = rep(names(gs),
