@@ -7,6 +7,9 @@ all: check clean
 docs:
 	Rscript -e 'roxygen2::roxygenise(".")'
 
+readme:
+	Rscript -e 'rmarkdown::render("README.Rmd")'
+
 build:
 	cd ..;\
 	R CMD build $(PKGSRC)

@@ -4,3 +4,6 @@ inst/extdata/for_unsupported.rmd
 ^.*\.DS_Store
 README.md
 Makefile
+.travis.yml
+appveyor.yml
+README.Rmd
