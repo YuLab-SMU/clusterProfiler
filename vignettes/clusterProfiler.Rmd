@@ -585,7 +585,7 @@ The comparison function was designed as a framework for comparing gene clusters 
 
 # Homepage
 
-Please visit [ChIPseeker homepage](https://guangchuangyu.github.io/clusterProfiler/) for more information.
+Please visit [clusterProfiler homepage](https://guangchuangyu.github.io/clusterProfiler/) for more information.
 
 
 # Session Information
