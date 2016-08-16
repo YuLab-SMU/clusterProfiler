@@ -69,7 +69,9 @@ enrichKEGG <- function(gene,
 
 get_KEGG_Env <- function() {
     if (! exists(".KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
-        assign(".KEGG_clusterProfiler_Env", new.env(), .GlobalEnv)
+        pos <- 1
+        envir <- as.environment(pos)
+        assign(".KEGG_clusterProfiler_Env", new.env(), envir=envir)
     }
     get(".KEGG_clusterProfiler_Env", envir = .GlobalEnv)
 }

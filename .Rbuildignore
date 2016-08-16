@@ -7,3 +7,4 @@ Makefile
 .travis.yml
 appveyor.yml
 README.Rmd
+CONTRIBUTING.md
