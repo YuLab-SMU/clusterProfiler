@@ -22,8 +22,8 @@ html_preview: false
 [![GitHub stars](https://img.shields.io/github/stars/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/stargazers) 
 
 
-[![releaseVersion](https://img.shields.io/badge/release%20version-`r url="https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html"; x=readLines(url); gsub("\\D+(\\d+\\.\\d+\\.\\d+)\\D+", "\\1", x[grep("Version", x) +1])`-green.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
-[![develVersion](https://img.shields.io/badge/devel%20version-`r x=readLines("DESCRIPTION"); y=x[grep("^Version", x)]; sub("Version: ", "", y)`-green.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
+[![releaseVersion](https://img.shields.io/badge/release%20version-`r rvcheck::check_bioc("clusterProfiler")$latest_version`-green.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
+[![develVersion](https://img.shields.io/badge/devel%20version-`r rvcheck:::get_devel_version("GuangchuangYu/clusterProfiler")`-green.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
 [![post](http://www.bioconductor.org/shields/posts/clusterProfiler.svg)](https://support.bioconductor.org/t/clusterProfiler/)
 [![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
