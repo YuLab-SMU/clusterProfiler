@@ -5,6 +5,7 @@
 ##' @param x an instance of enrichResult or gseaResult
 ##' @param pathID pathway ID
 ##' @return url
+##' @importFrom utils browseURL
 ##' @export
 ##' @author Guangchuang Yu
 browseKEGG <- function(x, pathID) {
