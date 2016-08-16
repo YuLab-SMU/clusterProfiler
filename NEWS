@@ -1,3 +1,9 @@
+CHANGES IN VERSION 3.1.6
+------------------------
+ o update vignette <2016-08-16, Tue>
+ o browseKEGG <2016-08-15, Mon>
+ o unit test <2016-08-15, Mon>
+ 
 CHANGES IN VERSION 3.1.5
 ------------------------
  o move enrichMeSH & gseMeSH to meshes <2016-08-11, Thu>

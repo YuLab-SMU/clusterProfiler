@@ -1,3 +1,19 @@
+##' open KEGG pathway with web browser
+##'
+##' 
+##' @title browseKEGG
+##' @param x an instance of enrichResult or gseaResult
+##' @param pathID pathway ID
+##' @return url
+##' @importFrom utils browseURL
+##' @export
+##' @author Guangchuang Yu
+browseKEGG <- function(x, pathID) {
+    url <- paste0("http://www.kegg.jp/kegg-bin/show_pathway?", pathID, '/', x[pathID, "geneID"])
+    browseURL(url)
+    invisible(url)
+}
+
 ##' search kegg organism, listed in http://www.genome.jp/kegg/catalog/org_list.html
 ##'
 ##' 
