@@ -143,9 +143,8 @@ head(ids)
 
 For GO analysis, user don't need to convert ID, all ID type provided by `OrgDb` can be used in `groupGO`, `enrichGO` and `gseGO` by specifying `keytype` parameter.
 
-## `bitr_kegg`: 
+## `bitr_kegg`: converting biological IDs using KEGG API
 
-`r Biocpkg("clusterProfiler")` also support converting biological IDs using KEGG API.
 
 ```{r}
 data(gcSample)
