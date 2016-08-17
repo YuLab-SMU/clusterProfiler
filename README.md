@@ -49,7 +49,7 @@ For details, please visit our project website, <https://guangchuangyu.github.io/
 
 ### Download stats
 
-[![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/) [![total](https://img.shields.io/badge/downloads-52387/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/) [![month](https://img.shields.io/badge/downloads-1932/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
+[![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/) [![total](https://img.shields.io/badge/downloads-52624/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/) [![month](https://img.shields.io/badge/downloads-1932/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
 
          +---------------+---------------+---------------+---------------+--------------+--------------+
          |                                                                                *            |

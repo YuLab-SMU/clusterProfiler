@@ -6,6 +6,16 @@ html_preview: false
 ---
 
 
+```{r echo=FALSE, results="hide", message=FALSE}
+library("ggtree") 
+library("txtplot")
+library("scholar")
+library("dlstats")
+library("rvcheck") 
+get_devel_version <- rvcheck:::get_devel_version
+```
+
+
 #  clusterProfiler
 
 [![platform](http://www.bioconductor.org/shields/availability/devel/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#archives)
@@ -22,8 +32,8 @@ html_preview: false
 [![GitHub stars](https://img.shields.io/github/stars/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/stargazers) 
 
 
-[![releaseVersion](https://img.shields.io/badge/release%20version-`r rvcheck::check_bioc("clusterProfiler")$latest_version`-green.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
-[![develVersion](https://img.shields.io/badge/devel%20version-`r rvcheck:::get_devel_version("GuangchuangYu/clusterProfiler")`-green.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
+[![releaseVersion](https://img.shields.io/badge/release%20version-`r check_bioc("clusterProfiler")$latest_version`-green.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
+[![develVersion](https://img.shields.io/badge/devel%20version-`r get_devel_version("GuangchuangYu/clusterProfiler")`-green.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
 [![post](http://www.bioconductor.org/shields/posts/clusterProfiler.svg)](https://support.bioconductor.org/t/clusterProfiler/)
 [![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
@@ -55,20 +65,20 @@ For details, please visit our project website, <https://guangchuangyu.github.io/
 
 
 ```{r echo=F, comment=NA}
-d <- scholar::get_article_cite_history('DO5oG40AAAAJ', 'MLfJN-KU85MC')
-txtplot::txtplot(d$year, d$cites)
+d <- get_article_cite_history('DO5oG40AAAAJ', 'MLfJN-KU85MC')
+txtplot(d$year, d$cites)
 ```
 
 ### Download stats
 
 [![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
-[![total](https://img.shields.io/badge/downloads-`r sum(dlstats::bioc_stats("clusterProfiler")$Nb_of_downloads)`/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
-[![month](https://img.shields.io/badge/downloads-`r x <- dlstats::bioc_stats("clusterProfiler"); x$Nb_of_downloads[nrow(x)-1]`/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
+[![total](https://img.shields.io/badge/downloads-`r sum(bioc_stats("clusterProfiler")$Nb_of_downloads)`/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
+[![month](https://img.shields.io/badge/downloads-`r x <- bioc_stats("clusterProfiler"); x$Nb_of_downloads[nrow(x)-1]`/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
 
 ```{r echo=F, comment=NA}
-x <- dlstats::bioc_stats("clusterProfiler")
+x <- bioc_stats("clusterProfiler")
 x <- x[-nrow(x), ] # last month data is not complete
-txtplot::txtplot(ggtree::Date2decimal(x$end), x$Nb_of_downloads, width=100, height=25)
+txtplot(Date2decimal(x$end), x$Nb_of_downloads, width=100, height=25)
 ```
 
 
