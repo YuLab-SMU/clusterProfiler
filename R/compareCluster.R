@@ -95,33 +95,6 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 }
 
 
-##' Class "compareClusterResult"
-##' This class represents the comparison result of gene clusters by GO
-##' categories at specific level or GO enrichment analysis.
-##'
-##'
-##' @name compareClusterResult-class
-##' @aliases compareClusterResult-class show,compareClusterResult-method
-##'   summary,compareClusterResult-method plot,compareClusterResult-method
-##' @docType class
-##' @slot compareClusterResult cluster comparing result
-##' @slot geneClusters a list of genes
-##' @slot fun one of groupGO, enrichGO and enrichKEGG
-##' @slot .call function call
-##' @exportClass compareClusterResult
-##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
-##' @exportClass compareClusterResult
-##' @seealso \code{\linkS4class{groupGOResult}}
-##'   \code{\linkS4class{enrichResult}} \code{\link{compareCluster}}
-##' @keywords classes
-setClass("compareClusterResult",
-         representation = representation(
-             compareClusterResult = "data.frame",
-             geneClusters = "list",
-             fun = "character",
-             .call = "call"
-         )
-         )
 
 ## show method for \code{compareClusterResult} instance
 ##
@@ -171,7 +144,7 @@ setMethod("show", signature(object="compareClusterResult"),
               } else if (fun == "enrichPathway") {
                   citation_msg <- paste("  Guangchuang Yu, Qing-Yu He. ReactomePA: an R/Bioconductor package for",
                                         "  reactome pathway analysis and visualization. Molecular BioSystems",
-                                        "  2015 accepted", sep="\n", collapse="\n")
+                                        "  2016, 12(2):477-479", sep="\n", collapse="\n")
               }
               if (!is.null(citation_msg)) {
                   cat(paste0("1.", citation_msg), "\n\n")

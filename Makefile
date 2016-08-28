@@ -2,9 +2,11 @@ PKGNAME := $(shell sed -n "s/Package: *\([^ ]*\)/\1/p" DESCRIPTION)
 PKGVERS := $(shell sed -n "s/Version: *\([^ ]*\)/\1/p" DESCRIPTION)
 PKGSRC  := $(shell basename `pwd`)
 
-all: readme check clean
+all: alldocs check clean
 
-docs:
+alldocs: rd readme mkdocs
+
+rd:
 	Rscript -e 'roxygen2::roxygenise(".")'
 
 readme:
@@ -33,6 +35,22 @@ bioccheck:
 clean:
 	cd ..;\
 	$(RM) -r $(PKGNAME).Rcheck/
+
+mkdocs: featuredArticles.md index.md documentation.md
+	cd mkdocs;\
+	mkdocs build
+
+index.md:
+	cd mkdocs;\
+	Rscript -e 'library(ypages); gendoc("private/index.md", "blue", "docs/index.md")'
+
+documentation.md:
+	cd mkdocs;\
+	Rscript -e 'library(ypages); gendoc("private/documentation.md", "blue", "docs/documentation.md")'
+
+featuredArticles.md:
+	cd mkdocs;\
+	Rscript -e 'library(ypages); gendoc("private/featuredArticles.md", "blue", "docs/featuredArticles.md")'
 
 svnignore:
 	svn propset svn:ignore -F .svnignore .
