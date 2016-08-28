@@ -2,7 +2,6 @@
 
 language: r
 r:
-  - devel
   - bioc-devel
   
 cache: packages
