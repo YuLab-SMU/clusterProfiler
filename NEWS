@@ -1,5 +1,6 @@
 CHANGES IN VERSION 3.1.7
 ------------------------
+ o [, [[, head, tail, dim methods for compareClusterResult <2016-08-28, Sun>
  o fixed R-devel check <2016-08-16, Tue>
  
 CHANGES IN VERSION 3.1.6

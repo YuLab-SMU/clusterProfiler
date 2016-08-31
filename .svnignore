@@ -5,3 +5,5 @@ Makefile
 .travis.yml
 appveyor.yml
 README.Rmd
+docs
+mkdocs

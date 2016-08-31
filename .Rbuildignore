@@ -8,3 +8,5 @@ Makefile
 appveyor.yml
 README.Rmd
 CONTRIBUTING.md
+mkdocs
+docs

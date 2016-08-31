@@ -3,3 +3,5 @@ R/.DS_Store
 vignettes/.DS_Store
 .svn
 *~
+__pycache__
+__init__.py
