@@ -4,9 +4,16 @@
 <a class="a2a_button_facebook"></a>
 <a class="a2a_button_twitter"></a>
 <a class="a2a_button_google_plus"></a>
+<a class="a2a_button_pinterest"></a>
+<a class="a2a_button_reddit"></a>
+<a class="a2a_button_sina_weibo"></a>
+<a class="a2a_button_wechat"></a>
+<a class="a2a_button_douban"></a>
 </div>
 <script async src="//static.addtoany.com/menu/page.js"></script>
 <!-- AddToAny END -->
+
+<link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
 
 
 ## <i class="fa fa-book"></i> Vignettes

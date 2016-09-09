@@ -1,5 +1,8 @@
 <!-- addtoany:= -->
 
+<link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
+
+
 ## <i class="fa fa-book"></i> Vignettes
 
 + [Disease enrichment analysis](https://bioconductor.org/packages/devel/bioc/vignettes/DOSE/inst/doc/enrichmentAnalysis.html)

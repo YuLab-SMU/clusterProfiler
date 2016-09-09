@@ -1,5 +1,7 @@
 <!-- addtoany:= -->
 
+<link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
+
 <!-- release:=clusterProfiler -->
 <!-- devel:=clusterProfiler -->
 <!-- download:=clusterProfiler:=total -->

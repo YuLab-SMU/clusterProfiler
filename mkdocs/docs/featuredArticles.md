@@ -4,17 +4,22 @@
 <a class="a2a_button_facebook"></a>
 <a class="a2a_button_twitter"></a>
 <a class="a2a_button_google_plus"></a>
+<a class="a2a_button_pinterest"></a>
+<a class="a2a_button_reddit"></a>
+<a class="a2a_button_sina_weibo"></a>
+<a class="a2a_button_wechat"></a>
+<a class="a2a_button_douban"></a>
 </div>
 <script async src="//static.addtoany.com/menu/page.js"></script>
 <!-- AddToAny END -->
 
-
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/academicons.min.css">
+<link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
 
-<br>
+
 Let us know if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-103-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-106-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -32,10 +37,10 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
-<div id = 'chart3903944731e' class = 'rChart morris'></div>
+<div id = 'chart235a68490b72' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart3903944731e",
+ "element": "chart235a68490b72",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -65,11 +70,11 @@ Let us know if you have published using `clusterProfiler` and your publication w
 },
 {
  "year": 2016,
-"cites":             40,
+"cites":             43,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart3903944731e",
+"id": "chart235a68490b72",
 "labels": "cites" 
 },
       chartType = "Bar"
