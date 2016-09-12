@@ -17,12 +17,11 @@ Guangchuang Yu, School of Public Health, The University of Hong Kong.
 
 ## <i class="fa fa-book"></i> Citation
 
+Please cite the following article when using `clusterProfiler`:
+
 <!-- doi:=10.1089/omi.2011.0118 -->
 <!-- citation:=MLfJN-KU85MC:=2349076811020942117 -->
 <!-- altmetric:=681089 -->
-
-
-Please cite the following article when using `clusterProfiler`:
 
 __Yu G__, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters. 
 __*OMICS: A Journal of Integrative Biology*__. 2012, 16(5):284-287. 
@@ -103,18 +102,9 @@ biocLite("clusterProfiler")
 
 ## <i class="fa fa-code-fork"></i> Projects that depend on _clusterProfiler_
 
-#### <i class="fa fa-angle-double-right"></i> Bioconductor packages
+<!-- package_depend:=clusterProfiler:=CRAN -->
 
-+ [bioCancer](https://www.bioconductor.org/packages/bioCancer/): Interactive Multi-Omics Cancers Data Visualization and Analysis
-+ [debrowser](https://www.bioconductor.org/packages/debrowser/): Interactive Differential Expresion Analysis Browser
-
-#### <i class="fa fa-angle-double-right"></i> Shiny Apps
-
-+ [NetPredictor](https://github.com/abhik1368/Shiny_NetPredictor): Analyzing and Predicting Links in Bipartite Network data
-
-<!--
-<i class="fa fa-hand-o-right"></i> Find out more on <i class="fa fa-github-alt"></i> [github](http://scisoft-net-map.isri.cmu.edu/application/clusterProfiler/gitprojects).
--->
+<!-- package_depend:=clusterProfiler:=BioC -->
   
 ## <i class="fa fa-comment"></i> Feedback
 <ul class="fa-ul">
