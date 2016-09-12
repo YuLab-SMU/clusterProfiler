@@ -20,7 +20,7 @@ install:
 # Adapt as necessary starting from here
 
 build_script:
-  - travis-tool.sh install_bioc BiocStyle AnnotationDbi org.Hs.eg.db DOSE GOSemSim
+  - travis-tool.sh install_bioc BiocStyle AnnotationDbi org.Hs.eg.db igraph DOSE GOSemSim tidyr knitr ReactomePA
   - travis-tool.sh install_deps
 
 test_script:
