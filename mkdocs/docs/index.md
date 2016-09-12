@@ -117,7 +117,7 @@ biocLite("clusterProfiler")
 
 
 #### <i class="fa fa-angle-double-right"></i> Bioconductor packages
-+ [debrowser](https://www.bioconductor.org/packages/debrowser): debrowser: Interactive Differential Expresion Analysis Browser
++ [debrowser](https://www.bioconductor.org/packages/debrowser):  Interactive Differential Expresion Analysis Browser
   
 ## <i class="fa fa-comment"></i> Feedback
 <ul class="fa-ul">
