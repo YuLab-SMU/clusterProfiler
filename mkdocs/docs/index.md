@@ -117,7 +117,9 @@ biocLite("clusterProfiler")
 
 
 #### <i class="fa fa-angle-double-right"></i> Bioconductor packages
-+ [debrowser](https://www.bioconductor.org/packages/debrowser):  Interactive Differential Expresion Analysis Browser
++ [bioCancer](https://www.bioconductor.org/packages/bioCancer): Interactive Multi-Omics Cancers Data Visualization and Analysis
++ [debrowser](https://www.bioconductor.org/packages/debrowser): Interactive Differential Expresion Analysis Browser
++ [eegc](https://www.bioconductor.org/packages/eegc): Engineering Evaluation by Gene Categorization (eegc)
   
 ## <i class="fa fa-comment"></i> Feedback
 <ul class="fa-ul">
