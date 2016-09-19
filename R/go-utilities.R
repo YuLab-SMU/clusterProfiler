@@ -31,10 +31,12 @@ go2ont <- function(goid) {
 
 
 get_GOTERM <- function() {
-    if (!exists(".GOTERM_Env", envir=.GlobalEnv)) {
-        assign(".GOTERM_Env", new.env(), .GlobalEnv)
+    pos <- 1
+    envir <- as.environment(pos)
+    if (!exists(".GOTERM_Env", envir=envir)) {
+        assign(".GOTERM_Env", new.env(), envir)
     }
-    GOTERM_Env <- get(".GOTERM_Env", envir = .GlobalEnv)
+    GOTERM_Env <- get(".GOTERM_Env", envir = envir)
     if (exists("GOTERM.df", envir = GOTERM_Env)) {
         GOTERM.df <- get("GOTERM.df", envir=GOTERM_Env)
     } else {
