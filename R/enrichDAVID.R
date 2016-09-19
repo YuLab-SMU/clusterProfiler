@@ -1,6 +1,6 @@
 ##' enrichment analysis by DAVID
 ##'
-##' 
+##'
 ##' @title enrichDAVID
 ##' @param gene input gene
 ##' @param idType id type
@@ -24,7 +24,7 @@
 ##' @export
 ##' @author Guangchuang Yu
 enrichDAVID <- function(gene,
-                        idType        = "ENTREZ_GENE_ID", 
+                        idType        = "ENTREZ_GENE_ID",
                         listType      = "Gene",
                         minGSSize     = 10,
                         maxGSSize     = 500,
@@ -36,7 +36,7 @@ enrichDAVID <- function(gene,
                         david.user){
 
     Count <- List.Total <- Pop.Hits <- Pop.Total <- NULL
-    
+
     pAdjustMethod <- match.arg(pAdjustMethod, c("bonferroni", "BH"))
     idType <- match.arg(idType, c("AFFYMETRIX_3PRIME_IVT_ID",
                                   "AFFYMETRIX_EXON_GENE_ID",
@@ -77,7 +77,7 @@ enrichDAVID <- function(gene,
     if (! david.pkg %in% pkgs) {
         stop("You should have RDAVIDWebService package installed before using enrichDAVID...")
     }
-    
+
     require(david.pkg, character.only=TRUE)
     DAVIDWebService <- eval(parse(text="DAVIDWebService"))
     addList <- eval(parse(text="addList"))
@@ -85,18 +85,18 @@ enrichDAVID <- function(gene,
     getFunctionalAnnotationChart <- eval(parse(text="getFunctionalAnnotationChart"))
     getSpecieNames <- eval(parse(text="getSpecieNames"))
 
-    
+
     david <- DAVIDWebService$new(email=david.user,
                                  url="https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/")
     david.res <- addList(david, gene, idType=idType,
                          listName="clusterProfiler",
                          listType=listType)
-                        
-                        
+
+
     if (david.res$inDavid == 0) {
         stop("All id can not be mapped. Please check 'idType' parameter...")
     }
-    
+
     setAnnotationCategories(david, annotation)
     x <- getFunctionalAnnotationChart(david, threshold=1, count=minGSSize)
 
@@ -104,7 +104,7 @@ enrichDAVID <- function(gene,
         warning("No significant enrichment found...")
         return(NULL)
     }
-    
+
     term <- x$Term
     if (length(grep("~", term[1])) == 0) {
         sep <- ":"
@@ -158,7 +158,7 @@ enrichDAVID <- function(gene,
         idx <- x$Pop.Hits <= maxGSSize
         Over <- Over[idx,]
     }
-    
+
     new("enrichResult",
         result         = Over,
         pvalueCutoff   = pvalueCutoff,
@@ -166,7 +166,6 @@ enrichDAVID <- function(gene,
         organism       = org,
         ontology       = annotation, ## as.character(x$Category[1]),
         gene           = as.character(gene),
-        geneInCategory = gc,
         keytype        = idType)
 }
-    
+

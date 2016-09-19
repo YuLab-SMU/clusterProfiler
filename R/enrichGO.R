@@ -47,7 +47,7 @@ enrichGO <- function(gene,
     ont <- match.arg(ont, c("BP", "CC", "MF", "ALL"))
 
     GO_DATA <- get_GO_data(OrgDb, ont, keytype)
-    
+
     res <- enricher_internal(gene,
                              pvalueCutoff=pvalueCutoff,
                              pAdjustMethod=pAdjustMethod,
@@ -60,14 +60,14 @@ enrichGO <- function(gene,
 
     if (is.null(res))
         return(res)
-    
+
     res@keytype <- keytype
     res@organism <- get_organism(OrgDb)
     if(readable) {
         res <- setReadable(res, OrgDb)
     }
     res@ontology <- ont
-    
+
     if (ont == "ALL") {
         res <- add_GO_Ontology(res, GO_DATA)
     }
@@ -88,16 +88,16 @@ get_GO_data <- function(OrgDb, ont, keytype) {
 
         org <- get("organism", envir=GO_Env)
         kt <- get("keytype", envir=GO_Env)
-        
+
         if (org == get_organism(OrgDb) &&
             keytype == kt &&
             exists("goAnno", envir=GO_Env, inherits=FALSE) &&
             exists("GO2TERM", envir=GO_Env, inherits=FALSE)){
-            
+
             use_cached <- TRUE
         }
     }
-    
+
     if (use_cached) {
         goAnno <- get("goAnno", envir=GO_Env)
     } else {
@@ -106,27 +106,27 @@ get_GO_data <- function(OrgDb, ont, keytype) {
         if (! keytype %in% kt) {
             stop("keytype is not supported...")
         }
-        
-        kk <- keys(OrgDb, keytype=keytype)    
+
+        kk <- keys(OrgDb, keytype=keytype)
         goAnno <- suppressMessages(
             select(OrgDb, keys=kk, keytype=keytype,
                    columns=c("GOALL", "ONTOLOGYALL")))
 
         goAnno <- unique(goAnno[!is.na(goAnno$GOALL), ])
-        
+
         assign("goAnno", goAnno, envir=GO_Env)
         assign("keytype", keytype, envir=GO_Env)
         assign("organism", get_organism(OrgDb), envir=GO_Env)
     }
-    
+
     if (ont == "ALL") {
         GO2GENE <- unique(goAnno[, c(2,1)])
-    } else {    
+    } else {
         GO2GENE <- unique(goAnno[goAnno$ONTOLOGYALL == ont, c(2,1)])
     }
-    
+
     GO_DATA <- build_Anno(GO2GENE, get_GO2TERM_table())
-    
+
     goOnt.df <- goAnno[, c("GOALL", "ONTOLOGYALL")] %>% unique
     goOnt <- goOnt.df[,2]
     names(goOnt) <- goOnt.df[,1]
@@ -191,7 +191,7 @@ get_GO_Env <- function () {
 ##             load("EG2ALLGO.rda")
 ##             qExtID2GO <- EG2ALLGO[gene]
 ##             qExtID2GO <- lapply(qExtID2GO, function(i) i[i %in% goterms])
-##         } else if (organism == "D39") {            
+##         } else if (organism == "D39") {
 ##             dir <- system.file("extdata/D39/", package="clusterProfiler")
 ##             setwd(dir)
 ##         } else if (organism == "M5005") {
@@ -201,7 +201,7 @@ get_GO_Env <- function () {
 ##             setwd(oldwd)
 ##             stop("GO mapping files not found in the working directory")
 ##         }
-        
+
 ##         setwd(oldwd)
 ##     }
 ##     return(qExtID2GO)
@@ -281,7 +281,7 @@ get_GO_Env <- function () {
 
 ##' drop GO term of specific level or specific terms (mostly too general).
 ##'
-##' 
+##'
 ##' @title dropGO
 ##' @param x an instance of 'enrichResult' or 'compareClusterResult'
 ##' @param level GO level
@@ -295,7 +295,7 @@ dropGO <- function(x, level=NULL, term=NULL) {
     if (! (is(x, "enrichResult") || is(x, "compareClusterResult")) ) {
         stop("x should be an instance of 'enrichResult' or 'compareClusterResult' ...")
     }
-    
+
     if (!is.null(level)) {
         if (is(x, "enrichResult")) {
             ont <- x@ontology
@@ -304,21 +304,18 @@ dropGO <- function(x, level=NULL, term=NULL) {
             if (is.null(ont)) {
                 ## should be "MF", default value of enrichGO
                 ## it's safe to determine from the output
-                ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology                
+                ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology
             }
-            
+
         }
-        
+
         tt <- getGOLevel(ont, level)
         term <- c(term, tt) %>% unique
     }
-    if (is.null(term)) 
+    if (is.null(term))
         return(x)
-    
+
     if (is(x, "enrichResult")) {
-        gc <- x@geneInCategory
-        x@geneInCategory <- gc[!names(gc) %in% term]
-        
         res <- x@result
         res <- res[!res$ID %in% term, ]
         x@result <- res
@@ -327,6 +324,6 @@ dropGO <- function(x, level=NULL, term=NULL) {
         res <- res[!res$ID %in% term,]
         x@compareClusterResult <- res
     }
-    
+
     return(x)
 }

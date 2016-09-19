@@ -7,9 +7,10 @@
 ##' @method [[ compareClusterResult
 ##' @export
 `[[.compareClusterResult` <- function(x, i) {
-    if (!i %in% names(x@geneInCategory))
+    gc <- geneInCategory(x)
+    if (!i %in% names(gc))
         stop("input term not found...")
-    x@geneInCategory[[i]]
+    gc[[i]]
 }
 
 
@@ -34,3 +35,17 @@ tail.compareClusterResult <- function(x, n=6L, ...) {
 dim.compareClusterResult <- function(x) {
     dim(x@result)
 }
+
+
+##' @method geneID groupGOResult
+##' @importFrom DOSE geneID
+##' @export
+geneID.groupGOResult <- function(x) as.character(x@result$geneID)
+
+
+##' @method geneInCategory groupGOResult
+##' @export
+##' @importFrom DOSE geneInCategory
+##' @importFrom stats setNames
+geneInCategory.groupGOResult <- function(x)
+    setNames(strsplit(geneID(x), "/", fixed=TRUE), rownames(x@result))
