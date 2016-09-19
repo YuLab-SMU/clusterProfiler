@@ -7,16 +7,26 @@ html_preview: false
 
 
 ```{r echo=FALSE, results="hide", message=FALSE}
-library("ggtree") 
 library("txtplot")
-library("scholar")
-library("dlstats")
-library("rvcheck") 
-get_devel_version <- rvcheck:::get_devel_version
+library("ypages")
 ```
 
 
 #  clusterProfiler
+
+`r badge_release("clusterProfiler", "green")`
+`r badge_devel("clusterProfiler", "green")`
+[![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
+`r badge_download("clusterProfiler", "total", "blue")`
+`r badge_download("clusterProfiler", "month", "blue")`
+
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![codecov](https://codecov.io/gh/GuangchuangYu/clusterProfiler/branch/master/graph/badge.svg)](https://codecov.io/gh/GuangchuangYu/clusterProfiler/)
+[![Last-changedate](https://img.shields.io/badge/last%20change-`r gsub('-', '--', Sys.Date())`-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
+[![commit](http://www.bioconductor.org/shields/commits/bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#svn_source)
+[![GitHub forks](https://img.shields.io/github/forks/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/network)
+[![GitHub stars](https://img.shields.io/github/stars/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/stargazers)
+
 
 [![platform](http://www.bioconductor.org/shields/availability/devel/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#archives)
 [![Build Status](http://www.bioconductor.org/shields/build/devel/bioc/clusterProfiler.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/clusterProfiler/)
@@ -24,19 +34,6 @@ get_devel_version <- rvcheck:::get_devel_version
 [![AppVeyor Build Status](https://img.shields.io/appveyor/ci/Guangchuangyu/clusterProfiler/master.svg?label=Windows)](https://ci.appveyor.com/project/GuangchuangYu/clusterProfiler)
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-green.svg?style=flat)](http://bioconda.github.io/recipes/bioconductor-clusterprofiler/README.html)
 
-[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![codecov](https://codecov.io/gh/GuangchuangYu/clusterProfiler/branch/master/graph/badge.svg)](https://codecov.io/gh/GuangchuangYu/clusterProfiler/)
-[![Last-changedate](https://img.shields.io/badge/last%20change-`r gsub('-', '--', Sys.Date())`-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
-[![commit](http://www.bioconductor.org/shields/commits/bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#svn_source)
-[![GitHub forks](https://img.shields.io/github/forks/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/network) 
-[![GitHub stars](https://img.shields.io/github/stars/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/stargazers) 
-
-
-[![releaseVersion](https://img.shields.io/badge/release%20version-`r check_bioc("clusterProfiler")$latest_version`-green.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
-[![develVersion](https://img.shields.io/badge/devel%20version-`r get_devel_version("GuangchuangYu/clusterProfiler")`-green.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
-[![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
-[![post](http://www.bioconductor.org/shields/posts/clusterProfiler.svg)](https://support.bioconductor.org/t/clusterProfiler/)
-[![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
 
 This package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](http://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
 
@@ -44,12 +41,13 @@ This package implements methods to analyze and visualize functional profiles of 
 
 ------------------------------------------------------------------------
 
-Please cite the following article when using `clusterProfiler`: 
+Please cite the following article when using `clusterProfiler`:
 
-__*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for comparing biological themes among gene clusters. OMICS: A Journal of Integrative Biology. 2012, 16(5):284-287. 
+__*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for comparing biological themes among gene clusters. OMICS: A Journal of Integrative Biology. 2012, 16(5):284-287.
 
-[![doi](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-green.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118)
-[![citation](https://img.shields.io/badge/cited%20by-`r sum(get_article_cite_history('DO5oG40AAAAJ', 'MLfJN-KU85MC')$cites)`-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+`r badge_doi("10.1089/omi.2011.0118", "green")`
+`r badge_citation("MLfJN-KU85MC", "2349076811020942117", "green")`
+`r badge_altmetric("681089", "green")`
 
 ------------------------------------------------------------------------
 
@@ -59,9 +57,9 @@ For details, please visit our project website, <https://guangchuangyu.github.io/
 + [Featured Articles](https://guangchuangyu.github.io/clusterProfiler/featuredArticles/)
 + [Feedback](https://guangchuangyu.github.io/clusterProfiler/#feedback)
 
-### Citation 
+### Citation
 
-[![citation](https://img.shields.io/badge/cited%20by-`r sum(get_article_cite_history('DO5oG40AAAAJ', 'MLfJN-KU85MC')$cites)`-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+`r badge_citation("MLfJN-KU85MC", "2349076811020942117", "green")`
 
 
 ```{r echo=F, comment=NA}
@@ -72,13 +70,13 @@ txtplot(d$year, d$cites)
 ### Download stats
 
 [![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
-[![total](https://img.shields.io/badge/downloads-`r sum(bioc_stats("clusterProfiler")$Nb_of_downloads)`/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
-[![month](https://img.shields.io/badge/downloads-`r x <- bioc_stats("clusterProfiler"); x$Nb_of_downloads[nrow(x)-1]`/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
+`r badge_download("clusterProfiler", "total", "blue")`
+`r badge_download("clusterProfiler", "month", "blue")`
 
 ```{r echo=F, comment=NA}
-x <- bioc_stats("clusterProfiler")
+x <- dlstats::bioc_stats("clusterProfiler")
 x <- x[-nrow(x), ] # last month data is not complete
-txtplot(Date2decimal(x$end), x$Nb_of_downloads, width=100, height=25)
+txtplot(ggtree::Date2decimal(x$end), x$Nb_of_downloads, width=100, height=25)
 ```
 
 
