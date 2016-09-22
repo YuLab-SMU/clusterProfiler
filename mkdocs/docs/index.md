@@ -17,7 +17,7 @@
 
 [![releaseVersion](https://img.shields.io/badge/release%20version-3.0.5-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
 [![develVersion](https://img.shields.io/badge/devel%20version-3.1.8-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
-[![total](https://img.shields.io/badge/downloads-55377/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![total](https://img.shields.io/badge/downloads-55663/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 [![month](https://img.shields.io/badge/downloads-2315/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
 The `clusterProfiler` package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.
@@ -120,6 +120,7 @@ biocLite("clusterProfiler")
 + [bioCancer](https://www.bioconductor.org/packages/bioCancer): Interactive Multi-Omics Cancers Data Visualization and Analysis
 + [debrowser](https://www.bioconductor.org/packages/debrowser): Interactive Differential Expresion Analysis Browser
 + [eegc](https://www.bioconductor.org/packages/eegc): Engineering Evaluation by Gene Categorization (eegc)
++ [LINC](https://www.bioconductor.org/packages/LINC): annotation of noncoding RNAs and coexpressed genes
   
 ## <i class="fa fa-comment"></i> Feedback
 <ul class="fa-ul">
