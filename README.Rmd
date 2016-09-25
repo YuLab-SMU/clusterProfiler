@@ -37,7 +37,7 @@ library("ypages")
 
 This package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](http://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
 
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/GuangchuangYu/clusterProfiler.svg?style=social)](https://twitter.com/intent/tweet?hashtags=clusterProfiler&url=http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/GuangchuangYu/clusterProfiler.svg?style=social)](https://twitter.com/intent/tweet?hashtags=clusterProfiler&url=http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118&screen_name=guangchuangyu)
 
 ------------------------------------------------------------------------
 

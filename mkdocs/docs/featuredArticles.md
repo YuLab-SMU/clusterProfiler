@@ -19,7 +19,7 @@
 
 Let us know if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-108-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-111-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -37,10 +37,10 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
-<div id = 'chart3ddddaca6d' class = 'rChart morris'></div>
+<div id = 'chart3a85556fadac' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart3ddddaca6d",
+ "element": "chart3a85556fadac",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -70,11 +70,11 @@ Let us know if you have published using `clusterProfiler` and your publication w
 },
 {
  "year": 2016,
-"cites":             45,
+"cites":             48,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart3ddddaca6d",
+"id": "chart3a85556fadac",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -86,6 +86,14 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
  
 
 ## <i class="fa fa-calendar"></i> 2016
+
+[Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016.
+
+
+[Local microRNA delivery targets Palladin and prevents metastatic breast cancer](http://www.nature.com/ncomms/2016/160919/ncomms12868/full/ncomms12868.html). ***Nature Communications***. 2016.
+
+
+[Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full). ***The Journal of Experimental Medicine***. 2016.
 
 [Antibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice](http://www.nature.com/articles/nmicrobiol2016140). **_Nature Microbiology_**. 2016.
 
@@ -147,7 +155,6 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 [Putative cobalt- and nickel-binding proteins and motifs in *Streptococcus pneumoniae*](http://dx.doi.org/10.1039/C3MT00126A). **_Metallomics_** 2013,5:928-935.
 
 ![](featured_img/c3mt00126a-f2.gif)
-
 
 [A novel andrographolide derivative AL-1 exerts its cytotoxicity on K562 cells through a ROS-dependent mechanism](http://dx.doi.org/10.1002/pmic.201200273). **_Proteomics_** 2013, 13(1):169–178.
 
