@@ -16,7 +16,7 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 ## <i class="fa fa-calendar"></i> 2016
 
-[Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016.
+[Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](http://www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016.
 
 
 [Local microRNA delivery targets Palladin and prevents metastatic breast cancer](http://www.nature.com/ncomms/2016/160919/ncomms12868/full/ncomms12868.html). ***Nature Communications***. 2016.
