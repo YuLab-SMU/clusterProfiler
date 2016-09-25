@@ -26,28 +26,12 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 [Antibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice](http://www.nature.com/articles/nmicrobiol2016140). **_Nature Microbiology_**. 2016.
 
-[Unbiased identification of substrates of protein tyrosine phosphatase ptp-3 in *C. elegans*](http://dx.doi.org/10.1016/j.molonc.2016.03.003). **_Molecular Oncology_**. 2016, 10:910-920.
-
-![](featured_img/1-s2.0-S004565351530309X-gr3.jpg)
 
 [Comprehensive identification of internal structure and alternative splicing events in circular RNAs](http://dx.doi.org/10.1038/ncomms12060). **_Nature Communications_**. 2016
 
-[Peak-valley-peak pattern of histone modifications delineates active regulatory elements and their directionality](http://dx.doi.org/10.1093/nar/gkw250). **_Nucl. Acids Res._**. 2016
-
-[Systems level analysis of histone H3 post-translational modifications reveals features of PTM crosstalk in chromatin regulation](http://dx.doi.org/10.1074/mcp.M115.054460). **_Molecular & Cellular Proteomics_**. 2016
 
 [TP53 regulates miRNA association with AGO2 to remodel the miRNA–mRNA interaction network](http://genome.cshlp.org/content/26/3/331.short). __*Genome Res.*__. 2016, 26:331-341.
 
-
-[Integrative bioinformatic analyses of an oncogenomic profile reveal the biology of endometrial cancer and guide drug discovery](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4868730/). __*Oncotarget*__. 2016,7(5):5909–5923. 
-
-
-[Critical role of lysosomes in the dysfunction of human Cardiac Stem Cells obtained from failing hearts](http://dx.doi.org/10.1016/j.ijcard.2016.04.155). **International Journal of Cardiology**. 2016, 216:140-150.
-
-[Pyruvate Kinase Isoform Switching and Hepatic Metabolic Reprogramming by the Environmental Contaminant 2,3,7,8-Tetrachlorodibenzo-*p*-Dioxin](http://toxsci.oxfordjournals.org/content/149/2/358.short). __*Toxicol. Sci.*__ 2016, 149(2):358-371.
-
-
-[Transcriptional profiling of human smooth muscle cells infected with gingipain and fimbriae mutants of Porphyromonas gingivalis](http://dx.doi.org/10.1038%2Fsrep21911). **_Sci Rep._**. 2016,6:21911.
 
 [ReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization](http://dx.doi.org/10.1039/C5MB00663E). __*Molecular BioSystems*__. 2016, 12(2):477-479.
 
