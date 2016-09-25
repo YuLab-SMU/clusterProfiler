@@ -30,7 +30,7 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 [Comprehensive identification of internal structure and alternative splicing events in circular RNAs](http://dx.doi.org/10.1038/ncomms12060). **_Nature Communications_**. 2016
 
 
-[TP53 regulates miRNA association with AGO2 to remodel the miRNA–mRNA interaction network](http://genome.cshlp.org/content/26/3/331.short). __*Genome Res.*__. 2016, 26:331-341.
+[TP53 regulates miRNA association with AGO2 to remodel the miRNA–mRNA interaction network](http://genome.cshlp.org/content/26/3/331.short). __*Genome Research*__. 2016, 26:331-341.
 
 
 [ReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization](http://dx.doi.org/10.1039/C5MB00663E). __*Molecular BioSystems*__. 2016, 12(2):477-479.
