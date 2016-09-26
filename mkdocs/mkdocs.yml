@@ -8,6 +8,14 @@ pages:
 - Home: index.md
 - Documentation: documentation.md
 - Featured Articles: featuredArticles.md
+- My Software:
+  - ChIPseeker: ../mysoftware/ChIPseeker.md
+  - clusterProfiler: ../mysoftware/clusterProfiler.md
+  - DOSE: ../mysoftware/DOSE.md
+  - ggtree: ../mysoftware/ggtree.md
+  - GOSemSim: ../mysoftware/GOSemSim.md
+  - ReactomePA: ../mysoftware/ReactomePA.md
+
 
 copyright: Copyright &copy; 2016 <a href="https://guangchuangyu.github.io">Guangchuang Yu</a>.<div style="width:250px;margin:auto;"><script type="text/javascript" src="//rf.revolvermaps.com/0/0/7.js?i=5qpvv5zz7fp&amp;m=0&amp;c=ff0000&amp;cr1=ffffff&amp;sx=0" async="async"></script></div>
 

@@ -1,134 +1,164 @@
 {
     "docs": [
         {
-            "location": "/",
-            "text": "The \nclusterProfiler\n package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.\n\n\nclusterProfiler\n is released within the \nBioconductor\n project and the source code is hosted on \n GitHub\n.\n\n\n Author\n\n\nGuangchuang Yu, School of Public Health, The University of Hong Kong.\n\n\n Citation\n\n\nPlease cite the following article when using \nclusterProfiler\n:\n\n\n\n\n\n\n\n\nYu G\n, Wang L, Han Y and He Q\n*\n. clusterProfiler: an R package for comparing biological themes among gene clusters. \n\nOMICS: A Journal of Integrative Biology\n. 2012, 16(5):284-287. \n\n\n Featured Articles\n\n\n\n\n Find out more on \n \nFeatured Articles\n.\n\n\n Installation\n\n\nInstall \nclusterProfiler\n is easy, follow the guide on the \nBioconductor page\n:\n\n\n## try http:// if https:// URLs are not supported\nsource(\"https://bioconductor.org/biocLite.R\")\n## biocLite(\"BiocUpgrade\") ## you may need this\nbiocLite(\"clusterProfiler\")\n\n\n\n\n Overview\n\n\n Supported Analyses\n\n\n\n\nOver-Representation Analysis\n\n\nGene Set Enrichment Analysis\n\n\nBiological theme comparison\n\n\n\n\n Supported ontologies/pathways\n\n\n\n\nDisease Ontology (via \nDOSE\n)\n\n\nNetwork of Cancer Gene\n (via \nDOSE\n)\n\n\nDisGeNET\n (via \nDOSE\n)\n\n\nGene Ontology (supports many species with GO annotation query online via \nAnnotationHub\n)\n\n\nKEGG Pathway and Module with latest online data (supports more than 4000 species listed in \nhttp://www.genome.jp/kegg/catalog/org_list.html\n)\n\n\nReactome Pathway (via \nReactomePA\n)\n\n\nDAVID (via \nRDAVIDWebService\n)\n\n\nMolecular Signatures Database\n\n\nhallmark gene sets\n\n\npositional gene sets\n\n\ncurated gene sets\n\n\nmotif gene sets\n\n\ncomputational gene sets\n\n\nGO gene sets\n\n\noncogenic signatures\n\n\nimmunologic signatures\n\n\n\n\n\n\nOther Annotations\n\n\nfrom other sources (e.g. \nDisGeNET\n as \nan example\n)\n\n\nuser's annotation\n\n\ncustomized ontology\n\n\nand many others\n\n\n\n\n\n\n\n\n Visualization\n\n\n\n\nbarplot\n\n\ncnetplot\n\n\ndotplot\n\n\nenrichMap\n\n\ngseaplot\n\n\nplotGOgraph (via \ntopGO\n package)\n\n\nupsetplot\n\n\n\n\n Useful utilities:\n\n\n\n\nbitr (Biological Id TranslatoR)\n\n\ncompareCluster (biological theme comparison)\n\n\ndropGO (screen out GO term of specific level or specific term)\n\n\ngo2ont (convert GO ID to Ontology)\n\n\ngo2term (convert GO ID to descriptive term)\n\n\ngofilter (restrict result at specific GO level)\n\n\ngsfilter (restrict result by gene set size)\n\n\nsimplify (remove redundant GO terms, supported via \nGOSemSim\n)\n\n\n\n\n Find out details and examples on \n \nDocumentation\n.\n\n\n Projects that depend on \nclusterProfiler\n\n\n Bioconductor packages\n\n\n\n\nbioCancer\n: Interactive Multi-Omics Cancers Data Visualization and Analysis\n\n\ndebrowser\n: Interactive Differential Expresion Analysis Browser\n\n\neegc\n: Engineering Evaluation by Gene Categorization (eegc)\n\n\nLINC\n: annotation of noncoding RNAs and coexpressed genes\n\n\n\n\n Feedback\n\n\n\n    \n Please make sure you \nfollow the guide\n before posting any issue/question\n\n    \n For bugs or feature requests, please post to \n \ngithub issue\n\n    \n  For user questions, please post to \nBioconductor support site\n and \nBiostars\n. We are following every post tagged with \nclusterProfiler\n\n    \n Join the group chat on \n and",
+            "location": "/", 
+            "text": "The \nclusterProfiler\n package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.\n\n\nclusterProfiler\n is released within the \nBioconductor\n project and the source code is hosted on \n GitHub\n.\n\n\n Author\n\n\nGuangchuang Yu, School of Public Health, The University of Hong Kong.\n\n\n Citation\n\n\nPlease cite the following article when using \nclusterProfiler\n:\n\n\n\n\n\n\n\n\nYu G\n, Wang L, Han Y and He Q\n*\n. clusterProfiler: an R package for comparing biological themes among gene clusters. \n\nOMICS: A Journal of Integrative Biology\n. 2012, 16(5):284-287. \n\n\n Featured Articles\n\n\n\n\n Find out more on \n \nFeatured Articles\n.\n\n\n Installation\n\n\nInstall \nclusterProfiler\n is easy, follow the guide on the \nBioconductor page\n:\n\n\n## try http:// if https:// URLs are not supported\nsource(\nhttps://bioconductor.org/biocLite.R\n)\n## biocLite(\nBiocUpgrade\n) ## you may need this\nbiocLite(\nclusterProfiler\n)\n\n\n\n\n Overview\n\n\n Supported Analyses\n\n\n\n\nOver-Representation Analysis\n\n\nGene Set Enrichment Analysis\n\n\nBiological theme comparison\n\n\n\n\n Supported ontologies/pathways\n\n\n\n\nDisease Ontology (via \nDOSE\n)\n\n\nNetwork of Cancer Gene\n (via \nDOSE\n)\n\n\nDisGeNET\n (via \nDOSE\n)\n\n\nGene Ontology (supports many species with GO annotation query online via \nAnnotationHub\n)\n\n\nKEGG Pathway and Module with latest online data (supports more than 4000 species listed in \nhttp://www.genome.jp/kegg/catalog/org_list.html\n)\n\n\nReactome Pathway (via \nReactomePA\n)\n\n\nDAVID (via \nRDAVIDWebService\n)\n\n\nMolecular Signatures Database\n\n\nhallmark gene sets\n\n\npositional gene sets\n\n\ncurated gene sets\n\n\nmotif gene sets\n\n\ncomputational gene sets\n\n\nGO gene sets\n\n\noncogenic signatures\n\n\nimmunologic signatures\n\n\n\n\n\n\nOther Annotations\n\n\nfrom other sources (e.g. \nDisGeNET\n as \nan example\n)\n\n\nuser's annotation\n\n\ncustomized ontology\n\n\nand many others\n\n\n\n\n\n\n\n\n Visualization\n\n\n\n\nbarplot\n\n\ncnetplot\n\n\ndotplot\n\n\nenrichMap\n\n\ngseaplot\n\n\nplotGOgraph (via \ntopGO\n package)\n\n\nupsetplot\n\n\n\n\n Useful utilities:\n\n\n\n\nbitr (Biological Id TranslatoR)\n\n\ncompareCluster (biological theme comparison)\n\n\ndropGO (screen out GO term of specific level or specific term)\n\n\ngo2ont (convert GO ID to Ontology)\n\n\ngo2term (convert GO ID to descriptive term)\n\n\ngofilter (restrict result at specific GO level)\n\n\ngsfilter (restrict result by gene set size)\n\n\nsimplify (remove redundant GO terms, supported via \nGOSemSim\n)\n\n\n\n\n Find out details and examples on \n \nDocumentation\n.\n\n\n Projects that depend on \nclusterProfiler\n\n\n Bioconductor packages\n\n\n\n\nbioCancer\n: Interactive Multi-Omics Cancers Data Visualization and Analysis\n\n\ndebrowser\n: Interactive Differential Expresion Analysis Browser\n\n\neegc\n: Engineering Evaluation by Gene Categorization (eegc)\n\n\nLINC\n: annotation of noncoding RNAs and coexpressed genes\n\n\n\n\n Feedback\n\n\n\n    \n Please make sure you \nfollow the guide\n before posting any issue/question\n\n    \n For bugs or feature requests, please post to \n \ngithub issue\n\n    \n  For user questions, please post to \nBioconductor support site\n and \nBiostars\n. We are following every post tagged with \nclusterProfiler\n\n    \n Join the group chat on \n and", 
             "title": "Home"
-        },
+        }, 
         {
-            "location": "/#author",
-            "text": "Guangchuang Yu, School of Public Health, The University of Hong Kong.",
+            "location": "/#author", 
+            "text": "Guangchuang Yu, School of Public Health, The University of Hong Kong.", 
             "title": " Author"
-        },
+        }, 
         {
-            "location": "/#citation",
-            "text": "Please cite the following article when using  clusterProfiler :     Yu G , Wang L, Han Y and He Q * . clusterProfiler: an R package for comparing biological themes among gene clusters.  OMICS: A Journal of Integrative Biology . 2012, 16(5):284-287.",
+            "location": "/#citation", 
+            "text": "Please cite the following article when using  clusterProfiler :     Yu G , Wang L, Han Y and He Q * . clusterProfiler: an R package for comparing biological themes among gene clusters.  OMICS: A Journal of Integrative Biology . 2012, 16(5):284-287.", 
             "title": " Citation"
-        },
+        }, 
         {
-            "location": "/#featured-articles",
-            "text": "Find out more on    Featured Articles .",
+            "location": "/#featured-articles", 
+            "text": "Find out more on    Featured Articles .", 
             "title": " Featured Articles"
-        },
+        }, 
         {
-            "location": "/#installation",
-            "text": "Install  clusterProfiler  is easy, follow the guide on the  Bioconductor page :  ## try http:// if https:// URLs are not supported\nsource(\"https://bioconductor.org/biocLite.R\")\n## biocLite(\"BiocUpgrade\") ## you may need this\nbiocLite(\"clusterProfiler\")",
+            "location": "/#installation", 
+            "text": "Install  clusterProfiler  is easy, follow the guide on the  Bioconductor page :  ## try http:// if https:// URLs are not supported\nsource( https://bioconductor.org/biocLite.R )\n## biocLite( BiocUpgrade ) ## you may need this\nbiocLite( clusterProfiler )", 
             "title": " Installation"
-        },
+        }, 
         {
-            "location": "/#overview",
-            "text": "",
+            "location": "/#overview", 
+            "text": "", 
             "title": " Overview"
-        },
+        }, 
         {
-            "location": "/#supported-analyses",
-            "text": "Over-Representation Analysis  Gene Set Enrichment Analysis  Biological theme comparison",
+            "location": "/#supported-analyses", 
+            "text": "Over-Representation Analysis  Gene Set Enrichment Analysis  Biological theme comparison", 
             "title": " Supported Analyses"
-        },
+        }, 
         {
-            "location": "/#supported-ontologiespathways",
-            "text": "Disease Ontology (via  DOSE )  Network of Cancer Gene  (via  DOSE )  DisGeNET  (via  DOSE )  Gene Ontology (supports many species with GO annotation query online via  AnnotationHub )  KEGG Pathway and Module with latest online data (supports more than 4000 species listed in  http://www.genome.jp/kegg/catalog/org_list.html )  Reactome Pathway (via  ReactomePA )  DAVID (via  RDAVIDWebService )  Molecular Signatures Database  hallmark gene sets  positional gene sets  curated gene sets  motif gene sets  computational gene sets  GO gene sets  oncogenic signatures  immunologic signatures    Other Annotations  from other sources (e.g.  DisGeNET  as  an example )  user's annotation  customized ontology  and many others",
+            "location": "/#supported-ontologiespathways", 
+            "text": "Disease Ontology (via  DOSE )  Network of Cancer Gene  (via  DOSE )  DisGeNET  (via  DOSE )  Gene Ontology (supports many species with GO annotation query online via  AnnotationHub )  KEGG Pathway and Module with latest online data (supports more than 4000 species listed in  http://www.genome.jp/kegg/catalog/org_list.html )  Reactome Pathway (via  ReactomePA )  DAVID (via  RDAVIDWebService )  Molecular Signatures Database  hallmark gene sets  positional gene sets  curated gene sets  motif gene sets  computational gene sets  GO gene sets  oncogenic signatures  immunologic signatures    Other Annotations  from other sources (e.g.  DisGeNET  as  an example )  user's annotation  customized ontology  and many others", 
             "title": " Supported ontologies/pathways"
-        },
+        }, 
         {
-            "location": "/#visualization",
-            "text": "barplot  cnetplot  dotplot  enrichMap  gseaplot  plotGOgraph (via  topGO  package)  upsetplot",
+            "location": "/#visualization", 
+            "text": "barplot  cnetplot  dotplot  enrichMap  gseaplot  plotGOgraph (via  topGO  package)  upsetplot", 
             "title": " Visualization"
-        },
+        }, 
         {
-            "location": "/#useful-utilities",
-            "text": "bitr (Biological Id TranslatoR)  compareCluster (biological theme comparison)  dropGO (screen out GO term of specific level or specific term)  go2ont (convert GO ID to Ontology)  go2term (convert GO ID to descriptive term)  gofilter (restrict result at specific GO level)  gsfilter (restrict result by gene set size)  simplify (remove redundant GO terms, supported via  GOSemSim )    Find out details and examples on    Documentation .",
+            "location": "/#useful-utilities", 
+            "text": "bitr (Biological Id TranslatoR)  compareCluster (biological theme comparison)  dropGO (screen out GO term of specific level or specific term)  go2ont (convert GO ID to Ontology)  go2term (convert GO ID to descriptive term)  gofilter (restrict result at specific GO level)  gsfilter (restrict result by gene set size)  simplify (remove redundant GO terms, supported via  GOSemSim )    Find out details and examples on    Documentation .", 
             "title": " Useful utilities:"
-        },
+        }, 
         {
-            "location": "/#projects-that-depend-on-clusterprofiler",
-            "text": "",
+            "location": "/#projects-that-depend-on-clusterprofiler", 
+            "text": "", 
             "title": " Projects that depend on clusterProfiler"
-        },
+        }, 
         {
-            "location": "/#bioconductor-packages",
-            "text": "bioCancer : Interactive Multi-Omics Cancers Data Visualization and Analysis  debrowser : Interactive Differential Expresion Analysis Browser  eegc : Engineering Evaluation by Gene Categorization (eegc)  LINC : annotation of noncoding RNAs and coexpressed genes",
+            "location": "/#bioconductor-packages", 
+            "text": "bioCancer : Interactive Multi-Omics Cancers Data Visualization and Analysis  debrowser : Interactive Differential Expresion Analysis Browser  eegc : Engineering Evaluation by Gene Categorization (eegc)  LINC : annotation of noncoding RNAs and coexpressed genes", 
             "title": " Bioconductor packages"
-        },
+        }, 
         {
-            "location": "/#feedback",
-            "text": "Please make sure you  follow the guide  before posting any issue/question \n      For bugs or feature requests, please post to    github issue \n       For user questions, please post to  Bioconductor support site  and  Biostars . We are following every post tagged with  clusterProfiler \n      Join the group chat on   and",
+            "location": "/#feedback", 
+            "text": "Please make sure you  follow the guide  before posting any issue/question \n      For bugs or feature requests, please post to    github issue \n       For user questions, please post to  Bioconductor support site  and  Biostars . We are following every post tagged with  clusterProfiler \n      Join the group chat on   and", 
             "title": " Feedback"
-        },
+        }, 
         {
-            "location": "/documentation/",
-            "text": "Vignettes\n\n\n\n\nDisease enrichment analysis\n\n\nDisease GSEA\n\n\nStatistical analysis and visualization of functional profiles for genes and gene clusters\n\n\n\n\n Blog posts\n\n\n News and updates\n\n\n\n\nclusterProfiler in Bioconductor 2.8\n\n\nclusterProfiler: an R Package for Comparing Biological Themes Among Gene Clusters\n\n\nBioC 3.1: NEWS of my BioC packages\n\n\nBioC 3.2: NEWS of my BioC packages\n\n\nBioC 3.3: NEWS of my BioC packages\n\n\n\n\n ID conversion\n\n\n\n\nconvert biological ID with KEGG API using clusterProfiler\n\n\n\n\n Enrichment analysis\n\n\n\n\nGO analysis using clusterProfiler\n\n\nuse simplify to remove redundancy of enriched GO terms\n\n\nKEGG Module Enrichment Analysis\n\n\nKEGG enrichment analysis with latest online data using clusterProfiler\n\n\nDAVID functional analysis with clusterProfiler\n\n\nfunctional enrichment for GTEx paper\n\n\nuse clusterProfiler as an universal enrichment analysis tool\n\n\nfunctional enrichment analysis with NGS data\n\n\nleading edge analysis\n\n\na formula interface for GeneOntology analysis\n \n bioinfoblog.it\n\n\nwhy clusterProfiler fails\n\n\nComparison of clusterProfiler and GSEA-P\n\n\n\n\n Visualization\n\n\n\n\ndotplot for enrichment result\n\n\nenrichment map\n\n\n\n\n Find out more on \nhttps://guangchuangyu.github.io/tags/clusterprofiler\n.\n\n\n Workflow\n\n\n\n\nAn end to end workflow for differential gene expression using Affymetrix microarrays\n\n\nRNAseq workflow",
+            "location": "/documentation/", 
+            "text": "Vignettes\n\n\n\n\nDisease enrichment analysis\n\n\nDisease GSEA\n\n\nStatistical analysis and visualization of functional profiles for genes and gene clusters\n\n\n\n\n Blog posts\n\n\n News and updates\n\n\n\n\nclusterProfiler in Bioconductor 2.8\n\n\nclusterProfiler: an R Package for Comparing Biological Themes Among Gene Clusters\n\n\nBioC 3.1: NEWS of my BioC packages\n\n\nBioC 3.2: NEWS of my BioC packages\n\n\nBioC 3.3: NEWS of my BioC packages\n\n\n\n\n ID conversion\n\n\n\n\nconvert biological ID with KEGG API using clusterProfiler\n\n\n\n\n Enrichment analysis\n\n\n\n\nGO analysis using clusterProfiler\n\n\nuse simplify to remove redundancy of enriched GO terms\n\n\nKEGG Module Enrichment Analysis\n\n\nKEGG enrichment analysis with latest online data using clusterProfiler\n\n\nDAVID functional analysis with clusterProfiler\n\n\nfunctional enrichment for GTEx paper\n\n\nuse clusterProfiler as an universal enrichment analysis tool\n\n\nfunctional enrichment analysis with NGS data\n\n\nleading edge analysis\n\n\na formula interface for GeneOntology analysis\n \n bioinfoblog.it\n\n\nwhy clusterProfiler fails\n\n\nComparison of clusterProfiler and GSEA-P\n\n\n\n\n Visualization\n\n\n\n\ndotplot for enrichment result\n\n\nenrichment map\n\n\n\n\n Find out more on \nhttps://guangchuangyu.github.io/tags/clusterprofiler\n.\n\n\n Workflow\n\n\n\n\nAn end to end workflow for differential gene expression using Affymetrix microarrays\n\n\nRNAseq workflow", 
             "title": "Documentation"
-        },
+        }, 
         {
-            "location": "/documentation/#vignettes",
-            "text": "Disease enrichment analysis  Disease GSEA  Statistical analysis and visualization of functional profiles for genes and gene clusters",
+            "location": "/documentation/#vignettes", 
+            "text": "Disease enrichment analysis  Disease GSEA  Statistical analysis and visualization of functional profiles for genes and gene clusters", 
             "title": " Vignettes"
-        },
+        }, 
         {
-            "location": "/documentation/#blog-posts",
-            "text": "",
+            "location": "/documentation/#blog-posts", 
+            "text": "", 
             "title": " Blog posts"
-        },
+        }, 
         {
-            "location": "/documentation/#news-and-updates",
-            "text": "clusterProfiler in Bioconductor 2.8  clusterProfiler: an R Package for Comparing Biological Themes Among Gene Clusters  BioC 3.1: NEWS of my BioC packages  BioC 3.2: NEWS of my BioC packages  BioC 3.3: NEWS of my BioC packages",
+            "location": "/documentation/#news-and-updates", 
+            "text": "clusterProfiler in Bioconductor 2.8  clusterProfiler: an R Package for Comparing Biological Themes Among Gene Clusters  BioC 3.1: NEWS of my BioC packages  BioC 3.2: NEWS of my BioC packages  BioC 3.3: NEWS of my BioC packages", 
             "title": " News and updates"
-        },
+        }, 
         {
-            "location": "/documentation/#id-conversion",
-            "text": "convert biological ID with KEGG API using clusterProfiler",
+            "location": "/documentation/#id-conversion", 
+            "text": "convert biological ID with KEGG API using clusterProfiler", 
             "title": " ID conversion"
-        },
+        }, 
         {
-            "location": "/documentation/#enrichment-analysis",
-            "text": "GO analysis using clusterProfiler  use simplify to remove redundancy of enriched GO terms  KEGG Module Enrichment Analysis  KEGG enrichment analysis with latest online data using clusterProfiler  DAVID functional analysis with clusterProfiler  functional enrichment for GTEx paper  use clusterProfiler as an universal enrichment analysis tool  functional enrichment analysis with NGS data  leading edge analysis  a formula interface for GeneOntology analysis    bioinfoblog.it  why clusterProfiler fails  Comparison of clusterProfiler and GSEA-P",
+            "location": "/documentation/#enrichment-analysis", 
+            "text": "GO analysis using clusterProfiler  use simplify to remove redundancy of enriched GO terms  KEGG Module Enrichment Analysis  KEGG enrichment analysis with latest online data using clusterProfiler  DAVID functional analysis with clusterProfiler  functional enrichment for GTEx paper  use clusterProfiler as an universal enrichment analysis tool  functional enrichment analysis with NGS data  leading edge analysis  a formula interface for GeneOntology analysis    bioinfoblog.it  why clusterProfiler fails  Comparison of clusterProfiler and GSEA-P", 
             "title": " Enrichment analysis"
-        },
+        }, 
         {
-            "location": "/documentation/#visualization",
-            "text": "dotplot for enrichment result  enrichment map    Find out more on  https://guangchuangyu.github.io/tags/clusterprofiler .",
+            "location": "/documentation/#visualization", 
+            "text": "dotplot for enrichment result  enrichment map    Find out more on  https://guangchuangyu.github.io/tags/clusterprofiler .", 
             "title": " Visualization"
-        },
+        }, 
         {
-            "location": "/documentation/#workflow",
-            "text": "An end to end workflow for differential gene expression using Affymetrix microarrays  RNAseq workflow",
+            "location": "/documentation/#workflow", 
+            "text": "An end to end workflow for differential gene expression using Affymetrix microarrays  RNAseq workflow", 
             "title": " Workflow"
-        },
+        }, 
         {
-            "location": "/featuredArticles/",
-            "text": "Let us know if you have published using \nclusterProfiler\n and your publication will be featured here.\n\n\n\n\n\n\n\n\n\n\n\n\n\n  .rChart {\n    display: block;\n    margin-left: auto; \n    margin-right: auto;\n    width: 800px;\n    height: 300px;\n  }  \n  \n\n\n\n\n\n\n\n    var chartParams = {\n \"element\": \"chart47df468fa34b\",\n\"width\":            800,\n\"height\":            400,\n\"xkey\": \"year\",\n\"ykeys\": [\n \"cites\" \n],\n\"data\": [\n {\n \"year\": 2012,\n\"cites\":              6,\n\"pubid\": \"MLfJN-KU85MC\" \n},\n{\n \"year\": 2013,\n\"cites\":             13,\n\"pubid\": \"MLfJN-KU85MC\" \n},\n{\n \"year\": 2014,\n\"cites\":             18,\n\"pubid\": \"MLfJN-KU85MC\" \n},\n{\n \"year\": 2015,\n\"cites\":             26,\n\"pubid\": \"MLfJN-KU85MC\" \n},\n{\n \"year\": 2016,\n\"cites\":             48,\n\"pubid\": \"MLfJN-KU85MC\" \n} \n],\n\"id\": \"chart47df468fa34b\",\n\"labels\": \"cites\" \n},\n      chartType = \"Bar\"\n    new Morris[chartType](chartParams)\n\n\n\n\nFind out more on \n google scholar\n.\n\n\n 2016\n\n\nCoordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development\n. \nNature Genetics\n. 2016.\n\n\nLocal microRNA delivery targets Palladin and prevents metastatic breast cancer\n. \nNature Communications\n. 2016.\n\n\nDpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells\n. \nThe Journal of Experimental Medicine\n. 2016.\n\n\nAntibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice\n. \nNature Microbiology\n. 2016.\n\n\nComprehensive identification of internal structure and alternative splicing events in circular RNAs\n. \nNature Communications\n. 2016\n\n\nTP53 regulates miRNA association with AGO2 to remodel the miRNA\u2013mRNA interaction network\n. \nGenome Res.\n. 2016, 26:331-341.\n\n\nReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization\n. \nMolecular BioSystems\n. 2016, 12(2):477-479.\n\n\n 2015\n\n\nChIPseeker: an R/Bioconductor package for ChIP peak annotation, comparision and visualization\n. \nBioinformatics\n. 2015, 31(14):2382-2383.\n\n\nDOSE: an R/Bioconductor package for Disease Ontology Semantic and Enrichment analysis\n. \nBioinformatics\n. 2015, 31(4):608-609.\n\n\nAberrant DNA methylation in non-small cell lung cancer-associated fibroblasts\n. \nCarcinogenesis\n. 2015, 36(12):1453-1463. \n\n\nA neural crest origin for cohesinopathy heart defects\n. \nHum. Mol. Genet\n. 2015, 24(24): 7005-7016. \n\n\nGenome-wide disruption of 5-hydroxymethylcytosine in a mouse model of autism\n. \nHum. Mol. Genet\n. 2015, 24(24):7121-7131. \n\n\nCorrelation of clinical features and genetic profiles of stromal interaction molecule 1 (STIM1) in colorectal cancers\n. \nOncotarget\n. 2015, 6(39):42169\u201342182. \n\n\n 2014\n\n\nAge- and diet-associated metabolome remodeling characterizes the aging process driven by damage accumulation\n. \neLife\n 2014,3:e02077\n\n\n\n\nExpression Profiling of the Wheat Pathogen \nZymoseptoria tritici\n Reveals Genomic Patterns of Transcription and Host-Specific Regulatory Programs\n. \nGenome Biol Evol\n 2014, 6(6): 1353-1365. \n\n\nProteomic analysis of putative heme-binding proteins in \nStreptococcus pyogenes\n. \nMetallomics\n 2014, 6:1451-1459\n\n\n 2013\n\n\nPutative cobalt- and nickel-binding proteins and motifs in \nStreptococcus pneumoniae\n. \nMetallomics\n 2013,5:928-935.\n\n\n\n\nA novel andrographolide derivative AL-1 exerts its cytotoxicity on K562 cells through a ROS-dependent mechanism\n. \nProteomics\n 2013, 13(1):169\u2013178.",
+            "location": "/featuredArticles/", 
+            "text": "Let us know if you have published using \nclusterProfiler\n and your publication will be featured here.\n\n\n\n\n\n\n\n\n\n\n\n\n\n  .rChart {\n    display: block;\n    margin-left: auto; \n    margin-right: auto;\n    width: 800px;\n    height: 300px;\n  }  \n  \n\n\n\n\n\n\n\n    var chartParams = {\n \"element\": \"chart180627a7e60c\",\n\"width\":            800,\n\"height\":            400,\n\"xkey\": \"year\",\n\"ykeys\": [\n \"cites\" \n],\n\"data\": [\n {\n \"year\": 2012,\n\"cites\":              6,\n\"pubid\": \"MLfJN-KU85MC\" \n},\n{\n \"year\": 2013,\n\"cites\":             13,\n\"pubid\": \"MLfJN-KU85MC\" \n},\n{\n \"year\": 2014,\n\"cites\":             18,\n\"pubid\": \"MLfJN-KU85MC\" \n},\n{\n \"year\": 2015,\n\"cites\":             26,\n\"pubid\": \"MLfJN-KU85MC\" \n},\n{\n \"year\": 2016,\n\"cites\":             48,\n\"pubid\": \"MLfJN-KU85MC\" \n} \n],\n\"id\": \"chart180627a7e60c\",\n\"labels\": \"cites\" \n},\n      chartType = \"Bar\"\n    new Morris[chartType](chartParams)\n\n\n\n\nFind out more on \n google scholar\n.\n\n\n 2016\n\n\nCoordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development\n. \nNature Genetics\n. 2016.\n\n\nLocal microRNA delivery targets Palladin and prevents metastatic breast cancer\n. \nNature Communications\n. 2016.\n\n\nDpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells\n. \nThe Journal of Experimental Medicine\n. 2016.\n\n\nAntibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice\n. \nNature Microbiology\n. 2016.\n\n\nComprehensive identification of internal structure and alternative splicing events in circular RNAs\n. \nNature Communications\n. 2016\n\n\nTP53 regulates miRNA association with AGO2 to remodel the miRNA\u2013mRNA interaction network\n. \nGenome Research\n. 2016, 26:331-341.\n\n\nReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization\n. \nMolecular BioSystems\n. 2016, 12(2):477-479.\n\n\n 2015\n\n\nChIPseeker: an R/Bioconductor package for ChIP peak annotation, comparision and visualization\n. \nBioinformatics\n. 2015, 31(14):2382-2383.\n\n\nDOSE: an R/Bioconductor package for Disease Ontology Semantic and Enrichment analysis\n. \nBioinformatics\n. 2015, 31(4):608-609.\n\n\nAberrant DNA methylation in non-small cell lung cancer-associated fibroblasts\n. \nCarcinogenesis\n. 2015, 36(12):1453-1463. \n\n\nA neural crest origin for cohesinopathy heart defects\n. \nHum. Mol. Genet\n. 2015, 24(24): 7005-7016. \n\n\nGenome-wide disruption of 5-hydroxymethylcytosine in a mouse model of autism\n. \nHum. Mol. Genet\n. 2015, 24(24):7121-7131. \n\n\nCorrelation of clinical features and genetic profiles of stromal interaction molecule 1 (STIM1) in colorectal cancers\n. \nOncotarget\n. 2015, 6(39):42169\u201342182. \n\n\n 2014\n\n\nAge- and diet-associated metabolome remodeling characterizes the aging process driven by damage accumulation\n. \neLife\n 2014,3:e02077\n\n\n\n\nExpression Profiling of the Wheat Pathogen \nZymoseptoria tritici\n Reveals Genomic Patterns of Transcription and Host-Specific Regulatory Programs\n. \nGenome Biol Evol\n 2014, 6(6): 1353-1365. \n\n\nProteomic analysis of putative heme-binding proteins in \nStreptococcus pyogenes\n. \nMetallomics\n 2014, 6:1451-1459\n\n\n 2013\n\n\nPutative cobalt- and nickel-binding proteins and motifs in \nStreptococcus pneumoniae\n. \nMetallomics\n 2013,5:928-935.\n\n\n\n\nA novel andrographolide derivative AL-1 exerts its cytotoxicity on K562 cells through a ROS-dependent mechanism\n. \nProteomics\n 2013, 13(1):169\u2013178.", 
             "title": "Featured Articles"
-        },
+        }, 
         {
-            "location": "/featuredArticles/#2016",
-            "text": "Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development .  Nature Genetics . 2016.  Local microRNA delivery targets Palladin and prevents metastatic breast cancer .  Nature Communications . 2016.  Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells .  The Journal of Experimental Medicine . 2016.  Antibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice .  Nature Microbiology . 2016.  Comprehensive identification of internal structure and alternative splicing events in circular RNAs .  Nature Communications . 2016  TP53 regulates miRNA association with AGO2 to remodel the miRNA\u2013mRNA interaction network .  Genome Res. . 2016, 26:331-341.  ReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization .  Molecular BioSystems . 2016, 12(2):477-479.",
+            "location": "/featuredArticles/#2016", 
+            "text": "Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development .  Nature Genetics . 2016.  Local microRNA delivery targets Palladin and prevents metastatic breast cancer .  Nature Communications . 2016.  Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells .  The Journal of Experimental Medicine . 2016.  Antibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice .  Nature Microbiology . 2016.  Comprehensive identification of internal structure and alternative splicing events in circular RNAs .  Nature Communications . 2016  TP53 regulates miRNA association with AGO2 to remodel the miRNA\u2013mRNA interaction network .  Genome Research . 2016, 26:331-341.  ReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization .  Molecular BioSystems . 2016, 12(2):477-479.", 
             "title": " 2016"
-        },
+        }, 
         {
-            "location": "/featuredArticles/#2015",
-            "text": "ChIPseeker: an R/Bioconductor package for ChIP peak annotation, comparision and visualization .  Bioinformatics . 2015, 31(14):2382-2383.  DOSE: an R/Bioconductor package for Disease Ontology Semantic and Enrichment analysis .  Bioinformatics . 2015, 31(4):608-609.  Aberrant DNA methylation in non-small cell lung cancer-associated fibroblasts .  Carcinogenesis . 2015, 36(12):1453-1463.   A neural crest origin for cohesinopathy heart defects .  Hum. Mol. Genet . 2015, 24(24): 7005-7016.   Genome-wide disruption of 5-hydroxymethylcytosine in a mouse model of autism .  Hum. Mol. Genet . 2015, 24(24):7121-7131.   Correlation of clinical features and genetic profiles of stromal interaction molecule 1 (STIM1) in colorectal cancers .  Oncotarget . 2015, 6(39):42169\u201342182.",
+            "location": "/featuredArticles/#2015", 
+            "text": "ChIPseeker: an R/Bioconductor package for ChIP peak annotation, comparision and visualization .  Bioinformatics . 2015, 31(14):2382-2383.  DOSE: an R/Bioconductor package for Disease Ontology Semantic and Enrichment analysis .  Bioinformatics . 2015, 31(4):608-609.  Aberrant DNA methylation in non-small cell lung cancer-associated fibroblasts .  Carcinogenesis . 2015, 36(12):1453-1463.   A neural crest origin for cohesinopathy heart defects .  Hum. Mol. Genet . 2015, 24(24): 7005-7016.   Genome-wide disruption of 5-hydroxymethylcytosine in a mouse model of autism .  Hum. Mol. Genet . 2015, 24(24):7121-7131.   Correlation of clinical features and genetic profiles of stromal interaction molecule 1 (STIM1) in colorectal cancers .  Oncotarget . 2015, 6(39):42169\u201342182.", 
             "title": " 2015"
-        },
+        }, 
         {
-            "location": "/featuredArticles/#2014",
-            "text": "Age- and diet-associated metabolome remodeling characterizes the aging process driven by damage accumulation .  eLife  2014,3:e02077   Expression Profiling of the Wheat Pathogen  Zymoseptoria tritici  Reveals Genomic Patterns of Transcription and Host-Specific Regulatory Programs .  Genome Biol Evol  2014, 6(6): 1353-1365.   Proteomic analysis of putative heme-binding proteins in  Streptococcus pyogenes .  Metallomics  2014, 6:1451-1459",
+            "location": "/featuredArticles/#2014", 
+            "text": "Age- and diet-associated metabolome remodeling characterizes the aging process driven by damage accumulation .  eLife  2014,3:e02077   Expression Profiling of the Wheat Pathogen  Zymoseptoria tritici  Reveals Genomic Patterns of Transcription and Host-Specific Regulatory Programs .  Genome Biol Evol  2014, 6(6): 1353-1365.   Proteomic analysis of putative heme-binding proteins in  Streptococcus pyogenes .  Metallomics  2014, 6:1451-1459", 
             "title": " 2014"
-        },
+        }, 
         {
-            "location": "/featuredArticles/#2013",
-            "text": "Putative cobalt- and nickel-binding proteins and motifs in  Streptococcus pneumoniae .  Metallomics  2013,5:928-935.   A novel andrographolide derivative AL-1 exerts its cytotoxicity on K562 cells through a ROS-dependent mechanism .  Proteomics  2013, 13(1):169\u2013178.",
+            "location": "/featuredArticles/#2013", 
+            "text": "Putative cobalt- and nickel-binding proteins and motifs in  Streptococcus pneumoniae .  Metallomics  2013,5:928-935.   A novel andrographolide derivative AL-1 exerts its cytotoxicity on K562 cells through a ROS-dependent mechanism .  Proteomics  2013, 13(1):169\u2013178.", 
             "title": " 2013"
+        }, 
+        {
+            "location": "/../mysoftware/ChIPseeker/", 
+            "text": "", 
+            "title": "ChIPseeker"
+        }, 
+        {
+            "location": "/../mysoftware/clusterProfiler/", 
+            "text": "", 
+            "title": "clusterProfiler"
+        }, 
+        {
+            "location": "/../mysoftware/DOSE/", 
+            "text": "", 
+            "title": "DOSE"
+        }, 
+        {
+            "location": "/../mysoftware/ggtree/", 
+            "text": "", 
+            "title": "ggtree"
+        }, 
+        {
+            "location": "/../mysoftware/GOSemSim/", 
+            "text": "", 
+            "title": "GOSemSim"
+        }, 
+        {
+            "location": "/../mysoftware/ReactomePA/", 
+            "text": "", 
+            "title": "ReactomePA"
         }
     ]
 }
