@@ -19,7 +19,7 @@
 
 Let us know if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-111-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-112-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -37,10 +37,10 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
-<div id = 'chart236c44ec1ba8' class = 'rChart morris'></div>
+<div id = 'chart1a2f1bc5ccb1' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart236c44ec1ba8",
+ "element": "chart1a2f1bc5ccb1",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -70,11 +70,11 @@ Let us know if you have published using `clusterProfiler` and your publication w
 },
 {
  "year": 2016,
-"cites":             48,
+"cites":             49,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart236c44ec1ba8",
+"id": "chart1a2f1bc5ccb1",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -86,6 +86,8 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
  
 
 ## <i class="fa fa-calendar"></i> 2016
+
+[Age-related accrual of methylomic variability is linked to fundamental ageing mechanisms](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1053-6). ***Genome Biology***.2016, 17:191.
 
 [Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](http://www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016.
 
