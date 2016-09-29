@@ -8,7 +8,7 @@ author: "\\
 date: "`r Sys.Date()`"
 bibliography: clusterProfiler.bib
 csl: nature.csl
-output: 
+output:
   BiocStyle::html_document:
     toc: true
   BiocStyle::pdf_document:
@@ -68,7 +68,7 @@ library(clusterProfiler)
 	* user's annotation
 	* customized ontology
 	* and many others
-  
+
 ## Visualization
 
 + barplot
@@ -115,12 +115,12 @@ profiles among gene clusters.
 `r Biocpkg("clusterProfiler")` provides `bitr` and `bitr_kegg` for converting ID types. Both `bitr` and `bitr_kegg` support many species including model and many non-model organisms.
 
 ```{r}
-x <- c("GPX3",  "GLRX",   "LBP",   "CRYAB", "DEFB1", "HCLS1",   "SOD2",   "HSPA2", 
-       "ORM1",  "IGFBP1", "PTHLH", "GPC3",  "IGFBP3","TOB1",    "MITF",   "NDRG1", 
-       "NR1H4", "FGFR3",  "PVR",   "IL6",   "PTPRM", "ERBB2",   "NID2",   "LAMB1", 
-       "COMP",  "PLS3",   "MCAM",  "SPP1",  "LAMC1", "COL4A2",  "COL4A1", "MYOC",  
+x <- c("GPX3",  "GLRX",   "LBP",   "CRYAB", "DEFB1", "HCLS1",   "SOD2",   "HSPA2",
+       "ORM1",  "IGFBP1", "PTHLH", "GPC3",  "IGFBP3","TOB1",    "MITF",   "NDRG1",
+       "NR1H4", "FGFR3",  "PVR",   "IL6",   "PTPRM", "ERBB2",   "NID2",   "LAMB1",
+       "COMP",  "PLS3",   "MCAM",  "SPP1",  "LAMC1", "COL4A2",  "COL4A1", "MYOC",
        "ANXA4", "TFPI2",  "CST6",  "SLPI",  "TIMP2", "CPM",     "GGT1",   "NNMT",
-       "MAL",   "EEF1A2", "HGD",   "TCN2",  "CDA",   "PCCA",    "CRYM",   "PDXK",  
+       "MAL",   "EEF1A2", "HGD",   "TCN2",  "CDA",   "PCCA",    "CRYM",   "PDXK",
        "STC1",  "WARS",  "HMOX1", "FXYD2", "RBP4",   "SLC6A12", "KDELR3", "ITM2B")
 eg = bitr(x, fromType="SYMBOL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
 head(eg)
@@ -166,7 +166,7 @@ If we try to convert `Z5100` to `ncbi-geneid`, `bitr_kegg` will throw error of `
 bitr_kegg("Z5100", fromType="kegg", toType='ncbi-geneid', organism='ece')
 ```
 
-```    
+```
 ## Error in KEGG_convert(fromType, toType, organism) :
 ## ncbi-geneid is not supported for ece ...
 ```
@@ -198,7 +198,7 @@ In `r Biocpkg("clusterProfiler")`, `groupGO` is designed for gene classification
 ```{r warning=FALSE}
 data(geneList, package="DOSE")
 gene <- names(geneList)[abs(geneList) > 2]
-gene.df <- bitr(gene, fromType = "ENTREZID", 
+gene.df <- bitr(gene, fromType = "ENTREZID",
 	   	toType = c("ENSEMBL", "SYMBOL"),
 		OrgDb = org.Hs.eg.db)
 head(gene.df)
@@ -211,7 +211,7 @@ ggo <- groupGO(gene     = gene,
 head(ggo)
 ```
 
-The input parameters of _gene_ is a vector of gene IDs (can be any ID type that supported by corresponding `OrgDb`). 
+The input parameters of _gene_ is a vector of gene IDs (can be any ID type that supported by corresponding `OrgDb`).
 
 If _readable_ is setting to _TRUE_, the input gene IDs will be converted to gene symbols.
 
@@ -228,7 +228,7 @@ ego <- enrichGO(gene          = gene,
                 ont           = "CC",
                 pAdjustMethod = "BH",
                 pvalueCutoff  = 0.01,
-                qvalueCutoff  = 0.05, 
+                qvalueCutoff  = 0.05,
 		readable      = TRUE)
 head(ego)
 ```
@@ -271,13 +271,13 @@ A common approach in analyzing gene expression profiles was identifying differen
 
 For algorithm details, please refer to the vignette of `r Biocpkg("DOSE")`.
 
-```{r eval=FALSE} 
+```{r eval=FALSE}
 ego3 <- gseGO(geneList     = geneList,
               OrgDb        = org.Hs.eg.db,
               ont          = "CC",
               nPerm        = 1000,
               minGSSize    = 100,
-              maxGSSize    = 500, 
+              maxGSSize    = 500,
               pvalueCutoff = 0.05,
               verbose      = FALSE)
 ```
@@ -292,7 +292,7 @@ GO semantic similarity can be calculated by `r Biocpkg("GOSemSim")`[@yu2010]. We
 
 # KEGG analysis
 
-The annotation package, `r Biocannopkg("KEGG.db")`, is not updated since 2012. It's now pretty old and in `r Biocpkg("clusterProfiler")`, `enrichKEGG` (for KEGG pathway) and `enrichMKEGG` (for KEGG module) supports downloading latest online version of KEGG data for enrichment analysis. Using `r Biocannopkg("KEGG.db")` is also supported by explicitly setting _use\_internal\_data_ parameter to _TRUE_, but it's not recommended. 
+The annotation package, `r Biocannopkg("KEGG.db")`, is not updated since 2012. It's now pretty old and in `r Biocpkg("clusterProfiler")`, `enrichKEGG` (for KEGG pathway) and `enrichMKEGG` (for KEGG module) supports downloading latest online version of KEGG data for enrichment analysis. Using `r Biocannopkg("KEGG.db")` is also supported by explicitly setting _use\_internal\_data_ parameter to _TRUE_, but it's not recommended.
 
 With this new feature, organism is not restricted to those supported in previous release, it can be any species that have KEGG annotation data available in KEGG database. User should pass abbreviation of academic name to the _organism_ parameter. The full list of KEGG supported organisms can be accessed via [http://www.genome.jp/kegg/catalog/org_list.html](http://www.genome.jp/kegg/catalog/org_list.html).
 
@@ -341,14 +341,14 @@ head(kk2)
 mkk <- enrichMKEGG(gene = gene,
                    organism = 'hsa')
 ```
-                   
+
 ## KEGG Module Gene Set Enrichment Analysis
 
 ```{r eval=FALSE}
 mkk2 <- gseMKEGG(geneList = geneList,
                  species = 'hsa')
 ```
-                 
+
 
 # Disease analysis
 
@@ -529,13 +529,13 @@ The input for _geneCluster_ parameter should be a named list of gene IDs. To spe
 
 ```{r}
 ck <- compareCluster(geneCluster = gcSample, fun = "enrichKEGG")
-head(summary(ck))
+head(as.data.frame(ck))
 ```
 
 
 ## Formula interface of compareCluster
 
-`compareCluster` also supports passing a formula (the code to support formula has been contributed by Giovanni Dall'Olio) of type $Entrez \sim group$ or $Entrez \sim group + othergroup$. 
+`compareCluster` also supports passing a formula (the code to support formula has been contributed by Giovanni Dall'Olio) of type $Entrez \sim group$ or $Entrez \sim group + othergroup$.
 
 ```{r}
 mydf <- data.frame(Entrez=names(geneList), FC=geneList)
@@ -547,7 +547,7 @@ mydf$othergroup[abs(mydf$FC) > 2] <- "B"
 
 formula_res <- compareCluster(Entrez~group+othergroup, data=mydf, fun="enrichKEGG")
 
-head(summary(formula_res))
+head(as.data.frame(formula_res))
 ```
 
 ## Visualization of profile comparison
