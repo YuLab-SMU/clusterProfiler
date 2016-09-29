@@ -2,6 +2,7 @@
 
 S3method("[",compareClusterResult)
 S3method("[[",compareClusterResult)
+S3method(as.data.frame,compareClusterResult)
 S3method(dim,compareClusterResult)
 S3method(fortify,compareClusterResult)
 S3method(geneID,groupGOResult)

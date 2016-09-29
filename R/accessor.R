@@ -1,3 +1,9 @@
+##' @method as.data.frame compareClusterResult
+##' @export
+as.data.frame.compareClusterResult <- function(x, ...) {
+    as.data.frame(x@compareClusterResult, ...)
+}
+
 ##' @method [ compareClusterResult
 ##' @export
 `[.compareClusterResult` <- function(x, i, j) {

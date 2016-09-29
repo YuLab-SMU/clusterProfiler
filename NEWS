@@ -1,5 +1,6 @@
 CHANGES IN VERSION 3.1.8
 ------------------------
+ o as.data.frame method for compareClusterResult <2016-09-29, Thu>
  o geneID and geneInCategory methods <2016-09-19, Mon>
 
 CHANGES IN VERSION 3.1.7

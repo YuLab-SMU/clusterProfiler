@@ -53,7 +53,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
             genes.var       = all.vars(geneClusters)[1]
             grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
             geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {as.character(x[[genes.var]])})
-        }   
+        }
     }
     clProf <- llply(geneClusters,
                     .fun=function(i) {
@@ -69,8 +69,8 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     if (nrow(clProf.df) == 0) {
         stop("No enrichment found in any of gene cluster, please check your input...")
     }
-    
-    clProf.df <- rename(clProf.df, c(.id="Cluster"))    
+
+    clProf.df <- rename(clProf.df, c(.id="Cluster"))
     clProf.df$Cluster = factor(clProf.df$Cluster, levels=clusters.levels)
 
     if (is.data.frame(data) && grepl('+', grouping.formula)) {
@@ -78,13 +78,13 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
             gsub("~", "", .) %>% gsub("^\\s*", "", .) %>% gsub("\\s*$", "", .)
         groupVars <- sapply(as.character(clProf.df$Cluster), strsplit, split="\\.") %>% do.call(rbind, .)
         for (i in seq_along(groupVarName)) {
-            clProf.df[, groupVarName[i]] <- groupVars[,i] 
+            clProf.df[, groupVarName[i]] <- groupVars[,i]
         }
         i <- which(colnames(clProf.df) %in% groupVarName)
         j <- (1:ncol(clProf.df))[-c(1, i)]
         clProf.df <- clProf.df[, c(1, i, j)]
     }
-    
+
     ##colnames(clProf.df)[1] <- "Cluster"
     new("compareClusterResult",
         compareClusterResult = clProf.df,
@@ -123,7 +123,7 @@ setMethod("show", signature(object="compareClusterResult"),
               result <- object@compareClusterResult
               clusts <- split(result, result$Cluster)
               nterms <- sapply(clusts, nrow)
-              
+
               cat("#\n# Result of Comparing", geneClusterLen, "gene clusters", "\n#\n")
               cat("#.. @fun", "\t", fun, "\n")
               cat("#.. @geneClusters", "\t")
@@ -169,10 +169,13 @@ setMethod("show", signature(object="compareClusterResult"),
 ## @exportMethod summary
 ## @author Guangchuang Yu \url{https://guangchuangyu.github.io}
 setMethod("summary", signature(object="compareClusterResult"),
-          function(object) {
-              return(object@compareClusterResult)
+          function(object, ...) {
+              warning("summary method to convert the object to data.frame is deprecated, please use as.data.frame instead.")
+              return(as.data.frame(object, ...))
           }
           )
+
+
 
 ##' @rdname plot-methods
 ##' @aliases plot,compareClusterResult,ANY-method
@@ -181,7 +184,7 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @param colorBy one of pvalue or p.adjust
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
-##' @param includeAll logical 
+##' @param includeAll logical
 ##' @param font.size font size
 ##' @param title figure title
 setMethod("plot", signature(x="compareClusterResult"),
@@ -207,7 +210,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                   barplot.compareClusterResult(x, colorBy, showCategory, by, includeAll, font.size, title)
               } else {
                   stop("type should be one of 'dot' or 'bar'...")
-              }              
+              }
           })
 ##' dot plot method
 ##'
@@ -221,7 +224,7 @@ setMethod("plot", signature(x="compareClusterResult"),
 ##' @param colorBy one of pvalue or p.adjust
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
-##' @param includeAll logical 
+##' @param includeAll logical
 ##' @param font.size font size
 ##' @param title figure title
 ##' @importFrom DOSE dotplot
@@ -253,7 +256,7 @@ barplot.compareClusterResult <- function(height, colorBy="p.adjust", showCategor
 ##'
 ##'
 ##' @title merge_result
-##' @param enrichResultList a list of enrichResult objects 
+##' @param enrichResultList a list of enrichResult objects
 ##' @return a compareClusterResult instance
 ##' @author Guangchuang Yu
 ##' @importFrom plyr ldply
@@ -272,5 +275,5 @@ merge_result <- function(enrichResultList) {
     y$Cluster = factor(y$Cluster, levels=names(enrichResultList))
     new("compareClusterResult",
         compareClusterResult = y)
-    
+
 }
