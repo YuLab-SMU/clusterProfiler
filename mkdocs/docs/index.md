@@ -17,8 +17,8 @@
 
 [![releaseVersion](https://img.shields.io/badge/release%20version-3.0.5-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
 [![develVersion](https://img.shields.io/badge/devel%20version-3.1.8-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
-[![total](https://img.shields.io/badge/downloads-56103/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
-[![month](https://img.shields.io/badge/downloads-2315/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![total](https://img.shields.io/badge/downloads-56523/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![month](https://img.shields.io/badge/downloads-2292/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
 The `clusterProfiler` package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.
 
@@ -33,11 +33,11 @@ Guangchuang Yu, School of Public Health, The University of Hong Kong.
 Please cite the following article when using `clusterProfiler`:
 
 [![doi](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-blue.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118)
-[![citation](https://img.shields.io/badge/cited%20by-112-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
-[![Altmetric](https://img.shields.io/badge/Altmetric-12-blue.svg?style=flat)](https://www.altmetric.com/details/681089)
+[![citation](https://img.shields.io/badge/cited%20by-114-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![Altmetric](https://img.shields.io/badge/Altmetric-13-blue.svg?style=flat)](https://www.altmetric.com/details/681089)
 
-__Yu G__, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters. 
-__*OMICS: A Journal of Integrative Biology*__. 2012, 16(5):284-287. 
+__Yu G__, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters.
+__*OMICS: A Journal of Integrative Biology*__. 2012, 16(5):284-287.
 
 
 
@@ -89,7 +89,7 @@ biocLite("clusterProfiler")
 	* user's annotation
 	* customized ontology
 	* and many others
-  
+
 #### <i class="fa fa-angle-double-right"></i> Visualization
 
 + barplot
@@ -99,7 +99,7 @@ biocLite("clusterProfiler")
 + gseaplot
 + plotGOgraph (via [topGO](https://www.bioconductor.org/packages/topGO) package)
 + upsetplot
-  
+
 #### <i class="fa fa-angle-double-right"></i> Useful utilities:
 
 + bitr (Biological Id TranslatoR)
@@ -120,8 +120,13 @@ biocLite("clusterProfiler")
 + [bioCancer](https://www.bioconductor.org/packages/bioCancer): Interactive Multi-Omics Cancers Data Visualization and Analysis
 + [debrowser](https://www.bioconductor.org/packages/debrowser): Interactive Differential Expresion Analysis Browser
 + [eegc](https://www.bioconductor.org/packages/eegc): Engineering Evaluation by Gene Categorization (eegc)
-+ [LINC](https://www.bioconductor.org/packages/LINC): annotation of noncoding RNAs and coexpressed genes
-  
++ [LINC](https://www.bioconductor.org/packages/LINC): co-expression of lincRNAs and protein-coding genes
+
+#### <i class="fa fa-angle-double-right"></i> Other applications
+
++ [APOSTL](https://github.com/bornea/APOSTL): An Interactive Galaxy Pipeline for Reproducible Analysis of Affinity Proteomics Data
+
+
 ## <i class="fa fa-comment"></i> Feedback
 <ul class="fa-ul">
 	<li><i class="fa-li fa fa-hand-o-right"></i> Please make sure you [follow the guide](https://guangchuangyu.github.io/2016/07/how-to-bug-author/) before posting any issue/question</li>

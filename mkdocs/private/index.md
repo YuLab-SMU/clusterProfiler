@@ -23,8 +23,8 @@ Please cite the following article when using `clusterProfiler`:
 <!-- citation:=MLfJN-KU85MC:=2349076811020942117 -->
 <!-- altmetric:=681089 -->
 
-__Yu G__, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters. 
-__*OMICS: A Journal of Integrative Biology*__. 2012, 16(5):284-287. 
+__Yu G__, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters.
+__*OMICS: A Journal of Integrative Biology*__. 2012, 16(5):284-287.
 
 
 
@@ -76,7 +76,7 @@ biocLite("clusterProfiler")
 	* user's annotation
 	* customized ontology
 	* and many others
-  
+
 #### <i class="fa fa-angle-double-right"></i> Visualization
 
 + barplot
@@ -86,7 +86,7 @@ biocLite("clusterProfiler")
 + gseaplot
 + plotGOgraph (via [topGO](https://www.bioconductor.org/packages/topGO) package)
 + upsetplot
-  
+
 #### <i class="fa fa-angle-double-right"></i> Useful utilities:
 
 + bitr (Biological Id TranslatoR)
@@ -105,7 +105,12 @@ biocLite("clusterProfiler")
 <!-- package_depend:=clusterProfiler:=CRAN -->
 
 <!-- package_depend:=clusterProfiler:=BioC -->
-  
+
+#### <i class="fa fa-angle-double-right"></i> Other applications
+
++ [APOSTL](https://github.com/bornea/APOSTL): An Interactive Galaxy Pipeline for Reproducible Analysis of Affinity Proteomics Data
+
+
 ## <i class="fa fa-comment"></i> Feedback
 <ul class="fa-ul">
 	<li><i class="fa-li fa fa-hand-o-right"></i> Please make sure you [follow the guide](https://guangchuangyu.github.io/2016/07/how-to-bug-author/) before posting any issue/question</li>
