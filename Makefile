@@ -36,6 +36,8 @@ clean:
 	cd ..;\
 	$(RM) -r $(PKGNAME).Rcheck/
 
+site: mkdocs
+
 mkdocs: mdfiles
 	cd mkdocs;\
 	mkdocs build;\
