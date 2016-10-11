@@ -37,10 +37,17 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
+<<<<<<< HEAD
 <div id = 'chart39391f2af79e' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
  "element": "chart39391f2af79e",
+=======
+<div id = 'chart604d25f36ce3' class = 'rChart morris'></div>
+<script type='text/javascript'>
+    var chartParams = {
+ "element": "chart604d25f36ce3",
+>>>>>>> c31c3cd90002044fcaf429920cf3fbd3821edec7
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -74,7 +81,11 @@ Let us know if you have published using `clusterProfiler` and your publication w
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
+<<<<<<< HEAD
 "id": "chart39391f2af79e",
+=======
+"id": "chart604d25f36ce3",
+>>>>>>> c31c3cd90002044fcaf429920cf3fbd3821edec7
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -87,7 +98,7 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 ## <i class="fa fa-calendar"></i> 2016
 
-[Age-related accrual of methylomic variability is linked to fundamental ageing mechanisms](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1053-6). ***Genome Biology***.2016, 17:191.
+[Classification and characterization of microsatellite instability across 18 cancer types](http://www.nature.com/nm/journal/vaop/ncurrent/full/nm.4191.html). ***Nature Medicine***. 2016.
 
 [Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](http://www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016.
 
@@ -101,6 +112,8 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 
 [Comprehensive identification of internal structure and alternative splicing events in circular RNAs](http://dx.doi.org/10.1038/ncomms12060). **_Nature Communications_**. 2016
+
+[Age-related accrual of methylomic variability is linked to fundamental ageing mechanisms](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1053-6). ***Genome Biology***.2016, 17:191.
 
 
 [TP53 regulates miRNA association with AGO2 to remodel the miRNA–mRNA interaction network](http://genome.cshlp.org/content/26/3/331.short). __*Genome Research*__. 2016, 26:331-341.
