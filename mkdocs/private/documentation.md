@@ -46,6 +46,12 @@
 
 <i class="fa fa-hand-o-right"></i> Find out more on <https://guangchuangyu.github.io/tags/clusterprofiler>.
 
+## <i class="fa fa-support"></i> Q&A
+
++ [Collecting Genes with similar GO term](https://www.biostars.org/p/201064/#201077)
++ [Convert gene to GO ID](https://www.biostars.org/p/215242/#215254)
+
+
 ## <i class="fa fa-gift"></i> Workflow
 
 + [An end to end workflow for differential gene expression using Affymetrix microarrays](http://f1000research.com/articles/5-1384/v1)
