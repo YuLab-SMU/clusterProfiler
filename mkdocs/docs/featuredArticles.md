@@ -37,17 +37,10 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
-<<<<<<< HEAD
-<div id = 'chart39391f2af79e' class = 'rChart morris'></div>
+<div id = 'chart39fe7ef5143e' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart39391f2af79e",
-=======
-<div id = 'chart604d25f36ce3' class = 'rChart morris'></div>
-<script type='text/javascript'>
-    var chartParams = {
- "element": "chart604d25f36ce3",
->>>>>>> c31c3cd90002044fcaf429920cf3fbd3821edec7
+ "element": "chart39fe7ef5143e",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -81,11 +74,7 @@ Let us know if you have published using `clusterProfiler` and your publication w
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-<<<<<<< HEAD
-"id": "chart39391f2af79e",
-=======
-"id": "chart604d25f36ce3",
->>>>>>> c31c3cd90002044fcaf429920cf3fbd3821edec7
+"id": "chart39fe7ef5143e",
 "labels": "cites" 
 },
       chartType = "Bar"
