@@ -37,10 +37,10 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
-<div id = 'chart39fe7ef5143e' class = 'rChart morris'></div>
+<div id = 'chart45a240c73dd' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart39fe7ef5143e",
+ "element": "chart45a240c73dd",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -74,7 +74,7 @@ Let us know if you have published using `clusterProfiler` and your publication w
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart39fe7ef5143e",
+"id": "chart45a240c73dd",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -91,22 +91,21 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 [Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](http://www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016.
 
-
-[Local microRNA delivery targets Palladin and prevents metastatic breast cancer](http://www.nature.com/ncomms/2016/160919/ncomms12868/full/ncomms12868.html). ***Nature Communications***. 2016.
-
-
 [Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full). ***The Journal of Experimental Medicine***. 2016.
 
-[Antibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice](http://www.nature.com/articles/nmicrobiol2016140). **_Nature Microbiology_**. 2016.
+[Mining kidney toxicogenomic data by using gene co-expression modules](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3143-y). ***BMC
+Genomics***. 2016, 17:790.
 
+[Local microRNA delivery targets Palladin and prevents metastatic breast cancer](http://www.nature.com/ncomms/2016/160919/ncomms12868/full/ncomms12868.html). ***Nature Communications***. 2016, 7:12868
 
-[Comprehensive identification of internal structure and alternative splicing events in circular RNAs](http://dx.doi.org/10.1038/ncomms12060). **_Nature Communications_**. 2016
+[Antibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice](http://www.nature.com/articles/nmicrobiol2016140). **_Nature Microbiology_**. 2016, 1:16140.
 
-[Age-related accrual of methylomic variability is linked to fundamental ageing mechanisms](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1053-6). ***Genome Biology***.2016, 17:191.
+[Comprehensive identification of internal structure and alternative splicing events in circular RNAs](http://dx.doi.org/10.1038/ncomms12060). **_Nature
+Communications_**. 2016, 7:12060.
 
+[Age-related accrual of methylomic variability is linked to fundamental ageing mechanisms](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1053-6). ***Genome Biology***. 2016, 17:191.
 
 [TP53 regulates miRNA association with AGO2 to remodel the miRNA–mRNA interaction network](http://genome.cshlp.org/content/26/3/331.short). __*Genome Research*__. 2016, 26:331-341.
-
 
 [ReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization](http://dx.doi.org/10.1039/C5MB00663E). __*Molecular BioSystems*__. 2016, 12(2):477-479.
 
