@@ -140,7 +140,7 @@ GI2EG <- function(GI, organism="D39") {
     } else {
         stop("not supported yet...")
     }
-    
+
     return(gi.eg)
 }
 
@@ -151,15 +151,6 @@ removeEmptyEntry.list <- function(x) {
 }
 
 
-
-add_GO_Ontology <- function(obj, GO_DATA) {
-    obj@setType <- "GOALL"
-    df <- obj@result
-    GO2ONT <- get("GO2ONT", envir=GO_DATA)
-    df <- cbind(ONTOLOGY=GO2ONT[df$ID], df)
-    obj@result <- df
-    return(obj)
-}
 
 
 GSEA_internal <- DOSE:::GSEA_internal
