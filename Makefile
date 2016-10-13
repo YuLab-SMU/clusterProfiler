@@ -43,9 +43,7 @@ clean:
 site: mkdocs
 
 mkdocs: mdfiles
-	cd docs;\
-	ln -f -s ../mkdocs/featured_img ./;\
-	cd ../mkdocs;\
+	cd mkdocs;\
 	mkdocs build;\
 	cd ../docs;\
 	rm -rf fonts;\
