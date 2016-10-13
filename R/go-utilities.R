@@ -1,7 +1,7 @@
 
 ##' convert goid to descriptive term
 ##'
-##' 
+##'
 ##' @title go2term
 ##' @param goid a vector of GO IDs
 ##' @return data.frame
@@ -16,7 +16,7 @@ go2term <- function(goid) {
 
 ##' convert goid to ontology (BP, CC, MF)
 ##'
-##' 
+##'
 ##' @title go2ont
 ##' @param goid a vector of GO IDs
 ##' @return data.frame
@@ -137,4 +137,19 @@ getGOLevel <- function(ont, level) {
         }
     }
     return(all_nodes)
+}
+
+
+add_GO_Ontology <- function(obj, GO_DATA) {
+    if (is(obj, 'gseaResult')) {
+        obj@setType <- "GOALL"
+    } else if (is(obj, 'enrichResult')) {
+        obj@ontology <- 'GOALL'
+    }
+
+    df <- obj@result
+    GO2ONT <- get("GO2ONT", envir=GO_DATA)
+    df <- cbind(ONTOLOGY=GO2ONT[df$ID], df)
+    obj@result <- df
+    return(obj)
 }
