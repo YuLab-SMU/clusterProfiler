@@ -37,10 +37,10 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
-<div id = 'chart45a240c73dd' class = 'rChart morris'></div>
+<div id = 'chart5524f1cea93' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart45a240c73dd",
+ "element": "chart5524f1cea93",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -74,7 +74,7 @@ Let us know if you have published using `clusterProfiler` and your publication w
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart45a240c73dd",
+"id": "chart5524f1cea93",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -93,8 +93,7 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 [Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full). ***The Journal of Experimental Medicine***. 2016.
 
-[Mining kidney toxicogenomic data by using gene co-expression modules](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3143-y). ***BMC
-Genomics***. 2016, 17:790.
+[Mining kidney toxicogenomic data by using gene co-expression modules](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3143-y). ***BMC Genomics***. 2016, 17:790.
 
 [Local microRNA delivery targets Palladin and prevents metastatic breast cancer](http://www.nature.com/ncomms/2016/160919/ncomms12868/full/ncomms12868.html). ***Nature Communications***. 2016, 7:12868
 
