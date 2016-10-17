@@ -58,6 +58,12 @@
     </url>
         
     <url>
+     <loc>https://guangchuangyu.github.io/clusterProfiler/meshes/</loc>
+     <lastmod>2016-10-17</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
      <loc>https://guangchuangyu.github.io/clusterProfiler/ReactomePA/</loc>
      <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>

@@ -14,6 +14,7 @@ pages:
   - DOSE: DOSE.md
   - ggtree: ggtree.md
   - GOSemSim: GOSemSim.md
+  - meshes: meshes.md
   - ReactomePA: ReactomePA.md
 
 

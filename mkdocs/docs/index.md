@@ -73,6 +73,7 @@ biocLite("clusterProfiler")
 + [DisGeNET](http://www.disgenet.org/web/DisGeNET/menu/home) (via [DOSE](https://www.bioconductor.org/packages/DOSE))
 + Gene Ontology (supports many species with GO annotation query online via [AnnotationHub](https://bioconductor.org/packages/AnnotationHub/))
 + KEGG Pathway and Module with latest online data (supports more than 4000 species listed in <http://www.genome.jp/kegg/catalog/org_list.html>)
++ MeSH enrichment analysis (via [meshes](https://www.bioconductor.org/packages/meshes))
 + Reactome Pathway (via [ReactomePA](https://www.bioconductor.org/packages/ReactomePA))
 + DAVID (via [RDAVIDWebService](https://www.bioconductor.org/packages/RDAVIDWebService))
 + [Molecular Signatures Database](http://software.broadinstitute.org/gsea/msigdb)
@@ -112,6 +113,18 @@ biocLite("clusterProfiler")
 + simplify (remove redundant GO terms, supported via [GOSemSim](https://www.bioconductor.org/packages/GOSemSim))
 
 <i class="fa fa-hand-o-right"></i> Find out details and examples on <i class="fa fa-book"></i> [Documentation](https://guangchuangyu.github.io/clusterProfiler/documentation/).
+
+## <i class="fa fa-wrench"></i> Related Tools
+
+<ul class="fa-ul">
+	<li><i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/DOSE">DOSE</a> for Disease Ontology Semantic and Enrichment analyses</li>
+	<li><i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/GOSemSim">GOSemSim</a> for GO semantic similarity measurement</li>
+	<li><i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/meshes">meshes</a> for MeSH Enrichment and Semantic analysis</li>
+	<li><i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/ReactomePA">ReactomePA</a> for Reactome pathway analysis</li>
+</ul>
+
+<i class="fa fa-hand-o-right"></i> Find out more on [projects](https://guangchuangyu.github.io/#projects).
+
 
 ## <i class="fa fa-code-fork"></i> Projects that depend on _clusterProfiler_
 

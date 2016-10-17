@@ -18,8 +18,8 @@
 
 ## <i class="fa fa-book"></i> Vignettes
 
-+ [Disease enrichment analysis](https://bioconductor.org/packages/devel/bioc/vignettes/DOSE/inst/doc/enrichmentAnalysis.html)
-+ [Disease GSEA](https://bioconductor.org/packages/devel/bioc/vignettes/DOSE/inst/doc/GSEA.html)
++ [DOSE: Disease enrichment analysis](https://bioconductor.org/packages/devel/bioc/vignettes/DOSE/inst/doc/enrichmentAnalysis.html)
++ [DOSE: Disease GSEA](https://bioconductor.org/packages/devel/bioc/vignettes/DOSE/inst/doc/GSEA.html)
 + [Statistical analysis and visualization of functional profiles for genes and gene clusters](https://bioconductor.org/packages/devel/bioc/vignettes/clusterProfiler/inst/doc/clusterProfiler.html)
 
 ## <i class="fa fa-wordpress"></i> Blog posts
