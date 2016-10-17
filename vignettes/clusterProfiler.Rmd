@@ -579,7 +579,12 @@ parameter _pvalueCutoff_, and FDR can be estimated by _qvalue_.
 
 User can refer to the example in Yu (2012)[@yu2012]; we analyzed the publicly available expression dataset of breast tumour tissues from 200 patients (GSE11121, Gene Expression Omnibus)[@schmidt2008]. We identified 8 gene clusters from differentially expressed genes, and using `compareCluster` to compare these gene clusters by their enriched biological process.
 
-The comparison function was designed as a framework for comparing gene clusters of any kind of ontology associations, not only `groupGO`, `enrichGO`, `enrichKEGG` and `enricher` provided in this package, but also other biological and biomedical ontologies, for instance, `enrichDO` from `r Biocpkg("DOSE")`[@yu_dose_2015] and `enrichPathway` from `r Biocpkg("ReactomePA")` work fine with `compareCluster` for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of `r Biocpkg("DOSE")`[@yu_dose_2015] and `r Biocpkg("ReactomePA")`.
+The comparison function was designed as a framework for comparing gene
+clusters of any kind of ontology associations, not only `groupGO`,
+`enrichGO`, `enrichKEGG` and `enricher` provided in this package, but
+also other biological and biomedical ontologies, for instance,
+`enrichDO` from `r Biocpkg("DOSE")`[@yu_dose_2015], `enrichMeSH` from
+`r Biocpkg("meshes")` and `enrichPathway` from `r Biocpkg("ReactomePA")` work fine with `compareCluster` for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of `r Biocpkg("DOSE")`[@yu_dose_2015] and `r Biocpkg("ReactomePA")`.
 
 
 # Homepage
