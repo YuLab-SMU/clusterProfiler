@@ -12,6 +12,7 @@ pages:
   - ChIPseeker: ChIPseeker.md
   - clusterProfiler: clusterProfiler.md
   - DOSE: DOSE.md
+  - emojifont: emojifont.md
   - ggtree: ggtree.md
   - GOSemSim: GOSemSim.md
   - meshes: meshes.md
