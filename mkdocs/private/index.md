@@ -30,7 +30,7 @@ __*OMICS: A Journal of Integrative Biology*__. 2012, 16(5):284-287.
 
 ## <i class="fa fa-pencil"></i> Featured Articles
 
-<img src="featured_img/elife-02077-fig5-v1.jpg" width="650">
+<img src="https://guangchuangyu.github.io/featured_img/clusterProfiler/elife-02077-fig5-v1.jpg" width="650">
 
 <i class="fa fa-hand-o-right"></i> Find out more on <i class="fa fa-pencil"></i> [Featured Articles](https://guangchuangyu.github.io/clusterProfiler/featuredArticles/).
 
