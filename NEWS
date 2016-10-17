@@ -1,3 +1,8 @@
+CHANGES IN VERSION 3.1.9
+------------------------
+ o bug fixed of simplify method for compareCluster object <2016-08-17, Mon>
+   + use semData parameter according to the change of GOSemSim
+
 CHANGES IN VERSION 3.1.8
 ------------------------
  o as.data.frame method for compareClusterResult <2016-09-29, Thu>
