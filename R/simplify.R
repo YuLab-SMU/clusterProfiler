@@ -101,7 +101,7 @@ simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, me
 ##' @aliases simplify,compareClusterResult-method
 ##' @author Guangchuang Yu
 setMethod("simplify", signature(x="compareClusterResult"),
-          function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel", semData) {
+          function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData) {
               res <- x@compareClusterResult
               ont <- get_go_ontology(x)
 
