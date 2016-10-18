@@ -1,3 +1,7 @@
+CHANGES IN VERSION 3.2.0
+------------------------
+ o BioC 3.4 released <2016-10-18, Tue>
+
 CHANGES IN VERSION 3.1.9
 ------------------------
  o bug fixed of simplify method for compareCluster object <2016-08-17, Mon>
