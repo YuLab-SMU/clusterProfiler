@@ -11,7 +11,7 @@
   select_fun = min, measure = "Wang", semData = NULL)
 
 \S4method{simplify}{compareClusterResult}(x, cutoff = 0.7, by = "p.adjust",
-  select_fun = min, measure = "Rel", semData)
+  select_fun = min, measure = "Wang", semData = NULL)
 }
 \arguments{
 \item{x}{output of enrichGO}

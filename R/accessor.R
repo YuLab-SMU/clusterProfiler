@@ -24,7 +24,7 @@ as.data.frame.compareClusterResult <- function(x, ...) {
 ##' @method head compareClusterResult
 ##' @export
 head.compareClusterResult <- function(x, n=6L, ...) {
-    head(x@result, n, ...)
+    head(as.data.frame(x), n, ...)
 }
 
 
@@ -32,14 +32,14 @@ head.compareClusterResult <- function(x, n=6L, ...) {
 ##' @method tail compareClusterResult
 ##' @export
 tail.compareClusterResult <- function(x, n=6L, ...) {
-    tail(x@result, n, ...)
+    tail(as.data.frame(x), n, ...)
 }
 
 
 ##' @method dim compareClusterResult
 ##' @export
 dim.compareClusterResult <- function(x) {
-    dim(x@result)
+    dim(as.data.frame(x))
 }
 
 
