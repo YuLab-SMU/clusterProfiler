@@ -15,9 +15,9 @@
 
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
 
-[![releaseVersion](https://img.shields.io/badge/release%20version-3.0.5-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
-[![develVersion](https://img.shields.io/badge/devel%20version-3.3.0-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
-[![total](https://img.shields.io/badge/downloads-57179/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![releaseVersion](https://img.shields.io/badge/release%20version-3.2.0-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
+[![develVersion](https://img.shields.io/badge/devel%20version-3.3.1-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
+[![total](https://img.shields.io/badge/downloads-57410/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 [![month](https://img.shields.io/badge/downloads-2292/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
 The `clusterProfiler` package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.

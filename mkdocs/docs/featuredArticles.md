@@ -37,10 +37,10 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
-<div id = 'chart58b7b2c49f5' class = 'rChart morris'></div>
+<div id = 'chart30b65e1d5f7f' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart58b7b2c49f5",
+ "element": "chart30b65e1d5f7f",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -74,7 +74,7 @@ Let us know if you have published using `clusterProfiler` and your publication w
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart58b7b2c49f5",
+"id": "chart30b65e1d5f7f",
 "labels": "cites" 
 },
       chartType = "Bar"
