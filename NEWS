@@ -1,7 +1,7 @@
 CHANGES IN VERSION 3.3.1
 ------------------------
  o bug fixed in head, tail and dim for compareCluster object <2016-10-18, Tue>
- 
+
 CHANGES IN VERSION 3.2.0
 ------------------------
  o BioC 3.4 released <2016-10-18, Tue>
