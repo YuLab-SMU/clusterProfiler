@@ -1,6 +1,5 @@
 .git
 CONTRIBUTING.md
-README.md
 .travis.yml
 appveyor.yml
 docs
