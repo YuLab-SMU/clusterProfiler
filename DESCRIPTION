@@ -12,19 +12,17 @@ Authors@R: c(person(given = "Guangchuang", family = "Yu",
 	     person(given = "Giovanni", family = "Dall'Olio",
 	            email = "giovanni.dallolio@upf.edu",
 		    role = "ctb"))
-Author: Guangchuang Yu <guangchuangyu@gmail.com> with contributions from
-    Li-Gen Wang and Giovanni Dall'Olio.
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
 Description: This package implements methods to analyze and visualize
     functional profiles (GO and KEGG) of gene and gene clusters.
 Depends:
-    R (>= 3.3.0),
-    DOSE (>= 2.11.12)
+    R (>= 3.3.1),
+    DOSE (>= 3.0.0)
 Imports:
     AnnotationDbi,
     ggplot2,
     GO.db,
-    GOSemSim (>= 1.99.3),
+    GOSemSim (>= 2.0.0),
     IRanges,
     magrittr,
     methods,

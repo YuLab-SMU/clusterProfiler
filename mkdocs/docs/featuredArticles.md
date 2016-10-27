@@ -17,9 +17,9 @@
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
 
 
-Let us know if you have published using `clusterProfiler` and your publication will be featured here.
+[Let us know](https://github.com/GuangchuangYu/featured_img) if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-118-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-121-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -37,10 +37,10 @@ Let us know if you have published using `clusterProfiler` and your publication w
   }  
   </style>
 
-<div id = 'chart6cd30e2c1e0' class = 'rChart morris'></div>
+<div id = 'chart7a96ea99d76' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart6cd30e2c1e0",
+ "element": "chart7a96ea99d76",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -70,11 +70,11 @@ Let us know if you have published using `clusterProfiler` and your publication w
 },
 {
  "year": 2016,
-"cites":             55,
+"cites":             58,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart6cd30e2c1e0",
+"id": "chart7a96ea99d76",
 "labels": "cites" 
 },
       chartType = "Bar"
