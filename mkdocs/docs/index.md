@@ -33,7 +33,7 @@ Guangchuang Yu, School of Public Health, The University of Hong Kong.
 Please cite the following article when using `clusterProfiler`:
 
 [![doi](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-blue.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118)
-[![citation](https://img.shields.io/badge/cited%20by-121-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-123-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 [![Altmetric](https://img.shields.io/badge/Altmetric-22-blue.svg?style=flat)](https://www.altmetric.com/details/681089)
 
 __Yu G__, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters.

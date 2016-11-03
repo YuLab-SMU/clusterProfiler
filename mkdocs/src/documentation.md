@@ -43,6 +43,7 @@
 
 + [dotplot for enrichment result](https://guangchuangyu.github.io/2015/06/dotplot-for-enrichment-result)
 + [enrichment map](https://guangchuangyu.github.io/2014/08/enrichment-map)
++ [showCategory parameter for visualizing compareCluster output](https://guangchuangyu.github.io/2016/11/showcategory-parameter-for-visualizing-comparecluster-output/)
 
 
 <i class="fa fa-hand-o-right"></i> Find out more on <https://guangchuangyu.github.io/tags/clusterprofiler>.
