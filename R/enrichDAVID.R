@@ -38,39 +38,6 @@ enrichDAVID <- function(gene,
     Count <- List.Total <- Pop.Hits <- Pop.Total <- NULL
 
     pAdjustMethod <- match.arg(pAdjustMethod, c("bonferroni", "BH"))
-    idType <- match.arg(idType, c("AFFYMETRIX_3PRIME_IVT_ID",
-                                  "AFFYMETRIX_EXON_GENE_ID",
-                                  "AFFYMETRIX_SNP_ID",
-                                  "AGILENT_CHIP_ID",
-                                  "AGILENT_ID",
-                                  "AGILENT_OLIGO_ID",
-                                  "ENSEMBL_GENE_ID",
-                                  "ENSEMBL_TRANSCRIPT_ID",
-                                  "ENTREZ_GENE_ID",
-                                  "GENOMIC_GI_ACCESSION",
-                                  "GENPEPT_ACCESSION",
-                                  "ILLUMINA_ID",
-                                  "IPI_ID",
-                                  "MGI_ID",
-                                  "OFFICIAL_GENE_SYMBOL",
-                                  "PFAM_ID",
-                                  "PIR_ID",
-                                  "PROTEIN_GI_ACCESSION",
-                                  "REFSEQ_GENOMIC",
-                                  "REFSEQ_MRNA",
-                                  "REFSEQ_PROTEIN",
-                                  "REFSEQ_RNA",
-                                  "RGD_ID",
-                                  "SGD_ID",
-                                  "TAIR_ID",
-                                  "UCSC_GENE_ID",
-                                  "UNIGENE",
-                                  "UNIPROT_ACCESSION",
-                                  "UNIPROT_ID",
-                                  "UNIREF100_ID",
-                                  "WORMBASE_GENE_ID",
-                                  "WORMPEP_ID",
-                                  "ZFIN_ID"))
 
     david.pkg <- "RDAVIDWebService"
     pkgs <- installed.packages()[,1]
@@ -84,10 +51,37 @@ enrichDAVID <- function(gene,
     setAnnotationCategories <- eval(parse(text="setAnnotationCategories"))
     getFunctionalAnnotationChart <- eval(parse(text="getFunctionalAnnotationChart"))
     getSpecieNames <- eval(parse(text="getSpecieNames"))
-
+    getIdTypes <- eval(parse(text="getIdTypes"))
 
     david <- DAVIDWebService$new(email=david.user,
                                  url="https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/")
+
+    ## addList will throw error if idType is not match.
+    ## use match.arg to check before addList make it more readable
+    
+    idType <- match.arg(idType, getIdTypes(david))
+    
+    ##     getIdTypes(david)
+    ##  [1] "AFFYMETRIX_3PRIME_IVT_ID" "AFFYMETRIX_EXON_ID"      
+    ##  [3] "AGILENT_CHIP_ID"          "AGILENT_ID"              
+    ##  [5] "AGILENT_OLIGO_ID"         "APHIDBASE_ID"            
+    ##  [7] "BEEBASE_ID"               "BEETLEBASE_ID"           
+    ##  [9] "BGD_ID"                   "CGNC_ID"                 
+    ## [11] "CRYPTODB_ID"              "DICTYBASE_ID"            
+    ## [13] "ENSEMBL_GENE_ID"          "ENSEMBL_TRANSCRIPT_ID"   
+    ## [15] "ENTREZ_GENE_ID"           "FLYBASE_GENE_ID"         
+    ## [17] "GENBANK_ACCESSION"        "GENOMIC_GI_ACCESSION"    
+    ## [19] "GENPEPT_ACCESSION"        "LOCUS_TAG"               
+    ## [21] "MGI_ID"                   "MIRBASE_ID"              
+    ## [23] "MRNA_GI_ACCESSION"        "NASONIABASE_ID"          
+    ## [25] "PROTEIN_GI_ACCESSION"     "PSEUDOCAP_ID"            
+    ## [27] "REFSEQ_MRNA"              "REFSEQ_PROTEIN"          
+    ## [29] "RGD_ID"                   "SGD_ID"                  
+    ## [31] "TAIR_ID"                  "UNIGENE"                 
+    ## [33] "UNIPROT_ACCESSION"        "UNIPROT_ID"              
+    ## [35] "VECTORBASE_ID"            "WORMBASE_GENE_ID"        
+    ## [37] "XENBASE_ID"               "ZFIN_ID"
+    
     david.res <- addList(david, gene, idType=idType,
                          listName="clusterProfiler",
                          listType=listType)
