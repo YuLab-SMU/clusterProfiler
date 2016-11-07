@@ -11,13 +11,14 @@ Authors@R: c(person(given = "Guangchuang", family = "Yu",
 		    role  = "ctb"),
 	     person(given = "Giovanni", family = "Dall'Olio",
 	            email = "giovanni.dallolio@upf.edu",
-		    role = "ctb"))
+		    role = "ctb", comment = "formula interface of compareCluster")
+		    )
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
 Description: This package implements methods to analyze and visualize
     functional profiles (GO and KEGG) of gene and gene clusters.
 Depends:
     R (>= 3.3.1),
-    DOSE (>= 3.0.0)
+    DOSE (>= 3.0.1)
 Imports:
     AnnotationDbi,
     ggplot2,
