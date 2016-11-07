@@ -151,11 +151,11 @@ enrichDAVID <- function(gene,
     org <- getSpecieNames(david)
     org <- gsub("\\(.*\\)", "", org)
 
-    gc <- strsplit(Over$geneID, "/")
-    names(gc) <- Over$ID
+    ## gc <- strsplit(Over$geneID, "/")
+    ## names(gc) <- Over$ID
 
     if (!is.na(maxGSSize) || !is.null(maxGSSize)) {
-        idx <- x$Pop.Hits <= maxGSSize
+        idx <- as.numeric(sub("/\\d+", "", Over$BgRatio)) <= maxGSSize
         Over <- Over[idx,]
     }
 
