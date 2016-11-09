@@ -1,5 +1,6 @@
 CHANGES IN VERSION 3.3.1
 ------------------------
+ o update startup message <2016-11-09, Wed>
  o bug fixed in enrichDAVID <2016-11-06, Sun>
    + https://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/#comment-2987574851
  o bug fixed in head, tail and dim for compareCluster object <2016-10-18, Tue>
