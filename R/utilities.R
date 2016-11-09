@@ -1,7 +1,3 @@
-.initial <- function() {
-    ## assign(".clusterProfilesEnv", new.env(),.GlobalEnv)
-}
-
 
 ##' Internal plot function for plotting compareClusterResult
 ##'
