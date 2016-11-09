@@ -1,5 +1,5 @@
-########### zzz.R
-.onLoad <- function(libname, pkgname) {
+##' @importFrom utils packageDescription
+.onAttach <- function(libname, pkgname) {
     pkgVersion <- packageDescription(pkgname, fields="Version")
     msg <- paste0(pkgname, " v", pkgVersion, "  ",
                   "For help: https://guangchuangyu.github.io/", pkgname, "\n\n")
