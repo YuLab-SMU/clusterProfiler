@@ -7,11 +7,12 @@
 <!-- download:=clusterProfiler:=total -->
 <!-- download:=clusterProfiler:=month -->
 
+
 The `clusterProfiler` package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.
 
 `clusterProfiler` is released within the [Bioconductor](https://bioconductor.org/packages/clusterProfiler) project and the source code is hosted on <a href="https://github.com/GuangchuangYu/clusterProfiler"><i class="fa fa-github fa-lg"></i> GitHub</a>.
 
-## <i class="fa fa-user"></i> Author
+## <i class="fa fa-user"></i> Author <img src="https://guangchuangyu.github.io/blog_images/biobabble.jpg" align="right" width="150"/>
 
 Guangchuang Yu, School of Public Health, The University of Hong Kong.
 
