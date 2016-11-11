@@ -1,3 +1,5 @@
+
+
 ##' simplify output from enrichGO by removing redundancy of enriched GO terms
 ##'
 ##'
@@ -11,7 +13,6 @@
 ##' @param select_fun function to select feature passed by 'by' parameter
 ##' @param measure method to measure similarity
 ##' @param semData GOSemSimDATA object
-##' @importFrom IRanges simplify
 ##' @return updated enrichResult object
 ##' @exportMethod simplify
 ##' @references issue #28
@@ -95,7 +96,6 @@ simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, me
 ##' @docType methods
 ##' @rdname simplify-methods
 ##' @title simplify method
-##' @importFrom IRanges simplify
 ##' @return updated compareClusterResult object
 ##' @exportMethod simplify
 ##' @aliases simplify,compareClusterResult-method

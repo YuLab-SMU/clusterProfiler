@@ -3,7 +3,7 @@
 language: r
 r:
   - bioc-devel
-  
+
 cache: packages
 bioc_required: true
 bioc_use_devel: true
@@ -21,17 +21,15 @@ env:
 r_packages:
     - knitr
     - rmarkdown
+    - covr
 
 bioc_packages:
     - org.Hs.eg.db
     - DOSE
     - GOSemSim
-    
+
 after_failure:
   - ./travis-tool.sh dump_logs
-
-r_github_packages:
-  - jimhester/covr
 
 after_success:
   - Rscript -e 'library(covr); codecov()'

@@ -1,3 +1,7 @@
+CHANGES IN VERSION 3.3.2
+------------------------
+ o define simplify generics as it was removed from IRanges <2016-11-11, Fri>
+
 CHANGES IN VERSION 3.3.1
 ------------------------
  o update startup message <2016-11-09, Wed>
