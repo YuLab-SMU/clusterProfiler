@@ -23,10 +23,10 @@ r_packages:
     - rmarkdown
     - covr
 
-bioc_packages:
-    - org.Hs.eg.db
-    - DOSE
-    - GOSemSim
+## bioc_packages:
+##     - org.Hs.eg.db
+##     - DOSE
+##     - GOSemSim
 
 after_failure:
   - ./travis-tool.sh dump_logs
