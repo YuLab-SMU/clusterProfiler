@@ -28,7 +28,7 @@ viewKEGG function is for visualize KEGG pathways
 works with enrichResult object to visualize enriched KEGG pathway
 }
 \references{
-Luo et al. (2013) Pathview: an R/Bioconductor package for 
+Luo et al. (2013) Pathview: an R/Bioconductor package for
 pathway-based data integration and visualization. \emph{Bioinformatics} (Oxford,
 England), 29:14 1830--1831, 2013. ISSN 1367-4803
 \url{http://bioinformatics.oxfordjournals.org/content/abstract/29/14/1830.abstract}

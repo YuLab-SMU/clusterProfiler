@@ -29,7 +29,7 @@
 ##'
 ##' 	data(gcSample)
 ##' 	yy = enrichKEGG(gcSample[[5]], pvalueCutoff=0.01)
-##' 	head(summary(yy))
+##' 	head(yy)
 ##' 	#plot(yy)
 ##'
 enrichKEGG <- function(gene,
@@ -59,11 +59,11 @@ enrichKEGG <- function(gene,
                              USER_DATA = KEGG_DATA)
     if (is.null(res))
         return(res)
-    
+
     res@ontology <- "KEGG"
     res@organism <- species
     res@keytype <- keyType
-    
+
     return(res)
 }
 
@@ -78,7 +78,7 @@ get_KEGG_Env <- function() {
 
 ##' download the latest version of KEGG pathway/module
 ##'
-##' 
+##'
 ##' @title download_KEGG
 ##' @param species species
 ##' @param keggType one of 'KEGG' or 'MKEGG'
@@ -89,23 +89,23 @@ get_KEGG_Env <- function() {
 ##' @export
 download_KEGG <- function(species, keggType="KEGG", keyType="kegg") {
     KEGG_Env <- get_KEGG_Env()
-    
+
     use_cached <- FALSE
-    
+
     if (exists("organism", envir = KEGG_Env, inherits = FALSE) &&
         exists("_type_", envir = KEGG_Env, inherits = FALSE) ) {
-        
+
         org <- get("organism", envir=KEGG_Env)
         type <- get("_type_", envir=KEGG_Env)
-        
+
         if (org == species && type == keggType &&
             exists("KEGGPATHID2NAME", envir=KEGG_Env, inherits = FALSE) &&
             exists("KEGGPATHID2EXTID", envir=KEGG_Env, inherits = FALSE)) {
-            
+
             use_cached <- TRUE
-        } 
+        }
     }
-    
+
     if (use_cached) {
         KEGGPATHID2EXTID <- get("KEGGPATHID2EXTID", envir=KEGG_Env)
         KEGGPATHID2NAME <- get("KEGGPATHID2NAME", envir=KEGG_Env)
@@ -115,10 +115,10 @@ download_KEGG <- function(species, keggType="KEGG", keyType="kegg") {
         } else {
             kres <- download.KEGG.Module(species)
         }
-        
+
         KEGGPATHID2EXTID <- kres$KEGGPATHID2EXTID
         KEGGPATHID2NAME <- kres$KEGGPATHID2NAME
-        
+
         assign("organism", species, envir=KEGG_Env)
         assign("_type_", keggType, envir=KEGG_Env)
         assign("KEGGPATHID2NAME", KEGGPATHID2NAME, envir=KEGG_Env)
@@ -154,13 +154,13 @@ prepare_KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
                kegg$KEGGPATHID2NAME)
 }
 
-download.KEGG.Path <- function(species) {    
+download.KEGG.Path <- function(species) {
     keggpathid2extid.df <- kegg_link(species, "pathway")
     if (is.null(keggpathid2extid.df))
         stop("'species' should be one of organisms listed in 'http://www.genome.jp/kegg/catalog/org_list.html'...")
     keggpathid2extid.df[,1] %<>% gsub("[^:]+:", "", .)
     keggpathid2extid.df[,2] %<>% gsub("[^:]+:", "", .)
-    
+
     keggpathid2name.df <- kegg_list("pathway")
     keggpathid2name.df[,1] %<>% gsub("path:map", species, .)
 
@@ -170,7 +170,7 @@ download.KEGG.Path <- function(species) {
     ## http://www.kegg.jp/dbget-bin/www_bget?ko+map0001
     ##
     keggpathid2extid.df <- keggpathid2extid.df[keggpathid2extid.df[,1] %in% keggpathid2name.df[,1],]
-    
+
     return(list(KEGGPATHID2EXTID=keggpathid2extid.df,
                 KEGGPATHID2NAME=keggpathid2name.df))
 }
@@ -183,7 +183,7 @@ download.KEGG.Module <- function(species) {
 
     keggmodule2extid.df[,1] %<>% gsub("[^:]+:", "", .) %>% gsub(species, "", .) %>% gsub("^_", "", .)
     keggmodule2extid.df[,2] %<>% gsub("[^:]+:", "", .)
-    
+
     keggmodule2name.df <- kegg_list("module")
     keggmodule2name.df[,1] %<>% gsub("md:", "", .)
     return(list(KEGGPATHID2EXTID=keggmodule2extid.df,
@@ -205,7 +205,7 @@ download.KEGG.Module <- function(species) {
 ## @importFrom pathview pathview
 ## @importFrom pathview kegg.species.code
 ##' @importFrom utils citation
-##' @references Luo et al. (2013) Pathview: an R/Bioconductor package for 
+##' @references Luo et al. (2013) Pathview: an R/Bioconductor package for
 ##'pathway-based data integration and visualization. \emph{Bioinformatics} (Oxford,
 ##'England), 29:14 1830--1831, 2013. ISSN 1367-4803
 ##'\url{http://bioinformatics.oxfordjournals.org/content/abstract/29/14/1830.abstract}
@@ -223,14 +223,14 @@ viewKEGG <- function(obj, pathwayID, foldChange,
 
     print("viewKEGG is a wrapper function of pathview")
     citation("pathview")
-    
+
     pkg <- "pathview"
     suppressMessages(require(pkg, character.only=TRUE))
     if (is.numeric(pathwayID)) {
-        pathwayID <- summary(obj)[pathwayID, 1]
+        pathwayID <- as.data.frame(obj)[pathwayID, 1]
     }
     if (length(pathwayID) == 1 & pathwayID == "all") {
-        pathwayID <- summary(obj)[, 1]
+        pathwayID <- as.data.frame(obj)[, 1]
     }
     m.fc <- max(abs(foldChange))
     bins <- ceiling(m.fc) * 2
@@ -276,7 +276,7 @@ get_KEGG_db <- function(kw) {
 
 organismMapper <- function(organism) {
     ## it only map those previous supported organism
-    
+
     if (organism == "anopheles") {
         species <- "aga"
     } else if (organism == "arabidopsis") {
