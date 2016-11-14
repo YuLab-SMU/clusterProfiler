@@ -69,7 +69,7 @@ txtplot(d$year, d$cites)
 
 ### Download stats
 
-[![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler/)
+`r badge_download_bioc("clusterProfiler")`
 `r badge_download("clusterProfiler", "total", "blue")`
 `r badge_download("clusterProfiler", "month", "blue")`
 

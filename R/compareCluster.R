@@ -268,7 +268,7 @@ merge_result <- function(enrichResultList) {
     if ( is.null(names(enrichResultList))) {
         stop("input should be a name list...")
     }
-    x <- lapply(enrichResultList, summary)
+    x <- lapply(enrichResultList, as.data.frame)
     names(x) <- names(enrichResultList)
     y <- ldply(x, "rbind")
     y <- rename(y, c(.id="Cluster"))

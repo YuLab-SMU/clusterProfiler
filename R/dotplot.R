@@ -5,14 +5,14 @@ dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust",
 
 ##' convert compareClusterResult to a data.frame that ready for plot
 ##'
-##' 
+##'
 ##' @rdname fortify
 ##' @title fortify
 ##' @param model compareClusterResult object
 ##' @param data not use here
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
-##' @param includeAll logical 
+##' @param includeAll logical
 ##' @return data.frame
 ##' @importFrom ggplot2 fortify
 ##' @importFrom plyr ddply
@@ -22,7 +22,7 @@ dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust",
 ##' @export
 ##' @author Guangchuang Yu
 fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRatio", includeAll=TRUE) {
-    clProf.df <- summary(model)
+    clProf.df <- as.data.frame(model)
 
     ## get top 5 (default) categories of each gene cluster.
     if (is.null(showCategory)) {
@@ -46,23 +46,23 @@ fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRa
                         },
                         N=showCategory
                         )
-        
+
     }
     ID <- NULL
     if (includeAll == TRUE) {
         result = subset(clProf.df, ID %in% result$ID)
     }
-    
+
     ## remove zero count
     result$Description <- as.character(result$Description) ## un-factor
     GOlevel <- result[,c("ID", "Description")] ## GO ID and Term
     GOlevel <- unique(GOlevel)
-    
+
     result <- result[result$Count != 0, ]
     result$Description <- factor(result$Description,
                                  levels=rev(GOlevel[,2]))
-    
-    
+
+
     if (by=="rowPercentage") {
         Description <- Count <- NULL # to satisfy codetools
         result <- ddply(result,
@@ -70,12 +70,12 @@ fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRa
                         transform,
                         Percentage = Count/sum(Count),
                         Total = sum(Count))
-        
+
         ## label GO Description with gene counts.
         x <- mdply(result[, c("Description", "Total")], paste, sep=" (")
         y <- sapply(x[,3], paste, ")", sep="")
         result$Description <- y
-        
+
         ## restore the original order of GO Description
         xx <- result[,c(2,3)]
         xx <- unique(xx)
@@ -84,10 +84,10 @@ fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRa
 
         ##drop the *Total* column
         result <- result[, colnames(result) != "Total"]
-        
+
         result$Description <- factor(result$Description,
                                      levels=rev(Termlevel))
-        
+
     } else if (by == "count") {
         ## nothing
     } else if (by == "geneRatio") {

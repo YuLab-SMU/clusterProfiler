@@ -43,7 +43,7 @@ categories with FDR control.
 
 	data(gcSample)
 	yy = enrichKEGG(gcSample[[5]], pvalueCutoff=0.01)
-	head(summary(yy))
+	head(yy)
 	#plot(yy)
 
 }

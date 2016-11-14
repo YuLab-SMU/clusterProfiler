@@ -1,3 +1,7 @@
+CHANGES IN VERSION 3.3.3
+------------------------
+ o change summary to as.data.frame in internal calls to prevent warning message <2016-11-14, Mon>
+
 CHANGES IN VERSION 3.3.2
 ------------------------
  o define simplify generics as it was removed from IRanges <2016-11-11, Fri>
