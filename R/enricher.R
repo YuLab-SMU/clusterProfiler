@@ -1,6 +1,6 @@
-##' A universal enrichment analyzer 
+##' A universal enrichment analyzer
 ##'
-##' 
+##'
 ##' @title enricher
 ##' @param gene a vector of gene id
 ##' @param pvalueCutoff pvalue cutoff
@@ -33,13 +33,13 @@ enricher <- function(gene,
                       qvalueCutoff = qvalueCutoff,
                       USER_DATA = USER_DATA)
 }
-                     
-                     
+
+
 ##' a universal gene set enrichment analysis tools
 ##'
-##' 
+##'
 ##' @title GSEA
-##' @param geneList order ranked geneList 
+##' @param geneList order ranked geneList
 ##' @param exponent weight of each step
 ##' @param nPerm number of permutations
 ##' @param minGSSize minimal size of each geneSet for analyzing
@@ -68,17 +68,17 @@ GSEA <- function(geneList,
                  by = 'fgsea') {
 
     USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
- 
+
     GSEA_internal(geneList = geneList,
-          exponent = exponent,
-          nPerm = nPerm,
-          minGSSize = minGSSize,
-          maxGSSize = maxGSSize,
-          pvalueCutoff = pvalueCutoff,
-          pAdjustMethod = pAdjustMethod,
-          verbose = verbose,
-          USER_DATA = USER_DATA,
-          seed = seed,
-          by = by)
+                  exponent = exponent,
+                  nPerm = nPerm,
+                  minGSSize = minGSSize,
+                  maxGSSize = maxGSSize,
+                  pvalueCutoff = pvalueCutoff,
+                  pAdjustMethod = pAdjustMethod,
+                  verbose = verbose,
+                  USER_DATA = USER_DATA,
+                  seed = seed,
+                  by = by)
 }
 
