@@ -22,6 +22,8 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 [Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full). ***The Journal of Experimental Medicine***. 2016.
 
+[Lineage-Specific Genome Architecture Links Enhancers and Non-coding Disease Variants to Target Gene Promoters](http://www.sciencedirect.com/science/article/pii/S0092867416313228). ***Cell***. 2016, 167(5):1369-1384.
+
 [Mining kidney toxicogenomic data by using gene co-expression modules](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3143-y). ***BMC Genomics***. 2016, 17:790.
 
 [Local microRNA delivery targets Palladin and prevents metastatic breast cancer](http://www.nature.com/ncomms/2016/160919/ncomms12868/full/ncomms12868.html). ***Nature Communications***. 2016, 7:12868

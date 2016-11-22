@@ -19,7 +19,7 @@
 
 [Let us know](https://github.com/GuangchuangYu/featured_img) if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-125-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-130-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -37,10 +37,10 @@
   }  
   </style>
 
-<div id = 'chart39193346d746' class = 'rChart morris'></div>
+<div id = 'chart48a22f6e5e8' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart39193346d746",
+ "element": "chart48a22f6e5e8",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -60,7 +60,7 @@
 },
 {
  "year": 2014,
-"cites":             17,
+"cites":             18,
 "pubid": "MLfJN-KU85MC" 
 },
 {
@@ -70,11 +70,11 @@
 },
 {
  "year": 2016,
-"cites":             63,
+"cites":             67,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart39193346d746",
+"id": "chart48a22f6e5e8",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -92,6 +92,8 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 [Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](http://www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016.
 
 [Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full). ***The Journal of Experimental Medicine***. 2016.
+
+[Lineage-Specific Genome Architecture Links Enhancers and Non-coding Disease Variants to Target Gene Promoters](http://www.sciencedirect.com/science/article/pii/S0092867416313228). ***Cell***. 2016, 167(5):1369-1384.
 
 [Mining kidney toxicogenomic data by using gene co-expression modules](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3143-y). ***BMC Genomics***. 2016, 17:790.
 
