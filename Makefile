@@ -60,5 +60,6 @@ mdfiles:
 	ln -f -s ../mysoftware/* ./
 
 svnignore:
+	svn update .;\
 	svn propset svn:ignore -F .svnignore .
 
