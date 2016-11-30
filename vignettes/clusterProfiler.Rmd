@@ -2,16 +2,18 @@
 title: "Statistical analysis and visualization of functional profiles for genes and gene clusters"
 author: "\\
 
-	Guangchuang Yu (<guangchuangyu@gmail.com>)\\
+	Guangchuang Yu \\
 
         School of Public Health, The University of Hong Kong"
 date: "`r Sys.Date()`"
 bibliography: clusterProfiler.bib
 csl: nature.csl
 output:
-  BiocStyle::html_document:
+  prettydoc::html_pretty:
     toc: true
-  BiocStyle::pdf_document:
+    theme: cayman
+    highlight: github
+  pdf_document:
     toc: true
 vignette: >
   %\VignetteIndexEntry{Statistical analysis and visualization of functional profiles for genes and gene clusters}
@@ -20,7 +22,6 @@ vignette: >
 ---
 
 ```{r style, echo=FALSE, results="asis", message=FALSE}
-BiocStyle::markdown()
 knitr::opts_chunk$set(tidy = FALSE,
                       warning = FALSE,
                       message = FALSE)
@@ -37,7 +38,7 @@ library(clusterProfiler)
 
 # Abstract
 
-`r Biocpkg("clusterProfiler")` implements methods to analyze and visualize functional profiles of genomic coordinates (supported by `r Biocpkg("ChIPseeker")`), gene and gene clusters.
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](https://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
 
 ## Supported Analysis
 
@@ -82,7 +83,7 @@ library(clusterProfiler)
 
 # Citation
 
-If you use `r Biocpkg("clusterProfiler")` in published research, please cite:
+If you use [clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) in published research, please cite:
 
 
 __*G Yu*__, LG Wang, Y Han, QY He. clusterProfiler: an R package for comparing biological themes among gene clusters. **_OMICS: A Journal of Integrative Biology_** 2012, 16(5):284-287. doi:[10.1089/omi.2011.0118](http://dx.doi.org/10.1089/omi.2011.0118)
@@ -107,12 +108,12 @@ whether there is a common theme of a particular gene cluster, but also
 to compare the biological themes among gene clusters. The manual step
 to choose interesting clusters followed by enrichment analysis on each
 selected cluster is slow and tedious. To bridge this gap, we designed
-`r Biocpkg("clusterProfiler")`[@yu2012], for comparing and visualizing functional
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler)[@yu2012], for comparing and visualizing functional
 profiles among gene clusters.
 
 # `bitr`: Biological Id TranslatoR
 
-`r Biocpkg("clusterProfiler")` provides `bitr` and `bitr_kegg` for converting ID types. Both `bitr` and `bitr_kegg` support many species including model and many non-model organisms.
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) provides `bitr` and `bitr_kegg` for converting ID types. Both `bitr` and `bitr_kegg` support many species including model and many non-model organisms.
 
 ```{r}
 x <- c("GPX3",  "GLRX",   "LBP",   "CRYAB", "DEFB1", "HCLS1",   "SOD2",   "HSPA2",
@@ -185,7 +186,7 @@ bitr_kegg("Z5100", fromType="kegg", toType='uniprot', organism='ece')
 
 GO analyses (`groupGO()`, `enrichGO()` and `gseGO()`) support organisms that have an `OrgDb` object available.
 
-Bioconductor have already provide `OrgDb` for about [20 species](http://bioconductor.org/packages/release/BiocViews.html#___OrgDb). User can query `OrgDb` online by `r Biocpkg("AnnotationHub")` or build their own by `r Biocpkg("AnnotationForge")`. An example can be found in the [vignette](https://bioconductor.org/packages/devel/bioc/vignettes/GOSemSim/inst/doc/GOSemSim.html#supported-organisms) of `r Biocpkg("GOSemSim")`.
+Bioconductor have already provide `OrgDb` for about [20 species](http://bioconductor.org/packages/release/BiocViews.html#___OrgDb). User can query `OrgDb` online by [AnnotationHub](https://www.bioconductor.org/packages/AnnotationHub) or build their own by [AnnotationForge](https://www.bioconductor.org/packages/AnnotationForge). An example can be found in the [vignette](https://bioconductor.org/packages/devel/bioc/vignettes/GOSemSim/inst/doc/GOSemSim.html#supported-organisms) of [GOSemSim](https://www.bioconductor.org/packages/GOSemSim).
 
 If user have GO annotation data (in data.frame format with first column of gene ID and second column of GO ID), they can use `enricher()` and `gseGO()` functions to perform over-representation test and gene set enrichment analysis.
 
@@ -193,7 +194,7 @@ If genes are annotated by direction annotation, it should also annotated by its 
 
 ## GO classification
 
-In `r Biocpkg("clusterProfiler")`, `groupGO` is designed for gene classification based on GO distribution at a specific level. Here we use dataset `geneList` provided by `r Biocpkg("DOSE")`. Please refer to vignette of `r Biocpkg("DOSE")` for more details.
+In [clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler), `groupGO` is designed for gene classification based on GO distribution at a specific level. Here we use dataset `geneList` provided by [DOSE](https://www.bioconductor.org/packages/DOSE). Please refer to vignette of [DOSE](https://www.bioconductor.org/packages/DOSE) for more details.
 
 ```{r warning=FALSE}
 data(geneList, package="DOSE")
@@ -219,7 +220,7 @@ If _readable_ is setting to _TRUE_, the input gene IDs will be converted to gene
 ## GO over-representation test
 
 
-Over-representation test[@boyle2004] were implemented in `r Biocpkg("clusterProfiler")`. For calculation details and explanation of paramters, please refer to the vignette of `r Biocpkg("DOSE")`.
+Over-representation test[@boyle2004] were implemented in [clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler). For calculation details and explanation of paramters, please refer to the vignette of [DOSE](https://www.bioconductor.org/packages/DOSE).
 
 ```{r}
 ego <- enrichGO(gene          = gene,
@@ -262,14 +263,14 @@ ego2 <- setReadable(ego2, OrgDb = org.Hs.eg.db)
 
 ### reduce redundancy of enriched GO terms
 
-According to [issue #28](https://github.com/GuangchuangYu/clusterProfiler/issues/28), I implement a `simplify` method to remove redundant GO terms obtained from `enrichGO`. An example can be found in [the blog post](https://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/). It internally call `r Biocpkg("GOSemSim")` to calculate similarities among GO terms and remove those highly similar terms by keeping one representative term. The `simplify` method also works with both outputs from `enrichGO` and `compareCluster`.
+According to [issue #28](https://github.com/GuangchuangYu/clusterProfiler/issues/28), I implement a `simplify` method to remove redundant GO terms obtained from `enrichGO`. An example can be found in [the blog post](https://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms/). It internally call [GOSemSim](https://www.bioconductor.org/packages/GOSemSim) to calculate similarities among GO terms and remove those highly similar terms by keeping one representative term. The `simplify` method also works with both outputs from `enrichGO` and `compareCluster`.
 
 
 ## GO Gene Set Enrichment Analysis
 
 A common approach in analyzing gene expression profiles was identifying differential expressed genes that are deemed interesting. The enrichment analysis we demonstrated previous were based on these differential expressed genes. This approach will find genes where the difference is large, but it will not detect a situation where the difference is small, but evidenced in coordinated way in a set of related genes. Gene Set Enrichment Analysis (GSEA)[@subramanian_gene_2005] directly addresses this limitation. All genes can be used in GSEA; GSEA aggregates the per gene statistics across genes within a gene set, therefore making it possible to detect situations where all genes in a predefined set change in a small but coordinated way. Since it is likely that many relevant phenotypic differences are manifested by small but consistent changes in a set of genes.
 
-For algorithm details, please refer to the vignette of `r Biocpkg("DOSE")`.
+For algorithm details, please refer to the vignette of [DOSE](https://www.bioconductor.org/packages/DOSE).
 
 ```{r eval=FALSE}
 ego3 <- gseGO(geneList     = geneList,
@@ -287,16 +288,16 @@ GSEA use permutation test, user can set _nPerm_ for number of permutations. Only
 
 ## GO Semantic Similarity Analysis
 
-GO semantic similarity can be calculated by `r Biocpkg("GOSemSim")`[@yu2010]. We can use it to cluster genes/proteins into different clusters based on their functional similarity and can also use it to measure the similarities among GO terms to reduce the redundancy of GO enrichment results.
+GO semantic similarity can be calculated by [GOSemSim](https://www.bioconductor.org/packages/GOSemSim)[@yu2010]. We can use it to cluster genes/proteins into different clusters based on their functional similarity and can also use it to measure the similarities among GO terms to reduce the redundancy of GO enrichment results.
 
 
 # KEGG analysis
 
-The annotation package, `r Biocannopkg("KEGG.db")`, is not updated since 2012. It's now pretty old and in `r Biocpkg("clusterProfiler")`, `enrichKEGG` (for KEGG pathway) and `enrichMKEGG` (for KEGG module) supports downloading latest online version of KEGG data for enrichment analysis. Using `r Biocannopkg("KEGG.db")` is also supported by explicitly setting _use\_internal\_data_ parameter to _TRUE_, but it's not recommended.
+The annotation package, `KEGG.db`, is not updated since 2012. It's now pretty old and in [clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler), `enrichKEGG` (for KEGG pathway) and `enrichMKEGG` (for KEGG module) supports downloading latest online version of KEGG data for enrichment analysis. Using `KEGG.db` is also supported by explicitly setting _use\_internal\_data_ parameter to _TRUE_, but it's not recommended.
 
 With this new feature, organism is not restricted to those supported in previous release, it can be any species that have KEGG annotation data available in KEGG database. User should pass abbreviation of academic name to the _organism_ parameter. The full list of KEGG supported organisms can be accessed via [http://www.genome.jp/kegg/catalog/org_list.html](http://www.genome.jp/kegg/catalog/org_list.html).
 
-`r Biocpkg("clusterProfiler")` provides `search_kegg_organism()` function to help searching supported organisms.
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) provides `search_kegg_organism()` function to help searching supported organisms.
 
 ```{r}
 search_kegg_organism('ece', by='kegg_code')
@@ -352,19 +353,19 @@ mkk2 <- gseMKEGG(geneList = geneList,
 
 # Disease analysis
 
-`r Biocpkg("DOSE")`[@yu_dose_2015] supports Disease Ontology (DO) Semantic and Enrichment analysis. The `enrichDO` function is very useful for identifying disease association of interesting genes, and function `gseDO` function is designed for gene set enrichment analysis of _DO_.
+[DOSE](https://www.bioconductor.org/packages/DOSE)[@yu_dose_2015] supports Disease Ontology (DO) Semantic and Enrichment analysis. The `enrichDO` function is very useful for identifying disease association of interesting genes, and function `gseDO` function is designed for gene set enrichment analysis of _DO_.
 
-In addition, `r Biocpkg("DOSE")` also supports enrichment analysis of [Network of Cancer Gene](http://ncg.kcl.ac.uk/) (NCG)[@omer_ncg] and [Disease Gene Network](http://disgenet.org/)[@janet_disgenet], please refer to the `r Biocpkg("DOSE")` vignettes.
+In addition, [DOSE](https://www.bioconductor.org/packages/DOSE) also supports enrichment analysis of [Network of Cancer Gene](http://ncg.kcl.ac.uk/) (NCG)[@omer_ncg] and [Disease Gene Network](http://disgenet.org/)[@janet_disgenet], please refer to the [DOSE](https://www.bioconductor.org/packages/DOSE) vignettes.
 
 
 # Reactome pathway analysis
 
-`r Biocpkg("ReactomePA")`[@yu_reactomepa_2016] uses Reactome as a source of pathway data. The function call of `enrichPathway` and `gsePathway` in `r Biocpkg("ReactomePA")` is consistent with `enrichKEGG` and `gseKEGG`.
+[ReactomePA](https://www.bioconductor.org/packages/ReactomePA)[@yu_reactomepa_2016] uses Reactome as a source of pathway data. The function call of `enrichPathway` and `gsePathway` in [ReactomePA](https://www.bioconductor.org/packages/ReactomePA) is consistent with `enrichKEGG` and `gseKEGG`.
 
 
 # DAVID functional analysis
 
-`r Biocpkg("clusterProfiler")` provides enrichment and GSEA analysis with GO, KEGG, DO and Reactome pathway supported internally, some user may prefer GO and KEGG analysis with DAVID[@huang_david_2007] and still attracted by the visualization methods provided by `r Biocpkg("clusterProfiler")`[@paranjpe_genome_wid_2013]. To bridge the gap between DAVID and clusterProfiler, we implemented `enrichDAVID`. This function query enrichment analysis result from DAVID webserver via `r Biocpkg("RDAVIDWebService")`[@fresno_rdavidwebservice_2013] and stored the result as an `enrichResult` instance, so that we can use all the visualization functions in `r Biocpkg("clusterProfiler")` to visualize DAVID results. `enrichDAVID` is fully compatible with `compareCluster` function and comparing enrichment results from different gene clusters is now available with DAVID.
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) provides enrichment and GSEA analysis with GO, KEGG, DO and Reactome pathway supported internally, some user may prefer GO and KEGG analysis with DAVID[@huang_david_2007] and still attracted by the visualization methods provided by [clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler)[@paranjpe_genome_wid_2013]. To bridge the gap between DAVID and clusterProfiler, we implemented `enrichDAVID`. This function query enrichment analysis result from DAVID webserver via [RDAVIDWebService](https://www.bioconductor.org/packages/RDAVIDWebService)[@fresno_rdavidwebservice_2013] and stored the result as an `enrichResult` instance, so that we can use all the visualization functions in [clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) to visualize DAVID results. `enrichDAVID` is fully compatible with `compareCluster` function and comparing enrichment results from different gene clusters is now available with DAVID.
 
 ```{r eval=FALSE}
 david <- enrichDAVID(gene = gene,
@@ -386,9 +387,9 @@ As user has limited usage, please [register](http://david.abcc.ncifcrf.gov/webse
 
 # Universal enrichment analysis
 
-`r Biocpkg("clusterProfiler")` supports both hypergeometric test and gene set enrichment analyses of many ontology/pathway, but it's still not enough for users may want to analyze their data with unsupported organisms, slim version of GO, novel functional annotation (e.g. GO via BlastGO or KEGG via KAAS), unsupported ontologies/pathways or customized annotations.
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) supports both hypergeometric test and gene set enrichment analyses of many ontology/pathway, but it's still not enough for users may want to analyze their data with unsupported organisms, slim version of GO, novel functional annotation (e.g. GO via BlastGO or KEGG via KAAS), unsupported ontologies/pathways or customized annotations.
 
-`r Biocpkg("clusterProfiler")` provides `enricher` function for hypergeometric test and `GSEA` function for gene set enrichment analysis that are designed to accept user defined annotation. They accept two additional parameters _TERM2GENE_ and _TERM2NAME_. As indicated in the parameter names, _TERM2GENE_ is a data.frame with first column of term ID and second column of corresponding mapped gene and _TERM2NAME_ is a data.frame with first column of term ID and second column of corresponding term name. _TERM2NAME_ is optional.
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) provides `enricher` function for hypergeometric test and `GSEA` function for gene set enrichment analysis that are designed to accept user defined annotation. They accept two additional parameters _TERM2GENE_ and _TERM2NAME_. As indicated in the parameter names, _TERM2GENE_ is a data.frame with first column of term ID and second column of corresponding mapped gene and _TERM2NAME_ is a data.frame with first column of term ID and second column of corresponding term name. _TERM2NAME_ is optional.
 
 An example of using `enricher` and `GSEA` to analyze [DisGeNet](http://www.disgenet.org/web/DisGeNET/menu/home) annotation is presented in the post, [use clusterProfiler as an universal enrichment analysis tool](http://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/).
 
@@ -406,7 +407,7 @@ The MSigDB is a collection of annotated gene sets, it include 8 major collection
 * C7: immunologic signatures
 
 
-Users can use `enricher` and `GSEA` function to analyze gene set collections downloaded from Molecular Signatures Database ([MSigDb](http://www.broadinstitute.org/gsea/msigdb/index.jsp)). `r Biocpkg("clusterProfiler")` provides a function, `read.gmt`, to parse the [gmt file](www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#GMT:_Gene_Matrix_Transposed_file_format_.28.2A.gmt.29) into a _TERM2GENE_ `data.frame` that is ready for both `enricher` and `GSEA` functions.
+Users can use `enricher` and `GSEA` function to analyze gene set collections downloaded from Molecular Signatures Database ([MSigDb](http://www.broadinstitute.org/gsea/msigdb/index.jsp)). [clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) provides a function, `read.gmt`, to parse the [gmt file](www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#GMT:_Gene_Matrix_Transposed_file_format_.28.2A.gmt.29) into a _TERM2GENE_ `data.frame` that is ready for both `enricher` and `GSEA` functions.
 
 ```{r}
 gmtfile <- system.file("extdata", "c5.cc.v5.0.entrez.gmt", package="clusterProfiler")
@@ -421,7 +422,7 @@ head(egmt2)
 
 # Functional analysis of NGS data
 
-Functional analysis using NGS data (eg, RNA-Seq and ChIP-Seq) can be performed by linking coding and non-coding regions to coding genes via `r Biocpkg("ChIPseeker")`[@yu_chipseeker_2015] package, which can annotates genomic regions to their nearest genes, host genes, and flanking genes respectivly. In addtion, it provides a function, `seq2gene`, that simultaneously considering host genes, promoter region and flanking gene from intergenic region that may under control via cis-regulation. This function maps genomic regions to genes in a many-to-many manner and facilitate functional analysis. For more details, please refer to `r Biocpkg("ChIPseeker")`.
+Functional analysis using NGS data (eg, RNA-Seq and ChIP-Seq) can be performed by linking coding and non-coding regions to coding genes via [ChIPseeker](https://www.bioconductor.org/packages/ChIPseeker)[@yu_chipseeker_2015] package, which can annotates genomic regions to their nearest genes, host genes, and flanking genes respectivly. In addtion, it provides a function, `seq2gene`, that simultaneously considering host genes, promoter region and flanking gene from intergenic region that may under control via cis-regulation. This function maps genomic regions to genes in a many-to-many manner and facilitate functional analysis. For more details, please refer to [ChIPseeker](https://www.bioconductor.org/packages/ChIPseeker).
 
 
 # Visualization
@@ -471,7 +472,7 @@ cnetplot(ego, categorySize="pvalue", foldChange=geneList)
 
 ## plotGOgraph
 
-`plotGOgraph`, which is based on `r Biocpkg("topGO")`, can accept output of `enrichGO` and visualized the enriched GO induced graph.
+`plotGOgraph`, which is based on [topGO](https://www.bioconductor.org/packages/topGO), can accept output of `enrichGO` and visualized the enriched GO induced graph.
 
 ```{r fig.height=12, fig.width=8}
 plotGOgraph(ego)
@@ -499,7 +500,7 @@ browseKEGG(kk, 'hsa04110')
 
 ## pathview from pathview package
 
-`r Biocpkg("clusterProfiler")` users can also use `pathview` from the `r Biocpkg("pathview")`[@luo_pathview] to visualize KEGG pathway.
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) users can also use `pathview` from the [pathview](https://www.bioconductor.org/packages/pathview)[@luo_pathview] to visualize KEGG pathway.
 
 The following example illustrate how to visualize "hsa04110" pathway, which was enriched in our previous analysis.
 
@@ -512,13 +513,13 @@ hsa04110 <- pathview(gene.data  = geneList,
 ```
 ![](figures/hsa04110_pathview.png)
 
-For further information, please refer to the vignette of `r Biocpkg("pathview")`[@luo_pathview].
+For further information, please refer to the vignette of [pathview](https://www.bioconductor.org/packages/pathview)[@luo_pathview].
 
 
 
 # Biological theme comparison
 
-`r Biocpkg("clusterProfiler")` was developed for biological theme comparison[@yu2012], and it provides a function, `compareCluster`, to automatically calculate enriched functional categories of each gene clusters.
+[clusterProfiler](https://www.bioconductor.org/packages/clusterProfiler) was developed for biological theme comparison[@yu2012], and it provides a function, `compareCluster`, to automatically calculate enriched functional categories of each gene clusters.
 
 ```{r}
 data(gcSample)
@@ -583,8 +584,8 @@ The comparison function was designed as a framework for comparing gene
 clusters of any kind of ontology associations, not only `groupGO`,
 `enrichGO`, `enrichKEGG` and `enricher` provided in this package, but
 also other biological and biomedical ontologies, for instance,
-`enrichDO` from `r Biocpkg("DOSE")`[@yu_dose_2015], `enrichMeSH` from
-`r Biocpkg("meshes")` and `enrichPathway` from `r Biocpkg("ReactomePA")` work fine with `compareCluster` for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of `r Biocpkg("DOSE")`[@yu_dose_2015] and `r Biocpkg("ReactomePA")`.
+`enrichDO` from [DOSE](https://www.bioconductor.org/packages/DOSE)[@yu_dose_2015], `enrichMeSH` from
+[meshes](https://www.bioconductor.org/packages/meshes) and `enrichPathway` from [ReactomePA](https://www.bioconductor.org/packages/ReactomePA) work fine with `compareCluster` for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of [DOSE](https://www.bioconductor.org/packages/DOSE)[@yu_dose_2015] and [ReactomePA](https://www.bioconductor.org/packages/ReactomePA).
 
 
 # Homepage

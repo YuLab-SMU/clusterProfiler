@@ -19,7 +19,7 @@
 
 [Let us know](https://github.com/GuangchuangYu/featured_img) if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-130-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-132-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -37,10 +37,10 @@
   }  
   </style>
 
-<div id = 'chart48a22f6e5e8' class = 'rChart morris'></div>
+<div id = 'chart35374e357ec' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart48a22f6e5e8",
+ "element": "chart35374e357ec",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -70,11 +70,11 @@
 },
 {
  "year": 2016,
-"cites":             67,
+"cites":             69,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart48a22f6e5e8",
+"id": "chart35374e357ec",
 "labels": "cites" 
 },
       chartType = "Bar"
