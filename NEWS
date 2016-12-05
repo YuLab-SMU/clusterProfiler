@@ -1,5 +1,11 @@
+CHANGES IN VERSION 3.3.4
+------------------------
+ o bug fixed of determine `ont` from `expand.dots` <2016-12-06, Mon>
+   + see https://github.com/GuangchuangYu/clusterProfiler/issues/72
+
 CHANGES IN VERSION 3.3.3
 ------------------------
+ o switch from BiocStyle to prettydoc <2016-11-30, Wed>
  o change summary to as.data.frame in internal calls to prevent warning message <2016-11-14, Mon>
 
 CHANGES IN VERSION 3.3.2

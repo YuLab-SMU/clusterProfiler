@@ -153,3 +153,27 @@ add_GO_Ontology <- function(obj, GO_DATA) {
     obj@result <- df
     return(obj)
 }
+
+
+get_go_ontology <- function(x) {
+    if (is(x, "compareClusterResult")) {
+        if (x@fun != "enrichGO") {
+            stop("simplify only work for GO...")
+        }
+        ont <- x@.call$ont
+        if (is.null(ont) || class(ont) != "character") {
+            ## should be "MF", default value of enrichGO
+            ## it's safe to determine from the output
+            ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology
+        }
+    } else if (is(x, "enrichResult")) {
+        if (!x@ontology %in% c("BP", "MF", "CC"))
+            stop("ontology should be one of 'MF', 'BP', 'CC'...")
+
+        ont <- x@ontology
+    } else {
+        stop("x should be an instance of 'enrichResult' or 'compareClusterResult'...")
+    }
+
+    return(ont)
+}
