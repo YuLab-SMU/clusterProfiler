@@ -5,7 +5,7 @@
 \title{fortify}
 \usage{
 \method{fortify}{compareClusterResult}(model, data, showCategory = 5,
-  by = "geneRatio", includeAll = TRUE)
+  by = "geneRatio", category = NULL, includeAll = TRUE)
 }
 \arguments{
 \item{model}{compareClusterResult object}
@@ -15,6 +15,8 @@
 \item{showCategory}{category numbers}
 
 \item{by}{one of geneRatio, Percentage or count}
+
+\item{category}{ONTOLOGY or NULL}
 
 \item{includeAll}{logical}
 }
