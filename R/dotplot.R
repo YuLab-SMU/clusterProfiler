@@ -1,5 +1,7 @@
-dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust", showCategory=5, by="geneRatio", includeAll=TRUE, font.size=12, title="") {
-    df <- fortify(object, showCategory=showCategory, by=by, includeAll=includeAll)
+dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust", showCategory=5, by="geneRatio",
+                                         category=NULL, includeAll=TRUE, font.size=12, title="") {
+
+    df <- fortify(object, showCategory=showCategory, by=by, includeAll=includeAll, category=category)
     plotting.clusterProfile(df, x=x, type="dot", colorBy=colorBy, by=by, title=title, font.size=font.size)
 }
 
@@ -12,6 +14,7 @@ dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust",
 ##' @param data not use here
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
+##' @param category ONTOLOGY or NULL
 ##' @param includeAll logical
 ##' @return data.frame
 ##' @importFrom ggplot2 fortify
@@ -21,7 +24,8 @@ dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust",
 ##' @method fortify compareClusterResult
 ##' @export
 ##' @author Guangchuang Yu
-fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRatio", includeAll=TRUE) {
+fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRatio",
+                                         category=NULL, includeAll=TRUE) {
     clProf.df <- as.data.frame(model)
 
     ## get top 5 (default) categories of each gene cluster.
@@ -29,25 +33,37 @@ fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRa
         result <- clProf.df
     } else {
         Cluster <- NULL # to satisfy codetools
-        result <- ddply(.data = clProf.df,
-                        .variables = .(Cluster),
-                        .fun = function(df, N) {
-                            if (length(df$Count) > N) {
-                                if (any(colnames(df) == "pvalue")) {
-                                    idx <- order(df$pvalue, decreasing=FALSE)[1:N]
-                                } else {
-                                    ## for groupGO
-                                    idx <- order(df$Count, decreasing=T)[1:N]
-                                }
-                                return(df[idx,])
-                            } else {
-                                return(df)
-                            }
-                        },
-                        N=showCategory
-                        )
 
+        topN <- function(res, showCategory) {
+            ddply(.data = res,
+                  .variables = .(Cluster),
+                  .fun = function(df, N) {
+                      if (length(df$Count) > N) {
+                          if (any(colnames(df) == "pvalue")) {
+                              idx <- order(df$pvalue, decreasing=FALSE)[1:N]
+                          } else {
+                              ## for groupGO
+                              idx <- order(df$Count, decreasing=T)[1:N]
+                          }
+                          return(df[idx,])
+                      } else {
+                          return(df)
+                      }
+                  },
+                  N=showCategory
+                  )
+
+        }
+
+        if (is.null(category)) {
+            result <- topN(clProf.df, showCategory)
+        } else {
+            lres <- split(clProf.df, as.character(clProf.df[, category]))
+            lres <- lapply(lres, topN, showCategory = showCategory)
+            result <- do.call('rbind', lres)
+        }
     }
+
     ID <- NULL
     if (includeAll == TRUE) {
         result = subset(clProf.df, ID %in% result$ID)
