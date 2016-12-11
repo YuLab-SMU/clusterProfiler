@@ -8,7 +8,7 @@
 \usage{
 \S4method{dotplot}{compareClusterResult}(object, x = ~Cluster,
   colorBy = "p.adjust", showCategory = 5, by = "geneRatio",
-  category = NULL, includeAll = TRUE, font.size = 12, title = "")
+  split = NULL, includeAll = TRUE, font.size = 12, title = "")
 }
 \arguments{
 \item{object}{compareClusterResult object}
@@ -21,7 +21,7 @@
 
 \item{by}{one of geneRatio, Percentage or count}
 
-\item{category}{ONTOLOGY or NULL}
+\item{split}{ONTOLOGY or NULL}
 
 \item{includeAll}{logical}
 

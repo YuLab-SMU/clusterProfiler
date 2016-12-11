@@ -5,7 +5,7 @@
 \title{fortify}
 \usage{
 \method{fortify}{compareClusterResult}(model, data, showCategory = 5,
-  by = "geneRatio", category = NULL, includeAll = TRUE)
+  by = "geneRatio", split = NULL, includeAll = TRUE)
 }
 \arguments{
 \item{model}{compareClusterResult object}
@@ -16,7 +16,7 @@
 
 \item{by}{one of geneRatio, Percentage or count}
 
-\item{category}{ONTOLOGY or NULL}
+\item{split}{ONTOLOGY or NULL}
 
 \item{includeAll}{logical}
 }

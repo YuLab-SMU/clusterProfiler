@@ -19,7 +19,7 @@
 
 [Let us know](https://github.com/GuangchuangYu/featured_img) if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-132-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-134-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -37,10 +37,10 @@
   }  
   </style>
 
-<div id = 'chart35374e357ec' class = 'rChart morris'></div>
+<div id = 'chart241afd0e18b' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart35374e357ec",
+ "element": "chart241afd0e18b",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -70,11 +70,11 @@
 },
 {
  "year": 2016,
-"cites":             69,
+"cites":             71,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart35374e357ec",
+"id": "chart241afd0e18b",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -86,6 +86,8 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 
 ## <i class="fa fa-calendar"></i> 2016
+
+[Splicing factor 1 modulates dietary restriction and TORC1 pathway longevity in *C. elegans*](http://www.nature.com/nature/journal/vaop/ncurrent/full/nature20789.html). ***Nature***. 2016.
 
 [Classification and characterization of microsatellite instability across 18 cancer types](http://www.nature.com/nm/journal/vaop/ncurrent/full/nm.4191.html). ***Nature Medicine***. 2016.
 

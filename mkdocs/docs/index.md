@@ -15,10 +15,10 @@
 
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
 
-[![releaseVersion](https://img.shields.io/badge/release%20version-3.2.6-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
-[![develVersion](https://img.shields.io/badge/devel%20version-3.3.3-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
-[![total](https://img.shields.io/badge/downloads-59724/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
-[![month](https://img.shields.io/badge/downloads-2211/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![releaseVersion](https://img.shields.io/badge/release%20version-3.2.8-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
+[![develVersion](https://img.shields.io/badge/devel%20version-3.3.4-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
+[![total](https://img.shields.io/badge/downloads-62114/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![month](https://img.shields.io/badge/downloads-2714/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
 
 The `clusterProfiler` package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.
@@ -34,7 +34,7 @@ Guangchuang Yu, School of Public Health, The University of Hong Kong.
 Please cite the following article when using `clusterProfiler`:
 
 [![doi](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-blue.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118)
-[![citation](https://img.shields.io/badge/cited%20by-132-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-134-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 [![Altmetric](https://img.shields.io/badge/Altmetric-22-blue.svg?style=flat)](https://www.altmetric.com/details/681089)
 
 __Yu G__, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters.

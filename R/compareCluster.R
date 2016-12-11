@@ -184,7 +184,7 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @param colorBy one of pvalue or p.adjust
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
-##' @param category ONTOLOGY or NULL
+##' @param split ONTOLOGY or NULL
 ##' @param includeAll logical
 ##' @param font.size font size
 ##' @param title figure title
@@ -194,7 +194,7 @@ setMethod("plot", signature(x="compareClusterResult"),
                    colorBy="p.adjust",
                    showCategory=5,
                    by="geneRatio",
-                   category=NULL,
+                   split=NULL,
                    includeAll=TRUE,
                    font.size=12,
                    title=""
@@ -204,13 +204,13 @@ setMethod("plot", signature(x="compareClusterResult"),
                           colorBy      = colorBy,
                           showCategory = showCategory,
                           by           = by,
-                          category     = category,
+                          split        = split,
                           includeAll   = includeAll,
                           font.size    = font.size,
                           title        = title
                           )
               } else if (type == "bar" || type == "barplot") {
-                  barplot.compareClusterResult(x, colorBy, showCategory, by, category = category, includeAll, font.size, title)
+                  barplot.compareClusterResult(x, colorBy, showCategory, by, split = split, includeAll, font.size, title)
               } else {
                   stop("type should be one of 'dot' or 'bar'...")
               }
@@ -227,7 +227,7 @@ setMethod("plot", signature(x="compareClusterResult"),
 ##' @param colorBy one of pvalue or p.adjust
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
-##' @param category ONTOLOGY or NULL
+##' @param split ONTOLOGY or NULL
 ##' @param includeAll logical
 ##' @param font.size font size
 ##' @param title figure title
@@ -239,13 +239,13 @@ setMethod("dotplot", signature(object="compareClusterResult"),
                    colorBy="p.adjust",
                    showCategory=5,
                    by="geneRatio",
-                   category=NULL,
+                   split=NULL,
                    includeAll=TRUE,
                    font.size=12,
                    title=""
                    ) {
               dotplot.compareClusterResult(object, x=x, colorBy, showCategory, by, includeAll,
-                                           category=category, font.size, title)
+                                           split=split, font.size, title)
           })
 
 
