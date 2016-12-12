@@ -8,7 +8,7 @@ categories after FDR control.}
 \usage{
 enrichGO(gene, OrgDb, keytype = "ENTREZID", ont = "MF",
   pvalueCutoff = 0.05, pAdjustMethod = "BH", universe, qvalueCutoff = 0.2,
-  minGSSize = 10, maxGSSize = 500, readable = FALSE)
+  minGSSize = 10, maxGSSize = 500, readable = FALSE, pool = FALSE)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
@@ -32,6 +32,8 @@ enrichGO(gene, OrgDb, keytype = "ENTREZID", ont = "MF",
 \item{maxGSSize}{maximal size of genes annotated for testing}
 
 \item{readable}{whether mapping gene ID to gene Name}
+
+\item{pool}{If ont='ALL', whether pool 3 GO sub-ontologies}
 }
 \value{
 An \code{enrichResult} instance.
