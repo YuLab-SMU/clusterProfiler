@@ -1,7 +1,7 @@
 dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust", showCategory=5, by="geneRatio",
-                                         category=NULL, includeAll=TRUE, font.size=12, title="") {
+                                         split=NULL, includeAll=TRUE, font.size=12, title="") {
 
-    df <- fortify(object, showCategory=showCategory, by=by, includeAll=includeAll, category=category)
+    df <- fortify(object, showCategory=showCategory, by=by, includeAll=includeAll, split=split)
     plotting.clusterProfile(df, x=x, type="dot", colorBy=colorBy, by=by, title=title, font.size=font.size)
 }
 
@@ -14,7 +14,7 @@ dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust",
 ##' @param data not use here
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
-##' @param category ONTOLOGY or NULL
+##' @param split ONTOLOGY or NULL
 ##' @param includeAll logical
 ##' @return data.frame
 ##' @importFrom ggplot2 fortify
@@ -25,7 +25,7 @@ dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust",
 ##' @export
 ##' @author Guangchuang Yu
 fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRatio",
-                                         category=NULL, includeAll=TRUE) {
+                                         split=NULL, includeAll=TRUE) {
     clProf.df <- as.data.frame(model)
 
     ## get top 5 (default) categories of each gene cluster.
@@ -55,10 +55,10 @@ fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRa
 
         }
 
-        if (is.null(category)) {
+        if (is.null(split)) {
             result <- topN(clProf.df, showCategory)
         } else {
-            lres <- split(clProf.df, as.character(clProf.df[, category]))
+            lres <- split(clProf.df, as.character(clProf.df[, split]))
             lres <- lapply(lres, topN, showCategory = showCategory)
             result <- do.call('rbind', lres)
         }

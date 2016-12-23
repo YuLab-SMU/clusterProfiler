@@ -1,5 +1,6 @@
 CHANGES IN VERSION 3.3.4
 ------------------------
+ o split 3 GO sub-ontologies for enrichGO <2016-12-12, Mon>
  o dotplot for compareClusterResult to support 3 GO sub-ontologies <2016-12-8, Thu>
  o bug fixed of determine `ont` from `expand.dots` <2016-12-06, Mon>
    + see https://github.com/GuangchuangYu/clusterProfiler/issues/72

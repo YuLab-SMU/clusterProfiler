@@ -125,8 +125,6 @@ removeEmptyEntry.list <- function(x) {
 }
 
 
-
-
 GSEA_internal <- DOSE:::GSEA_internal
 enricher_internal <- DOSE:::enricher_internal
 get_fun_from_pkg <- DOSE:::get_fun_from_pkg
