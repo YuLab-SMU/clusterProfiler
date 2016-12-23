@@ -124,10 +124,6 @@ removeEmptyEntry.list <- function(x) {
     x[notNA.idx]
 }
 
-##' @importFrom ggplot2 facet_grid
-##' @export
-ggplot2::facet_grid
-
 
 GSEA_internal <- DOSE:::GSEA_internal
 enricher_internal <- DOSE:::enricher_internal
