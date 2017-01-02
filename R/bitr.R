@@ -72,13 +72,17 @@ bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
 ##' @author Guangchuang Yu
 bitr_kegg <- function(geneID, fromType, toType, organism, drop=TRUE) {
     id_types <- c("ncbi-proteinid", "ncbi-geneid", "uniprot", "kegg")
-    fromType <- match.arg(fromType, id_types)
+    fromType <- match.arg(fromType, c("Path", "Module", id_types))
     toType <- match.arg(toType, id_types)
 
     if (fromType == toType)
         stop("fromType and toType should not be identical...")
-    
-    idconv <- KEGG_convert(fromType, toType, organism)
+
+    if (fromType == "Path" || fromType == "Module") {
+        idconv <- KEGG_path2extid(geneID, organism, fromType, toType)
+    } else {
+        idconv <- KEGG_convert(fromType, toType, organism)
+    }
     
     res <- idconv[idconv[,1] %in% geneID, ]
     n <- sum(!geneID %in% res[,1])
@@ -123,3 +127,27 @@ KEGG_convert <- function(fromType, toType, species) {
     idconv[,2] %<>% gsub("[^:]+:", "", .)
     return(idconv)
 }
+
+##' query all genes in a KEGG pathway or module
+##'
+##' 
+##' @title KEGG_path2extid 
+##' @param keggID KEGG ID, path or module ID 
+##' @param species species
+##' @param keggType one of 'Path' or 'Module'
+##' @param keyType KEGG gene type, one of "ncbi-proteinid", "ncbi-geneid", "uniprot", or "kegg"
+##' @return extid vector
+##' @author guangchuang yu
+KEGG_path2extid <- function(keggID, species=sub("\\d+$", "", keggID),
+                          keggType = "Path", keyType = "kegg") {
+    keggType <- match.arg(keggType, c("Path", "Module"))
+    if (keggType == "Path") {
+        keggType <- "KEGG"
+    } else {
+        keggType <- "MKEGG"
+    }
+    kegg <- download_KEGG(species, keggType, keyType)
+    path2extid <- kegg$KEGGPATHID2EXTID
+    path2extid[path2extid$from %in% keggID, ]
+}
+
