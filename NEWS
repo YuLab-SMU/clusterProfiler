@@ -1,5 +1,10 @@
+CHANGES IN VERSION 3.3.5
+------------------------
+ o bitr_kegg support converting Path/Module to geneID and vice versa <2017-01-03, Tue>
+
 CHANGES IN VERSION 3.3.4
 ------------------------
+ o bug fixed of download_KEGG for supporting different keyType <2017-01-02, Mon>
  o split 3 GO sub-ontologies for enrichGO <2016-12-12, Mon>
  o dotplot for compareClusterResult to support 3 GO sub-ontologies <2016-12-8, Thu>
  o bug fixed of determine `ont` from `expand.dots` <2016-12-06, Mon>

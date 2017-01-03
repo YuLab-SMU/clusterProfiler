@@ -107,3 +107,6 @@ kegg_list <- function(db) {
     url <- paste0("http://rest.kegg.jp/list/", db, collapse="")
     kegg_rest(url)
 }
+
+
+    

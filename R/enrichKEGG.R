@@ -126,6 +126,8 @@ download_KEGG <- function(species, keggType="KEGG", keyType="kegg") {
     }
 
     if (keyType != "kegg") {
+        need_idconv <- FALSE
+        idconv <- NULL
         if (use_cached &&
             exists("key", envir=KEGG_Env, inherits = FALSE) &&
             exists("idconv", envir=KEGG_Env, inherits = FALSE)) {
@@ -133,8 +135,14 @@ download_KEGG <- function(species, keggType="KEGG", keyType="kegg") {
             key <- get("key", envir=KEGG_Env)
             if (key == keyType) {
                 idconv <- get("idconv", envir=KEGG_Env)
+            } else {
+                need_idconv <- TRUE
             }
         } else {
+            neec_idconv <- TRUE
+        }
+
+        if (need_idconv || is.null(idconv)) {
             idconv <- KEGG_convert("kegg", keyType, species)
             assign("key", keyType, envir=KEGG_Env)
             assign("idconv", idconv, envir=KEGG_Env)
