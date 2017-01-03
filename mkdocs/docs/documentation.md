@@ -55,6 +55,7 @@
 ### <i class="fa fa-angle-double-right"></i> Visualization
 
 + [dotplot for enrichment result](https://guangchuangyu.github.io/2015/06/dotplot-for-enrichment-result)
++ [dotplot for GSEA result](http://guangchuangyu.github.io/2016/12/dotplot-for-gsea-result/)
 + [enrichment map](https://guangchuangyu.github.io/2014/08/enrichment-map)
 + [showCategory parameter for visualizing compareCluster output](https://guangchuangyu.github.io/2016/11/showcategory-parameter-for-visualizing-comparecluster-output/)
 

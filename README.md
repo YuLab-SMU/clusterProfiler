@@ -17,7 +17,7 @@ Please cite the following article when using `clusterProfiler`:
 
 ***Yu G***, Wang L, Han Y and He Q<sup>\*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters. OMICS: A Journal of Integrative Biology. 2012, 16(5):284-287.
 
-[![doi](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-green.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118) [![citation](https://img.shields.io/badge/cited%20by-136-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117) [![Altmetric](https://img.shields.io/badge/Altmetric-22-green.svg?style=flat)](https://www.altmetric.com/details/681089)
+[![doi](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-green.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118) [![citation](https://img.shields.io/badge/cited%20by-138-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117) [![Altmetric](https://img.shields.io/badge/Altmetric-22-green.svg?style=flat)](https://www.altmetric.com/details/681089)
 
 ------------------------------------------------------------------------
 
@@ -29,23 +29,23 @@ For details, please visit our project website, <https://guangchuangyu.github.io/
 
 ### Citation
 
-[![citation](https://img.shields.io/badge/cited%20by-136-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-138-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
-       +-+------------+-----------+------------+-----------+---+
-       |                                                   *   |
+       +-+---------+---------+---------+---------+---------+---+
+       |                                         *             |
        |                                                       |
     60 +                                                       +
        |                                                       |
        |                                                       |
     40 +                                                       +
        |                                                       |
+       |                               *                       |
+    20 +                                                       +
+       |           *         *                                 |
        |                                                       |
-       |                                       *               |
-    20 +                          *                            +
-       |              *                                        |
-       | *                                                     |
-       +-+------------+-----------+------------+-----------+---+
-       2012         2013        2014         2015        2016   
+       | *                                                 *   |
+     0 +-+---------+---------+---------+---------+---------+---+
+       2012      2013      2014      2015      2016      2017   
 
 ### Download stats
 
