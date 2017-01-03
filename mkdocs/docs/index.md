@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
 
 [![releaseVersion](https://img.shields.io/badge/release%20version-3.2.9-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
-[![develVersion](https://img.shields.io/badge/devel%20version-3.3.4-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
+[![develVersion](https://img.shields.io/badge/devel%20version-3.3.5-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
 [![total](https://img.shields.io/badge/downloads-63931/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 [![month](https://img.shields.io/badge/downloads-2714/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
