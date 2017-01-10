@@ -41,8 +41,9 @@ categories with FDR control.
 }
 \examples{
 
-	data(gcSample)
-	yy = enrichKEGG(gcSample[[5]], pvalueCutoff=0.01)
+	data(geneList)
+    de <- names(geneList)[1:100]
+	yy <- enrichKEGG(de, pvalueCutoff=0.01)
 	head(yy)
 	#plot(yy)
 
