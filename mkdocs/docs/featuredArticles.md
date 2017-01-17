@@ -19,7 +19,7 @@
 
 [Let us know](https://github.com/GuangchuangYu/featured_img) if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-138-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-145-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -37,10 +37,10 @@
   }  
   </style>
 
-<div id = 'chart4c426e6df90e' class = 'rChart morris'></div>
+<div id = 'chart5b6767f1608d' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart4c426e6df90e",
+ "element": "chart5b6767f1608d",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -65,21 +65,21 @@
 },
 {
  "year": 2015,
-"cites":             26,
+"cites":             27,
 "pubid": "MLfJN-KU85MC" 
 },
 {
  "year": 2016,
-"cites":             74,
+"cites":             76,
 "pubid": "MLfJN-KU85MC" 
 },
 {
  "year": 2017,
-"cites":              1,
+"cites":              5,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart4c426e6df90e",
+"id": "chart5b6767f1608d",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -89,6 +89,9 @@
 
 Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117).
 
+## <i class="fa fa-calendar"></i> 2017
+
+[Gene co-expression analysis for functional classification and gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139). ***Brief Bioinform***. 2017.
 
 ## <i class="fa fa-calendar"></i> 2016
 

@@ -13,6 +13,9 @@
 
 Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117).
 
+## <i class="fa fa-calendar"></i> 2017
+
+[Gene co-expression analysis for functional classification and gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139). ***Brief Bioinform***. 2017.
 
 ## <i class="fa fa-calendar"></i> 2016
 
