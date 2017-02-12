@@ -1,5 +1,6 @@
 CHANGES IN VERSION 3.3.5
 ------------------------
+ o solve #81 <2017-02-12, Sun>
  o bitr_kegg support converting Path/Module to geneID and vice versa <2017-01-03, Tue>
 
 CHANGES IN VERSION 3.3.4
