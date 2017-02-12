@@ -19,7 +19,7 @@
 
 [Let us know](https://github.com/GuangchuangYu/featured_img) if you have published using `clusterProfiler` and your publication will be featured here.
 
-[![citation](https://img.shields.io/badge/cited%20by-145-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-158-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -37,10 +37,10 @@
   }  
   </style>
 
-<div id = 'chart5b6767f1608d' class = 'rChart morris'></div>
+<div id = 'chart392a43253e92' class = 'rChart morris'></div>
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart5b6767f1608d",
+ "element": "chart392a43253e92",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -65,21 +65,21 @@
 },
 {
  "year": 2015,
-"cites":             27,
+"cites":             26,
 "pubid": "MLfJN-KU85MC" 
 },
 {
  "year": 2016,
-"cites":             76,
+"cites":             84,
 "pubid": "MLfJN-KU85MC" 
 },
 {
  "year": 2017,
-"cites":              5,
+"cites":             11,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart5b6767f1608d",
+"id": "chart392a43253e92",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -93,15 +93,18 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 [Gene co-expression analysis for functional classification and gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139). ***Brief Bioinform***. 2017.
 
+[Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full). ***The Journal of Experimental Medicine***. 2016.
+
+[The Long Noncoding RNA Landscape of the Ischemic Human Left Ventricle](http://circgenetics.ahajournals.org/content/10/1/e001534). ***Circulation: Cardiovascular Genetics***. 2017, 10:e001534.
+
+[Splicing factor 1 modulates dietary restriction and TORC1 pathway longevity in *C. elegans*](http://www.nature.com/nature/journal/vaop/ncurrent/full/nature20789.html). ***Nature***. 2017, 541:102–106.
+
+
 ## <i class="fa fa-calendar"></i> 2016
 
-[Splicing factor 1 modulates dietary restriction and TORC1 pathway longevity in *C. elegans*](http://www.nature.com/nature/journal/vaop/ncurrent/full/nature20789.html). ***Nature***. 2016.
+[Classification and characterization of microsatellite instability across 18 cancer types](http://www.nature.com/nm/journal/vaop/ncurrent/full/nm.4191.html). ***Nature Medicine***. 2016, 22:1342–1350.
 
-[Classification and characterization of microsatellite instability across 18 cancer types](http://www.nature.com/nm/journal/vaop/ncurrent/full/nm.4191.html). ***Nature Medicine***. 2016.
-
-[Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](http://www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016.
-
-[Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full). ***The Journal of Experimental Medicine***. 2016.
+[Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development](http://www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html). ***Nature Genetics***. 2016, 48:1436–1442.
 
 [Lineage-Specific Genome Architecture Links Enhancers and Non-coding Disease Variants to Target Gene Promoters](http://www.sciencedirect.com/science/article/pii/S0092867416313228). ***Cell***. 2016, 167(5):1369-1384.
 
@@ -111,8 +114,7 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 [Antibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice](http://www.nature.com/articles/nmicrobiol2016140). **_Nature Microbiology_**. 2016, 1:16140.
 
-[Comprehensive identification of internal structure and alternative splicing events in circular RNAs](http://dx.doi.org/10.1038/ncomms12060). **_Nature
-Communications_**. 2016, 7:12060.
+[Comprehensive identification of internal structure and alternative splicing events in circular RNAs](http://dx.doi.org/10.1038/ncomms12060). **_Nature Communications_**. 2016, 7:12060.
 
 [Age-related accrual of methylomic variability is linked to fundamental ageing mechanisms](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1053-6). ***Genome Biology***. 2016, 17:191.
 

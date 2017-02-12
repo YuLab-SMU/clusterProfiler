@@ -17,8 +17,8 @@
 
 [![releaseVersion](https://img.shields.io/badge/release%20version-3.2.11-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
 [![develVersion](https://img.shields.io/badge/devel%20version-3.3.5-blue.svg?style=flat)](https://github.com/GuangchuangYu/clusterProfiler)
-[![total](https://img.shields.io/badge/downloads-64977/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
-[![month](https://img.shields.io/badge/downloads-2576/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![total](https://img.shields.io/badge/downloads-67333/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![month](https://img.shields.io/badge/downloads-2678/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
 
 The `clusterProfiler` package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.
@@ -34,7 +34,7 @@ Guangchuang Yu, School of Public Health, The University of Hong Kong.
 Please cite the following article when using `clusterProfiler`:
 
 [![doi](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-blue.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118)
-[![citation](https://img.shields.io/badge/cited%20by-145-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-158-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 [![Altmetric](https://img.shields.io/badge/Altmetric-22-blue.svg?style=flat)](https://www.altmetric.com/details/681089)
 
 __Yu G__, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters.
@@ -137,6 +137,7 @@ biocLite("clusterProfiler")
 + [LINC](https://www.bioconductor.org/packages/LINC): co-expression of lincRNAs and protein-coding genes
 + [MoonlightR](https://www.bioconductor.org/packages/MoonlightR): Identify oncogenes and tumor suppressor genes from omics data
 + [TCGAbiolinks](https://www.bioconductor.org/packages/TCGAbiolinks): An R/Bioconductor package for integrative analysis with TCGA data
++ [TCGAbiolinksGUI](https://www.bioconductor.org/packages/TCGAbiolinksGUI): TCGAbiolinksGUI
 
 #### <i class="fa fa-angle-double-right"></i> Other applications
 
