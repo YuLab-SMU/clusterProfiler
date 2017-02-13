@@ -69,7 +69,8 @@ plotGOgraph <- function(x,
                   geneSel = selector,
                   annot = annFUN.gene2GO,
                   gene2GO=gene2GO)
-    
+
+    firstSigNodes <- min(firstSigNodes, nrow(x))
     showSigOfNodes(GOdata        = GOdata,
                    termsP.value  = pvalue,
                    firstSigNodes = firstSigNodes,
