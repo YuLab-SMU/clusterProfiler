@@ -1,3 +1,7 @@
+CHANGES IN VERSION 3.3.6
+------------------------
+ o better support of plotGOgraph for gseGO, use core enriched gene info <2017-02-27, Mon>
+
 CHANGES IN VERSION 3.3.5
 ------------------------
  o solve #81 <2017-02-12, Sun>
