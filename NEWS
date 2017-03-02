@@ -1,5 +1,7 @@
 CHANGES IN VERSION 3.3.6
 ------------------------
+ o bug fixed of bitr_kegg for converting ID to kegg <2017-03-01, Wed>
+   + https://support.bioconductor.org/p/93170/#93174
  o better support of plotGOgraph for gseGO, use core enriched gene info <2017-02-27, Mon>
 
 CHANGES IN VERSION 3.3.5

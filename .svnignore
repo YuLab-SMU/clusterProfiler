@@ -5,3 +5,4 @@ appveyor.yml
 docs
 mkdocs
 outdated
+.github
