@@ -28,6 +28,7 @@ Imports:
     methods,
     plyr,
     qvalue,
+    rvcheck,
     stats,
     stats4,
     tidyr,
