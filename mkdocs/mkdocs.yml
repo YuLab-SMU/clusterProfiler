@@ -8,7 +8,7 @@ pages:
 - Home: index.md
 - Documentation: documentation.md
 - Featured Articles: featuredArticles.md
-- My Software:
+- Software:
   - ChIPseeker: ChIPseeker.md
   - clusterProfiler: clusterProfiler.md
   - DOSE: DOSE.md
