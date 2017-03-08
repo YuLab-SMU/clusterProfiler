@@ -5,9 +5,14 @@ output:
 html_preview: false
 ---
 
+# clusterProfiler: statistical analysis and visualization of functional profiles for genes and gene clusters
+
+
 `r ypages:::addtoany()`
 
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://guangchuangyu.github.io/css/academicons.min.css">
+
 
 `r badge_bioc_release("clusterProfiler", "blue")`
 `r badge_devel("guangchuangyu/clusterProfiler", "blue")`
@@ -22,6 +27,14 @@ The `clusterProfiler` package implements methods to analyze and visualize functi
 ## <i class="fa fa-user"></i> Author
 
 Guangchuang Yu, School of Public Health, The University of Hong Kong.
+
+<a href="https://twitter.com/guangchuangyu"><i class="fa fa-twitter fa-3x"></i></a>
+<a href="https://guangchuangyu.github.io/blog_images/biobabble.jpg"><i class="fa fa-wechat fa-3x"></i></a>
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=Guangchuang+Yu[Author+-+Full]"><i class="ai ai-pubmed ai-3x"></i></a>
+<a href="https://scholar.google.com.hk/citations?user=DO5oG40AAAAJ&hl=en"><i class="ai ai-google-scholar ai-3x"></i></a>
+<a href="https://orcid.org/0000-0002-6485-8781"><i class="ai ai-orcid ai-3x"></i></a>
+<a href="https://impactstory.org/u/0000-0002-6485-8781"><i class="ai ai-impactstory ai-3x"></i></a>
+
 
 ## <i class="fa fa-book"></i> Citation
 
@@ -139,4 +152,3 @@ biocLite("clusterProfiler")
 	<li><i class="fa-li fa fa-support"></i>  For user questions, please post to [Bioconductor support site](https://support.bioconductor.org/) and [Biostars](https://www.biostars.org/). We are following every post tagged with **clusterProfiler**</li>
 	<li><i class="fa-li fa fa-commenting"></i> Join the group chat on <a href="https://twitter.com/hashtag/clusterProfiler"><i class="fa fa-twitter fa-lg"></i></a> and <a href="http://huati.weibo.com/k/clusterProfiler"><i class="fa fa-weibo fa-lg"></i></a></li>
 </ul>
-
