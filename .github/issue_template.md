@@ -7,7 +7,7 @@
 
 ### Describe you issue
 
-* [ ] Make a reproducible example (*e.g.* [1](https://gist.github.com/talonsensei/e1fad082657054207f249ec98f0920eb]))
+* [ ] Make a reproducible example (*e.g.* [1](https://gist.github.com/talonsensei/e1fad082657054207f249ec98f0920eb))
 * [ ] your code should contain comments to describe the problem (*e.g.* what expected and actually happened?)
 
 
