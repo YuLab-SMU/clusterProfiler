@@ -25,10 +25,10 @@ clusterProfiler: statistical analysis and visualization of functional profiles f
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/academicons.min.css">
 
-[![releaseVersion](https://img.shields.io/badge/release%20version-3.2.11-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
-[![develVersion](https://img.shields.io/badge/devel%20version-3.3.6-blue.svg?style=flat)](https://github.com/guangchuangyu/clusterProfiler)
-[![total](https://img.shields.io/badge/downloads-34261/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
-[![month](https://img.shields.io/badge/downloads-1401/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![](https://img.shields.io/badge/release%20version-3.2.14-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
+[![](https://img.shields.io/badge/devel%20version-3.3.6-blue.svg?style=flat)](https://github.com/guangchuangyu/clusterProfiler)
+[![](https://img.shields.io/badge/download-36110/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![](https://img.shields.io/badge/download-1437/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
 The `clusterProfiler` package implements methods to analyze and
 visualize functional profiles of genomic coordinates (supported by
@@ -57,9 +57,9 @@ Guangchuang Yu, School of Public Health, The University of Hong Kong.
 
 Please cite the following article when using `clusterProfiler`:
 
-[![doi](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-blue.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118)
-[![citation](https://img.shields.io/badge/cited%20by-160-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
-[![Altmetric](https://img.shields.io/badge/Altmetric-23-blue.svg?style=flat)](https://www.altmetric.com/details/681089)
+[![](https://img.shields.io/badge/doi-10.1089/omi.2011.0118-blue.svg?style=flat)](http://dx.doi.org/10.1089/omi.2011.0118)
+[![citation](https://img.shields.io/badge/cited%20by-163-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![](https://img.shields.io/badge/Altmetric-23-blue.svg?style=flat)](https://www.altmetric.com/details/681089)
 
 **Yu G**, Wang L, Han Y and He Q<sup>\*</sup>. clusterProfiler: an R
 package for comparing biological themes among gene clusters. ***OMICS: A
@@ -206,8 +206,8 @@ biocLite("clusterProfiler")
 
 <ul class="fa-ul">
     <li><i class="fa-li fa fa-hand-o-right"></i> Please make sure you have followed <a href="https://guangchuangyu.github.io/2016/07/how-to-bug-author/"><strong>the important guide</strong></a> before posting any issue/question</li>
-    <li><i class="fa-li fa fa-bug"></i> For bugs or feature requests, please post to <i class="fa fa-github-alt"></i> [github issue](https://github.com/GuangchuangYu/clusterProfiler/issues)</li>
-    <li><i class="fa-li fa fa-support"></i>  For user questions, please post to [Bioconductor support site](https://support.bioconductor.org/) and [Biostars](https://www.biostars.org/). We are following every post tagged with **clusterProfiler**</li>
+    <li><i class="fa-li fa fa-bug"></i> For bugs or feature requests, please post to <i class="fa fa-github-alt"></i> <a href="https://github.com/GuangchuangYu/clusterProfiler/issues">github issue</a></li>
+    <li><i class="fa-li fa fa-support"></i>  For user questions, please post to <a href="https://support.bioconductor.org/">Bioconductor support site</a> and <a href="https://www.biostars.org/">Biostars</a>. We are following every post tagged with <strong>clusterProfiler</strong></li>
     <li><i class="fa-li fa fa-commenting"></i> Join the group chat on <a href="https://twitter.com/hashtag/clusterProfiler"><i class="fa fa-twitter fa-lg"></i></a> and <a href="http://huati.weibo.com/k/clusterProfiler"><i class="fa fa-weibo fa-lg"></i></a></li>
 
 </ul>

@@ -26,7 +26,7 @@ output:
 published using `clusterProfiler` and your publication will be featured
 here.
 
-[![citation](https://img.shields.io/badge/cited%20by-160-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-163-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -41,13 +41,13 @@ here.
     height: 300px;
   }  
   </style>
-<div id="chart8d1d19ee5ec8" class="rChart morris">
+<div id="chart726e6ff75d93" class="rChart morris">
 
 </div>
 
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart8d1d19ee5ec8",
+ "element": "chart726e6ff75d93",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -82,11 +82,11 @@ here.
 },
 {
  "year": 2017,
-"cites":             12,
+"cites":             15,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart8d1d19ee5ec8",
+"id": "chart726e6ff75d93",
 "labels": "cites" 
 },
       chartType = "Bar"
