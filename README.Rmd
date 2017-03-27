@@ -15,7 +15,7 @@ library("ypages")
 #  clusterProfiler
 
 `r badge_bioc_release("clusterProfiler", "green")`
-`r badge_devel("clusterProfiler", "green")`
+`r badge_devel("guangchuangyu/clusterProfiler", "green")`
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
 `r badge_bioc_download("clusterProfiler", "total", "blue")`
 `r badge_bioc_download("clusterProfiler", "month", "blue")`
