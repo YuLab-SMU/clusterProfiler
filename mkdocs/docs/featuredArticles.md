@@ -41,13 +41,13 @@ here.
     height: 300px;
   }  
   </style>
-<div id="chart726e6ff75d93" class="rChart morris">
+<div id="chart4ad5e6f7aa" class="rChart morris">
 
 </div>
 
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart726e6ff75d93",
+ "element": "chart4ad5e6f7aa",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -86,7 +86,7 @@ here.
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart726e6ff75d93",
+"id": "chart4ad5e6f7aa",
 "labels": "cites" 
 },
       chartType = "Bar"
