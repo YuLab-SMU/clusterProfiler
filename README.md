@@ -29,7 +29,7 @@ For details, please visit our project website, <https://guangchuangyu.github.io/
 
 ### Citation
 
-[![citation](https://img.shields.io/badge/cited%20by-183-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-183-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117) [![](https://img.shields.io/badge/ESI-Highly%20Cited%20Paper-green.svg?style=flat)](http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007)
 
        +-+---------+---------+---------+---------+---------+---+
        |                                         *             |

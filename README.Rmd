@@ -65,7 +65,7 @@ For details, please visit our project website, <https://guangchuangyu.github.io/
 ### Citation
 
 `r badge_citation("MLfJN-KU85MC", "2349076811020942117", "green")`
-
+`r badge_custom("ESI", "Highly Cited Paper", "green", "http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007")`
 
 ```{r echo=F, comment=NA}
 d <- get_article_cite_history('DO5oG40AAAAJ', 'MLfJN-KU85MC')
