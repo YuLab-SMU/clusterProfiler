@@ -26,7 +26,9 @@ output:
 published using `clusterProfiler` and your publication will be featured
 here.
 
-[![citation](https://img.shields.io/badge/cited%20by-163-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![](https://img.shields.io/badge/2nd%20most%20cited%20paper-in%20OMICS-blue.svg?style=flat)](http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi)
+[![citation](https://img.shields.io/badge/cited%20by-183-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![](https://img.shields.io/badge/ESI-Highly%20Cited%20Paper-blue.svg?style=flat)](http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
 <script src='https://guangchuangyu.github.io/resume/css/jquery.min.js' type='text/javascript'></script>
@@ -41,13 +43,13 @@ here.
     height: 300px;
   }  
   </style>
-<div id="chart4ad5e6f7aa" class="rChart morris">
+<div id="chart4812ee687e0" class="rChart morris">
 
 </div>
 
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart4ad5e6f7aa",
+ "element": "chart4812ee687e0",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -77,16 +79,16 @@ here.
 },
 {
  "year": 2016,
-"cites":             85,
+"cites":             86,
 "pubid": "MLfJN-KU85MC" 
 },
 {
  "year": 2017,
-"cites":             15,
+"cites":             34,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart4ad5e6f7aa",
+"id": "chart4812ee687e0",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -102,10 +104,10 @@ scholar](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020
 gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139).
 ***Brief Bioinform***. 2017.
 
-[Dpy30 is critical for maintaining the identity and function of adult
-hematopoietic stem
-cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full).
-***The Journal of Experimental Medicine***. 2016.
+[H2A monoubiquitination in Arabidopsis thaliana is generally independent
+of LHP1 and PRC2
+activity](http://genomebiology.biomedcentral.com/articles/10.1186/s13059-017-1197-z).
+***Genome Biology***. 2017, 18:69
 
 [The Long Noncoding RNA Landscape of the Ischemic Human Left
 Ventricle](http://circgenetics.ahajournals.org/content/10/1/e001534).
@@ -118,6 +120,11 @@ elegans*](http://www.nature.com/nature/journal/vaop/ncurrent/full/nature20789.ht
 
 <i class="fa fa-calendar"></i> 2016
 -----------------------------------
+
+[Dpy30 is critical for maintaining the identity and function of adult
+hematopoietic stem
+cells](http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full).
+***The Journal of Experimental Medicine***. 2016, 213(11):2349-2364
 
 [Classification and characterization of microsatellite instability
 across 18 cancer

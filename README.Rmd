@@ -8,6 +8,7 @@ html_preview: false
 
 ```{r echo=FALSE, results="hide", message=FALSE}
 library("txtplot")
+library("badger")
 library("ypages")
 ```
 
@@ -32,7 +33,7 @@ library("ypages")
 [![Build Status](http://www.bioconductor.org/shields/build/devel/bioc/clusterProfiler.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/clusterProfiler/)
 [![Linux/Mac Travis Build Status](https://img.shields.io/travis/GuangchuangYu/clusterProfiler/master.svg?label=Mac%20OSX%20%26%20Linux)](https://travis-ci.org/GuangchuangYu/clusterProfiler)
 [![AppVeyor Build Status](https://img.shields.io/appveyor/ci/Guangchuangyu/clusterProfiler/master.svg?label=Windows)](https://ci.appveyor.com/project/GuangchuangYu/clusterProfiler)
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-green.svg?style=flat)](http://bioconda.github.io/recipes/bioconductor-clusterprofiler/README.html)
+
 
 
 This package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](http://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
@@ -46,8 +47,12 @@ Please cite the following article when using `clusterProfiler`:
 __*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for comparing biological themes among gene clusters. OMICS: A Journal of Integrative Biology. 2012, 16(5):284-287.
 
 `r badge_doi("10.1089/omi.2011.0118", "green")`
-`r badge_citation("MLfJN-KU85MC", "2349076811020942117", "green")`
 `r badge_altmetric("681089", "green")`
+`r badge_custom("2nd most cited paper", "in OMICS", "green",
+  "http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi")`
+`r badge_citation("MLfJN-KU85MC", "2349076811020942117", "green")`
+`r badge_custom("ESI", "Highly Cited Paper", "green", "http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007")`
+
 
 ------------------------------------------------------------------------
 
