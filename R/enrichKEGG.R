@@ -273,7 +273,8 @@ get_data_from_KEGG_db <- function(species) {
     PATHID2EXTID.df <- stack(PATHID2EXTID)
     PATHID2EXTID.df <- PATHID2EXTID.df[, c(2,1)]
     PATHID2NAME <- as.list(get_KEGG_db("KEGGPATHID2NAME"))
-    PATHID2NAME.df <- data.frame(path=names(PATHID2NAME), name=unlist(PATHID2NAME))
+    PATHID2NAME.df <- data.frame(path=paste0(species, names(PATHID2NAME)),
+                                 name=unlist(PATHID2NAME))
     build_Anno(PATHID2EXTID.df, PATHID2NAME.df)
 }
 
