@@ -26,7 +26,7 @@ clusterProfiler: statistical analysis and visualization of functional profiles f
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/academicons.min.css">
 
 [![](https://img.shields.io/badge/release%20version-3.4.0-blue.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
-[![](https://img.shields.io/badge/devel%20version-3.3.6-blue.svg?style=flat)](https://github.com/guangchuangyu/clusterProfiler)
+[![](https://img.shields.io/badge/devel%20version-3.5.0-blue.svg?style=flat)](https://github.com/guangchuangyu/clusterProfiler)
 [![](https://img.shields.io/badge/download-38340/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 [![](https://img.shields.io/badge/download-2557/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
@@ -61,6 +61,7 @@ Please cite the following article when using `clusterProfiler`:
 [![](https://img.shields.io/badge/Altmetric-22-blue.svg?style=flat)](https://www.altmetric.com/details/681089)
 [![](https://img.shields.io/badge/2nd%20most%20cited%20paper-in%20OMICS-blue.svg?style=flat)](http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi)
 [![citation](https://img.shields.io/badge/cited%20by-188-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![](https://img.shields.io/badge/cited%20in%20Web%20of%20Science%20Core%20Collection--blue.svg?style=flat)](http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007)
 [![](https://img.shields.io/badge/ESI-Highly%20Cited%20Paper-blue.svg?style=flat)](http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007)
 
 **Yu G**, Wang L, Han Y and He Q<sup>\*</sup>. clusterProfiler: an R
