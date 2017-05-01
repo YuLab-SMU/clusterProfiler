@@ -1,3 +1,8 @@
+CHANGES IN VERSION 3.5.2
+------------------------
+ o bug fixed of maintaining input list order in plotting compareCluster result <2017-05-02, Tue>
+   + https://support.bioconductor.org/p/95400/#95426
+
 CHANGES IN VERSION 3.5.1
 ------------------------
  o bug fixed of converting KEGG PATH ID to NAME using KEGG.db <2017-04-28, Fri>

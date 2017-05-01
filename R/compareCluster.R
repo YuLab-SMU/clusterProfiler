@@ -45,6 +45,7 @@
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     fun_name <- fun
     fun <- eval(parse(text=fun))
+
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
         if (!is.data.frame(data)) {
@@ -57,7 +58,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     }
     clProf <- llply(geneClusters,
                     .fun=function(i) {
-            x=suppressMessages(fun(i, ...))
+                        x=suppressMessages(fun(i, ...))
                         if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
                             as.data.frame(x)
                         }
