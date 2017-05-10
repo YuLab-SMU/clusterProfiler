@@ -1,5 +1,6 @@
 CHANGES IN VERSION 3.5.2
 ------------------------
+ o support keyType in enrichMKEGG <2017-05-10, Wed>
  o bug fixed of maintaining input list order in plotting compareCluster result <2017-05-02, Tue>
    + https://support.bioconductor.org/p/95400/#95426
 

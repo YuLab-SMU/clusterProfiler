@@ -17,7 +17,7 @@ enrichMKEGG <- function(gene,
                         qvalueCutoff = 0.2) {
 
     species <- organismMapper(organism)
-    KEGG_DATA <- prepare_KEGG(species, "MKEGG")
+    KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)
     res <- enricher_internal(gene,
                              pvalueCutoff  = pvalueCutoff,
                              pAdjustMethod = pAdjustMethod,
