@@ -23,17 +23,6 @@
 ##' @importFrom utils installed.packages
 ##' @export
 ##' @author Guangchuang Yu
-##' @param gene 
-##' @param idType 
-##' @param universe 
-##' @param minGSSize 
-##' @param maxGSSize 
-##' @param annotation 
-##' @param pvalueCutoff 
-##' @param pAdjustMethod 
-##' @param qvalueCutoff 
-##' @param species 
-##' @param david.user 
 enrichDAVID <- function(gene,
                         idType        = "ENTREZ_GENE_ID",
                         universe,
