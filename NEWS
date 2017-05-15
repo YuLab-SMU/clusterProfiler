@@ -1,3 +1,8 @@
+CHANGES IN VERSION 3.5.3
+------------------------
+ o accept background gene list via `universe` parameter in `enrichDAVID` <2017-05-16, Tue>
+   + https://github.com/GuangchuangYu/clusterProfiler/issues/87
+
 CHANGES IN VERSION 3.5.2
 ------------------------
  o support keyType in enrichMKEGG <2017-05-10, Wed>
