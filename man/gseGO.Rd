@@ -4,7 +4,7 @@
 \alias{gseGO}
 \title{gseGO}
 \usage{
-gseGO(geneList, ont = "BP", OrgDb, keytype = "ENTREZID", exponent = 1,
+gseGO(geneList, ont = "BP", OrgDb, keyType = "ENTREZID", exponent = 1,
   nPerm = 1000, minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
   pAdjustMethod = "BH", verbose = TRUE, seed = FALSE, by = "fgsea")
 }
@@ -15,7 +15,7 @@ gseGO(geneList, ont = "BP", OrgDb, keytype = "ENTREZID", exponent = 1,
 
 \item{OrgDb}{OrgDb}
 
-\item{keytype}{keytype of gene}
+\item{keyType}{keytype of gene}
 
 \item{exponent}{weight of each step}
 
