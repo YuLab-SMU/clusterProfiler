@@ -4,7 +4,7 @@
 ##' @title enrichDAVID
 ##' @param gene input gene
 ##' @param idType id type
-##' @param listType list Type
+##' @param universe background genes
 ##' @param minGSSize minimal size of genes annotated for testing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param annotation david annotation
@@ -23,9 +23,20 @@
 ##' @importFrom utils installed.packages
 ##' @export
 ##' @author Guangchuang Yu
+##' @param gene 
+##' @param idType 
+##' @param universe 
+##' @param minGSSize 
+##' @param maxGSSize 
+##' @param annotation 
+##' @param pvalueCutoff 
+##' @param pAdjustMethod 
+##' @param qvalueCutoff 
+##' @param species 
+##' @param david.user 
 enrichDAVID <- function(gene,
                         idType        = "ENTREZ_GENE_ID",
-                        listType      = "Gene",
+                        universe,
                         minGSSize     = 10,
                         maxGSSize     = 500,
                         annotation    = "GOTERM_BP_FAT",
@@ -84,11 +95,17 @@ enrichDAVID <- function(gene,
     
     david.res <- addList(david, gene, idType=idType,
                          listName="clusterProfiler",
-                         listType=listType)
+                         listType="Gene")
 
 
     if (david.res$inDavid == 0) {
         stop("All id can not be mapped. Please check 'idType' parameter...")
+    }
+
+    if (!missing(universe)) {
+        david.res <- addList(david, universe, idType=idType,
+                             listName="universe",
+                             listType="Background")
     }
 
     setAnnotationCategories(david, annotation)
