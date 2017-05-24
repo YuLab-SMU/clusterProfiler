@@ -154,7 +154,7 @@ enrichDAVID <- function(gene,
     ## gc <- strsplit(Over$geneID, "/")
     ## names(gc) <- Over$ID
 
-    if (!is.na(maxGSSize) || !is.null(maxGSSize)) {
+    if (!is.na(maxGSSize) && !is.null(maxGSSize)) {
         idx <- as.numeric(sub("/\\d+", "", Over$BgRatio)) <= maxGSSize
         Over <- Over[idx,]
     }

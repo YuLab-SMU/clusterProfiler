@@ -1,5 +1,6 @@
 CHANGES IN VERSION 3.5.3
 ------------------------
+ o fixed https://github.com/GuangchuangYu/clusterProfiler/issues/88 <2017-05-24, Wed>
  o accept background gene list via `universe` parameter in `enrichDAVID` <2017-05-16, Tue>
    + https://github.com/GuangchuangYu/clusterProfiler/issues/87
 
