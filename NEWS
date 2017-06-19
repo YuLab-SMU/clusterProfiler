@@ -1,3 +1,8 @@
+CHANGES IN VERSION 3.5.4
+------------------------
+ o bug fixed of simplify for compareCluster result <2017-06-19, Mon>
+   + https://github.com/GuangchuangYu/clusterProfiler/issues/67#issuecomment-307815402
+
 CHANGES IN VERSION 3.5.3
 ------------------------
  o fixed https://github.com/GuangchuangYu/clusterProfiler/issues/88 <2017-05-24, Wed>
