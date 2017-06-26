@@ -27,7 +27,7 @@ published using `clusterProfiler` and your publication will be featured
 here.
 
 [![](https://img.shields.io/badge/2nd%20most%20cited%20paper-in%20OMICS-blue.svg?style=flat)](http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi)
-[![citation](https://img.shields.io/badge/cited%20by-199-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-215-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 [![](https://img.shields.io/badge/ESI-Highly%20Cited%20Paper-blue.svg?style=flat)](http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
@@ -43,13 +43,13 @@ here.
     height: 300px;
   }  
   </style>
-<div id="chart4e7928d2a45e" class="rChart morris">
+<div id="chart71242b70ebf" class="rChart morris">
 
 </div>
 
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart4e7928d2a45e",
+ "element": "chart71242b70ebf",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -59,12 +59,12 @@ here.
 "data": [
  {
  "year": 2012,
-"cites":              6,
+"cites":              7,
 "pubid": "MLfJN-KU85MC" 
 },
 {
  "year": 2013,
-"cites":             13,
+"cites":             14,
 "pubid": "MLfJN-KU85MC" 
 },
 {
@@ -74,21 +74,21 @@ here.
 },
 {
  "year": 2015,
-"cites":             26,
+"cites":             25,
 "pubid": "MLfJN-KU85MC" 
 },
 {
  "year": 2016,
-"cites":             84,
+"cites":             81,
 "pubid": "MLfJN-KU85MC" 
 },
 {
  "year": 2017,
-"cites":             51,
+"cites":             69,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart4e7928d2a45e",
+"id": "chart71242b70ebf",
 "labels": "cites" 
 },
       chartType = "Bar"
@@ -99,6 +99,9 @@ scholar](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020
 
 <i class="fa fa-calendar"></i> 2017
 -----------------------------------
+
+[qSVA framework for RNA quality correction in differential expression
+analysis](http://dx.doi.org/10.1073/pnas.1617384114). ***PNAS***. 2017
 
 [Gene co-expression analysis for functional classification and
 gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139).

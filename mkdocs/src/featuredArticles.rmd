@@ -27,6 +27,9 @@ Find out more on [<i class="ai ai-google-scholar"></i> google scholar](https://s
 
 ## <i class="fa fa-calendar"></i> 2017
 
+[qSVA framework for RNA quality correction in differential expression analysis](http://dx.doi.org/10.1073/pnas.1617384114).
+***PNAS***. 2017
+
 [Gene co-expression analysis for functional classification and gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139). ***Brief Bioinform***. 2017.
 
 [H2A monoubiquitination in Arabidopsis thaliana is generally independent of LHP1 and PRC2 activity](http://genomebiology.biomedcentral.com/articles/10.1186/s13059-017-1197-z).
