@@ -1,5 +1,7 @@
 CHANGES IN VERSION 3.5.4
 ------------------------
+ o change keytype parameter in enrichGO to keyType for consistent <2017-06-28, Wed>
+   + https://github.com/GuangchuangYu/clusterProfiler/issues/91#issuecomment-311657933
  o bug fixed of simplify for compareCluster result <2017-06-19, Mon>
    + https://github.com/GuangchuangYu/clusterProfiler/issues/67#issuecomment-307815402
 

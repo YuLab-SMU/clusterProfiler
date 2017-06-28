@@ -5,7 +5,7 @@
 ##'
 ##' @param gene a vector of entrez gene id.
 ##' @param OrgDb OrgDb
-##' @param keytype keytype of input gene
+##' @param keyType keytype of input gene
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
@@ -34,7 +34,7 @@
 ##' }
 enrichGO <- function(gene,
                      OrgDb,
-                     keytype = "ENTREZID",
+                     keyType = "ENTREZID",
                      ont="MF",
                      pvalueCutoff=0.05,
                      pAdjustMethod="BH",
@@ -46,14 +46,14 @@ enrichGO <- function(gene,
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "CC", "MF", "ALL"))
-    GO_DATA <- get_GO_data(OrgDb, ont, keytype)
+    GO_DATA <- get_GO_data(OrgDb, ont, keyType)
 
     if (missing(universe))
         universe <- NULL
 
     if (ont == "ALL" && !pool) {
         lres <- lapply(c("BP", "CC", "MF"), function(ont)
-            suppressMessages(enrichGO(gene, OrgDb, keytype, ont,
+            suppressMessages(enrichGO(gene, OrgDb, keyType, ont,
                      pvalueCutoff, pAdjustMethod, universe,
                      qvalueCutoff, minGSSize, maxGSSize
                      ))
@@ -88,7 +88,7 @@ enrichGO <- function(gene,
             return(res)
     }
 
-    res@keytype <- keytype
+    res@keytype <- keyType
     res@organism <- get_organism(OrgDb)
     if(readable) {
         res <- setReadable(res, OrgDb)
