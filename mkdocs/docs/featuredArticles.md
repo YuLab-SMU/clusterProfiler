@@ -27,7 +27,7 @@ published using `clusterProfiler` and your publication will be featured
 here.
 
 [![](https://img.shields.io/badge/2nd%20most%20cited%20paper-in%20OMICS-blue.svg?style=flat)](http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi)
-[![citation](https://img.shields.io/badge/cited%20by-215-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-229-blue.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 [![](https://img.shields.io/badge/ESI-Highly%20Cited%20Paper-blue.svg?style=flat)](http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007)
 
 <link rel='stylesheet' href=https://guangchuangyu.github.io/resume/css/morris.css>
@@ -43,13 +43,13 @@ here.
     height: 300px;
   }  
   </style>
-<div id="chart71242b70ebf" class="rChart morris">
+<div id="chart168b4d773a4a" class="rChart morris">
 
 </div>
 
 <script type='text/javascript'>
     var chartParams = {
- "element": "chart71242b70ebf",
+ "element": "chart168b4d773a4a",
 "width":            800,
 "height":            400,
 "xkey": "year",
@@ -84,11 +84,11 @@ here.
 },
 {
  "year": 2017,
-"cites":             69,
+"cites":             83,
 "pubid": "MLfJN-KU85MC" 
 } 
 ],
-"id": "chart71242b70ebf",
+"id": "chart168b4d773a4a",
 "labels": "cites" 
 },
       chartType = "Bar"
