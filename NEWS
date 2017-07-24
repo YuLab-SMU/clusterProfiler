@@ -1,3 +1,7 @@
+CHANGES IN VERSION 3.5.5
+------------------------
+ o bioc git transition <2017-07-18, Tue>
+
 CHANGES IN VERSION 3.5.4
 ------------------------
  o change keytype parameter in enrichGO to keyType for consistent <2017-06-28, Wed>

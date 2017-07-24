@@ -7,7 +7,7 @@ html_preview: false
 
 
 ```{r echo=FALSE, results="hide", message=FALSE}
-library("txtplot")
+library("ggplot2")
 library("badger")
 library("ypages")
 ```
@@ -65,13 +65,23 @@ __*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for compar
 `r badge_custom("2nd most cited paper", "in OMICS", "green",
   "http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi")`
 `r badge_citation("MLfJN-KU85MC", "2349076811020942117", "green")`
-`r badge_sci_citation("http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007", "green")`
-`r badge_custom("ESI", "Highly Cited Paper", "green", "http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007")`
+`r badge_custom("ESI", "Highly Cited Paper", "green")`
+
+
 
 ```{r echo=F, comment=NA}
 d <- get_article_cite_history('DO5oG40AAAAJ', 'MLfJN-KU85MC')
-txtplot(d$year, d$cites)
+## txtplot(d$year, d$cites)
+## library("ggalt")
+## p <- ggplot(d, aes(year, cites)) + geom_lollipop(point.size=3, point.colour='firebrick') +
+p <- ggplot(d, aes(year, cites)) + geom_segment(aes(xend=year, yend=0)) + geom_point(size=3, color='firebrick') +
+    theme_minimal() + xlab(NULL) + ylab(NULL) + labs(title="Citation", caption="data from Google Scholar")
+ggsave(p, file="docs/citation.png", width=8, height=4)
 ```
+
+
+<img src="docs/citation.png" width="890"/>
+
 
 ### Download stats
 
@@ -79,10 +89,16 @@ txtplot(d$year, d$cites)
 `r badge_bioc_download("clusterProfiler", "total", "blue")`
 `r badge_bioc_download("clusterProfiler", "month", "blue")`
 
-```{r echo=F, comment=NA}
+
+```{r echo=F, message=F, comment=NA}
 x <- dlstats::bioc_stats("clusterProfiler")
 x <- x[-nrow(x), ] # last month data is not complete
-txtplot(ggtree::Date2decimal(x$end), x$Nb_of_downloads, width=100, height=25)
+## txtplot(ggtree::Date2decimal(x$end), x$Nb_of_downloads, width=100, height=25)
+p <- ggplot(x, aes(end, Nb_of_distinct_IPs)) + geom_point() + geom_line() +
+    theme_minimal() +xlab(NULL) + ylab(NULL) +
+    labs(title="clusterProfiler", subtitle="Monthly download stats (distinct IPs)", caption="data from Bioconductor")
+ggsave(p, file="docs/dlstats.png", width=8, height=4)
 ```
 
+<img src="docs/dlstats.png" width="890"/>
 
