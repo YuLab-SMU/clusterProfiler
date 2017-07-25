@@ -16,6 +16,8 @@ library("yyplot")
 
 #  clusterProfiler
 
+<img src="https://raw.githubusercontent.com/Bioconductor/BiocStickers/master/clusterProfiler/clusterProfiler.png" height="200" align="right" />
+
 `r badge_bioc_release("clusterProfiler", "green")`
 `r badge_devel("guangchuangyu/clusterProfiler", "green")`
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
@@ -93,7 +95,7 @@ x <- x[-nrow(x), ] # last month data is not complete
 p <- ggplot(x, aes(end, Nb_of_distinct_IPs)) + geom_point() + geom_line() +
     theme_minimal() +xlab(NULL) + ylab(NULL) +
     labs(title="clusterProfiler", subtitle="Monthly download stats (distinct IPs)", caption="data from Bioconductor")
-ggsave(p, file="docs/dlstats.png", width=8, height=4)
+ggsave(p, file="docs/images/dlstats.png", width=8, height=4)
 ```
 
 <img src="docs/images/dlstats.png" width="890"/>
