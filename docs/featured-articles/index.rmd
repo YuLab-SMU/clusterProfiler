@@ -1,13 +1,11 @@
 ---
-date: 2017-07-18T21:07:13+01:00
-title: Featured Articles
-type: index
+date: 2017-07-18T21:08:13+08:00
+title: 'Featured Articles'
 weight: 20
 ---
 
 
 <link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
-
 
 [Let us know](https://github.com/GuangchuangYu/featured_img) if you have published using `clusterProfiler` and your publication will be featured here.
 

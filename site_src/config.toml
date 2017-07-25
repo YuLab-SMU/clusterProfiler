@@ -1,6 +1,6 @@
 baseurl = "https://guangchuangyu.github.io/clusterProfiler/"
 languageCode = "en-us"
-title = "clusterProfiler - Guangchuang Yu"
+title = "clusterProfiler"
 theme = "hugo-material-docs"
 metadataformat = "yaml"
 canonifyurls = true
@@ -13,7 +13,7 @@ relativeurls = true
 [params]
 	# General information
 	author = "Guangchuang Yu"
-	description = "Visualization and annotation of phylogenetic trees."
+	description = "statistical analysis and visualization of functional profiles for genes and gene clusters"
 	copyright = "Released under the Artistic-2.0 license"
 
 	# Repository
@@ -21,7 +21,7 @@ relativeurls = true
 	repo_url = "https://github.com/GuangchuangYu/clusterProfiler"
 
 	# version = "1.0.0"
-	logo = "images/clusterProfiler.png"
+	logo = "images/hsa04110_pathview.png"
 	favicon = ""
 
 	permalink = " "
@@ -57,7 +57,6 @@ relativeurls = true
 	name   = "Documentation"
 	url    = "documentation/"
 	weight = 10
-
 
 [[menu.main]]
 	name   = "Featured Articles"

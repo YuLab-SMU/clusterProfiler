@@ -1,17 +1,16 @@
 ---
-date: 2017-07-08T21:07:13+01:00
+date: 2015-06-06T12:06:03+08:00
 title: 'clusterProfiler: statistical analysis and visualization of functional profiles for genes and gene clusters'
 type: index
 weight: 1
 ---
 
 
-<link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
-
 <img src="https://raw.githubusercontent.com/Bioconductor/BiocStickers/master/clusterProfiler/clusterProfiler.png" height="200" align="right" />
 
+<link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
 
-```{r echo=F, message=F}
+```{r echo=F, results="hide", message=F}
 library(badger)
 library(ypages)
 ```
@@ -22,9 +21,9 @@ library(ypages)
 `r badge_bioc_download("clusterProfiler", "month", "blue")`
 
 
-The `clusterProfiler` package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.
+The [clusterProfiler](https://bioconductor.org/packages/clusterProfiler/) package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.
 
-`clusterProfiler` is released within the [Bioconductor](https://bioconductor.org/packages/clusterProfiler) project and the source code is hosted on <a href="https://github.com/GuangchuangYu/clusterProfiler"><i class="fa fa-github fa-lg"></i> GitHub</a>.
+[clusterProfiler](https://bioconductor.org/packages/clusterProfiler/) is released within the [Bioconductor](https://bioconductor.org/packages/clusterProfiler) project and the source code is hosted on <a href="https://github.com/GuangchuangYu/clusterProfiler"><i class="fa fa-github fa-lg"></i> GitHub</a>.
 
 ## <i class="fa fa-user"></i> Author
 
@@ -33,15 +32,14 @@ Guangchuang Yu, School of Public Health, The University of Hong Kong.
 
 ## <i class="fa fa-book"></i> Citation
 
-Please cite the following article when using `clusterProfiler`:
+Please cite the following article when using [clusterProfiler](https://bioconductor.org/packages/clusterProfiler/):
 
 `r badge_doi("10.1089/omi.2011.0118", "blue")`
 `r badge_altmetric("681089", "blue")`
 `r badge_custom("2nd most cited paper", "in OMICS", "blue",
   "http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi")`
 `r badge_citation("MLfJN-KU85MC", "2349076811020942117", "blue")`
-`r badge_sci_citation("http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007", "blue")`
-`r badge_custom("ESI", "Highly Cited Paper", "blue", "http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&customersID=RID&IsProductCode=Yes&product=WOS&Init=Yes&Func=Frame&DestFail=http%3A%2F%2Fwww.webofknowledge.com&action=retrieve&SrcApp=RID&SrcAuth=RID&SID=Y2CXu6nry8nDQZcUy1w&UT=WOS%3A000303653300007")`
+`r badge_custom("ESI", "Highly Cited Paper", "blue")`
 
 
 
@@ -147,6 +145,7 @@ biocLite("clusterProfiler")
 
 
 ## <i class="fa fa-comment"></i> Feedback
+
 <ul class="fa-ul">
 <li><i class="fa-li fa fa-hand-o-right"></i> Please make sure you have followed <a href="https://guangchuangyu.github.io/2016/07/how-to-bug-author/"><strong>the important guide</strong></a> before posting any issue/question</li>
 <li><i class="fa-li fa fa-bug"></i> For bugs or feature requests, please post to <i class="fa fa-github-alt"></i> <a href="https://github.com/GuangchuangYu/clusterProfiler/issues">github issue</a></li>
