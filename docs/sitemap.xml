@@ -1,86 +1,48 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-    
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    
-
-    
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/documentation/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    
-
-    
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/featuredArticles/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    
-
-    
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/ChIPseeker/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/clusterProfiler/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/DOSE/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/emojifont/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/ggtree/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/GOSemSim/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/meshes/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/ReactomePA/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://guangchuangyu.github.io/clusterProfiler/treeio/</loc>
-     <lastmod>2017-07-18</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    
-
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://guangchuangyu.github.io/clusterProfiler/</loc>
+    <lastmod>2017-07-08T21:07:13+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://guangchuangyu.github.io/clusterProfiler/documentation/</loc>
+    <lastmod>2017-07-08T21:07:13+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://guangchuangyu.github.io/clusterProfiler/featured-articles/</loc>
+    <lastmod>2017-07-08T21:07:13+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://guangchuangyu.github.io/clusterProfiler/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://guangchuangyu.github.io/clusterProfiler/documentation/</loc>
+    <lastmod>2017-07-08T21:07:13+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://guangchuangyu.github.io/clusterProfiler/featured-articles/</loc>
+    <lastmod>2017-07-08T21:07:13+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://guangchuangyu.github.io/clusterProfiler/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://guangchuangyu.github.io/clusterProfiler/</loc>
+    <lastmod>2017-07-08T21:07:13+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
 </urlset>

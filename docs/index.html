@@ -1,290 +1,344 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
-        <meta name="author" content="Guangchuang Yu">
-        <link rel="canonical" href="https://guangchuangyu.github.io/clusterProfiler/">
-        <link rel="shortcut icon" href="./img/favicon.ico">
+  
+  
+  
+  
+   <html class="no-js"> 
 
-	<title>clusterProfiler</title>
+  <head lang="en-us">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <title>clusterProfiler - Guangchuang Yu</title>
+    <meta name="generator" content="Hugo 0.21" />
 
-        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link rel="stylesheet" href="./css/highlight.css">
-        <link href="./css/base.css" rel="stylesheet">
+    
+    <meta name="description" content="Visualization and annotation of phylogenetic trees.">
+    
+    <link rel="canonical" href="https://guangchuangyu.github.io/clusterProfiler/">
+    
+    <meta name="author" content="Guangchuang Yu">
+    
 
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
+    <meta property="og:url" content="https://guangchuangyu.github.io/clusterProfiler/">
+    <meta property="og:title" content="clusterProfiler - Guangchuang Yu">
+    <meta property="og:image" content="https://guangchuangyu.github.io/clusterProfiler/images/clusterProfiler.png">
+    <meta name="apple-mobile-web-app-title" content="clusterProfiler - Guangchuang Yu">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-        
-    </head>
+    <link rel="shortcut icon" type="image/x-icon" href="https://guangchuangyu.github.io/clusterProfiler/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="https://guangchuangyu.github.io/clusterProfiler/images/favicon.ico">
 
-    <body>
+    <style>
+      @font-face {
+        font-family: 'Icon';
+        src: url('https://guangchuangyu.github.io/clusterProfiler/fonts/icon.eot');
+        src: url('https://guangchuangyu.github.io/clusterProfiler/fonts/icon.eot')
+               format('embedded-opentype'),
+             url('https://guangchuangyu.github.io/clusterProfiler/fonts/icon.woff')
+               format('woff'),
+             url('https://guangchuangyu.github.io/clusterProfiler/fonts/icon.ttf')
+               format('truetype'),
+             url('https://guangchuangyu.github.io/clusterProfiler/fonts/icon.svg')
+               format('svg');
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
 
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
+    <link rel="stylesheet" href="https://guangchuangyu.github.io/clusterProfiler/stylesheets/application.css">
+    <link rel="stylesheet" href="https://guangchuangyu.github.io/clusterProfiler/stylesheets/temporary.css">
+    <link rel="stylesheet" href="https://guangchuangyu.github.io/clusterProfiler/stylesheets/palettes.css">
+    <link rel="stylesheet" href="https://guangchuangyu.github.io/clusterProfiler/stylesheets/highlight/highlight.css">
 
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
+    
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Ubuntu:400,700|Ubuntu&#43;Mono">
+    <style>
+      body, input {
+        font-family: 'Ubuntu', Helvetica, Arial, sans-serif;
+      }
+      pre, code {
+        font-family: 'Ubuntu Mono', 'Courier New', 'Courier', monospace;
+      }
+    </style>
 
-            <!-- Main title -->
-            <a class="navbar-brand" href=".">clusterProfiler</a>
-        </div>
+    
+    <script src="https://guangchuangyu.github.io/clusterProfiler/javascripts/modernizr.js"></script>
 
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-            <!-- Main navigation -->
-            <ul class="nav navbar-nav">
-            
-            
-                <li class="active">
-                    <a href=".">Home</a>
-                </li>
-            
-            
-            
-                <li >
-                    <a href="documentation/">Documentation</a>
-                </li>
-            
-            
-            
-                <li >
-                    <a href="featuredArticles/">Featured Articles</a>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Software <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        
-<li >
-    <a href="ChIPseeker/">ChIPseeker</a>
-</li>
+    
+    <link href="https://guangchuangyu.github.io/clusterProfiler/index.xml" rel="alternate" type="application/rss+xml" title="clusterProfiler - Guangchuang Yu" />
+    <link href="https://guangchuangyu.github.io/clusterProfiler/index.xml" rel="feed" type="application/rss+xml" title="clusterProfiler - Guangchuang Yu" />
+    
 
-                    
-                        
-<li >
-    <a href="clusterProfiler/">clusterProfiler</a>
-</li>
+  </head>
+  <body class="palette-primary-teal palette-accent-teal">
 
-                    
-                        
-<li >
-    <a href="DOSE/">DOSE</a>
-</li>
 
-                    
-                        
-<li >
-    <a href="emojifont/">emojifont</a>
-</li>
 
-                    
-                        
-<li >
-    <a href="ggtree/">ggtree</a>
-</li>
+	
+	
 
-                    
-                        
-<li >
-    <a href="GOSemSim/">GOSemSim</a>
-</li>
 
-                    
-                        
-<li >
-    <a href="meshes/">meshes</a>
-</li>
+<div class="backdrop">
+	<div class="backdrop-paper"></div>
+</div>
 
-                    
-                        
-<li >
-    <a href="ReactomePA/">ReactomePA</a>
-</li>
+<input class="toggle" type="checkbox" id="toggle-drawer">
+<input class="toggle" type="checkbox" id="toggle-search">
+<label class="toggle-button overlay" for="toggle-drawer"></label>
 
-                    
-                        
-<li >
-    <a href="treeio/">treeio</a>
-</li>
-
-                    
-                    </ul>
-                </li>
-            
-            
-            </ul>
-
-            <!-- Search, Navigation and Repo links -->
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                        <i class="fa fa-search"></i> Search
-                    </a>
-                </li>
-                <li class="disabled">
-                    <a rel="next" >
-                        <i class="fa fa-arrow-left"></i> Previous
-                    </a>
-                </li>
-                <li >
-                    <a rel="prev" href="documentation/">
-                        Next <i class="fa fa-arrow-right"></i>
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="https://github.com/GuangchuangYu/clusterProfiler">
-                        
-                            <i class="fa fa-github"></i>
-                        
-                        GitHub
-                    </a>
-                </li>
-                
-            </ul>
-        </div>
+<header class="header">
+	<nav aria-label="Header">
+  <div class="bar default">
+    <div class="button button-menu" role="button" aria-label="Menu">
+      <label class="toggle-button icon icon-menu" for="toggle-drawer">
+        <span></span>
+      </label>
     </div>
-</div>
+    <div class="stretch">
+      <div class="title">
+        clusterProfiler - Guangchuang Yu
+      </div>
+    </div>
 
-        <div class="container">
-            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#clusterprofiler-statistical-analysis-and-visualization-of-functional-profiles-for-genes-and-gene-clusters">clusterProfiler: statistical analysis and visualization of functional profiles for genes and gene clusters</a></li>
-        
-            <li><a href="#author"> Author</a></li>
-        
-            <li><a href="#citation"> Citation</a></li>
-        
-            <li><a href="#featured-articles"> Featured Articles</a></li>
-        
-            <li><a href="#installation"> Installation</a></li>
-        
-            <li><a href="#overview"> Overview</a></li>
-        
-            <li><a href="#related-tools"> Related Tools</a></li>
-        
-            <li><a href="#projects-that-depend-on-clusterprofiler"> Projects that depend on clusterProfiler</a></li>
-        
-            <li><a href="#feedback"> Feedback</a></li>
-        
+    <div class="button button-twitter" role="button" aria-label="Twitter">
+       <a href="https://twitter.com/guangchuangyu" title="@guangchuangyu on Twitter" target="_blank" class="toggle-button icon icon-twitter"></a>
+    </div>
     
-    </ul>
-</div></div>
-            <div class="col-md-9" role="main">
 
-<h1 id="clusterprofiler-statistical-analysis-and-visualization-of-functional-profiles-for-genes-and-gene-clusters">clusterProfiler: statistical analysis and visualization of functional profiles for genes and gene clusters</h1>
-<!-- AddToAny BEGIN -->
+    
+    <div class="button button-github" role="button" aria-label="GitHub">
+      <a href="https://github.com/GuangchuangYu" title="@GuangchuangYu on GitHub" target="_blank" class="toggle-button icon icon-github"></a>
+    </div>
+    
+    
+        
+  </div>
+  <div class="bar search">
+    <div class="button button-close" role="button" aria-label="Close">
+      <label class="toggle-button icon icon-back" for="toggle-search"></label>
+    </div>
+    <div class="stretch">
+      <div class="field">
+        <input class="query" type="text" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck>
+      </div>
+    </div>
+    <div class="button button-reset" role="button" aria-label="Search">
+      <button class="toggle-button icon icon-close" id="reset-search"></button>
+    </div>
+  </div>
+</nav>
+</header>
 
-<div class="a2a_kit a2a_kit_size_32 a2a_default_style">
+<main class="main">
+	<div class="drawer">
+		<nav aria-label="Navigation">
+  <a href="https://github.com/GuangchuangYu/clusterProfiler" class="project">
+    <div class="banner">
+      
+        <div class="logo">
+          <img src="https://guangchuangyu.github.io/clusterProfiler/images/clusterProfiler.png">
+        </div>
+      
+      <div class="name">
+        <strong>clusterProfiler - Guangchuang Yu </strong>
+        
+          <br>
+          GuangchuangYu/clusterProfiler
+        
+      </div>
+    </div>
+  </a>
 
-<a class="a2a_dd" href="//www.addtoany.com/share"></a>
-<a class="a2a_button_facebook"></a> <a class="a2a_button_twitter"></a>
-<a class="a2a_button_google_plus"></a>
-<a class="a2a_button_pinterest"></a> <a class="a2a_button_reddit"></a>
-<a class="a2a_button_sina_weibo"></a> <a class="a2a_button_wechat"></a>
-<a class="a2a_button_douban"></a>
+  <div class="scrollable">
+    <div class="wrapper">
+      
+        <ul class="repo">
+          <li class="repo-download">
+            <a href="https://github.com/GuangchuangYu/clusterProfiler/archive/master.zip" target="_blank" title="Download" data-action="download">
+              <i class="icon icon-download"></i> Download
+            </a>
+          </li>
+          <li class="repo-stars">
+            <a href="https://github.com/GuangchuangYu/clusterProfiler/stargazers" target="_blank" title="Stargazers" data-action="star">
+              <i class="icon icon-star"></i> Stars
+              <span class="count">&ndash;</span>
+            </a>
+          </li>
+        </ul>
+        <hr>
+      
 
-</div>
+      <div class="toc">
+        
+        <ul>
+          
 
-<script async src="//static.addtoany.com/menu/page.js"></script>
 
-<!-- AddToAny END -->
 
-<p><link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://guangchuangyu.github.io/css/academicons.min.css"></p>
-<p><a href="https://bioconductor.org/packages/clusterProfiler"><img alt="" src="https://img.shields.io/badge/release%20version-3.4.4-blue.svg?style=flat" /></a>
-<a href="https://github.com/guangchuangyu/clusterProfiler"><img alt="" src="https://img.shields.io/badge/devel%20version-3.5.4-blue.svg?style=flat" /></a>
-<a href="https://bioconductor.org/packages/stats/bioc/clusterProfiler"><img alt="" src="https://img.shields.io/badge/download-44352/total-blue.svg?style=flat" /></a>
-<a href="https://bioconductor.org/packages/stats/bioc/clusterProfiler"><img alt="" src="https://img.shields.io/badge/download-2330/month-blue.svg?style=flat" /></a></p>
-<p>The <code>clusterProfiler</code> package implements methods to analyze and
-visualize functional profiles of genomic coordinates (supported by
-ChIPseeker), gene and gene clusters.</p>
-<p><code>clusterProfiler</code> is released within the
-<a href="https://bioconductor.org/packages/clusterProfiler">Bioconductor</a>
-project and the source code is hosted on
-<a href="https://github.com/GuangchuangYu/clusterProfiler"><i class="fa fa-github fa-lg"></i>
-GitHub</a>.</p>
-<h2 id="author"><i class="fa fa-user"></i> Author</h2>
+
+<li>
+  
+    
+
+
+
+<a  title="clusterProfiler" href="./">
+	
+	clusterProfiler
+</a>
+
+
+
+  
+</li>
+
+
+
+<li>
+  
+    
+
+
+
+<a  title="Documentation" href="./documentation/">
+	
+	Documentation
+</a>
+
+
+
+  
+</li>
+
+
+
+<li>
+  
+    
+
+
+
+<a  title="Featured Articles" href="./featured-articles/">
+	
+	Featured Articles
+</a>
+
+
+
+  
+</li>
+
+
+        </ul>
+        
+
+        
+        <hr>
+        <span class="section">The author</span>
+
+        <ul>
+          
+          <li>
+            <a href="https://twitter.com/guangchuangyu" target="_blank" title="@guangchuangyu on Twitter">
+              @guangchuangyu on Twitter
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="https://github.com/GuangchuangYu" target="_blank" title="@GuangchuangYu on GitHub">
+              @GuangchuangYu on GitHub
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="https://guangchuangyu.github.io/blog_images/biobabble.jpg" title="关注公众号: biobabble">
+              @biobabble on WeChat
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="mailto:guangchuangyu@gmail.com" title="Email of guangchuangyu@gmail.com">
+              Contact via email
+            </a>
+          </li>
+          
+        </ul>
+        
+<div style="width:250px;margin:auto;"><script type="text/javascript" src="//rf.revolvermaps.com/0/0/7.js?i=5qpvv5zz7fp&amp;m=0&amp;c=ff0000&amp;cr1=ffffff&amp;sx=0" async="async"></script></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+	</div>
+
+	<article class="article">
+		<div class="wrapper">
+			
+				<h1>clusterProfiler: statistical analysis and visualization of functional profiles for genes and gene clusters </h1>
+
+				<p><link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css"> <link rel="stylesheet" href="https://guangchuangyu.github.io/css/academicons.min.css"></p>
+<p><img src="https://raw.githubusercontent.com/Bioconductor/BiocStickers/master/clusterProfiler/clusterProfiler.png" height="200" align="right" /></p>
+<p><a href="https://bioconductor.org/packages/clusterProfiler"><img src="https://img.shields.io/badge/release%20version-3.4.4-blue.svg?style=flat" /></a> <a href="https://github.com/guangchuangyu/clusterProfiler"><img src="https://img.shields.io/badge/devel%20version-3.5.5-blue.svg?style=flat" /></a> <a href="https://bioconductor.org/packages/stats/bioc/clusterProfiler"><img src="https://img.shields.io/badge/download-44547/total-blue.svg?style=flat" /></a> <a href="https://bioconductor.org/packages/stats/bioc/clusterProfiler"><img src="https://img.shields.io/badge/download-2330/month-blue.svg?style=flat" /></a></p>
+<p>The <code>clusterProfiler</code> package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.</p>
+<p><code>clusterProfiler</code> is released within the <a href="https://bioconductor.org/packages/clusterProfiler">Bioconductor</a> project and the source code is hosted on <a href="https://github.com/GuangchuangYu/clusterProfiler"><i class="fa fa-github fa-lg"></i> GitHub</a>.</p>
+<div id="author" class="section level2">
+<h2><i class="fa fa-user"></i> Author</h2>
 <p>Guangchuang Yu, School of Public Health, The University of Hong Kong.</p>
-<p><a href="https://twitter.com/guangchuangyu"><i class="fa fa-twitter fa-3x"></i></a>
-<a href="https://guangchuangyu.github.io/blog_images/biobabble.jpg"><i class="fa fa-wechat fa-3x"></i></a>
-<a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=Guangchuang+Yu[Author+-+Full]"><i class="ai ai-pubmed ai-3x"></i></a>
-<a href="https://scholar.google.com.hk/citations?user=DO5oG40AAAAJ&hl=en"><i class="ai ai-google-scholar ai-3x"></i></a>
-<a href="https://orcid.org/0000-0002-6485-8781"><i class="ai ai-orcid ai-3x"></i></a>
-<a href="https://impactstory.org/u/0000-0002-6485-8781"><i class="ai ai-impactstory ai-3x"></i></a></p>
-<h2 id="citation"><i class="fa fa-book"></i> Citation</h2>
+</div>
+<div id="citation" class="section level2">
+<h2><i class="fa fa-book"></i> Citation</h2>
 <p>Please cite the following article when using <code>clusterProfiler</code>:</p>
-<p><a href="http://dx.doi.org/10.1089/omi.2011.0118"><img alt="" src="https://img.shields.io/badge/doi-10.1089/omi.2011.0118-blue.svg?style=flat" /></a>
-<a href="https://www.altmetric.com/details/681089"><img alt="" src="https://img.shields.io/badge/Altmetric-23-blue.svg?style=flat" /></a>
-<a href="http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi"><img alt="" src="https://img.shields.io/badge/2nd%20most%20cited%20paper-in%20OMICS-blue.svg?style=flat" /></a>
-<a href="https://scholar.google.com.hk/scholar?oi=bibs&amp;hl=en&amp;cites=2349076811020942117"><img alt="citation" src="https://img.shields.io/badge/cited%20by-229-blue.svg?style=flat" /></a>
-<a href="http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&amp;customersID=RID&amp;IsProductCode=Yes&amp;product=WOS&amp;Init=Yes&amp;Func=Frame&amp;DestFail=http%3A%2F%2Fwww.webofknowledge.com&amp;action=retrieve&amp;SrcApp=RID&amp;SrcAuth=RID&amp;SID=Y2CXu6nry8nDQZcUy1w&amp;UT=WOS%3A000303653300007"><img alt="" src="https://img.shields.io/badge/cited%20in%20Web%20of%20Science%20Core%20Collection--blue.svg?style=flat" /></a>
-<a href="http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&amp;customersID=RID&amp;IsProductCode=Yes&amp;product=WOS&amp;Init=Yes&amp;Func=Frame&amp;DestFail=http%3A%2F%2Fwww.webofknowledge.com&amp;action=retrieve&amp;SrcApp=RID&amp;SrcAuth=RID&amp;SID=Y2CXu6nry8nDQZcUy1w&amp;UT=WOS%3A000303653300007"><img alt="" src="https://img.shields.io/badge/ESI-Highly%20Cited%20Paper-blue.svg?style=flat" /></a></p>
-<p><strong>Yu G</strong>, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R
-package for comparing biological themes among gene clusters. <strong><em>OMICS: A
-Journal of Integrative Biology</em></strong>. 2012, 16(5):284-287.</p>
-<h2 id="featured-articles"><i class="fa fa-pencil"></i> Featured Articles</h2>
+<p><a href="http://dx.doi.org/10.1089/omi.2011.0118"><img src="https://img.shields.io/badge/doi-10.1089/omi.2011.0118-blue.svg?style=flat" /></a> <a href="https://www.altmetric.com/details/681089"><img src="https://img.shields.io/badge/Altmetric-23-blue.svg?style=flat" /></a> <a href="http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi"><img src="https://img.shields.io/badge/2nd%20most%20cited%20paper-in%20OMICS-blue.svg?style=flat" /></a> <a href="https://scholar.google.com.hk/scholar?oi=bibs&amp;hl=en&amp;cites=2349076811020942117"><img src="https://img.shields.io/badge/cited%20by-234-blue.svg?style=flat" alt="citation" /></a> <a href="http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&amp;customersID=RID&amp;IsProductCode=Yes&amp;product=WOS&amp;Init=Yes&amp;Func=Frame&amp;DestFail=http%3A%2F%2Fwww.webofknowledge.com&amp;action=retrieve&amp;SrcApp=RID&amp;SrcAuth=RID&amp;SID=Y2CXu6nry8nDQZcUy1w&amp;UT=WOS%3A000303653300007"><img src="https://img.shields.io/badge/cited%20in%20Web%20of%20Science%20Core%20Collection--blue.svg?style=flat" /></a> <a href="http://apps.webofknowledge.com/InboundService.do?mode=FullRecord&amp;customersID=RID&amp;IsProductCode=Yes&amp;product=WOS&amp;Init=Yes&amp;Func=Frame&amp;DestFail=http%3A%2F%2Fwww.webofknowledge.com&amp;action=retrieve&amp;SrcApp=RID&amp;SrcAuth=RID&amp;SID=Y2CXu6nry8nDQZcUy1w&amp;UT=WOS%3A000303653300007"><img src="https://img.shields.io/badge/ESI-Highly%20Cited%20Paper-blue.svg?style=flat" /></a></p>
+<p><strong>Yu G</strong>, Wang L, Han Y and He Q<sup>*</sup>. clusterProfiler: an R package for comparing biological themes among gene clusters. <strong><em>OMICS: A Journal of Integrative Biology</em></strong>. 2012, 16(5):284-287.</p>
+</div>
+<div id="featured-articles" class="section level2">
+<h2><i class="fa fa-pencil"></i> Featured Articles</h2>
 <p><img src="https://guangchuangyu.github.io/featured_img/clusterProfiler/elife-02077-fig5-v1.jpg" width="650"></p>
-<p><i class="fa fa-hand-o-right"></i> Find out more on
-<i class="fa fa-pencil"></i> <a href="https://guangchuangyu.github.io/clusterProfiler/featuredArticles/">Featured
-Articles</a>.</p>
-<h2 id="installation"><i class="fa fa-download"></i> Installation</h2>
-<p>Install <code>clusterProfiler</code> is easy, follow the guide on the <a href="https://bioconductor.org/packages/clusterProfiler/">Bioconductor
-page</a>:</p>
-<pre><code class="r">## try http:// if https:// URLs are not supported
+<p><i class="fa fa-hand-o-right"></i> Find out more on <i class="fa fa-pencil"></i> <a href="https://guangchuangyu.github.io/clusterProfiler/featuredArticles/">Featured Articles</a>.</p>
+</div>
+<div id="installation" class="section level2">
+<h2><i class="fa fa-download"></i> Installation</h2>
+<p>Install <code>clusterProfiler</code> is easy, follow the guide on the <a href="https://bioconductor.org/packages/clusterProfiler/">Bioconductor page</a>:</p>
+<pre class="r"><code>## try http:// if https:// URLs are not supported
 source(&quot;https://bioconductor.org/biocLite.R&quot;)
 ## biocLite(&quot;BiocUpgrade&quot;) ## you may need this
-biocLite(&quot;clusterProfiler&quot;)
-</code></pre>
-
-<h2 id="overview"><i class="fa fa-cogs"></i> Overview</h2>
-<h4 id="supported-analyses"><i class="fa fa-angle-double-right"></i> Supported Analyses</h4>
+biocLite(&quot;clusterProfiler&quot;)</code></pre>
+</div>
+<div id="overview" class="section level2">
+<h2><i class="fa fa-cogs"></i> Overview</h2>
+<div id="supported-analyses" class="section level4">
+<h4><i class="fa fa-angle-double-right"></i> Supported Analyses</h4>
 <ul>
 <li>Over-Representation Analysis</li>
 <li>Gene Set Enrichment Analysis</li>
 <li>Biological theme comparison</li>
 </ul>
-<h4 id="supported-ontologiespathways"><i class="fa fa-angle-double-right"></i> Supported ontologies/pathways</h4>
+</div>
+<div id="supported-ontologiespathways" class="section level4">
+<h4><i class="fa fa-angle-double-right"></i> Supported ontologies/pathways</h4>
 <ul>
-<li>Disease Ontology (via
-    <a href="https://www.bioconductor.org/packages/DOSE">DOSE</a>)</li>
-<li><a href="http://ncg.kcl.ac.uk/">Network of Cancer Gene</a> (via
-    <a href="https://www.bioconductor.org/packages/DOSE">DOSE</a>)</li>
-<li><a href="http://www.disgenet.org/web/DisGeNET/menu/home">DisGeNET</a> (via
-    <a href="https://www.bioconductor.org/packages/DOSE">DOSE</a>)</li>
-<li>Gene Ontology (supports many species with GO annotation query online
-    via
-    <a href="https://bioconductor.org/packages/AnnotationHub/">AnnotationHub</a>)</li>
-<li>KEGG Pathway and Module with latest online data (supports more than
-    4000 species listed in
-    <a href="http://www.genome.jp/kegg/catalog/org_list.html">http://www.genome.jp/kegg/catalog/org_list.html</a>)</li>
-<li>MeSH enrichment analysis (via
-    <a href="https://www.bioconductor.org/packages/meshes">meshes</a>)</li>
-<li>Reactome Pathway (via
-    <a href="https://www.bioconductor.org/packages/ReactomePA">ReactomePA</a>)</li>
-<li>DAVID (via
-    <a href="https://www.bioconductor.org/packages/RDAVIDWebService">RDAVIDWebService</a>)</li>
-<li><a href="http://software.broadinstitute.org/gsea/msigdb">Molecular Signatures
-    Database</a><ul>
+<li>Disease Ontology (via <a href="https://www.bioconductor.org/packages/DOSE">DOSE</a>)</li>
+<li><a href="http://ncg.kcl.ac.uk/">Network of Cancer Gene</a> (via <a href="https://www.bioconductor.org/packages/DOSE">DOSE</a>)</li>
+<li><a href="http://www.disgenet.org/web/DisGeNET/menu/home">DisGeNET</a> (via <a href="https://www.bioconductor.org/packages/DOSE">DOSE</a>)</li>
+<li>Gene Ontology (supports many species with GO annotation query online via <a href="https://bioconductor.org/packages/AnnotationHub/">AnnotationHub</a>)</li>
+<li>KEGG Pathway and Module with latest online data (supports more than 4000 species listed in <a href="http://www.genome.jp/kegg/catalog/org_list.html" class="uri">http://www.genome.jp/kegg/catalog/org_list.html</a>)</li>
+<li>MeSH enrichment analysis (via <a href="https://www.bioconductor.org/packages/meshes">meshes</a>)</li>
+<li>Reactome Pathway (via <a href="https://www.bioconductor.org/packages/ReactomePA">ReactomePA</a>)</li>
+<li>DAVID (via <a href="https://www.bioconductor.org/packages/RDAVIDWebService">RDAVIDWebService</a>)</li>
+<li><a href="http://software.broadinstitute.org/gsea/msigdb">Molecular Signatures Database</a>
+<ul>
 <li>hallmark gene sets</li>
 <li>positional gene sets</li>
 <li>curated gene sets</li>
@@ -293,31 +347,30 @@ biocLite(&quot;clusterProfiler&quot;)
 <li>GO gene sets</li>
 <li>oncogenic signatures</li>
 <li>immunologic signatures</li>
-</ul>
-</li>
-<li>Other Annotations<ul>
-<li>from other sources (e.g.
-    <a href="http://www.disgenet.org/web/DisGeNET/menu/home">DisGeNET</a> as
-    <a href="https://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/">an
-    example</a>)</li>
-<li>user's annotation</li>
+</ul></li>
+<li>Other Annotations
+<ul>
+<li>from other sources (e.g. <a href="http://www.disgenet.org/web/DisGeNET/menu/home">DisGeNET</a> as <a href="https://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool/">an example</a>)</li>
+<li>user’s annotation</li>
 <li>customized ontology</li>
 <li>and many others</li>
+</ul></li>
 </ul>
-</li>
-</ul>
-<h4 id="visualization"><i class="fa fa-angle-double-right"></i> Visualization</h4>
+</div>
+<div id="visualization" class="section level4">
+<h4><i class="fa fa-angle-double-right"></i> Visualization</h4>
 <ul>
 <li>barplot</li>
 <li>cnetplot</li>
 <li>dotplot</li>
 <li>enrichMap</li>
 <li>gseaplot</li>
-<li>plotGOgraph (via
-    <a href="https://www.bioconductor.org/packages/topGO">topGO</a> package)</li>
+<li>plotGOgraph (via <a href="https://www.bioconductor.org/packages/topGO">topGO</a> package)</li>
 <li>upsetplot</li>
 </ul>
-<h4 id="useful-utilities"><i class="fa fa-angle-double-right"></i> Useful utilities:</h4>
+</div>
+<div id="useful-utilities" class="section level4">
+<h4><i class="fa fa-angle-double-right"></i> Useful utilities:</h4>
 <ul>
 <li>bitr (Biological Id TranslatoR)</li>
 <li>compareCluster (biological theme comparison)</li>
@@ -326,93 +379,343 @@ biocLite(&quot;clusterProfiler&quot;)
 <li>go2term (convert GO ID to descriptive term)</li>
 <li>gofilter (restrict result at specific GO level)</li>
 <li>gsfilter (restrict result by gene set size)</li>
-<li>simplify (remove redundant GO terms, supported via
-    <a href="https://www.bioconductor.org/packages/GOSemSim">GOSemSim</a>)</li>
+<li>simplify (remove redundant GO terms, supported via <a href="https://www.bioconductor.org/packages/GOSemSim">GOSemSim</a>)</li>
 </ul>
-<p><i class="fa fa-hand-o-right"></i> Find out details and examples on
-<i class="fa fa-book"></i>
-<a href="https://guangchuangyu.github.io/clusterProfiler/documentation/">Documentation</a>.</p>
-<h2 id="related-tools"><i class="fa fa-wrench"></i> Related Tools</h2>
+<p><i class="fa fa-hand-o-right"></i> Find out details and examples on <i class="fa fa-book"></i> <a href="https://guangchuangyu.github.io/clusterProfiler/documentation/">Documentation</a>.</p>
+</div>
+</div>
+<div id="related-tools" class="section level2">
+<h2><i class="fa fa-wrench"></i> Related Tools</h2>
 <ul class="fa-ul">
-    <li><i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/DOSE">DOSE</a> for Disease Ontology Semantic and Enrichment analyses</li>
-    <li><i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/GOSemSim">GOSemSim</a> for GO semantic similarity measurement</li>
-    <li><i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/meshes">meshes</a> for MeSH Enrichment and Semantic analysis</li>
-    <li><i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/ReactomePA">ReactomePA</a> for Reactome pathway analysis</li>
-
+<li>
+<i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/DOSE">DOSE</a> for Disease Ontology Semantic and Enrichment analyses
+</li>
+<li>
+<i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/GOSemSim">GOSemSim</a> for GO semantic similarity measurement
+</li>
+<li>
+<i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/meshes">meshes</a> for MeSH Enrichment and Semantic analysis
+</li>
+<li>
+<i class="fa-li fa fa-angle-double-right"></i><a href="https://guangchuangyu.github.io/ReactomePA">ReactomePA</a> for Reactome pathway analysis
+</li>
 </ul>
-
-<p><i class="fa fa-hand-o-right"></i> Find out more on
-<a href="https://guangchuangyu.github.io/#projects">projects</a>.</p>
-<h2 id="projects-that-depend-on-clusterprofiler"><i class="fa fa-code-fork"></i> Projects that depend on <em>clusterProfiler</em></h2>
-<h4 id="bioconductor-packages"><i class="fa fa-angle-double-right"></i> Bioconductor packages</h4>
+<p><i class="fa fa-hand-o-right"></i> Find out more on <a href="https://guangchuangyu.github.io/#projects">projects</a>.</p>
+</div>
+<div id="projects-that-depend-on-clusterprofiler" class="section level2">
+<h2><i class="fa fa-code-fork"></i> Projects that depend on <em>clusterProfiler</em></h2>
+<div id="bioconductor-packages" class="section level4">
+<h4><i class="fa fa-angle-double-right"></i> Bioconductor packages</h4>
 <ul>
-<li><a href="https://www.bioconductor.org/packages/bioCancer">bioCancer</a>:
-    Interactive Multi-Omics Cancers Data Visualization and Analysis</li>
-<li><a href="https://www.bioconductor.org/packages/debrowser">debrowser</a>:
-    Interactive Differential Expresion Analysis Browser</li>
-<li><a href="https://www.bioconductor.org/packages/eegc">eegc</a>: Engineering
-    Evaluation by Gene Categorization (eegc)</li>
-<li><a href="https://www.bioconductor.org/packages/LINC">LINC</a>: co-expression of
-    lincRNAs and protein-coding genes</li>
-<li><a href="https://www.bioconductor.org/packages/MoonlightR">MoonlightR</a>:
-    Identify oncogenes and tumor suppressor genes from omics data</li>
-<li><a href="https://www.bioconductor.org/packages/TCGAbiolinksGUI">TCGAbiolinksGUI</a>:
-    "TCGAbiolinksGUI: A Graphical User Interface to analyze cancer
-    molecular and clinical data"</li>
+<li><a href="https://www.bioconductor.org/packages/bioCancer">bioCancer</a>: Interactive Multi-Omics Cancers Data Visualization and Analysis</li>
+<li><a href="https://www.bioconductor.org/packages/debrowser">debrowser</a>: Interactive Differential Expresion Analysis Browser</li>
+<li><a href="https://www.bioconductor.org/packages/eegc">eegc</a>: Engineering Evaluation by Gene Categorization (eegc)</li>
+<li><a href="https://www.bioconductor.org/packages/LINC">LINC</a>: co-expression of lincRNAs and protein-coding genes</li>
+<li><a href="https://www.bioconductor.org/packages/MoonlightR">MoonlightR</a>: Identify oncogenes and tumor suppressor genes from omics data</li>
+<li><a href="https://www.bioconductor.org/packages/TCGAbiolinksGUI">TCGAbiolinksGUI</a>: “TCGAbiolinksGUI: A Graphical User Interface to analyze cancer molecular and clinical data”</li>
 </ul>
-<h4 id="other-applications"><i class="fa fa-angle-double-right"></i> Other applications</h4>
+</div>
+<div id="other-applications" class="section level4">
+<h4><i class="fa fa-angle-double-right"></i> Other applications</h4>
 <ul>
-<li><a href="https://github.com/bornea/APOSTL">APOSTL</a>: An Interactive Galaxy
-    Pipeline for Reproducible Analysis of Affinity Proteomics Data</li>
+<li><a href="https://github.com/bornea/APOSTL">APOSTL</a>: An Interactive Galaxy Pipeline for Reproducible Analysis of Affinity Proteomics Data</li>
 </ul>
-<h2 id="feedback"><i class="fa fa-comment"></i> Feedback</h2>
+</div>
+</div>
+<div id="feedback" class="section level2">
+<h2><i class="fa fa-comment"></i> Feedback</h2>
 <ul class="fa-ul">
-    <li><i class="fa-li fa fa-hand-o-right"></i> Please make sure you have followed <a href="https://guangchuangyu.github.io/2016/07/how-to-bug-author/"><strong>the important guide</strong></a> before posting any issue/question</li>
-    <li><i class="fa-li fa fa-bug"></i> For bugs or feature requests, please post to <i class="fa fa-github-alt"></i> <a href="https://github.com/GuangchuangYu/clusterProfiler/issues">github issue</a></li>
-    <li><i class="fa-li fa fa-support"></i>  For user questions, please post to <a href="https://support.bioconductor.org/">Bioconductor support site</a> and <a href="https://www.biostars.org/">Biostars</a>. We are following every post tagged with <strong>clusterProfiler</strong></li>
-    <li><i class="fa-li fa fa-commenting"></i> Join the group chat on <a href="https://twitter.com/hashtag/clusterProfiler"><i class="fa fa-twitter fa-lg"></i></a> and <a href="http://huati.weibo.com/k/clusterProfiler"><i class="fa fa-weibo fa-lg"></i></a></li>
+<li>
+<i class="fa-li fa fa-hand-o-right"></i> Please make sure you have followed <a href="https://guangchuangyu.github.io/2016/07/how-to-bug-author/"><strong>the important guide</strong></a> before posting any issue/question
+</li>
+<li>
+<i class="fa-li fa fa-bug"></i> For bugs or feature requests, please post to <i class="fa fa-github-alt"></i> <a href="https://github.com/GuangchuangYu/clusterProfiler/issues">github issue</a>
+</li>
+<li>
+<i class="fa-li fa fa-support"></i> For user questions, please post to <a href="https://support.bioconductor.org/">Bioconductor support site</a> and <a href="https://www.biostars.org/">Biostars</a>. We are following every post tagged with <strong>clusterProfiler</strong>
+</li>
+<li>
+<i class="fa-li fa fa-commenting"></i> Join the group chat on <a href="https://twitter.com/hashtag/clusterProfiler"><i class="fa fa-twitter fa-lg"></i></a> and <a href="http://huati.weibo.com/k/clusterProfiler"><i class="fa fa-weibo fa-lg"></i></a>
+</li>
+</ul>
+</div>
 
-</ul></div>
-        </div>
+			
+				<h1>Documentation </h1>
 
-        <footer class="col-md-12">
-            <hr>
-            
-                <center>Copyright &copy; 2016 <a href="https://guangchuangyu.github.io">Guangchuang Yu</a>.<div style="width:250px;margin:auto;"><script type="text/javascript" src="//rf.revolvermaps.com/0/0/7.js?i=5qpvv5zz7fp&amp;m=0&amp;c=ff0000&amp;cr1=ffffff&amp;sx=0" async="async"></script></div></center>
-            
-            <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
-        </footer>
+				<p><link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css"></p>
+<div id="vignettes" class="section level2">
+<h2><i class="fa fa-book"></i> Vignettes</h2>
+<ul>
+<li><a href="https://bioconductor.org/packages/devel/bioc/vignettes/DOSE/inst/doc/enrichmentAnalysis.html">DOSE: Disease enrichment analysis</a></li>
+<li><a href="https://bioconductor.org/packages/devel/bioc/vignettes/DOSE/inst/doc/GSEA.html">DOSE: Disease GSEA</a></li>
+<li><a href="https://bioconductor.org/packages/devel/bioc/vignettes/clusterProfiler/inst/doc/clusterProfiler.html">Statistical analysis and visualization of functional profiles for genes and gene clusters</a></li>
+</ul>
+</div>
+<div id="blog-posts" class="section level2">
+<h2><i class="fa fa-wordpress"></i> Blog posts</h2>
+<div id="news-and-updates" class="section level3">
+<h3><i class="fa fa-angle-double-right"></i> News and updates</h3>
+<ul>
+<li><a href="https://guangchuangyu.github.io/2011/03/clusterprofiler-in-bioconductor-2.8">clusterProfiler in Bioconductor 2.8</a></li>
+<li><a href="https://guangchuangyu.github.io/2012/05/clusterprofiler-an-r-package-for-comparing-biological-themes-among-gene-clusters">clusterProfiler: an R Package for Comparing Biological Themes Among Gene Clusters</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/04/bioc-31-news-of-my-bioc-packages">BioC 3.1: NEWS of my BioC packages</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/10/bioc-32-news-of-my-bioc-packages">BioC 3.2: NEWS of my BioC packages</a></li>
+<li><a href="https://guangchuangyu.github.io/2016/05/bioc-33-news-of-my-bioc-packages/">BioC 3.3: NEWS of my BioC packages</a></li>
+<li><a href="https://guangchuangyu.github.io/2016/10/bioc-34-news-of-my-bioc-packages">BioC 3.4: NEWS of my BioC packages</a></li>
+</ul>
+</div>
+<div id="id-conversion" class="section level3">
+<h3><i class="fa fa-angle-double-right"></i> ID conversion</h3>
+<ul>
+<li><a href="https://guangchuangyu.github.io/2016/05/convert-biological-id-with-kegg-api-using-clusterprofiler">convert biological ID with KEGG API using clusterProfiler</a></li>
+</ul>
+</div>
+<div id="enrichment-analysis" class="section level3">
+<h3><i class="fa fa-angle-double-right"></i> Enrichment analysis</h3>
+<ul>
+<li><a href="https://guangchuangyu.github.io/2016/01/go-analysis-using-clusterprofiler">GO analysis using clusterProfiler</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/10/use-simplify-to-remove-redundancy-of-enriched-go-terms">use simplify to remove redundancy of enriched GO terms</a></li>
+<li><a href="https://guangchuangyu.github.io/2016/04/kegg-module-enrichment-analysis">KEGG Module Enrichment Analysis</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/02/kegg-enrichment-analysis-with-latest-online-data-using-clusterprofiler">KEGG enrichment analysis with latest online data using clusterProfiler</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/03/david-functional-analysis-with-clusterprofiler">DAVID functional analysis with clusterProfiler</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/08/functional-enrichment-for-gtex-paper">functional enrichment for GTEx paper</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/05/use-clusterprofiler-as-an-universal-enrichment-analysis-tool">use clusterProfiler as an universal enrichment analysis tool</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/08/functional-enrichment-analysis-with-ngs-data">functional enrichment analysis with NGS data</a></li>
+<li><a href="https://guangchuangyu.github.io/2016/07/leading-edge-analysis/">leading edge analysis</a></li>
+<li><a href="http://bioinfoblog.it/2015/02/a-formula-interface-for-geneontology-analysis/">a formula interface for GeneOntology analysis</a> <i class="fa fa-arrow-left"></i> bioinfoblog.it</li>
+<li><a href="https://guangchuangyu.github.io/2014/08/why-clusterprofiler-fails">why clusterProfiler fails</a></li>
+<li><a href="https://guangchuangyu.github.io/2015/11/comparison-of-clusterprofiler-and-gsea-p">Comparison of clusterProfiler and GSEA-P</a></li>
+</ul>
+</div>
+<div id="visualization" class="section level3">
+<h3><i class="fa fa-angle-double-right"></i> Visualization</h3>
+<ul>
+<li><a href="https://guangchuangyu.github.io/2015/06/dotplot-for-enrichment-result">dotplot for enrichment result</a></li>
+<li><a href="http://guangchuangyu.github.io/2016/12/dotplot-for-gsea-result/">dotplot for GSEA result</a></li>
+<li><a href="https://guangchuangyu.github.io/2014/08/enrichment-map">enrichment map</a></li>
+<li><a href="https://guangchuangyu.github.io/2016/11/showcategory-parameter-for-visualizing-comparecluster-output/">showCategory parameter for visualizing compareCluster output</a></li>
+</ul>
+<p><i class="fa fa-hand-o-right"></i> Find out more on <a href="https://guangchuangyu.github.io/tags/clusterprofiler" class="uri">https://guangchuangyu.github.io/tags/clusterprofiler</a>.</p>
+</div>
+</div>
+<div id="qa" class="section level2">
+<h2><i class="fa fa-support"></i> Q&amp;A</h2>
+<ul>
+<li><a href="https://support.bioconductor.org/p/89253/#89272">difference in the number of genes from input and enrichGO results</a></li>
+<li><a href="https://www.biostars.org/p/201064/#201077">Collecting Genes with similar GO term</a></li>
+<li><a href="https://www.biostars.org/p/215242/#215254">Convert gene to GO ID</a></li>
+<li><a href="https://www.biostars.org/p/219013/">cnetplot output to Cytoscape</a></li>
+</ul>
+</div>
+<div id="workflow" class="section level2">
+<h2><i class="fa fa-gift"></i> Workflow</h2>
+<ul>
+<li><a href="http://f1000research.com/articles/5-1384/v1">An end to end workflow for differential gene expression using Affymetrix microarrays</a></li>
+<li><a href="https://github.com/twbattaglia/RNAseq-workflow">RNAseq workflow</a></li>
+</ul>
+</div>
 
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script>
-        <script>var base_url = '.';</script>
-        <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
-        <script src="./js/base.js"></script>
+			
+				<h1>Featured Articles </h1>
 
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>
-                            From here you can search these documents. Enter
-                            your search terms below.
-                        </p>
-                        <form role="form">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
-                            </div>
-                        </form>
-                        <div id="mkdocs-search-results"></div>
-                    </div>
-                    <div class="modal-footer">
-                    </div>
-                </div>
+				<p><link rel="stylesheet" href="https://guangchuangyu.github.io/css/font-awesome.min.css"></p>
+<p><a href="https://github.com/GuangchuangYu/featured_img">Let us know</a> if you have published using <code>clusterProfiler</code> and your publication will be featured here.</p>
+<p><img src="../images/citation.png" width="880"/></p>
+<div id="section" class="section level2">
+<h2><i class="fa fa-calendar"></i> 2017</h2>
+<p><a href="http://dx.doi.org/10.1073/pnas.1617384114">qSVA framework for RNA quality correction in differential expression analysis</a>. <strong><em>PNAS</em></strong>. 2017</p>
+<p><a href="http://dx.doi.org/10.1093/bib/bbw139">Gene co-expression analysis for functional classification and gene–disease predictions</a>. <strong><em>Brief Bioinform</em></strong>. 2017.</p>
+<p><a href="http://genomebiology.biomedcentral.com/articles/10.1186/s13059-017-1197-z">H2A monoubiquitination in Arabidopsis thaliana is generally independent of LHP1 and PRC2 activity</a>. <strong><em>Genome Biology</em></strong>. 2017, 18:69</p>
+<p><a href="http://circgenetics.ahajournals.org/content/10/1/e001534">The Long Noncoding RNA Landscape of the Ischemic Human Left Ventricle</a>. <strong><em>Circulation: Cardiovascular Genetics</em></strong>. 2017, 10:e001534.</p>
+<p><a href="http://www.nature.com/nature/journal/vaop/ncurrent/full/nature20789.html">Splicing factor 1 modulates dietary restriction and TORC1 pathway longevity in <em>C. elegans</em></a>. <strong><em>Nature</em></strong>. 2017, 541:102–106.</p>
+</div>
+<div id="section-1" class="section level2">
+<h2><i class="fa fa-calendar"></i> 2016</h2>
+<p><a href="http://jem.rupress.org/content/early/2016/09/14/jem.20160185.full">Dpy30 is critical for maintaining the identity and function of adult hematopoietic stem cells</a>. <strong><em>The Journal of Experimental Medicine</em></strong>. 2016, 213(11):2349-2364</p>
+<p><a href="http://www.nature.com/nm/journal/vaop/ncurrent/full/nm.4191.html">Classification and characterization of microsatellite instability across 18 cancer types</a>. <strong><em>Nature Medicine</em></strong>. 2016, 22:1342–1350.</p>
+<p><a href="http://www.nature.com/ng/journal/vaop/ncurrent/full/ng.3671.html">Coordinate redeployment of PRC1 proteins suppresses tumor formation during Drosophila development</a>. <strong><em>Nature Genetics</em></strong>. 2016, 48:1436–1442.</p>
+<p><a href="http://www.sciencedirect.com/science/article/pii/S0092867416313228">Lineage-Specific Genome Architecture Links Enhancers and Non-coding Disease Variants to Target Gene Promoters</a>. <strong><em>Cell</em></strong>. 2016, 167(5):1369-1384.</p>
+<p><a href="https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3143-y">Mining kidney toxicogenomic data by using gene co-expression modules</a>. <strong><em>BMC Genomics</em></strong>. 2016, 17:790.</p>
+<p><a href="http://www.nature.com/ncomms/2016/160919/ncomms12868/full/ncomms12868.html">Local microRNA delivery targets Palladin and prevents metastatic breast cancer</a>. <strong><em>Nature Communications</em></strong>. 2016, 7:12868</p>
+<p><a href="http://www.nature.com/articles/nmicrobiol2016140">Antibiotic-mediated gut microbiome perturbation accelerates development of type 1 diabetes in mice</a>. <strong><em>Nature Microbiology</em></strong>. 2016, 1:16140.</p>
+<p><a href="http://dx.doi.org/10.1038/ncomms12060">Comprehensive identification of internal structure and alternative splicing events in circular RNAs</a>. <strong><em>Nature Communications</em></strong>. 2016, 7:12060.</p>
+<p><a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1053-6">Age-related accrual of methylomic variability is linked to fundamental ageing mechanisms</a>. <strong><em>Genome Biology</em></strong>. 2016, 17:191.</p>
+<p><a href="http://genome.cshlp.org/content/26/3/331.short">TP53 regulates miRNA association with AGO2 to remodel the miRNA–mRNA interaction network</a>. <strong><em>Genome Research</em></strong>. 2016, 26:331-341.</p>
+<p><a href="http://dx.doi.org/10.1039/C5MB00663E">ReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization</a>. <strong><em>Molecular BioSystems</em></strong>. 2016, 12(2):477-479.</p>
+</div>
+<div id="section-2" class="section level2">
+<h2><i class="fa fa-calendar"></i> 2015</h2>
+<p><a href="http://bioinformatics.oxfordjournals.org/cgi/content/abstract/btv145">ChIPseeker: an R/Bioconductor package for ChIP peak annotation, comparision and visualization</a>. <strong><em>Bioinformatics</em></strong>. 2015, 31(14):2382-2383.</p>
+<p><a href="http://bioinformatics.oxfordjournals.org/cgi/content/abstract/btu684">DOSE: an R/Bioconductor package for Disease Ontology Semantic and Enrichment analysis</a>. <strong><em>Bioinformatics</em></strong>. 2015, 31(4):608-609.</p>
+<p><a href="http://dx.doi.org/10.1093/carcin/bgv146">Aberrant DNA methylation in non-small cell lung cancer-associated fibroblasts</a>. <strong><em>Carcinogenesis</em></strong>. 2015, 36(12):1453-1463.</p>
+<p><a href="http://dx.doi.org/10.1093/hmg/ddv402">A neural crest origin for cohesinopathy heart defects</a>. <strong><em>Hum. Mol. Genet</em></strong>. 2015, 24(24): 7005-7016.</p>
+<p><a href="http://dx.doi.org/10.1093/hmg/ddv411">Genome-wide disruption of 5-hydroxymethylcytosine in a mouse model of autism</a>. <strong><em>Hum. Mol. Genet</em></strong>. 2015, 24(24):7121-7131.</p>
+<p><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4747217/">Correlation of clinical features and genetic profiles of stromal interaction molecule 1 (STIM1) in colorectal cancers</a>. <strong><em>Oncotarget</em></strong>. 2015, 6(39):42169–42182.</p>
+</div>
+<div id="section-3" class="section level2">
+<h2><i class="fa fa-calendar"></i> 2014</h2>
+<p><a href="http://dx.doi.org/10.7554/eLife.02077">Age- and diet-associated metabolome remodeling characterizes the aging process driven by damage accumulation</a>. <strong><em>eLife</em></strong> 2014,3:e02077</p>
+<div class="figure">
+<img src="https://guangchuangyu.github.io/featured_img/clusterProfiler/elife-02077-fig5-v1.jpg" />
+
+</div>
+<p><a href="http://dx.doi.org/10.1093/gbe/evu101">Expression Profiling of the Wheat Pathogen <em>Zymoseptoria tritici</em> Reveals Genomic Patterns of Transcription and Host-Specific Regulatory Programs</a>. <strong><em>Genome Biol Evol</em></strong> 2014, 6(6): 1353-1365.</p>
+<p><a href="http://dx.doi.org/10.1039/C4MT00027G">Proteomic analysis of putative heme-binding proteins in <em>Streptococcus pyogenes</em></a>. <strong><em>Metallomics</em></strong> 2014, 6:1451-1459</p>
+</div>
+<div id="section-4" class="section level2">
+<h2><i class="fa fa-calendar"></i> 2013</h2>
+<p><a href="http://dx.doi.org/10.1039/C3MT00126A">Putative cobalt- and nickel-binding proteins and motifs in <em>Streptococcus pneumoniae</em></a>. <strong><em>Metallomics</em></strong> 2013,5:928-935.</p>
+<div class="figure">
+<img src="https://guangchuangyu.github.io/featured_img/clusterProfiler/c3mt00126a-f2.gif" />
+
+</div>
+<p><a href="http://dx.doi.org/10.1002/pmic.201200273">A novel andrographolide derivative AL-1 exerts its cytotoxicity on K562 cells through a ROS-dependent mechanism</a>. <strong><em>Proteomics</em></strong> 2013, 13(1):169–178.</p>
+</div>
+
+			
+
+			<aside class="copyright" role="note">
+				
+				&copy; 2017 Released under the Artistic-2.0 license &ndash;
+				
+				Documentation built with
+				<a href="https://www.gohugo.io" target="_blank">Hugo</a>
+				using the
+				<a href="http://github.com/digitalcraftsman/hugo-material-docs" target="_blank">Material</a> theme.
+			</aside>
+
+			<footer class="footer">
+				
+
+
+
+<nav class="pagination" aria-label="Footer">
+  <div class="previous">
+  </div>
+
+  
+  
+
+  <div class="next">
+      <a href="https://guangchuangyu.github.io/clusterProfiler/documentation/" title="Documentation">
+        <span class="direction">
+          Next
+        </span>
+        <div class="page">
+          <div class="stretch">
+            <div class="title">
+              Documentation
             </div>
+          </div>
+          <div class="button button-next" role="button" aria-label="Next">
+            <i class="icon icon-forward"></i>
+          </div>
         </div>
-    </body>
+      </a>
+  </div>
+</nav>
+
+
+
+			</footer>
+		</div>
+	</article>
+
+	<div class="results" role="status" aria-live="polite">
+		<div class="scrollable">
+			<div class="wrapper">
+				<div class="meta"></div>
+				<div class="list"></div>
+			</div>
+		</div>
+	</div>
+</main>
+
+    <script>
+    
+      var base_url = 'https:\/\/guangchuangyu.github.io\/clusterProfiler\/';
+      var repo_id  = 'GuangchuangYu\/clusterProfiler';
+    
+    </script>
+
+    <script src="https://guangchuangyu.github.io/clusterProfiler/javascripts/application.js"></script>
+    
+
+    <script>
+      /* Add headers to scrollspy */
+      var headers   = document.getElementsByTagName("h2");
+      var scrollspy = document.getElementById('scrollspy');
+
+      if(scrollspy) {
+        if(headers.length > 0) {
+          for(var i = 0; i < headers.length; i++) {
+            var li = document.createElement("li");
+            li.setAttribute("class", "anchor");
+
+            var a  = document.createElement("a");
+            a.setAttribute("href", "#" + headers[i].id);
+            a.setAttribute("title", headers[i].innerHTML);
+            a.innerHTML = headers[i].innerHTML;
+
+            li.appendChild(a)
+            scrollspy.appendChild(li);
+          }
+        } else {
+          scrollspy.parentElement.removeChild(scrollspy)
+        }
+
+
+        /* Add permanent link next to the headers */
+        var headers = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+
+        for(var i = 0; i < headers.length; i++) {
+            var a = document.createElement("a");
+            a.setAttribute("class", "headerlink");
+            a.setAttribute("href", "#" + headers[i].id);
+            a.setAttribute("title", "Permanent link")
+            a.innerHTML = " ";
+            headers[i].appendChild(a);
+        }
+      }
+    </script>
+
+    
+      <script>
+        (function(i,s,o,g,r,a,m){
+          i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||
+          []).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;
+          m.parentNode.insertBefore(a,m)
+        })(window, document,
+          'script', '//www.google-analytics.com/analytics.js', 'ga');
+         
+        ga('create', 'UA-77901140-1', 'auto');
+        ga('set', 'anonymizeIp', true);
+        ga('send', 'pageview');
+         
+        var buttons = document.querySelectorAll('a');
+        Array.prototype.map.call(buttons, function(item) {
+          if (item.host != document.location.host) {
+            item.addEventListener('click', function() {
+              var action = item.getAttribute('data-action') || 'follow';
+              ga('send', 'event', 'outbound', action, item.href);
+            });
+          }
+        });
+         
+        var query = document.querySelector('.query');
+        query.addEventListener('blur', function() {
+          if (this.value) {
+            var path = document.location.pathname;
+            ga('send', 'pageview', path + '?q=' + this.value);
+          }
+        });
+      </script>
+    
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
 </html>
+

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>clusterProfiler - Guangchuang Yu</title>
+    <link>https://guangchuangyu.github.io/clusterProfiler/</link>
+    <description>Recent content on clusterProfiler - Guangchuang Yu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Released under the Artistic-2.0 license</copyright>
+    <lastBuildDate>Sat, 08 Jul 2017 21:07:13 +0100</lastBuildDate>
+    
+	<atom:link href="https://guangchuangyu.github.io/clusterProfiler/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>clusterProfiler: statistical analysis and visualization of functional profiles for genes and gene clusters</title>
+      <link>https://guangchuangyu.github.io/clusterProfiler/</link>
+      <pubDate>Sat, 08 Jul 2017 21:07:13 +0100</pubDate>
+      
+      <guid>https://guangchuangyu.github.io/clusterProfiler/</guid>
+      <description>The clusterProfiler package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by ChIPseeker), gene and gene clusters.
+clusterProfiler is released within the Bioconductor project and the source code is hosted on  GitHub.
+ Author Guangchuang Yu, School of Public Health, The University of Hong Kong.
+  Citation Please cite the following article when using clusterProfiler:</description>
+    </item>
+    
+    <item>
+      <title>Documentation</title>
+      <link>https://guangchuangyu.github.io/clusterProfiler/documentation/</link>
+      <pubDate>Sat, 08 Jul 2017 21:07:13 +0100</pubDate>
+      
+      <guid>https://guangchuangyu.github.io/clusterProfiler/documentation/</guid>
+      <description>Vignettes  DOSE: Disease enrichment analysis DOSE: Disease GSEA Statistical analysis and visualization of functional profiles for genes and gene clusters    Blog posts  News and updates  clusterProfiler in Bioconductor 2.8 clusterProfiler: an R Package for Comparing Biological Themes Among Gene Clusters BioC 3.1: NEWS of my BioC packages BioC 3.2: NEWS of my BioC packages BioC 3.3: NEWS of my BioC packages BioC 3.4: NEWS of my BioC packages    ID conversion  convert biological ID with KEGG API using clusterProfiler    Enrichment analysis  GO analysis using clusterProfiler use simplify to remove redundancy of enriched GO terms KEGG Module Enrichment Analysis KEGG enrichment analysis with latest online data using clusterProfiler DAVID functional analysis with clusterProfiler functional enrichment for GTEx paper use clusterProfiler as an universal enrichment analysis tool functional enrichment analysis with NGS data leading edge analysis a formula interface for GeneOntology analysis  bioinfoblog.</description>
+    </item>
+    
+    <item>
+      <title>Featured Articles</title>
+      <link>https://guangchuangyu.github.io/clusterProfiler/featured-articles/</link>
+      <pubDate>Sat, 08 Jul 2017 21:07:13 +0100</pubDate>
+      
+      <guid>https://guangchuangyu.github.io/clusterProfiler/featured-articles/</guid>
+      <description>Let us know if you have published using clusterProfiler and your publication will be featured here.
+ 2017 qSVA framework for RNA quality correction in differential expression analysis. PNAS. 2017
+Gene co-expression analysis for functional classification and gene–disease predictions. Brief Bioinform. 2017.
+H2A monoubiquitination in Arabidopsis thaliana is generally independent of LHP1 and PRC2 activity. Genome Biology. 2017, 18:69
+The Long Noncoding RNA Landscape of the Ischemic Human Left Ventricle. Circulation: Cardiovascular Genetics.</description>
+    </item>
+    
+  </channel>
+</rss>
