@@ -1,7 +1,7 @@
 
 ##' open KEGG pathway with web browser
 ##'
-##' 
+##'
 ##' @title browseKEGG
 ##' @param x an instance of enrichResult or gseaResult
 ##' @param pathID pathway ID
@@ -17,7 +17,7 @@ browseKEGG <- function(x, pathID) {
 
 ##' search kegg organism, listed in http://www.genome.jp/kegg/catalog/org_list.html
 ##'
-##' 
+##'
 ##' @title search_kegg_organism
 ##' @param str string
 ##' @param by one of 'kegg.code', 'scientific_name' and 'common_name'
@@ -42,16 +42,16 @@ get_kegg_species <- function() {
     pkg <- "XML"
     requireNamespace(pkg)
     readHTMLTable <- eval(parse(text="XML::readHTMLTable"))
-    x <- readHTMLTable("http://www.genome.jp/kegg/catalog/org_list.html") 
+    x <- readHTMLTable("http://www.genome.jp/kegg/catalog/org_list.html")
 
     y <- get_species_name(x[[2]], "Eukaryotes")
     y2 <- get_species_name(x[[3]], 'Prokaryotes')
-    
+
     sci_name <- gsub(" \\(.*$", '', y[,2])
     com_name <- gsub("[^\\(]+ \\(([^\\)]+)\\)$", '\\1', y[,2])
     eu <- data.frame(kegg_code=unlist(y[,1]),
                      scientific_name = sci_name,
-                     common_name = com_name, 
+                     common_name = com_name,
                      stringsAsFactors = FALSE)
     pr <- data.frame(kegg_code=unlist(y2[,1]),
                      scientific_name = unlist(y2[,2]),
@@ -109,5 +109,22 @@ kegg_list <- function(db) {
     kegg_rest(url)
 }
 
+##' convert ko ID to descriptive name
+##'
+##'
+##' @title ko2name
+##' @param ko ko ID
+##' @return data.frame
+##' @export
+##' @author guangchuang yu
+ko2name <- function(ko) {
+    p <- kegg_list('pathway')
+    ko2 <- gsub("^ko", "path:map", ko)
+    ko.df <- data.frame(ko=ko, from=ko2)
+    res <- merge(ko.df, p, by = 'from', all.x=TRUE)
+    res <- res[, c("ko", "to")]
+    colnames(res) <- c("ko", "name")
+    return(res)
+}
 
-    
+

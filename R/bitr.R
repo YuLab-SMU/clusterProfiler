@@ -132,6 +132,7 @@ KEGG_convert <- function(fromType, toType, species) {
     return(idconv)
 }
 
+
 ##' query all genes in a KEGG pathway or module
 ##'
 ##'
