@@ -8,7 +8,7 @@ canonifyurls = true
 googleAnalytics = "UA-77901140-1"
 publishDir = "../docs"
 relativeurls = true
-
+ignoreFiles = ["\\.Rmd$", "\\.rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [params]
 	# General information
