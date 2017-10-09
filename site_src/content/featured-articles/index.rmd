@@ -15,8 +15,9 @@ weight: 20
 
 ## <i class="fa fa-calendar"></i> 2017
 
-[qSVA framework for RNA quality correction in differential expression analysis](http://dx.doi.org/10.1073/pnas.1617384114).
-***PNAS***. 2017
+[Mediator subunit MED25 links the jasmonate receptor to transcriptionally active chromatin](http://dx.doi.org/10.1073/pnas.1710885114). ***PNAS***. 2017
+
+[qSVA framework for RNA quality correction in differential expression analysis](http://dx.doi.org/10.1073/pnas.1617384114). ***PNAS***. 2017
 
 [Gene co-expression analysis for functional classification and gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139). ***Brief Bioinform***. 2017.
 
