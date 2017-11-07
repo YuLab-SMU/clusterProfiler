@@ -18,4 +18,3 @@ merge a list of enrichResult objects to compareClusterResult
 \author{
 Guangchuang Yu
 }
-

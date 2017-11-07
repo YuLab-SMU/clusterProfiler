@@ -29,4 +29,3 @@ convert compareClusterResult to a data.frame that ready for plot
 \author{
 Guangchuang Yu
 }
-

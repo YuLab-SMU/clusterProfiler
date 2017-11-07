@@ -2,8 +2,8 @@
 % Please edit documentation in R/compareCluster.R
 \docType{methods}
 \name{dotplot,compareClusterResult-method}
-\alias{dotplot,compareClusterResult,ANY-method}
 \alias{dotplot,compareClusterResult-method}
+\alias{dotplot,compareClusterResult,ANY-method}
 \title{dotplot}
 \usage{
 \S4method{dotplot}{compareClusterResult}(object, x = ~Cluster,
@@ -32,4 +32,3 @@
 \description{
 dot plot method
 }
-

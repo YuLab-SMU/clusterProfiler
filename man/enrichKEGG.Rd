@@ -48,11 +48,10 @@ categories with FDR control.
 	#plot(yy)
 
 }
-\author{
-Guangchuang Yu \url{http://ygc.name}
-}
 \seealso{
 \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 }
+\author{
+Guangchuang Yu \url{http://ygc.name}
+}
 \keyword{manip}
-

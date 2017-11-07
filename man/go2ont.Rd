@@ -18,4 +18,3 @@ convert goid to ontology (BP, CC, MF)
 \author{
 Guangchuang Yu
 }
-

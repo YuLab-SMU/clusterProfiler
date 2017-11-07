@@ -6,7 +6,7 @@
 ##'
 ##' @param gene a vector of entrez gene id.
 ##' @param OrgDb OrgDb
-##' @param keytype keytype of input gene
+##' @param keyType key type of input gene
 ##' @param ont One of "MF", "BP", and "CC" subontologies.
 ##' @param level Specific GO Level.
 ##' @param readable if readable is TRUE, the gene IDs will mapping to gene
@@ -26,11 +26,11 @@
 ##' 	head(summary(yy))
 ##' 	#plot(yy)
 ##'
-groupGO <- function(gene, OrgDb, keytype="ENTREZID", ont="CC", level = 2, readable=FALSE) {
+groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readable=FALSE) {
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "CC", "MF"))
 
-    GO_DATA <- get_GO_data(OrgDb, ont, keytype)
+    GO_DATA <- get_GO_data(OrgDb, ont, keyType)
 
     GOLevel <- getGOLevel(ont, level) ##get GO IDs of specific level.
 
@@ -65,7 +65,7 @@ groupGO <- function(gene, OrgDb, keytype="ENTREZID", ont="CC", level = 2, readab
              level = level,
              organism = get_organism(OrgDb),
              gene = gene,
-             keytype = keytype
+             keytype = keyType
              )
     if(readable == TRUE)
         x <- setReadable(x, OrgDb)

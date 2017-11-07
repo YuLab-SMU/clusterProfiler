@@ -18,4 +18,3 @@ list ID types supported by annoDb
 \author{
 Guangchuang Yu
 }
-

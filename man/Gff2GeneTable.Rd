@@ -23,4 +23,3 @@ given a GFF file, this function extracts information from it and save it in work
 \author{
 Yu Guangchuang
 }
-

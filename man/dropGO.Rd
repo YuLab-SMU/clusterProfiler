@@ -22,4 +22,3 @@ drop GO term of specific level or specific terms (mostly too general).
 \author{
 Guangchuang Yu
 }
-

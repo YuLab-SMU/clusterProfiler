@@ -31,4 +31,3 @@ Internal plot function for plotting compareClusterResult
 \author{
 Guangchuang Yu \url{http://ygc.name}
 }
-

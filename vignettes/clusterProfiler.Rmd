@@ -142,7 +142,7 @@ ids <- bitr(x, fromType="SYMBOL", toType=c("UNIPROT", "ENSEMBL"), OrgDb="org.Hs.
 head(ids)
 ```
 
-For GO analysis, user don't need to convert ID, all ID type provided by `OrgDb` can be used in `groupGO`, `enrichGO` and `gseGO` by specifying `keytype` parameter.
+For GO analysis, user don't need to convert ID, all ID type provided by `OrgDb` can be used in `groupGO`, `enrichGO` and `gseGO` by specifying `keyType` parameter.
 
 ## `bitr_kegg`: converting biological IDs using KEGG API
 
@@ -234,12 +234,12 @@ ego <- enrichGO(gene          = gene,
 head(ego)
 ```
 
-As I mentioned before, any gene ID type that supported in `OrgDb` can be directly used in GO analyses. User need to specify the `keytype` parameter to specify the input gene ID type.
+As I mentioned before, any gene ID type that supported in `OrgDb` can be directly used in GO analyses. User need to specify the `keyType` parameter to specify the input gene ID type.
 
 ```{r eval=FALSE}
 ego2 <- enrichGO(gene         = gene.df$ENSEMBL,
                 OrgDb         = org.Hs.eg.db,
-		keytype       = 'ENSEMBL',
+                keyType       = 'ENSEMBL',
                 ont           = "CC",
                 pAdjustMethod = "BH",
                 pvalueCutoff  = 0.01,

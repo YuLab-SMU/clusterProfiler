@@ -3,8 +3,8 @@
 \docType{methods}
 \name{simplify}
 \alias{simplify}
-\alias{simplify,compareClusterResult-method}
 \alias{simplify,enrichResult-method}
+\alias{simplify,compareClusterResult-method}
 \title{simplify method}
 \usage{
 \S4method{simplify}{enrichResult}(x, cutoff = 0.7, by = "p.adjust",
@@ -36,13 +36,12 @@ simplify output from enrichGO by removing redundancy of enriched GO terms
 
 simplify output from compareCluster by removing redundancy of enriched GO terms
 }
+\references{
+issue #28
+\url{https://github.com/GuangchuangYu/clusterProfiler/issues/28}
+}
 \author{
 Guangchuang Yu
 
 Guangchuang Yu
 }
-\references{
-issue #28
-\url{https://github.com/GuangchuangYu/clusterProfiler/issues/28}
-}
-

@@ -3,9 +3,9 @@
 \docType{class}
 \name{compareClusterResult-class}
 \alias{compareClusterResult-class}
-\alias{plot,compareClusterResult-method}
 \alias{show,compareClusterResult-method}
 \alias{summary,compareClusterResult-method}
+\alias{plot,compareClusterResult-method}
 \title{Class "compareClusterResult"
 This class represents the comparison result of gene clusters by GO
 categories at specific level or GO enrichment analysis.}
@@ -25,12 +25,12 @@ categories at specific level or GO enrichment analysis.
 
 \item{\code{.call}}{function call}
 }}
-\author{
-Guangchuang Yu \url{https://guangchuangyu.github.io}
-}
+
 \seealso{
 \code{\linkS4class{groupGOResult}}
   \code{\linkS4class{enrichResult}} \code{\link{compareCluster}}
 }
+\author{
+Guangchuang Yu \url{https://guangchuangyu.github.io}
+}
 \keyword{classes}
-

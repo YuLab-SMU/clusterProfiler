@@ -45,12 +45,11 @@ xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf,
 as.data.frame(xx.formula.twogroups)
 }
 }
-\author{
-Guangchuang Yu \url{https://guangchuangyu.github.io}
-}
 \seealso{
 \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
   \code{\link{enrichGO}}
 }
+\author{
+Guangchuang Yu \url{https://guangchuangyu.github.io}
+}
 \keyword{manip}
-

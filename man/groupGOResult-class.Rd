@@ -27,12 +27,12 @@ specific GO level.
 
 \item{\code{readable}}{logical flag of gene ID in symbol or not.}
 }}
-\author{
-Guangchuang Yu \url{http://ygc.name}
-}
+
 \seealso{
 \code{\linkS4class{compareClusterResult}}
   \code{\link{compareCluster}} \code{\link{groupGO}}
 }
+\author{
+Guangchuang Yu \url{http://ygc.name}
+}
 \keyword{classes}
-

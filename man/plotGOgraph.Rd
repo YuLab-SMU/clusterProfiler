@@ -26,10 +26,9 @@ GO DAG graph
 \description{
 plot GO graph
 }
-\author{
-Guangchuang Yu
-}
 \seealso{
 \link[topGO]{showSigOfNodes}
 }
-
+\author{
+Guangchuang Yu
+}

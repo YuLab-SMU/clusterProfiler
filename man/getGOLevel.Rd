@@ -20,4 +20,3 @@ query GOIDs at a specific level.
 \author{
 Guangchuang Yu \url{http://guangchuangyu.github.io}
 }
-

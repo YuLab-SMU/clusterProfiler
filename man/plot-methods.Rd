@@ -40,4 +40,3 @@ plot method generics
 \author{
 Guangchuang Yu \url{http://ygc.name}
 }
-

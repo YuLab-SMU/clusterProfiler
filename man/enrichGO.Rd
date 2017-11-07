@@ -51,11 +51,10 @@ categories after FDR control.
 	head(yy)
 }
 }
-\author{
-Guangchuang Yu \url{https://guangchuangyu.github.io}
-}
 \seealso{
 \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 }
+\author{
+Guangchuang Yu \url{https://guangchuangyu.github.io}
+}
 \keyword{manip}
-

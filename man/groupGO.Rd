@@ -6,7 +6,7 @@
 Given a vector of genes, this function will return the GO profile at
 a specific level.}
 \usage{
-groupGO(gene, OrgDb, keytype = "ENTREZID", ont = "CC", level = 2,
+groupGO(gene, OrgDb, keyType = "ENTREZID", ont = "CC", level = 2,
   readable = FALSE)
 }
 \arguments{
@@ -14,7 +14,7 @@ groupGO(gene, OrgDb, keytype = "ENTREZID", ont = "CC", level = 2,
 
 \item{OrgDb}{OrgDb}
 
-\item{keytype}{keytype of input gene}
+\item{keyType}{key type of input gene}
 
 \item{ont}{One of "MF", "BP", and "CC" subontologies.}
 
@@ -39,11 +39,10 @@ a specific level.
 	#plot(yy)
 
 }
-\author{
-Guangchuang Yu \url{http://ygc.name}
-}
 \seealso{
 \code{\link{groupGOResult-class}}, \code{\link{compareCluster}}
 }
+\author{
+Guangchuang Yu \url{http://ygc.name}
+}
 \keyword{manip}
-

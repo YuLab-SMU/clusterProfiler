@@ -37,4 +37,3 @@ KEGG Module Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment KEGG Module
 categories with FDR control.
 }
-

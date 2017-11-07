@@ -22,4 +22,3 @@ search kegg organism, listed in http://www.genome.jp/kegg/catalog/org_list.html
 \author{
 Guangchuang Yu
 }
-

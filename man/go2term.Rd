@@ -18,4 +18,3 @@ convert goid to descriptive term
 \author{
 Guangchuang Yu
 }
-

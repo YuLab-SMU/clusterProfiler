@@ -18,4 +18,3 @@ convert ko ID to descriptive name
 \author{
 guangchuang yu
 }
-

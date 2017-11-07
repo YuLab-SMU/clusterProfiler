@@ -2,8 +2,8 @@
 % Please edit documentation in R/clusterProfiler-package.R
 \docType{package}
 \name{clusterProfiler-package}
-\alias{clusterProfiler}
 \alias{clusterProfiler-package}
+\alias{clusterProfiler}
 \title{statistical analysis and visualization of functional profiles for genes and
 gene clusters
 The package implements methods to analyze and visualize functional profiles
@@ -14,4 +14,3 @@ gene clusters
 The package implements methods to analyze and visualize functional profiles
 of gene and gene clusters.
 }
-

@@ -26,4 +26,3 @@ Biological Id TRanslator
 \author{
 Guangchuang Yu
 }
-

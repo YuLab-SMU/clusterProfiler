@@ -18,4 +18,3 @@ parse gmt file to a data.frame
 \author{
 Guangchuang Yu
 }
-
