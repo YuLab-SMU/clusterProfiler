@@ -6,14 +6,6 @@ weight: 1
 ---
 
 
-## Plea to against BMC
-
-```{r echo=FALSE}
-blogdown::shortcode('tweet', '928836702998638592')
-```
-
-----
-
 
 <img src="https://raw.githubusercontent.com/Bioconductor/BiocStickers/master/clusterProfiler/clusterProfiler.png" height="200" align="right" />
 
