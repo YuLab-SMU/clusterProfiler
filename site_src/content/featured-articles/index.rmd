@@ -20,6 +20,10 @@ weight: 20
 
 [Gene co-expression analysis for functional classification and gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139). ***Brief Bioinform***. 2017.
 
+[RNA editing by ADAR1 leads to context-dependent transcriptome-wide changes in RNA secondary structure](http://dx.doi.org/10.1038/s41467-017-01458-8).
+***Nature Communications***. 2017, 8:1440.
+
+
 [Mediator subunit MED25 links the jasmonate receptor to transcriptionally active chromatin](http://dx.doi.org/10.1073/pnas.1710885114).
 ***PNAS***. 2017, 114(42):E8930-E8939.
 

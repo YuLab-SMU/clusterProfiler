@@ -6,14 +6,14 @@ clusterProfiler
 [![releaseVersion](https://img.shields.io/badge/release%20version-3.6.0-green.svg?style=flat)](https://bioconductor.org/packages/clusterProfiler)
 [![develVersion](https://img.shields.io/badge/devel%20version-3.7.0-green.svg?style=flat)](https://github.com/guangchuangyu/clusterProfiler)
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
-[![total](https://img.shields.io/badge/downloads-52848/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![total](https://img.shields.io/badge/downloads-53496/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 [![month](https://img.shields.io/badge/downloads-2168/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
 [![Project Status: Active - The project has reached a stable, usable
 state and is being actively
 developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![codecov](https://codecov.io/gh/GuangchuangYu/clusterProfiler/branch/master/graph/badge.svg)](https://codecov.io/gh/GuangchuangYu/clusterProfiler/)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2017--11--17-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2017--11--23-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
 [![commit](http://www.bioconductor.org/shields/commits/bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#svn_source)
 [![GitHub
 forks](https://img.shields.io/github/forks/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/network)
@@ -59,7 +59,7 @@ Journal of Integrative Biology. 2012, 16(5):284-287.
 ### Citation
 
 [![](https://img.shields.io/badge/2nd%20most%20cited%20paper-in%20OMICS-green.svg?style=flat)](http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi)
-[![citation](https://img.shields.io/badge/cited%20by-311-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
+[![citation](https://img.shields.io/badge/cited%20by-320-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=2349076811020942117)
 ![](https://img.shields.io/badge/ESI-Highly%20Cited%20Paper-green.svg?style=flat)
 
 <img src="docs/images/citation.png" width="890"/>
@@ -67,7 +67,7 @@ Journal of Integrative Biology. 2012, 16(5):284-287.
 ### Download stats
 
 [![download](http://www.bioconductor.org/shields/downloads/clusterProfiler.svg)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
-[![total](https://img.shields.io/badge/downloads-52848/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
+[![total](https://img.shields.io/badge/downloads-53496/total-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 [![month](https://img.shields.io/badge/downloads-2168/month-blue.svg?style=flat)](https://bioconductor.org/packages/stats/bioc/clusterProfiler)
 
 <img src="docs/images/dlstats.png" width="890"/>
