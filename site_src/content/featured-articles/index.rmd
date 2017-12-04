@@ -15,6 +15,14 @@ weight: 20
 
 ## <i class="fa fa-calendar"></i> 2017
 
+[Mutant-IDH1-dependent chromatin state reprogramming, reversibility, and persistence](http://dx.doi.org/10.1038/s41588-017-0001-z).
+***Nature Genetics***. 2017.
+
+
+[FMRFamide-like peptides expand the behavioral repertoire of a densely connected nervous system](http://dx.doi.org/10.1073/pnas.1710374114).
+**_PNAS_**. 2017.
+
+
 [Regeneration of the entire human epidermis using transgenic stem cells](https://www.nature.com/articles/nature24487).
 ***Nature***. 2017.
 
