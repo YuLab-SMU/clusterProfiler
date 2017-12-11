@@ -4,6 +4,7 @@
 \name{simplify}
 \alias{simplify}
 \alias{simplify,enrichResult-method}
+\alias{simplify}
 \alias{simplify,compareClusterResult-method}
 \title{simplify method}
 \usage{

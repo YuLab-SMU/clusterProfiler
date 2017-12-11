@@ -15,6 +15,9 @@ weight: 20
 
 ## <i class="fa fa-calendar"></i> 2017
 
+[Proteomic analysis of postsynaptic proteins in regions of the human neocortex](https://link.springer.com/article/10.1038/s41593-017-0025-9).
+
+
 [Mutant-IDH1-dependent chromatin state reprogramming, reversibility, and persistence](http://dx.doi.org/10.1038/s41588-017-0001-z).
 ***Nature Genetics***. 2017.
 

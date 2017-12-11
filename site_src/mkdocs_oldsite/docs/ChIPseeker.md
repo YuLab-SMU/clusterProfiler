@@ -1,1 +1,0 @@
-../mysoftware/ChIPseeker.md
