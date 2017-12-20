@@ -15,6 +15,13 @@ weight: 20
 
 ## <i class="fa fa-calendar"></i> 2017
 
+[EGFR feedback-inhibition by Ran-binding protein 6 is disrupted in cancer](http://dx.doi.org/10.1038/s41467-017-02185-w)
+**_Nature Communications_**.
+
+
+[The landscape of miRNA editing in animals and its impact on miRNA biogenesis and targeting](http://dx.doi.org/10.1101/gr.224386.117).
+**_Genome Research_**.
+
 [Proteomic analysis of postsynaptic proteins in regions of the human neocortex](https://link.springer.com/article/10.1038/s41593-017-0025-9).
 
 

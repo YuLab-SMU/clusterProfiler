@@ -4,7 +4,7 @@ PKGSRC  := $(shell basename `pwd`)
 
 all: rd readme check clean
 
-alldocs: rd readme mkdocs
+alldocs: rd readme site
 
 rd:
 	Rscript -e 'library(methods); devtools::document()'
