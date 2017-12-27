@@ -15,6 +15,9 @@ weight: 20
 
 ## <i class="fa fa-calendar"></i> 2017
 
+[Microbiome Influences Prenatal and Adult Microglia in a Sex-Specific Manner](https://www.sciencedirect.com/science/article/pii/S0092867417314320).
+**_Cell_**. 2017.
+
 [EGFR feedback-inhibition by Ran-binding protein 6 is disrupted in cancer](http://dx.doi.org/10.1038/s41467-017-02185-w)
 **_Nature Communications_**.
 
