@@ -13,33 +13,40 @@ weight: 20
 <img src="../images/citation.png" width="880"/>
 
 
-## <i class="fa fa-calendar"></i> 2017
+## <i class="fa fa-calendar"></i> 2018
+
+[The prolyl isomerase FKBP25 regulates microtubule polymerization impacting cell cycle progression and genomic stability](https://doi.org/10.1093/nar/gky008).
+**_Nucleic Acids Research_**. 2018
 
 [Microbiome Influences Prenatal and Adult Microglia in a Sex-Specific Manner](https://www.sciencedirect.com/science/article/pii/S0092867417314320).
-**_Cell_**. 2017.
+**_Cell_**. 2018.
 
-[EGFR feedback-inhibition by Ran-binding protein 6 is disrupted in cancer](http://dx.doi.org/10.1038/s41467-017-02185-w)
-**_Nature Communications_**.
-
+[Gene co-expression analysis for functional classification and gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139). ***Brief Bioinform***. 2018.
 
 [The landscape of miRNA editing in animals and its impact on miRNA biogenesis and targeting](http://dx.doi.org/10.1101/gr.224386.117).
-**_Genome Research_**.
+**_Genome Research_**.  2018, 28:132-143 .
 
-[Proteomic analysis of postsynaptic proteins in regions of the human neocortex](https://link.springer.com/article/10.1038/s41593-017-0025-9).
-
+[Proteomic analysis of postsynaptic proteins in regions of the human neocortex](http://dx.doi.org/10.1038/s41593-017-0025-9).
+**_Nature Neuroscience_**. 2018, 21(1):130-138.
 
 [Mutant-IDH1-dependent chromatin state reprogramming, reversibility, and persistence](http://dx.doi.org/10.1038/s41588-017-0001-z).
-***Nature Genetics***. 2017.
+***Nature Genetics***. 2018, 50:62–72.
+
+
+## <i class="fa fa-calendar"></i> 2017
+
+
+[EGFR feedback-inhibition by Ran-binding protein 6 is disrupted in cancer](http://dx.doi.org/10.1038/s41467-017-02185-w)
+**_Nature Communications_**. 2017, 8:2035.
 
 
 [FMRFamide-like peptides expand the behavioral repertoire of a densely connected nervous system](http://dx.doi.org/10.1073/pnas.1710374114).
-**_PNAS_**. 2017.
+**_PNAS_**. 2017, 114(50):E10726–E10735.
 
 
 [Regeneration of the entire human epidermis using transgenic stem cells](https://www.nature.com/articles/nature24487).
-***Nature***. 2017.
+***Nature***. 2017, 551:327–332.
 
-[Gene co-expression analysis for functional classification and gene–disease predictions](http://dx.doi.org/10.1093/bib/bbw139). ***Brief Bioinform***. 2017.
 
 [RNA editing by ADAR1 leads to context-dependent transcriptome-wide changes in RNA secondary structure](http://dx.doi.org/10.1038/s41467-017-01458-8).
 ***Nature Communications***. 2017, 8:1440.
