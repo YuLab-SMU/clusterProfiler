@@ -45,7 +45,7 @@ categories after FDR control.
 }
 \examples{
 \dontrun{
-    data(geneList)
+  data(geneList, package = "DOSE")
 	de <- names(geneList)[1:100]
 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
 	head(yy)

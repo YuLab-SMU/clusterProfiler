@@ -2,7 +2,7 @@ PKGNAME := $(shell sed -n "s/Package: *\([^ ]*\)/\1/p" DESCRIPTION)
 PKGVERS := $(shell sed -n "s/Version: *\([^ ]*\)/\1/p" DESCRIPTION)
 PKGSRC  := $(shell basename `pwd`)
 
-all: rd readme check clean
+all: rd check clean
 
 alldocs: rd readme site
 
@@ -61,8 +61,11 @@ update:
 	git merge origin/master
 
 
-push: update
+push:
 	git push upstream master;\
 	git push origin master
 
 
+release:
+	git checkout RELEASE_3_6;\
+	git fetch --all

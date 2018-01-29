@@ -178,44 +178,48 @@ setMethod("summary", signature(object="compareClusterResult"),
 
 
 
-##' @rdname plot-methods
-##' @aliases plot,compareClusterResult,ANY-method
-##' @param x compareClusterResult object
-##' @param type one of bar or dot
-##' @param colorBy one of pvalue or p.adjust
-##' @param showCategory category numbers
-##' @param by one of geneRatio, Percentage or count
-##' @param split ONTOLOGY or NULL
-##' @param includeAll logical
-##' @param font.size font size
-##' @param title figure title
-setMethod("plot", signature(x="compareClusterResult"),
-          function(x,
-                   type="dot",
-                   colorBy="p.adjust",
-                   showCategory=5,
-                   by="geneRatio",
-                   split=NULL,
-                   includeAll=TRUE,
-                   font.size=12,
-                   title=""
-                   ) {
-              if (type == "dot" || type == "dotplot") {
-                  dotplot(x,
-                          colorBy      = colorBy,
-                          showCategory = showCategory,
-                          by           = by,
-                          split        = split,
-                          includeAll   = includeAll,
-                          font.size    = font.size,
-                          title        = title
-                          )
-              } else if (type == "bar" || type == "barplot") {
-                  barplot.compareClusterResult(x, colorBy, showCategory, by, split = split, includeAll, font.size, title)
-              } else {
-                  stop("type should be one of 'dot' or 'bar'...")
-              }
-          })
+## ##' @rdname plot-methods
+## ##' @importFrom stats4 plot
+## ##' @importFrom enrichplot dotplot
+## ##' @aliases plot,compareClusterResult,ANY-method
+## ##' @param x compareClusterResult object
+## ##' @param type one of bar or dot
+## ##' @param colorBy one of pvalue or p.adjust
+## ##' @param showCategory category numbers
+## ##' @param by one of geneRatio, Percentage or count
+## ##' @param split ONTOLOGY or NULL
+## ##' @param includeAll logical
+## ##' @param font.size font size
+## ##' @param title figure title
+## setMethod("plot", signature(x="compareClusterResult"),
+##           function(x,
+##                    type="dot",
+##                    colorBy="p.adjust",
+##                    showCategory=5,
+##                    by="geneRatio",
+##                    split=NULL,
+##                    includeAll=TRUE,
+##                    font.size=12,
+##                    title=""
+##                    ) {
+##               if (type == "dot" || type == "dotplot") {
+##                   dotplot(x,
+##                           colorBy      = colorBy,
+##                           showCategory = showCategory,
+##                           by           = by,
+##                           split        = split,
+##                           includeAll   = includeAll,
+##                           font.size    = font.size,
+##                           title        = title
+##                           )
+##               } else if (type == "bar" || type == "barplot") {
+##                   barplot.compareClusterResult(x, colorBy, showCategory, by, split = split, includeAll, font.size, title)
+##               } else {
+##                   stop("type should be one of 'dot' or 'bar'...")
+##               }
+##           })
+
+
 ##' dot plot method
 ##'
 ##'
@@ -225,37 +229,40 @@ setMethod("plot", signature(x="compareClusterResult"),
 ##' @aliases dotplot,compareClusterResult,ANY-method
 ##' @param object compareClusterResult object
 ##' @param x x variable
-##' @param colorBy one of pvalue or p.adjust
+##' @param color one of pvalue or p.adjust
 ##' @param showCategory category numbers
 ##' @param by one of geneRatio, Percentage or count
 ##' @param split ONTOLOGY or NULL
 ##' @param includeAll logical
 ##' @param font.size font size
 ##' @param title figure title
-##' @importFrom DOSE dotplot
+##' @importFrom enrichplot dotplot
 ##' @exportMethod dotplot
 setMethod("dotplot", signature(object="compareClusterResult"),
           function(object,
                    x = ~Cluster,
-                   colorBy="p.adjust",
+                   color ="p.adjust",
                    showCategory=5,
-                   by="geneRatio",
                    split=NULL,
-                   includeAll=TRUE,
                    font.size=12,
-                   title=""
+                   title="",
+                   by="geneRatio",
+                   includeAll=TRUE
                    ) {
-              dotplot.compareClusterResult(object, x=x, colorBy, showCategory, by, includeAll,
-                                           split=split, font.size, title)
+              dotplot.compareClusterResult(object, x=x, colorBy = color,
+                                           showCategory = showCategory, by = by,
+                                           includeAll = includeAll,
+                                           split=split, font.size = font.size,
+                                           title = title)
           })
 
 
-barplot.compareClusterResult <- function(height, colorBy="p.adjust", showCategory=5,
+barplot.compareClusterResult <- function(height, color="p.adjust", showCategory=5,
                                          by="geneRatio", includeAll=TRUE, font.size=12, title="", ...) {
     ## use *height* to satisy barplot generic definition
     ## actually here is an compareClusterResult object.
     df <- fortify(height, showCategory=showCategory, by=by, includeAll=includeAll)
-    plotting.clusterProfile(df, type="bar", colorBy=colorBy, by=by, title=title, font.size=font.size)
+    plotting.clusterProfile(df, type="bar", colorBy=color, by=by, title=title, font.size=font.size)
 }
 
 

@@ -7,7 +7,7 @@ author: "\\
         School of Public Health, The University of Hong Kong"
 date: "`r Sys.Date()`"
 bibliography: clusterProfiler.bib
-csl: nature.csl
+biblio-style: apalike
 output:
   prettydoc::html_pretty:
     toc: true
@@ -31,7 +31,6 @@ knitr::opts_chunk$set(tidy = FALSE,
 library(DOSE)
 library(GO.db)
 library(org.Hs.eg.db)
-library(topGO)
 library(GSEABase)
 library(clusterProfiler)
 ```
@@ -75,9 +74,9 @@ library(clusterProfiler)
 + barplot
 + cnetplot
 + dotplot
-+ enrichMap
++ emapplot
 + gseaplot
-+ plotGOgraph (via [topGO](https://www.bioconductor.org/packages/topGO) package)
++ goplot
 + upsetplot
 
 
@@ -449,33 +448,30 @@ barplot(ego, showCategory=8)
 dotplot(ego)
 ```
 
-## enrichMap
+## emapplot
 
-Enrichment map can be viusalized by `enrichMap`, which also support results obtained from hypergeometric test and gene set enrichment analysis.
-```{r fig.cap="enrichment map of enrichment result", fig.align="center", fig.height=16, fig.width=16, eval=FALSE}
-enrichMap(ego)
+Enrichment map can be viusalized by `emapplot`, which also support results obtained from hypergeometric test and gene set enrichment analysis.
+```{r fig.cap="enrichment map of enrichment result", fig.align="center", fig.height=8, fig.width=8}
+emapplot(ego)
 ```
-
-![](figures/enrichMap.png)
 
 ## cnetplot
 
 In order to consider the potentially biological complexities in which a gene may belong to multiple annotation categories and provide information of numeric changes if available, we developed `cnetplot` function to extract the complex association.
 
-```{r fig.height=14, fig.width=14, eval=FALSE}
+```{r fig.height=8, fig.width=8}
 ## categorySize can be scaled by 'pvalue' or 'geneNum'
 cnetplot(ego, categorySize="pvalue", foldChange=geneList)
 ```
 
-![](figures/cnetplot.png)
 
 
-## plotGOgraph
+## goplot
 
-`plotGOgraph`, which is based on [topGO](https://www.bioconductor.org/packages/topGO), can accept output of `enrichGO` and visualized the enriched GO induced graph.
+`goplot` can accept output of `enrichGO` and visualized the enriched GO induced graph.
 
-```{r fig.height=12, fig.width=8}
-plotGOgraph(ego)
+```{r fig.height=12, fig.width=8, eval=FALSE}
+goplot(ego)
 ```
 
 ## gseaplot

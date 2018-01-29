@@ -7,27 +7,27 @@
 \title{dotplot}
 \usage{
 \S4method{dotplot}{compareClusterResult}(object, x = ~Cluster,
-  colorBy = "p.adjust", showCategory = 5, by = "geneRatio",
-  split = NULL, includeAll = TRUE, font.size = 12, title = "")
+  color = "p.adjust", showCategory = 5, split = NULL, font.size = 12,
+  title = "", by = "geneRatio", includeAll = TRUE)
 }
 \arguments{
 \item{object}{compareClusterResult object}
 
 \item{x}{x variable}
 
-\item{colorBy}{one of pvalue or p.adjust}
+\item{color}{one of pvalue or p.adjust}
 
 \item{showCategory}{category numbers}
 
-\item{by}{one of geneRatio, Percentage or count}
-
 \item{split}{ONTOLOGY or NULL}
-
-\item{includeAll}{logical}
 
 \item{font.size}{font size}
 
 \item{title}{figure title}
+
+\item{by}{one of geneRatio, Percentage or count}
+
+\item{includeAll}{logical}
 }
 \description{
 dot plot method

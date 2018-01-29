@@ -17,9 +17,6 @@
 ##' @param pool If ont='ALL', whether pool 3 GO sub-ontologies
 ##' @return An \code{enrichResult} instance.
 ##' @importClassesFrom DOSE enrichResult
-##' @importMethodsFrom DOSE show
-##' @importMethodsFrom DOSE summary
-##' @importMethodsFrom DOSE plot
 ##' @importFrom DOSE setReadable
 ##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
@@ -27,7 +24,7 @@
 ##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
 ##' @examples
 ##' \dontrun{
-##'     data(geneList)
+##'   data(geneList, package = "DOSE")
 ##' 	de <- names(geneList)[1:100]
 ##' 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
 ##' 	head(yy)

@@ -27,6 +27,7 @@ dotplot.compareClusterResult <- function(object, x=~Cluster, colorBy="p.adjust",
 fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRatio",
                                          split=NULL, includeAll=TRUE) {
     clProf.df <- as.data.frame(model)
+    .split <- split
 
     ## get top 5 (default) categories of each gene cluster.
     if (is.null(showCategory)) {
@@ -55,13 +56,14 @@ fortify.compareClusterResult <- function(model, data, showCategory=5, by="geneRa
 
         }
 
-        if (is.null(split)) {
-            result <- topN(clProf.df, showCategory)
-        } else {
-            lres <- split(clProf.df, as.character(clProf.df[, split]))
+        if (!is.null(.split) && .split %in% colnames(clProf.df)) {
+            lres <- split(clProf.df, as.character(clProf.df[, .split]))
             lres <- lapply(lres, topN, showCategory = showCategory)
             result <- do.call('rbind', lres)
+        } else {
+            result <- topN(clProf.df, showCategory)
         }
+
     }
 
     ID <- NULL

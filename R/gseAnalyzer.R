@@ -16,14 +16,11 @@
 ##' @param seed logical
 ##' @param by one of 'fgsea' or 'DOSE'
 ##' @importClassesFrom DOSE gseaResult
-##' @importMethodsFrom DOSE show
-##' @importMethodsFrom DOSE summary
-##' @importMethodsFrom DOSE plot
 ##' @export
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
 gseGO <- function(geneList,
-                  ont           = "BP", 
+                  ont           = "BP",
                   OrgDb,
                   keyType       = "ENTREZID",
                   exponent      = 1,
@@ -38,7 +35,7 @@ gseGO <- function(geneList,
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "CC", "MF", "ALL"))
-    
+
     GO_DATA <- get_GO_data(OrgDb, ont, keyType)
 
     res <-  GSEA_internal(geneList = geneList,
@@ -55,14 +52,14 @@ gseGO <- function(geneList,
 
     if (is.null(res))
         return(res)
-    
+
     res@organism <- get_organism(OrgDb)
     res@setType <- ont
     res@keytype <- keyType
-    
+
     if (ont == "ALL") {
         res <- add_GO_Ontology(res, GO_DATA)
-    } 
+    }
     return(res)
 }
 
@@ -100,7 +97,7 @@ gseMKEGG <- function(geneList,
                      seed = FALSE,
                      by = 'fgsea') {
 
-    species <- organismMapper(organism)    
+    species <- organismMapper(organism)
     KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)
 
     res <-  GSEA_internal(geneList = geneList,
@@ -118,11 +115,11 @@ gseMKEGG <- function(geneList,
     if (is.null(res))
         return(res)
 
-    
+
     res@organism <- species
     res@setType <- "MKEGG"
     res@keytype <- "UNKNOWN"
-    
+
     return(res)
 }
 
@@ -133,10 +130,6 @@ gseMKEGG <- function(geneList,
 ##' @title gseKEGG
 ##' @inheritParams gseMKEGG
 ##' @param use_internal_data logical, use KEGG.db or latest online KEGG data
-##' @importClassesFrom DOSE gseaResult
-##' @importMethodsFrom DOSE show
-##' @importMethodsFrom DOSE summary
-##' @importMethodsFrom DOSE plot
 ##' @export
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
@@ -175,11 +168,11 @@ gseKEGG <- function(geneList,
 
     if (is.null(res))
         return(res)
-    
+
     res@organism <- species
     res@setType <- "KEGG"
     res@keytype <- "UNKNOWN"
-    
+
     return(res)
 }
 

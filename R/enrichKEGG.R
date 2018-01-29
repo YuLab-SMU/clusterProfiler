@@ -15,10 +15,6 @@
 ##' @param use_internal_data logical, use KEGG.db or latest online KEGG data
 ##' @return A \code{enrichResult} instance.
 ##' @export
-##' @importClassesFrom DOSE enrichResult
-##' @importMethodsFrom DOSE show
-##' @importMethodsFrom DOSE summary
-##' @importMethodsFrom DOSE plot
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importClassesFrom methods data.frame
@@ -27,11 +23,11 @@
 ##' @keywords manip
 ##' @examples
 ##'
-##' 	data(geneList)
-##'     de <- names(geneList)[1:100]
+##' 	data(geneList, package='DOSE')
+##'   de <- names(geneList)[1:100]
 ##' 	yy <- enrichKEGG(de, pvalueCutoff=0.01)
 ##' 	head(yy)
-##' 	#plot(yy)
+##'
 ##'
 enrichKEGG <- function(gene,
                        organism          = "hsa",
