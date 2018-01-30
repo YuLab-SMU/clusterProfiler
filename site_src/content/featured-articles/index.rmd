@@ -15,6 +15,9 @@ weight: 20
 
 ## <i class="fa fa-calendar"></i> 2018
 
+[High-resolution spatiotemporal transcriptome mapping of tomato fruit development and ripening](https://doi.org/10.1038/s41467-017-02782-9).
+**_Nature Communications_**. 2018, 364.
+
 [The prolyl isomerase FKBP25 regulates microtubule polymerization impacting cell cycle progression and genomic stability](https://doi.org/10.1093/nar/gky008).
 **_Nucleic Acids Research_**. 2018
 

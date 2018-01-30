@@ -25,7 +25,8 @@
 ##' @importFrom ggplot2 theme_bw
 ##' @importFrom ggplot2 element_text
 ##' @importFrom ggplot2 ggtitle
-##' @importFrom ggplot2 scale_colour_gradient
+##' @importFrom ggplot2 scale_color_gradientn
+##' @importFrom ggplot2 guide_colorbar
 ##' @importFrom DOSE theme_dose
 ##' @author Guangchuang Yu \url{http://ygc.name}
 plotting.clusterProfile <- function(clProf.reshape.df,
@@ -66,8 +67,8 @@ plotting.clusterProfile <- function(clProf.reshape.df,
         if (any(colnames(clProf.reshape.df) == colorBy)) {
             p <- p +
                 geom_point() +
-                    aes_string(color=colorBy) +
-                        scale_colour_gradient(low="red", high="blue")
+                aes_string(color=colorBy) +
+                scale_color_gradientn(guide=guide_colorbar(reverse=TRUE), colors = enrichplot:::sig_palette)
         } else {
             p <- p + geom_point(colour="steelblue")
         }
