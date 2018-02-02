@@ -64,3 +64,6 @@ weight: 10
 
 + [An end to end workflow for differential gene expression using Affymetrix microarrays](http://f1000research.com/articles/5-1384/v1)
 + [RNAseq workflow](https://github.com/twbattaglia/RNAseq-workflow)
++ [recount workflow: Accessing over 70,000 human RNA-seq samples with Bioconductor](https://f1000research.com/articles/6-1558/)
++ [TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages](http://f1000research.com/articles/5-1542/)
+
