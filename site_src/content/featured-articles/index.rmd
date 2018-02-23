@@ -15,6 +15,15 @@ weight: 20
 
 ## <i class="fa fa-calendar"></i> 2018
 
+[Transcription factor Hoxb5 reprograms B cells into functional T lymphocytes](https://www.nature.com/articles/s41590-018-0046-x).
+**_Nature Immunology_**. 2018.
+
+[The effects of death and post-mortem cold ischemia on human tissue transcriptomes](https://www.nature.com/articles/s41467-017-02772-x).
+**_Nature Communications_**. 2018, 9:490.
+
+[Haploinsufficiency leads to neurodegeneration in C9ORF72 ALS/FTD human induced motor neurons](https://doi.org/10.1038/nm.4490).
+**_Nature Medicine_**. 2018
+
 [High-resolution spatiotemporal transcriptome mapping of tomato fruit development and ripening](https://doi.org/10.1038/s41467-017-02782-9).
 **_Nature Communications_**. 2018, 364.
 
@@ -34,6 +43,7 @@ weight: 20
 
 [Mutant-IDH1-dependent chromatin state reprogramming, reversibility, and persistence](http://dx.doi.org/10.1038/s41588-017-0001-z).
 ***Nature Genetics***. 2018, 50:62–72.
+
 
 
 ## <i class="fa fa-calendar"></i> 2017
