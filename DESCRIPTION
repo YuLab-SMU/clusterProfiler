@@ -15,11 +15,11 @@ Depends:
     R (>= 3.4.0)
 Imports:
     AnnotationDbi,
-    DOSE,
+    DOSE (>= 3.5.1),
     enrichplot (>= 0.99.7),
     ggplot2,
     GO.db,
-    GOSemSim (>= 2.0.0),
+    GOSemSim,
     magrittr,
     methods,
     plyr,
@@ -37,8 +37,10 @@ Suggests:
     prettydoc,
     pathview,
     ReactomePA,
-    testthat,
-    topGO
+    testthat
+Remotes:
+    GuangchuangYu/DOSE,
+    GuangchuangYu/enrichplot
 VignetteBuilder: knitr
 ByteCompile: true
 License: Artistic-2.0

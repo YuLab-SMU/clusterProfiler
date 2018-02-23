@@ -23,7 +23,7 @@ plotGOgraph <- function(x,
                         sigForAll=TRUE,
                         useFullNames=TRUE, ...) {
 
-    requireNamespace("topGO") || stop("package topGO is required")
+    ## requireNamespace("topGO") || stop("package topGO is required")
     groupGOTerms <- get_fun_from_pkg("topGO", "groupGOTerms")
     annFUN.gene2GO <- get_fun_from_pkg("topGO", "annFUN.gene2GO")
     showSigOfNodes <- get_fun_from_pkg("topGO", "showSigOfNodes")
