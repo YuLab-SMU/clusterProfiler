@@ -586,7 +586,7 @@ also other biological and biomedical ontologies, for instance,
 
 # Homepage
 
-Please visit [clusterProfiler homepage](https://guangchuangyu.github.io/clusterProfiler/) for more information.
+Please visit [clusterProfiler homepage](https://guangchuangyu.github.io/software/clusterProfiler/) for more information.
 
 
 # Session Information

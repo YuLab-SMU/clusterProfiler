@@ -7,10 +7,8 @@ html_preview: false
 
 
 ```{r echo=FALSE, results="hide", message=FALSE}
-library("ggplot2")
 library("badger")
 library("ypages")
-library("yyplot")
 ```
 
 
@@ -42,11 +40,11 @@ library("yyplot")
 This package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](http://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
 
 
-For details, please visit our project website, <https://guangchuangyu.github.io/clusterProfiler>.
+For details, please visit our project website, <https://guangchuangyu.github.io/software/clusterProfiler>.
 
-+ [Documentation](https://guangchuangyu.github.io/clusterProfiler/documentation/)
-+ [Featured Articles](https://guangchuangyu.github.io/clusterProfiler/featuredArticles/)
-+ [Feedback](https://guangchuangyu.github.io/clusterProfiler/#feedback)
++ [Documentation](https://guangchuangyu.github.io/software/clusterProfiler/documentation/)
++ [Featured Articles](https://guangchuangyu.github.io/software/clusterProfiler/featuredArticles/)
++ [Feedback](https://guangchuangyu.github.io/software/clusterProfiler/#feedback)
 
 
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/GuangchuangYu/clusterProfiler.svg?style=social)](https://twitter.com/intent/tweet?hashtags=clusterProfiler&url=http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118&screen_name=guangchuangyu)
@@ -72,13 +70,7 @@ __*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for compar
 
 
 
-```{r echo=F, comment=NA}
-p <- plot_citation_trend('DO5oG40AAAAJ', 'MLfJN-KU85MC')
-ggsave(p, file="docs/images/citation.png", width=8, height=4)
-```
-
-
-<img src="docs/images/citation.png" width="890"/>
+<img src="https://guangchuangyu.github.io/software/clusterProfiler/featured-articles/index_files/figure-html/citation-1.png" width="890"/>
 
 
 ### Download stats
@@ -88,15 +80,5 @@ ggsave(p, file="docs/images/citation.png", width=8, height=4)
 `r badge_bioc_download("clusterProfiler", "month", "blue")`
 
 
-```{r echo=F, message=F, comment=NA}
-x <- dlstats::bioc_stats("clusterProfiler")
-x <- x[-nrow(x), ] # last month data is not complete
-## txtplot(ggtree::Date2decimal(x$end), x$Nb_of_downloads, width=100, height=25)
-p <- ggplot(x, aes(end, Nb_of_distinct_IPs)) + geom_point() + geom_line() +
-    theme_minimal() +xlab(NULL) + ylab(NULL) +
-    labs(title="clusterProfiler", subtitle="Monthly download stats (distinct IPs)", caption="data from Bioconductor")
-ggsave(p, file="docs/images/dlstats.png", width=8, height=4)
-```
-
-<img src="docs/images/dlstats.png" width="890"/>
+<img src="https://guangchuangyu.github.io/software/clusterProfiler/index_files/figure-html/unnamed-chunk-2-1.png" width="890"/>
 

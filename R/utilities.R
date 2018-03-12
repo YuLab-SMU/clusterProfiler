@@ -28,7 +28,7 @@
 ##' @importFrom ggplot2 scale_color_gradientn
 ##' @importFrom ggplot2 guide_colorbar
 ##' @importFrom DOSE theme_dose
-##' @author Guangchuang Yu \url{http://ygc.name}
+##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
 plotting.clusterProfile <- function(clProf.reshape.df,
                                     x = ~Cluster,
                                     type = "dot",
