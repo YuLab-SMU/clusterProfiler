@@ -19,6 +19,7 @@ vignette: >
   %\VignetteIndexEntry{Statistical analysis and visualization of functional profiles for genes and gene clusters}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r style, echo=FALSE, results="asis", message=FALSE}
@@ -584,10 +585,22 @@ also other biological and biomedical ontologies, for instance,
 [meshes](https://www.bioconductor.org/packages/meshes) and `enrichPathway` from [ReactomePA](https://www.bioconductor.org/packages/ReactomePA) work fine with `compareCluster` for comparing biological themes in disease and reactome pathway perspective. More details can be found in the vignettes of [DOSE](https://www.bioconductor.org/packages/DOSE)[@yu_dose_2015] and [ReactomePA](https://www.bioconductor.org/packages/ReactomePA).
 
 
-# Homepage
+# Need helps?
 
-Please visit [clusterProfiler homepage](https://guangchuangyu.github.io/software/clusterProfiler/) for more information.
 
+If you have questions/issues, please visit
+[clusterProfiler homepage](https://guangchuangyu.github.io/software/clusterProfiler/) first.
+Your problems are mostly documented. If you think you found a bug, please follow
+[the guide](https://guangchuangyu.github.io/2016/07/how-to-bug-author/) and
+provide a reproducible example to be posted
+on
+[github issue tracker](https://github.com/GuangchuangYu/clusterProfiler/issues).
+For questions, please post
+to [Bioconductor support site](https://support.bioconductor.org/) and tag your
+post with *clusterProfiler*.
+
+
+For Chinese user, you can follow me on [WeChat (微信)](https://guangchuangyu.github.io/blog_images/biobabble.jpg).
 
 # Session Information
 

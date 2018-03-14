@@ -29,5 +29,5 @@ ggplot object
 Internal plot function for plotting compareClusterResult
 }
 \author{
-Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://guangchuangyu.github.io}
 }

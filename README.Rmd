@@ -19,13 +19,12 @@ library("ypages")
 `r badge_bioc_release("clusterProfiler", "green")`
 `r badge_devel("guangchuangyu/clusterProfiler", "green")`
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
-`r badge_bioc_download("clusterProfiler", "total", "blue")`
-`r badge_bioc_download("clusterProfiler", "month", "blue")`
+[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/GuangchuangYu)
+
 
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![codecov](https://codecov.io/gh/GuangchuangYu/clusterProfiler/branch/master/graph/badge.svg)](https://codecov.io/gh/GuangchuangYu/clusterProfiler/)
 [![Last-changedate](https://img.shields.io/badge/last%20change-`r gsub('-', '--', Sys.Date())`-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
-[![commit](http://www.bioconductor.org/shields/commits/bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#svn_source)
 [![GitHub forks](https://img.shields.io/github/forks/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/network)
 [![GitHub stars](https://img.shields.io/github/stars/GuangchuangYu/clusterProfiler.svg)](https://github.com/GuangchuangYu/clusterProfiler/stargazers)
 
@@ -47,7 +46,10 @@ For details, please visit our project website, <https://guangchuangyu.github.io/
 + [Feedback](https://guangchuangyu.github.io/software/clusterProfiler/#feedback)
 
 
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/GuangchuangYu/clusterProfiler.svg?style=social)](https://twitter.com/intent/tweet?hashtags=clusterProfiler&url=http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118&screen_name=guangchuangyu)
+[![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?hashtags=clusterProfiler&url=http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118&screen_name=guangchuangyu)
+`r badger::badge_custom("follow me on", "微信", "green", "https://guangchuangyu.github.io/blog_images/biobabble.jpg")`
+`r badger::badge_custom("打赏", "支付宝/微信", "green", "https://guangchuangyu.github.io/blog_images/pay_qrcode.png")`
+
 
 ------------------------------------------------------------------------
 
