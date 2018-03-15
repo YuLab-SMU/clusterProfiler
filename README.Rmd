@@ -67,7 +67,6 @@ __*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for compar
 
 `r badge_custom("2nd most cited paper", "in OMICS", "green",
   "http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi")`
-`r badge_citation("MLfJN-KU85MC", "2349076811020942117", "green")`
 `r badge_custom("ESI", "Highly Cited Paper", "green")`
 
 
