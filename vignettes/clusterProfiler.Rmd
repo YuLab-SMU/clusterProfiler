@@ -286,6 +286,10 @@ ego3 <- gseGO(geneList     = geneList,
 GSEA use permutation test, user can set _nPerm_ for number of permutations. Only gene Set size in `[minGSSize, maxGSSize]` will be tested.
 
 
+If you have issues in preparing your own `geneList`, please refer to the [wiki
+page](https://github.com/GuangchuangYu/DOSE/wiki/how-to-prepare-your-own-geneList).
+
+
 ## GO Semantic Similarity Analysis
 
 GO semantic similarity can be calculated by [GOSemSim](https://www.bioconductor.org/packages/GOSemSim)[@yu2010]. We can use it to cluster genes/proteins into different clusters based on their functional similarity and can also use it to measure the similarities among GO terms to reduce the redundancy of GO enrichment results.
