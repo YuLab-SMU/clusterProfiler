@@ -4,6 +4,12 @@ as.data.frame.compareClusterResult <- function(x, ...) {
     as.data.frame(x@compareClusterResult, ...)
 }
 
+##' @method as.data.frame groupGOResult
+##' @export
+as.data.frame.groupGOResult <- function(x, ...) {
+    as.data.frame(x@result, ...)
+}
+
 ##' @method [ compareClusterResult
 ##' @export
 `[.compareClusterResult` <- function(x, i, j) {
