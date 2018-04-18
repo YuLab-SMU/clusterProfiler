@@ -320,6 +320,8 @@ dropGO <- function(x, level=NULL, term=NULL) {
         stop("x should be an instance of 'enrichResult' or 'compareClusterResult' ...")
     }
 
+    res <- as.data.frame(x)
+
     if (!is.null(level)) {
         if (is(x, "enrichResult")) {
             ont <- x@ontology
@@ -328,7 +330,7 @@ dropGO <- function(x, level=NULL, term=NULL) {
             if (is.null(ont)) {
                 ## should be "MF", default value of enrichGO
                 ## it's safe to determine from the output
-                ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology
+                ont <- res$ID[1] %>% GOTERM[[.]] %>% Ontology
             }
 
         }
@@ -340,11 +342,9 @@ dropGO <- function(x, level=NULL, term=NULL) {
         return(x)
 
     if (is(x, "enrichResult")) {
-        res <- x@result
         res <- res[!res$ID %in% term, ]
         x@result <- res
     } else {
-        res <- x@compareClusterResult
         res <- res[!res$ID %in% term,]
         x@compareClusterResult <- res
     }

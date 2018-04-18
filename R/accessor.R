@@ -13,7 +13,8 @@ as.data.frame.groupGOResult <- function(x, ...) {
 ##' @method [ compareClusterResult
 ##' @export
 `[.compareClusterResult` <- function(x, i, j) {
-              x@result[i,j]
+    result <- as.data.frame(x)
+    result[i,j]
 }
 
 ##' @method [[ compareClusterResult
