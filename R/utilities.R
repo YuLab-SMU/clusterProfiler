@@ -25,10 +25,10 @@
 ##' @importFrom ggplot2 theme_bw
 ##' @importFrom ggplot2 element_text
 ##' @importFrom ggplot2 ggtitle
-##' @importFrom ggplot2 scale_color_gradientn
+##' @importFrom ggplot2 scale_color_continuous
 ##' @importFrom ggplot2 guide_colorbar
 ##' @importFrom DOSE theme_dose
-##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
 plotting.clusterProfile <- function(clProf.reshape.df,
                                     x = ~Cluster,
                                     type = "dot",
@@ -68,7 +68,8 @@ plotting.clusterProfile <- function(clProf.reshape.df,
             p <- p +
                 geom_point() +
                 aes_string(color=colorBy) +
-                scale_color_gradientn(guide=guide_colorbar(reverse=TRUE), colors = enrichplot:::sig_palette)
+                scale_color_continuous(low="red", high="blue", guide=guide_colorbar(reverse=TRUE))
+            ## scale_color_gradientn(guide=guide_colorbar(reverse=TRUE), colors = enrichplot:::sig_palette)
         } else {
             p <- p + geom_point(colour="steelblue")
         }
