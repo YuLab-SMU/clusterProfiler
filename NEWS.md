@@ -1,3 +1,7 @@
+# clusterProfiler 3.9.1.001
+
++ re-export `DOSE::gsfilter` and `DOSE::setReadable` (2018-05-25, Fri)
+
 # clusterProfiler 3.9.1
 
 + change color scheme of dotplot of compareClusterResult back to red->purple

@@ -9,6 +9,14 @@ DOSE::geneID
 ##' @export
 DOSE::geneInCategory
 
+##' @importFrom DOSE gsfilter
+##' @export
+DOSE::gsfilter
+
+##' @importFrom DOSE setReadable
+##' @export
+DOSE::setReadable
+
 build_Anno <- DOSE:::build_Anno
 get_organism <- DOSE:::get_organism
 

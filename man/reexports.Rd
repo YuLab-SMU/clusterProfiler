@@ -7,6 +7,10 @@
 \alias{reexports}
 \alias{geneInCategory}
 \alias{reexports}
+\alias{gsfilter}
+\alias{reexports}
+\alias{setReadable}
+\alias{reexports}
 \alias{cnetplot}
 \alias{reexports}
 \alias{dotplot}
@@ -27,7 +31,7 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{DOSE}{\code{\link[DOSE]{geneID}}, \code{\link[DOSE]{geneInCategory}}}
+  \item{DOSE}{\code{\link[DOSE]{geneID}}, \code{\link[DOSE]{geneInCategory}}, \code{\link[DOSE]{gsfilter}}, \code{\link[DOSE]{setReadable}}}
 
   \item{enrichplot}{\code{\link[enrichplot]{cnetplot}}, \code{\link[enrichplot]{dotplot}}, \code{\link[enrichplot]{emapplot}}, \code{\link[enrichplot]{goplot}}, \code{\link[enrichplot]{gseaplot}}, \code{\link[enrichplot]{heatplot}}, \code{\link[enrichplot]{ridgeplot}}}
 }}
