@@ -1,4 +1,4 @@
-# clusterProfiler 3.9.1.001
+# clusterProfiler 3.9.2
 
 + re-export `DOSE::gsfilter` and `DOSE::setReadable` (2018-05-25, Fri)
 
