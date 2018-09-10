@@ -29,6 +29,8 @@ knitr::opts_chunk$set(tidy = FALSE,
 ```
 
 ```{r echo=FALSE, results='hide', message=FALSE}
+library(dplyr)
+library(tidyr)
 library(DOSE)
 library(GO.db)
 library(org.Hs.eg.db)
@@ -423,6 +425,28 @@ head(egmt)
 egmt2 <- GSEA(geneList, TERM2GENE=c5, verbose=FALSE)
 head(egmt2)
 ```
+
+## WikiPathways analysis
+
+In contrast to KEGG, [WikiPathways](https://www.wikipathways.org) is a continuously updated pathway database curated by a community of researchers and pathway enthusiasts. WikiPathways produces monthly releases of gmt files for supported organisms at [data.wikipathways.org](http://data.wikipathways.org/current/gmt/). Download the appropriate gmt file and then generate `TERM2GENE` and `TERM2NAME` to use `enricher` and `GSEA` functions. 
+
+```{r}
+wpgmtfile <- system.file("extdata", "wikipathways-20180810-gmt-Homo_sapiens.gmt", package="clusterProfiler")
+wp2gene <- read.gmt(wpgmtfile)
+wp2gene <- wp2gene %>% tidyr::separate(ont, c("name","version","wpid","org"), "%")
+wpid2gene <- wp2gene %>% dplyr::select(wpid, gene) #TERM2GENE
+wpid2name <- wp2gene %>% dplyr::select(wpid, name) #TERM2NAME
+
+ewp <- enricher(gene, TERM2GENE = wpid2gene, TERM2NAME = wpid2name)
+ewp <- setReadable(ewp, org.Hs.eg.db, keytype = "ENTREZID")
+head(ewp)
+
+ewp2 <- GSEA(geneList, TERM2GENE = wpid2gene, TERM2NAME = wpid2name, verbose=FALSE)
+ewp2 <- setReadable(ewp2, org.Hs.eg.db, keytype = "ENTREZID")
+head(ewp2)
+```
+
+As an alternative to manually downloading gmt files, install the [rWikiPathways package](https://bioconductor.org/packages/release/bioc/html/rWikiPathways.html) to gain scripting access to the latest gmt files using the `downloadPathwayArchive` function.
 
 # Functional analysis of NGS data
 
