@@ -4,25 +4,15 @@
 \name{reexports}
 \alias{reexports}
 \alias{geneID}
-\alias{reexports}
 \alias{geneInCategory}
-\alias{reexports}
 \alias{gsfilter}
-\alias{reexports}
 \alias{setReadable}
-\alias{reexports}
 \alias{cnetplot}
-\alias{reexports}
 \alias{dotplot}
-\alias{reexports}
 \alias{emapplot}
-\alias{reexports}
 \alias{goplot}
-\alias{reexports}
 \alias{gseaplot}
-\alias{reexports}
 \alias{heatplot}
-\alias{reexports}
 \alias{ridgeplot}
 \title{Objects exported from other packages}
 \keyword{internal}

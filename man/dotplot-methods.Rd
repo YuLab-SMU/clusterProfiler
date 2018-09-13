@@ -7,8 +7,8 @@
 \title{dotplot}
 \usage{
 \S4method{dotplot}{compareClusterResult}(object, x = ~Cluster,
-  color = "p.adjust", showCategory = 5, split = NULL, font.size = 12,
-  title = "", by = "geneRatio", includeAll = TRUE)
+  color = "p.adjust", showCategory = 5, split = NULL,
+  font.size = 12, title = "", by = "geneRatio", includeAll = TRUE)
 }
 \arguments{
 \item{object}{compareClusterResult object}

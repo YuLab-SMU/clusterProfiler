@@ -5,9 +5,9 @@
 \title{gseKEGG}
 \usage{
 gseKEGG(geneList, organism = "hsa", keyType = "kegg", exponent = 1,
-  nPerm = 1000, minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", verbose = TRUE, use_internal_data = FALSE,
-  seed = FALSE, by = "fgsea")
+  nPerm = 1000, minGSSize = 10, maxGSSize = 500,
+  pvalueCutoff = 0.05, pAdjustMethod = "BH", verbose = TRUE,
+  use_internal_data = FALSE, seed = FALSE, by = "fgsea")
 }
 \arguments{
 \item{geneList}{order ranked geneList}

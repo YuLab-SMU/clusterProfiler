@@ -5,7 +5,8 @@
 \title{plotting-clusterProfile}
 \usage{
 plotting.clusterProfile(clProf.reshape.df, x = ~Cluster, type = "dot",
-  colorBy = "p.adjust", by = "geneRatio", title = "", font.size = 12)
+  colorBy = "p.adjust", by = "geneRatio", title = "",
+  font.size = 12)
 }
 \arguments{
 \item{clProf.reshape.df}{data frame of compareCluster result}

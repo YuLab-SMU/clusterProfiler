@@ -6,7 +6,8 @@
 works with enrichResult object to visualize enriched KEGG pathway}
 \usage{
 viewKEGG(obj, pathwayID, foldChange, color.low = "green",
-  color.high = "red", kegg.native = TRUE, out.suffix = "clusterProfiler")
+  color.high = "red", kegg.native = TRUE,
+  out.suffix = "clusterProfiler")
 }
 \arguments{
 \item{obj}{enrichResult object}
