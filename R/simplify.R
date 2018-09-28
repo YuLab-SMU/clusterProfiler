@@ -32,6 +32,37 @@ setMethod("simplify", signature(x="enrichResult"),
           }
           )
 
+##' simplify output from enrichGO by removing redundancy of enriched GO terms
+##'
+##'
+##' @name simplify
+##' @docType methods
+##' @rdname simplify-methods
+##' @title simplify method
+##' @param x output of gseGO
+##' @param cutoff similarity cutoff
+##' @param by feature to select representative term, selected by 'select_fun' function
+##' @param select_fun function to select feature passed by 'by' parameter
+##' @param measure method to measure similarity
+##' @param semData GOSemSimDATA object
+##' @return updated gseaResult object
+##' @exportMethod simplify
+##' @references issue #162
+##' \url{https://github.com/GuangchuangYu/clusterProfiler/issues/162}
+##' @aliases simplify,gseaResult-method
+##' @author Gwang-Jin Kim
+setMethod("simplify", signature(x="gseaResult"),
+          function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData=NULL) {
+            if (!x@setType %in% c("BP", "MF", "CC"))
+              stop("simplify only applied to output from enrichGO...")
+                    
+                    
+            x@result %<>% simplify_internal(., cutoff, by, select_fun,
+                                            measure, x@setType, semData)
+            return(x)
+          }
+)
+
 ##' @importFrom GOSemSim mgoSim
 ##' @importFrom GOSemSim godata
 ##' @importFrom tidyr gather
