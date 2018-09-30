@@ -1,10 +1,8 @@
 ---
 title: "Statistical analysis and visualization of functional profiles for genes and gene clusters"
-author: "\\
+author: "Guangchuang Yu\\
 
-	Guangchuang Yu \\
-
-        School of Public Health, The University of Hong Kong"
+        School of Basic Medical Sciences, Southern Medical University"
 date: "`r Sys.Date()`"
 bibliography: clusterProfiler.bib
 biblio-style: apalike
@@ -628,7 +626,6 @@ to [Bioconductor support site](https://support.bioconductor.org/) and tag your
 post with *clusterProfiler*.
 
 
-For Chinese user, you can follow me on [WeChat (微信)](https://guangchuangyu.github.io/blog_images/biobabble.jpg).
 
 # Session Information
 
