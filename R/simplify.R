@@ -32,7 +32,7 @@ setMethod("simplify", signature(x="enrichResult"),
           }
           )
 
-##' simplify output from enrichGO by removing redundancy of enriched GO terms
+##' simplify output from gseGO by removing redundancy of enriched GO terms
 ##'
 ##'
 ##' @name simplify
