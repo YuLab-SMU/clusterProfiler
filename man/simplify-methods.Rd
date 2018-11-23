@@ -53,7 +53,7 @@ updated compareClusterResult object
 \description{
 simplify output from enrichGO by removing redundancy of enriched GO terms
 
-simplify output from enrichGO by removing redundancy of enriched GO terms
+simplify output from gseGO by removing redundancy of enriched GO terms
 
 simplify output from compareCluster by removing redundancy of enriched GO terms
 }
