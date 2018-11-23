@@ -12,7 +12,7 @@ gseGO(geneList, ont = "BP", OrgDb, keyType = "ENTREZID",
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{ont}{one of "BP", "MF", "CC" or "GO"}
+\item{ont}{one of "BP", "MF", and "CC" subontologies, or "ALL" for all three.}
 
 \item{OrgDb}{OrgDb}
 
@@ -35,6 +35,8 @@ gseGO(geneList, ont = "BP", OrgDb, keyType = "ENTREZID",
 \item{seed}{logical}
 
 \item{by}{one of 'fgsea' or 'DOSE'}
+
+\item{ont}{one of "BP", "MF", and "CC" subontologies, or "ALL" for all three.}
 }
 \value{
 gseaResult object

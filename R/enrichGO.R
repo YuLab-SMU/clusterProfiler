@@ -6,7 +6,7 @@
 ##' @param gene a vector of entrez gene id.
 ##' @param OrgDb OrgDb
 ##' @param keyType keytype of input gene
-##' @param ont One of "MF", "BP", and "CC" subontologies.
+##' @param ont One of "BP", "MF", and "CC" subontologies, or "ALL" for all three.
 ##' @param pvalueCutoff Cutoff value of pvalue.
 ##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes
@@ -42,7 +42,7 @@ enrichGO <- function(gene,
                      readable=FALSE, pool=FALSE) {
 
     ont %<>% toupper
-    ont <- match.arg(ont, c("BP", "CC", "MF", "ALL"))
+    ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
     GO_DATA <- get_GO_data(OrgDb, ont, keyType)
 
     if (missing(universe))

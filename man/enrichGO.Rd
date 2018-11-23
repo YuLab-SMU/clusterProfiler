@@ -18,7 +18,7 @@ enrichGO(gene, OrgDb, keyType = "ENTREZID", ont = "MF",
 
 \item{keyType}{keytype of input gene}
 
-\item{ont}{One of "MF", "BP", and "CC" subontologies.}
+\item{ont}{One of "BP", "MF", and "CC" subontologies, or "ALL" for all three.}
 
 \item{pvalueCutoff}{Cutoff value of pvalue.}
 
