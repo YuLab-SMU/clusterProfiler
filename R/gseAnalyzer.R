@@ -4,7 +4,6 @@
 ##' @title gseGO
 ##' @param geneList order ranked geneList
 ##' @param ont one of "BP", "MF", and "CC" subontologies, or "ALL" for all three.
-##' @param ont one of "BP", "MF", and "CC" subontologies, or "ALL" for all three.
 ##' @param OrgDb OrgDb
 ##' @param keyType keytype of gene
 ##' @param exponent weight of each step

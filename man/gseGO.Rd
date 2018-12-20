@@ -35,8 +35,6 @@ gseGO(geneList, ont = "BP", OrgDb, keyType = "ENTREZID",
 \item{seed}{logical}
 
 \item{by}{one of 'fgsea' or 'DOSE'}
-
-\item{ont}{one of "BP", "MF", and "CC" subontologies, or "ALL" for all three.}
 }
 \value{
 gseaResult object
