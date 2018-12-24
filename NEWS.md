@@ -1,3 +1,12 @@
+# clusterProfiler 3.11.1
+
++ `asis` parameter in `[.compareClusterResult` (2018-12-24, Mon)
+  - <https://github.com/GuangchuangYu/enrichplot/issues/17>
+
+# clusterProfiler 3.10.0
+
++ Bioconductor 3.8 release
+
 # clusterProfiler 3.9.2
 
 + re-export `DOSE::gsfilter` and `DOSE::setReadable` (2018-05-25, Fri)

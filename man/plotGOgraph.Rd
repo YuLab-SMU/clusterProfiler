@@ -26,9 +26,6 @@ GO DAG graph
 \description{
 plot GO graph
 }
-\seealso{
-\link[topGO]{showSigOfNodes}
-}
 \author{
 Guangchuang Yu
 }

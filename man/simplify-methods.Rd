@@ -30,30 +30,14 @@
 \item{measure}{method to measure similarity}
 
 \item{semData}{GOSemSimDATA object}
-
-\item{x}{output of gseGO}
-
-\item{cutoff}{similarity cutoff}
-
-\item{by}{feature to select representative term, selected by 'select_fun' function}
-
-\item{select_fun}{function to select feature passed by 'by' parameter}
-
-\item{measure}{method to measure similarity}
-
-\item{semData}{GOSemSimDATA object}
 }
 \value{
 updated enrichResult object
 
-updated gseaResult object
-
 updated compareClusterResult object
 }
 \description{
-simplify output from enrichGO by removing redundancy of enriched GO terms
-
-simplify output from gseGO by removing redundancy of enriched GO terms
+simplify output from enrichGO and gseGO by removing redundancy of enriched GO terms
 
 simplify output from compareCluster by removing redundancy of enriched GO terms
 }
@@ -67,7 +51,7 @@ issue #162
 \author{
 Guangchuang Yu
 
-Gwang-Jin Kim
+Gwang-Jin Kim and Guangchuang Yu
 
 Guangchuang Yu
 }

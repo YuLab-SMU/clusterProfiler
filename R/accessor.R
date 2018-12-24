@@ -12,9 +12,13 @@ as.data.frame.groupGOResult <- function(x, ...) {
 
 ##' @method [ compareClusterResult
 ##' @export
-`[.compareClusterResult` <- function(x, i, j) {
+`[.compareClusterResult` <- function(x, i, j, asis, ...) {
     result <- as.data.frame(x)
-    result[i,j]
+    y <- result[i,j, ...]
+    if (!asis)
+        return(y)
+    x@compareClusterResult <- y
+    return(x)
 }
 
 ##' @method [[ compareClusterResult
