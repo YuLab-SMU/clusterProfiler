@@ -31,12 +31,10 @@ Imports:
 Suggests:
     AnnotationHub,
     dplyr,
-    GSEABase,
     KEGG.db,
     knitr,
     org.Hs.eg.db,
     prettydoc,
-    pathview,
     ReactomePA,
     testthat
 VignetteBuilder: knitr
