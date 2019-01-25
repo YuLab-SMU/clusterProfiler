@@ -25,8 +25,9 @@ setMethod("simplify", signature(x="enrichResult"),
                   stop("simplify only applied to output from gsegO and enrichGO...")
 
 
-              x@result %<>% simplify_internal(., cutoff, by, select_fun,
-                                              measure, x@ontology, semData)
+              x@result  <-  simplify_internal(as.data.frame(x), cutoff,
+                                              by, select_fun, measure,
+                                              x@ontology, semData)
 
               return(x)
           }
@@ -43,8 +44,9 @@ setMethod("simplify", signature(x="gseaResult"),
             if (!x@setType %in% c("BP", "MF", "CC"))
               stop("simplify only applied to output from gseGO and enrichGO...")
 
-            x@result %<>% simplify_internal(., cutoff, by, select_fun,
-                                            measure, x@setType, semData)
+            x@result  <- simplify_internal(as.data.frame(x), cutoff,
+                                            by, select_fun, measure,
+                                            x@setType, semData)
             return(x)
           }
 )

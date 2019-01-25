@@ -115,8 +115,9 @@ get_GO_data <- function(OrgDb, ont, keytype) {
 
         if (org == get_organism(OrgDb) &&
             keytype == kt &&
-            exists("goAnno", envir=GO_Env, inherits=FALSE) &&
-            exists("GO2TERM", envir=GO_Env, inherits=FALSE)){
+            exists("goAnno", envir=GO_Env, inherits=FALSE)) {
+            ## https://github.com/GuangchuangYu/clusterProfiler/issues/182
+            ## && exists("GO2TERM", envir=GO_Env, inherits=FALSE)){
 
             use_cached <- TRUE
         }
