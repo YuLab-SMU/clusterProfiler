@@ -70,7 +70,7 @@ __*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for compar
 
 
 
-<img src="https://guangchuangyu.github.io/software/clusterProfiler/featured-articles/index_files/figure-html/citation-1.png" width="890"/>
+<img src="https://guangchuangyu.github.io/software/citation_trend/clusterProfiler.png" width="890"/>
 
 
 ### Download stats
@@ -80,5 +80,5 @@ __*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for compar
 `r badge_bioc_download("clusterProfiler", "month", "blue")`
 
 
-<img src="https://guangchuangyu.github.io/software/clusterProfiler/index_files/figure-html/unnamed-chunk-2-1.png" width="890"/>
+<img src="https://guangchuangyu.github.io/software/dlstats/clusterProfiler.png" width="890"/>
 

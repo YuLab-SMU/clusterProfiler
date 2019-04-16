@@ -10,7 +10,7 @@ rd:
 	Rscript -e 'library(methods); devtools::document()'
 
 readme:
-	Rscript -e 'rmarkdown::render("README.Rmd")'
+	Rscript -e 'rmarkdown::render("README.Rmd", encoding="UTF-8")'
 
 build:
 	cd ..;\
