@@ -11,17 +11,17 @@ enricher(gene, pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
 \arguments{
 \item{gene}{a vector of gene id}
 
-\item{pvalueCutoff}{pvalue cutoff}
+\item{pvalueCutoff}{pvalue cutoff on enrichment tests to report}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
-\item{universe}{background genes}
+\item{universe}{background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.}
 
 \item{minGSSize}{minimal size of genes annotated for testing}
 
 \item{maxGSSize}{maximal size of genes annotated for testing}
 
-\item{qvalueCutoff}{qvalue cutoff}
+\item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
 
 \item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene}
 

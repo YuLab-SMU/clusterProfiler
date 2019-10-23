@@ -20,13 +20,13 @@ enrichGO(gene, OrgDb, keyType = "ENTREZID", ont = "MF",
 
 \item{ont}{One of "BP", "MF", and "CC" subontologies, or "ALL" for all three.}
 
-\item{pvalueCutoff}{Cutoff value of pvalue.}
+\item{pvalueCutoff}{pvalue cutoff on enrichment tests to report}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
-\item{universe}{background genes}
+\item{universe}{background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.}
 
-\item{qvalueCutoff}{qvalue cutoff}
+\item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
 
 \item{minGSSize}{minimal size of genes annotated by Ontology term for testing.}
 

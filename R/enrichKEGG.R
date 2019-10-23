@@ -6,12 +6,9 @@
 ##' @param gene a vector of entrez gene id.
 ##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
-##' @param pvalueCutoff Cutoff value of pvalue.
-##' @param pAdjustMethod one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
-##' @param universe background genes
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param maxGSSize maximal size of genes annotated for testing
-##' @param qvalueCutoff qvalue cutoff
+##' @inheritParams enricher
 ##' @param use_internal_data logical, use KEGG.db or latest online KEGG data
 ##' @return A \code{enrichResult} instance.
 ##' @export
