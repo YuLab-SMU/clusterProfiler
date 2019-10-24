@@ -4,13 +4,10 @@
 ##' @title enrichDAVID
 ##' @param gene input gene
 ##' @param idType id type
-##' @param universe background genes
 ##' @param minGSSize minimal size of genes annotated for testing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param annotation david annotation
-##' @param pvalueCutoff pvalueCutoff
-##' @param pAdjustMethod one of "BH" and "bonferroni"
-##' @param qvalueCutoff qvalutCutoff
+##' @inheritParams enricher
 ##' @param species species
 ##' @param david.user david user
 ##' @return A \code{enrichResult} instance

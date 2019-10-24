@@ -13,7 +13,7 @@ enrichDAVID(gene, idType = "ENTREZ_GENE_ID", universe, minGSSize = 10,
 
 \item{idType}{id type}
 
-\item{universe}{background genes}
+\item{universe}{background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.}
 
 \item{minGSSize}{minimal size of genes annotated for testing}
 
@@ -21,11 +21,11 @@ enrichDAVID(gene, idType = "ENTREZ_GENE_ID", universe, minGSSize = 10,
 
 \item{annotation}{david annotation}
 
-\item{pvalueCutoff}{pvalueCutoff}
+\item{pvalueCutoff}{pvalue cutoff on enrichment tests to report}
 
-\item{pAdjustMethod}{one of "BH" and "bonferroni"}
+\item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
-\item{qvalueCutoff}{qvalutCutoff}
+\item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
 
 \item{species}{species}
 
