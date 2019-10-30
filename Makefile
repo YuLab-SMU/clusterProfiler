@@ -52,9 +52,11 @@ push:
 	git push upstream master;\
 	git push origin master
 
+rmoldrelease:
+	git branch -D RELEASE_3_9
 
 release:
-	git checkout RELEASE_3_9;\
+	git checkout RELEASE_3_10;\
 	git fetch --all
 
 biocinit:
