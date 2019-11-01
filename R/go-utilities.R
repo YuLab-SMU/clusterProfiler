@@ -103,6 +103,7 @@ keepGOterm <- function(x, term) {
 ##' @importFrom GO.db GOMFCHILDREN
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+##' @noRd
 getGOLevel <- function(ont, level) {
     switch(ont,
            MF = {
