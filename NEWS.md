@@ -1,3 +1,16 @@
+# clusterProfiler 3.15.1
+
++ mv `compareClusterResult` class defintion to `DOSE` (2019-11-02, Sat)
++ mv `fortify`, `barplot` and  `dotplot` for `compareClusterResult` to `enrichplot`.
+
+# clusterProfiler 3.14.0
+
++ Bioconductor 3.10 release
+
+# clusterProfiler 3.12.0
+
++ Bioconductor 3.9 release
+
 # clusterProfiler 3.11.1
 
 + `asis` parameter in `[.compareClusterResult` (2018-12-24, Mon)
