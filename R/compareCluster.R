@@ -92,6 +92,8 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         compareClusterResult = clProf.df,
         geneClusters = geneClusters,
         fun = fun_name,
+        keytype        = "UNKNOWN",
+        readable       = FALSE,
         .call = match.call(expand.dots=TRUE)
 	)
 }
