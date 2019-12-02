@@ -1,6 +1,7 @@
 # clusterProfiler 3.15.1
 
-+ add `keytype` and `readable` info in `compareCluster` output (2019-12-02, Mon)
++ e.g. user can pass `fun=enrichGO` to `compareCluster` without quoting `enrichGO` (2019-12-02, Mon)
++ add `keytype` and `readable` info in `compareCluster` output
 + mv `compareClusterResult` class defintion to `DOSE` (2019-11-02, Sat)
 + mv `fortify`, `barplot` and  `dotplot` for `compareClusterResult` to `enrichplot`.
 
