@@ -27,27 +27,31 @@ library("ypages")
 [![Build Status](http://www.bioconductor.org/shields/build/devel/bioc/clusterProfiler.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/clusterProfiler/)
 [![Linux/Mac Travis Build Status](https://img.shields.io/travis/GuangchuangYu/clusterProfiler/master.svg?label=Mac%20OSX%20%26%20Linux)](https://travis-ci.org/GuangchuangYu/clusterProfiler)
 [![AppVeyor Build Status](https://img.shields.io/appveyor/ci/Guangchuangyu/clusterProfiler/master.svg?label=Windows)](https://ci.appveyor.com/project/GuangchuangYu/clusterProfiler)
-
-
 [![codecov](https://codecov.io/gh/GuangchuangYu/clusterProfiler/branch/master/graph/badge.svg)](https://codecov.io/gh/GuangchuangYu/clusterProfiler/)
-[![Last-changedate](https://img.shields.io/badge/last%20change-`r gsub('-', '--', Sys.Date())`-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
 
+<!--
+[![Last-changedate](https://img.shields.io/badge/last%20change-`r gsub('-', '--', Sys.Date())`-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
+-->
 
 
 This package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](http://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
 
 
-For details, please visit our project website, <https://guangchuangyu.github.io/software/clusterProfiler>.
+For details, please visit <https://yulab-smu.github.io/clusterProfiler-book/>.
 
-+ [Documentation](https://guangchuangyu.github.io/software/clusterProfiler/documentation/)
-+ [Featured Articles](https://guangchuangyu.github.io/software/clusterProfiler/featuredArticles/)
-+ [Feedback](https://guangchuangyu.github.io/software/clusterProfiler/#feedback)
+
+## :writing_hand: Authors
+
+Guangchuang YU
+
+School of Basic Medical Sciences, Southern Medical University
+
+<https://guangchuangyu.github.io>
 
 
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?hashtags=clusterProfiler&url=http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118&screen_name=guangchuangyu)
 [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://saythanks.io/to/GuangchuangYu)
-`r badger::badge_custom("follow me on", "微信", "green", "https://guangchuangyu.github.io/blog_images/biobabble.jpg")`
-`r badger::badge_custom("打赏", "支付宝/微信", "green", "https://guangchuangyu.github.io/blog_images/pay_qrcode.png")`
+`r badger::badge_custom('follow me on', 'WeChat', 'green', 'https://guangchuangyu.github.io/blog_images/biobabble.jpg')`
 
 
 ------------------------------------------------------------------------
@@ -56,17 +60,19 @@ Please cite the following article when using `clusterProfiler`:
 
 __*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for comparing biological themes among gene clusters. OMICS: A Journal of Integrative Biology. 2012, 16(5):284-287.
 
-`r badge_doi("10.1089/omi.2011.0118", "green")`
-`r badge_altmetric("681089", "green")`
 
+`r badge_custom("1st most cited paper", "in OMICS", "green",
+  "http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi")`
+`r badge_custom("ESI", "Highly Cited Paper", "green")`
+`r badge_doi("10.1089/omi.2011.0118", "green")`
+
+
+<!--
 
 ------------------------------------------------------------------------
 
 ### Citation
 
-`r badge_custom("1st most cited paper", "in OMICS", "green",
-  "http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi")`
-`r badge_custom("ESI", "Highly Cited Paper", "green")`
 
 
 
@@ -75,10 +81,11 @@ __*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for compar
 
 ### Download stats
 
-`r badge_download_bioc("clusterProfiler")`
-`r badge_bioc_download("clusterProfiler", "total", "blue")`
-`r badge_bioc_download("clusterProfiler", "month", "blue")`
+r badge_download_bioc("clusterProfiler")
+r badge_bioc_download("clusterProfiler", "total", "blue")
+r badge_bioc_download("clusterProfiler", "month", "blue")
 
 
 <img src="https://guangchuangyu.github.io/software/dlstats/clusterProfiler.png" width="890"/>
 
+-->
