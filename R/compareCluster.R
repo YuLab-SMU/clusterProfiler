@@ -15,6 +15,7 @@
 ##' @importFrom plyr ldply
 ##' @importFrom plyr dlply
 ##' @importFrom plyr rename
+##' @importFrom utils modifyList
 ##' @importClassesFrom DOSE compareClusterResult
 ##' @export
 ##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
@@ -88,14 +89,42 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     }
 
     ##colnames(clProf.df)[1] <- "Cluster"
-    new("compareClusterResult",
-        compareClusterResult = clProf.df,
-        geneClusters = geneClusters,
-        fun = fun_name,
-        .call = match.call(expand.dots=TRUE)
-	)
+    res <- new("compareClusterResult",
+               compareClusterResult = clProf.df,
+               geneClusters = geneClusters,
+               fun = fun_name,
+               .call = match.call(expand.dots=TRUE)
+               )
+
+    params <- modifyList(extract_params(args(fun)),
+                         extract_params(res@.call))
+    
+    keytype <- params[['keyType']]
+    if (is.null(keytype)) keytype <- "UNKNOWN"
+    readable <- params[['readable']]
+
+    res@keytype <- keytype
+    res@readable <- as.logical(readable)
+    return(res)
 }
 
+extract_params <- function(x) {
+    y <- rlang::quo_text(x) %>%
+        sub('\nNULL', '', .) %>%
+        gsub('"', '', .) %>%
+        sub(".*\\(", "", .) %>%
+        sub("\\)", "", .) %>%
+        gsub("\\s+", "", .)
+
+    y <- strsplit(y, ",")[[1]]
+    params <- sub("=.*", "", y)
+    vals <- sub(".*=", "", y)
+    i <- params != vals
+    params <- params[i]
+    vals <- vals[i]
+    names(vals) <- params
+    return(as.list(vals))
+}
 
 
 ## show method for \code{compareClusterResult} instance

@@ -34,6 +34,7 @@ Suggests:
     knitr,
     org.Hs.eg.db,
     prettydoc,
+    rlang,
     ReactomePA,
     testthat
 VignetteBuilder: knitr
