@@ -86,9 +86,14 @@ get_species_name_idx <- function(y, table='Eukaryotes') {
 
 
 kegg_rest <- function(rest_url) {
-    content <- tryCatch(suppressWarnings(readLines(rest_url)), error=function(e) NULL)
-    if (is.null(content))
-        return(content)
+    ## content <- tryCatch(suppressWarnings(readLines(rest_url)), error=function(e) NULL)
+    ## if (is.null(content))
+    ##     return(content)
+
+    message("Reading KEGG annotation online:\n" )
+    f <- tempfile()
+    utils::download.file(rest_url, destfile = f, method = 'curl')
+    content <- readLines(f)
 
     content %<>% strsplit(., "\t") %>% do.call('rbind', .)
     res <- data.frame(from=content[,1],
