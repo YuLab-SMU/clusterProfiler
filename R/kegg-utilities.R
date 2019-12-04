@@ -84,7 +84,7 @@ get_species_name_idx <- function(y, table='Eukaryotes') {
     }))
 }
 
-
+##' @importFrom downloader download
 kegg_rest <- function(rest_url) {
     ## content <- tryCatch(suppressWarnings(readLines(rest_url)), error=function(e) NULL)
     ## if (is.null(content))
@@ -92,7 +92,13 @@ kegg_rest <- function(rest_url) {
 
     message("Reading KEGG annotation online:\n" )
     f <- tempfile()
-    utils::download.file(rest_url, destfile = f, method = 'curl')
+    dl <- tryCatch(downloader::download(rest_url, destfile = f),
+                   error = function(e) NULL)
+    if (is.null(dl)) {
+        message("fail to download KEGG data...")
+        return(NULL)
+    }
+
     content <- readLines(f)
 
     content %<>% strsplit(., "\t") %>% do.call('rbind', .)

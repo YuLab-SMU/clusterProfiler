@@ -15,6 +15,7 @@ Depends:
     R (>= 3.4.0)
 Imports:
     AnnotationDbi,
+    downloader,
     DOSE (>= 3.13.1),
     enrichplot (>= 1.7.1),
     GO.db,
