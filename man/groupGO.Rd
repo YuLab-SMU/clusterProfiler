@@ -6,8 +6,14 @@
 Given a vector of genes, this function will return the GO profile at
 a specific level.}
 \usage{
-groupGO(gene, OrgDb, keyType = "ENTREZID", ont = "CC", level = 2,
-  readable = FALSE)
+groupGO(
+  gene,
+  OrgDb,
+  keyType = "ENTREZID",
+  ont = "CC",
+  level = 2,
+  readable = FALSE
+)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}

@@ -1,3 +1,7 @@
+# clusterProfiler 3.15.2
+
++ re-implement `read.gmt` without using GSEABase, and my own version is much more fasta :) (2019-12-13, Fri)
+
 # clusterProfiler 3.15.1
 
 + e.g. user can pass `fun=enrichGO` to `compareCluster` without quoting `enrichGO` (2019-12-02, Mon)

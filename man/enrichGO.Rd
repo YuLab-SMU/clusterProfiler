@@ -6,10 +6,20 @@
 Given a vector of genes, this function will return the enrichment GO
 categories after FDR control.}
 \usage{
-enrichGO(gene, OrgDb, keyType = "ENTREZID", ont = "MF",
-  pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
-  qvalueCutoff = 0.2, minGSSize = 10, maxGSSize = 500,
-  readable = FALSE, pool = FALSE)
+enrichGO(
+  gene,
+  OrgDb,
+  keyType = "ENTREZID",
+  ont = "MF",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  universe,
+  qvalueCutoff = 0.2,
+  minGSSize = 10,
+  maxGSSize = 500,
+  readable = FALSE,
+  pool = FALSE
+)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
