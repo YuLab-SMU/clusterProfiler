@@ -23,17 +23,13 @@ read.gmt <- function(gmtfile) {
     ##     data.frame(ont=y[1], gene=y[-c(1:2)])
     ## }) %>% do.call('rbind', .)
     
-    res <- lapply(x, function(record) {
-        strsplit(record, "\t")[[1]]
-    }) 
 
     ## first column: gene set name
     ## second column: description
     ## all the others, unequal length for genes
-
-    nn <- vapply(res, function(y) y[1], character(1))
-    res <- lapply(res, function(y) y[-c(1:2)])
-    names(res) <- nn
+    res <- strsplit(x, "\t")
+    names(res) <- vapply(res, function(y) y[1], character(1))
+    res <- lapply(res, "[", -c(1:2))
 
     ont2gene <- stack(res)
     ont2gene <- ont2gene[, c("ind", "values")]
