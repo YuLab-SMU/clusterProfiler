@@ -155,12 +155,18 @@ get_GO_data <- function(OrgDb, ont, keytype) {
         colnames(goAnno) <- c(keytype, "GOALL")
         goAnno <- unique(goAnno[!is.na(goAnno[,1]), ])
         goAnno$ONTOLOGYALL <- goterms[goAnno$GOALL]
-        GO2GENE <- unique(goAnno[, c(2,1)])
 
         assign("goAnno", goAnno, envir=GO_Env)
         assign("keytype", keytype, envir=GO_Env)
         assign("organism", get_organism(OrgDb), envir=GO_Env)
     }
+
+    ## if (ont == "ALL") {
+    ##     GO2GENE <- unique(goAnno[, c(2,1)])
+    ## } else {
+    ##     GO2GENE <- unique(goAnno[goAnno$ONTOLOGYALL == ont, c(2,1)])
+    ## }
+    GO2GENE <- unique(goAnno[, c(2,1)])
 
     GO_DATA <- build_Anno(GO2GENE, get_GO2TERM_table())
     
