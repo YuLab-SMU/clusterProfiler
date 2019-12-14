@@ -33,6 +33,6 @@ read.gmt <- function(gmtfile) {
 
     ont2gene <- stack(res)
     ont2gene <- ont2gene[, c("ind", "values")]
-    colnames(ont2gene) <- c("ont", "gene")
+    colnames(ont2gene) <- c("term", "gene")
     return(ont2gene)
 }
