@@ -17,6 +17,9 @@ DOSE::gsfilter
 ##' @export
 DOSE::setReadable
 
-build_Anno <- DOSE:::build_Anno
-get_organism <- DOSE:::get_organism
+build_Anno <- getFromNamespace("build_Anno", "DOSE")
+TERMID2EXTID <- getFromNamespace("TERMID2EXTID", "DOSE")
+TERM2NAME <- getFromNamespace("TERM2NAME", "DOSE")
+get_organism <- getFromNamespace("get_organism", "DOSE")
+
 

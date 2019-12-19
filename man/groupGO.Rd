@@ -49,6 +49,6 @@ a specific level.
 \code{\link{groupGOResult-class}}, \code{\link{compareCluster}}
 }
 \author{
-Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://guangchuangyu.github.io}
 }
 \keyword{manip}

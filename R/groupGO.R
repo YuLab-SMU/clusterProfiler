@@ -18,7 +18,7 @@
 ##' @importClassesFrom methods data.frame
 ##' @importFrom DOSE setReadable
 ##' @export
-##' @author Guangchuang Yu \url{http://ygc.name}
+##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
 ##' @examples
 ##'
 ##' 	data(gcSample)
@@ -33,12 +33,6 @@ groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readab
     GO_DATA <- get_GO_data(OrgDb, ont, keyType)
 
     GOLevel <- getGOLevel(ont, level) ##get GO IDs of specific level.
-
-    DOSE <- "DOSE"
-    require(DOSE, character.only = TRUE)
-    TERMID2EXTID <- eval(parse(text=paste0(DOSE, ":::", "TERMID2EXTID")))
-    TERM2NAME <- eval(parse(text=paste0(DOSE, ":::", "TERM2NAME")))
-
 
     GO2ExtID <- TERMID2EXTID(GOLevel, GO_DATA) ## mapping GOID to External Gene IDs.
 
@@ -84,7 +78,7 @@ groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readab
 ## @param object A \code{groupGOResult} instance
 ## @return message
 ## @importFrom methods show
-## @author Guangchuang Yu \url{http://ygc.name}
+## @author Guangchuang Yu \url{http://guangchuangyu.github.io}
 setMethod("show", signature(object="groupGOResult"),
           function (object){
               ont = object@ontology
