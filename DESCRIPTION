@@ -31,7 +31,6 @@ Imports:
 Suggests:
     AnnotationHub,
     dplyr,
-    KEGG.db,
     knitr,
     org.Hs.eg.db,
     prettydoc,
