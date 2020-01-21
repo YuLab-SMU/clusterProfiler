@@ -92,7 +92,7 @@ kegg_rest <- function(rest_url) {
 
     message("Reading KEGG annotation online:\n" )
     f <- tempfile()
-    dl <- tryCatch(downloader::download(rest_url, destfile = f),
+    dl <- tryCatch(downloader::download(rest_url, destfile = f, quiet = TRUE),
                    error = function(e) NULL)
     if (is.null(dl)) {
         message("fail to download KEGG data...")

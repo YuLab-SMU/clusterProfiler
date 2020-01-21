@@ -1,3 +1,9 @@
+# clusterProfiler 3.15.2
+
++ remove `Suggests` of `KEGG.db` as it will be deprecated in Bioconductor 3.11 (2020-01-14, Tue)
++ optimize `enrichGO` to use less memory (2019-12-13, Fri)
++ re-implement `read.gmt` without using GSEABase, and my own version is much more fasta :) 
+
 # clusterProfiler 3.15.1
 
 + e.g. user can pass `fun=enrichGO` to `compareCluster` without quoting `enrichGO` (2019-12-02, Mon)

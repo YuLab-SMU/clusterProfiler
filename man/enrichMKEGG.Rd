@@ -6,9 +6,17 @@
 Given a vector of genes, this function will return the enrichment KEGG Module
 categories with FDR control.}
 \usage{
-enrichMKEGG(gene, organism = "hsa", keyType = "kegg",
-  pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
-  minGSSize = 10, maxGSSize = 500, qvalueCutoff = 0.2)
+enrichMKEGG(
+  gene,
+  organism = "hsa",
+  keyType = "kegg",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  universe,
+  minGSSize = 10,
+  maxGSSize = 500,
+  qvalueCutoff = 0.2
+)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}

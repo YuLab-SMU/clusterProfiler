@@ -4,8 +4,12 @@
 \alias{KEGG_path2extid}
 \title{KEGG_path2extid}
 \usage{
-KEGG_path2extid(keggID, species = sub("\\\\d+$", "", keggID),
-  keggType = "Path", keyType = "kegg")
+KEGG_path2extid(
+  keggID,
+  species = sub("\\\\d+$", "", keggID),
+  keggType = "Path",
+  keyType = "kegg"
+)
 }
 \arguments{
 \item{keggID}{KEGG ID, path or module ID}

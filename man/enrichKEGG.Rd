@@ -6,10 +6,18 @@
 Given a vector of genes, this function will return the enrichment KEGG
 categories with FDR control.}
 \usage{
-enrichKEGG(gene, organism = "hsa", keyType = "kegg",
-  pvalueCutoff = 0.05, pAdjustMethod = "BH", universe,
-  minGSSize = 10, maxGSSize = 500, qvalueCutoff = 0.2,
-  use_internal_data = FALSE)
+enrichKEGG(
+  gene,
+  organism = "hsa",
+  keyType = "kegg",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  universe,
+  minGSSize = 10,
+  maxGSSize = 500,
+  qvalueCutoff = 0.2,
+  use_internal_data = FALSE
+)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
@@ -53,6 +61,6 @@ categories with FDR control.
 \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 }
 \author{
-Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{http://guangchuangyu.github.io}
 }
 \keyword{manip}
