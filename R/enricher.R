@@ -41,9 +41,9 @@ enricher <- function(gene,
 ##' @title GSEA
 ##' @param geneList order ranked geneList
 ##' @param exponent weight of each step
-##' @param nPerm number of permutations
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param maxGSSize maximal size of genes annotated for testing
+##' @param eps_dose This parameter sets the boundary for calculating the p value.
 ##' @param pvalueCutoff pvalue cutoff
 ##' @param pAdjustMethod p value adjustment method
 ##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
@@ -56,9 +56,10 @@ enricher <- function(gene,
 ##' @export
 GSEA <- function(geneList,
                  exponent = 1,
-                 nPerm = 1000,
+                 #nPerm = 1000,
                  minGSSize = 10,
                  maxGSSize = 500,
+                 eps_dose  = 1e-10,
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
                  TERM2GENE,
@@ -71,9 +72,10 @@ GSEA <- function(geneList,
 
     GSEA_internal(geneList = geneList,
                   exponent = exponent,
-                  nPerm = nPerm,
+                  #nPerm = nPerm,
                   minGSSize = minGSSize,
                   maxGSSize = maxGSSize,
+                  eps_dose = eps_dose,
                   pvalueCutoff = pvalueCutoff,
                   pAdjustMethod = pAdjustMethod,
                   verbose = verbose,
