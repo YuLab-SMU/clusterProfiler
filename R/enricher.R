@@ -41,9 +41,10 @@ enricher <- function(gene,
 ##' @title GSEA
 ##' @param geneList order ranked geneList
 ##' @param exponent weight of each step
+##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param maxGSSize maximal size of genes annotated for testing
-##' @param eps_dose This parameter sets the boundary for calculating the p value.
+##' @param eps This parameter sets the boundary for calculating the p value.
 ##' @param pvalueCutoff pvalue cutoff
 ##' @param pAdjustMethod p value adjustment method
 ##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
@@ -56,10 +57,10 @@ enricher <- function(gene,
 ##' @export
 GSEA <- function(geneList,
                  exponent = 1,
-                 #nPerm = 1000,
+                 nPerm = 1000,
                  minGSSize = 10,
                  maxGSSize = 500,
-                 eps_dose  = 1e-10,
+                 eps  = 1e-10,
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
                  TERM2GENE,
@@ -69,18 +70,32 @@ GSEA <- function(geneList,
                  by = 'fgsea') {
 
     USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
-
-    GSEA_internal(geneList = geneList,
-                  exponent = exponent,
-                  #nPerm = nPerm,
-                  minGSSize = minGSSize,
-                  maxGSSize = maxGSSize,
-                  eps_dose = eps_dose,
-                  pvalueCutoff = pvalueCutoff,
-                  pAdjustMethod = pAdjustMethod,
-                  verbose = verbose,
-                  USER_DATA = USER_DATA,
-                  seed = seed,
-                  by = by)
+    
+    if(missing(nPerm)) {
+        GSEA_internal(geneList      = geneList,
+                      exponent      = exponent,
+                      minGSSize     = minGSSize,
+                      maxGSSize     = maxGSSize,
+                      eps           = eps,
+                      pvalueCutoff  = pvalueCutoff,
+                      pAdjustMethod = pAdjustMethod,
+                      verbose       = verbose,
+                      USER_DATA     = USER_DATA,
+                      seed          = seed,
+                      by            = by)
+    } else {
+        GSEA_internal(geneList      = geneList,
+                      exponent      = exponent,
+                      nPerm         = nPerm,
+                      minGSSize     = minGSSize,
+                      maxGSSize     = maxGSSize,
+                      pvalueCutoff  = pvalueCutoff,
+                      pAdjustMethod = pAdjustMethod,
+                      verbose       = verbose,
+                      USER_DATA     = USER_DATA,
+                      seed          = seed,
+                      by            = by)
+    }
+    
 }
 

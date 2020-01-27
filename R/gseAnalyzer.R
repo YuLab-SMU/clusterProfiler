@@ -7,9 +7,10 @@
 ##' @param OrgDb OrgDb
 ##' @param keyType keytype of gene
 ##' @param exponent weight of each step
+##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param maxGSSize maximal size of genes annotated for testing
-##' @param eps_dose This parameter sets the boundary for calculating the p value.
+##' @param eps This parameter sets the boundary for calculating the p value.
 ##' @param pvalueCutoff pvalue Cutoff
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
@@ -24,33 +25,46 @@ gseGO <- function(geneList,
                   OrgDb,
                   keyType       = "ENTREZID",
                   exponent      = 1,
-                  #nPerm         = 1000,
+                  nPerm         = 1000,
                   minGSSize     = 10,
                   maxGSSize     = 500,
-                  eps_dose = 1e-10,
+                  eps           = 1e-10,
                   pvalueCutoff  = 0.05,
                   pAdjustMethod = "BH",
                   verbose       = TRUE,
                   seed          = FALSE,
-                  by = 'fgsea') {
+                  by            = 'fgsea') {
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
 
     GO_DATA <- get_GO_data(OrgDb, ont, keyType)
-
-    res <-  GSEA_internal(geneList = geneList,
-                          exponent = exponent,
-                          #nPerm = nPerm,
-                          minGSSize = minGSSize,
-                          maxGSSize = maxGSSize,
-                          eps_dose = eps_dose,
-                          pvalueCutoff = pvalueCutoff,
-                          pAdjustMethod = pAdjustMethod,
-                          verbose = verbose,
-                          USER_DATA = GO_DATA,
-                          seed = seed,
-                          by = by)
+    if(missing(nPerm)) {
+        res <-  GSEA_internal(geneList      = geneList,
+                              exponent      = exponent,
+                              minGSSize     = minGSSize,
+                              maxGSSize     = maxGSSize,
+                              eps           = eps,
+                              pvalueCutoff  = pvalueCutoff,
+                              pAdjustMethod = pAdjustMethod,
+                              verbose       = verbose,
+                              USER_DATA     = GO_DATA,
+                              seed          = seed,
+                              by            = by)
+    } else {
+        res <-  GSEA_internal(geneList      = geneList,
+                              exponent      = exponent,
+                              nPerm         = nPerm,
+                              minGSSize     = minGSSize,
+                              maxGSSize     = maxGSSize,
+                              pvalueCutoff  = pvalueCutoff,
+                              pAdjustMethod = pAdjustMethod,
+                              verbose       = verbose,
+                              USER_DATA     = GO_DATA,
+                              seed          = seed,
+                              by            = by)
+    }
+    
 
     if (is.null(res))
         return(res)
@@ -75,9 +89,10 @@ gseGO <- function(geneList,
 ##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 ##' @param exponent weight of each step
+##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param maxGSSize maximal size of genes annotated for testing
-##' @param eps_dose This parameter sets the boundary for calculating the p value.
+##' @param eps This parameter sets the boundary for calculating the p value.
 ##' @param pvalueCutoff pvalue Cutoff
 ##' @param pAdjustMethod pvalue adjustment method
 ##' @param verbose print message or not
@@ -90,31 +105,45 @@ gseMKEGG <- function(geneList,
                      organism          = 'hsa',
                      keyType           = 'kegg',
                      exponent          = 1,
-                     #nPerm             = 1000,
+                     nPerm             = 1000,
                      minGSSize         = 10,
                      maxGSSize         = 500,
-                     eps_dose = 1e-10,
+                     eps               = 1e-10,
                      pvalueCutoff      = 0.05,
                      pAdjustMethod     = "BH",
                      verbose           = TRUE,
-                     seed = FALSE,
-                     by = 'fgsea') {
+                     seed              = FALSE,
+                     by                = 'fgsea') {
 
     species <- organismMapper(organism)
     KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)
-
-    res <-  GSEA_internal(geneList = geneList,
-                          exponent = exponent,
-                          #nPerm = nPerm,
-                          minGSSize = minGSSize,
-                          maxGSSize = maxGSSize,
-                          eps_dose = eps_dose,
-                          pvalueCutoff = pvalueCutoff,
-                          pAdjustMethod = pAdjustMethod,
-                          verbose = verbose,
-                          USER_DATA = KEGG_DATA,
-                          seed = seed,
-                          by = by)
+    
+    if(missing(nPerm)) {
+        res <-  GSEA_internal(geneList       = geneList,
+                              exponent       = exponent,
+                              minGSSize      = minGSSize,
+                              maxGSSize      = maxGSSize,
+                              eps            = eps,
+                              pvalueCutoff   = pvalueCutoff,
+                              pAdjustMethod  = pAdjustMethod,
+                              verbose        = verbose,
+                              USER_DATA      = KEGG_DATA,
+                              seed           = seed,
+                              by             = by)
+    } else {
+        res <-  GSEA_internal(geneList       = geneList,
+                              exponent       = exponent,
+                              nPerm          = nPerm,
+                              minGSSize      = minGSSize,
+                              maxGSSize      = maxGSSize,
+                              pvalueCutoff   = pvalueCutoff,
+                              pAdjustMethod  = pAdjustMethod,
+                              verbose        = verbose,
+                              USER_DATA      = KEGG_DATA,
+                              seed           = seed,
+                              by             = by)
+    }
+   
 
     if (is.null(res))
         return(res)
@@ -141,16 +170,16 @@ gseKEGG <- function(geneList,
                     organism          = 'hsa',
                     keyType           = 'kegg',
                     exponent          = 1,
-                    #nPerm             = 1000,
+                    nPerm             = 1000,
                     minGSSize         = 10,
                     maxGSSize         = 500,
-                    eps_dose          = 1e-10,
+                    eps               = 1e-10,
                     pvalueCutoff      = 0.05,
                     pAdjustMethod     = "BH",
                     verbose           = TRUE,
                     use_internal_data = FALSE,
                     seed              = FALSE,
-                    by = 'fgsea') {
+                    by                = 'fgsea') {
 
     species <- organismMapper(organism)
     if (use_internal_data) {
@@ -159,18 +188,32 @@ gseKEGG <- function(geneList,
         KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
     }
 
-    res <-  GSEA_internal(geneList = geneList,
-                          exponent = exponent,
-                          #nPerm = nPerm,
-                          minGSSize = minGSSize,
-                          maxGSSize = maxGSSize,
-                          eps_dose = eps_dose,
-                          pvalueCutoff = pvalueCutoff,
-                          pAdjustMethod = pAdjustMethod,
-                          verbose = verbose,
-                          USER_DATA = KEGG_DATA,
-                          seed = seed,
-                          by = by)
+    if(missing(nPerm)) {
+        res <-  GSEA_internal(geneList         = geneList,
+                              exponent         = exponent,
+                              minGSSize        = minGSSize,
+                              maxGSSize        = maxGSSize,
+                              eps              = eps,
+                              pvalueCutoff     = pvalueCutoff,
+                              pAdjustMethod    = pAdjustMethod,
+                              verbose          = verbose,
+                              USER_DATA        = KEGG_DATA,
+                              seed             = seed,
+                              by               = by)
+    } else {
+        res <-  GSEA_internal(geneList         = geneList,
+                              exponent         = exponent,
+                              nPerm            = nPerm,
+                              minGSSize        = minGSSize,
+                              maxGSSize        = maxGSSize,
+                              pvalueCutoff     = pvalueCutoff,
+                              pAdjustMethod    = pAdjustMethod,
+                              verbose          = verbose,
+                              USER_DATA        = KEGG_DATA,
+                              seed             = seed,
+                              by               = by)
+    }
+    
 
     if (is.null(res))
         return(res)
