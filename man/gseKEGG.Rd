@@ -9,7 +9,6 @@ gseKEGG(
   organism = "hsa",
   keyType = "kegg",
   exponent = 1,
-  nPerm = 1000,
   minGSSize = 10,
   maxGSSize = 500,
   eps = 1e-10,
@@ -18,7 +17,8 @@ gseKEGG(
   verbose = TRUE,
   use_internal_data = FALSE,
   seed = FALSE,
-  by = "fgsea"
+  by = "fgsea",
+  ...
 )
 }
 \arguments{
@@ -29,8 +29,6 @@ gseKEGG(
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
 \item{exponent}{weight of each step}
-
-\item{nPerm}{permutation numbers}
 
 \item{minGSSize}{minimal size of each geneSet for analyzing}
 
@@ -49,6 +47,8 @@ gseKEGG(
 \item{seed}{logical}
 
 \item{by}{one of 'fgsea' or 'DOSE'}
+
+\item{...}{other parameter}
 }
 \value{
 gseaResult object
