@@ -7,7 +7,6 @@
 ##' @param OrgDb OrgDb
 ##' @param keyType keytype of gene
 ##' @param exponent weight of each step
-##' @param nPerm permutation numbers
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param eps This parameter sets the boundary for calculating the p value.
@@ -16,6 +15,7 @@
 ##' @param verbose print message or not
 ##' @param seed logical
 ##' @param by one of 'fgsea' or 'DOSE'
+##' @param ... other parameter
 ##' @importClassesFrom DOSE gseaResult
 ##' @export
 ##' @return gseaResult object
@@ -25,7 +25,6 @@ gseGO <- function(geneList,
                   OrgDb,
                   keyType       = "ENTREZID",
                   exponent      = 1,
-                  nPerm         = 1000,
                   minGSSize     = 10,
                   maxGSSize     = 500,
                   eps           = 1e-10,
@@ -33,37 +32,27 @@ gseGO <- function(geneList,
                   pAdjustMethod = "BH",
                   verbose       = TRUE,
                   seed          = FALSE,
-                  by            = 'fgsea') {
+                  by            = 'fgsea',
+                  ...) {
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
 
     GO_DATA <- get_GO_data(OrgDb, ont, keyType)
-    if(missing(nPerm)) {
-        res <-  GSEA_internal(geneList      = geneList,
-                              exponent      = exponent,
-                              minGSSize     = minGSSize,
-                              maxGSSize     = maxGSSize,
-                              eps           = eps,
-                              pvalueCutoff  = pvalueCutoff,
-                              pAdjustMethod = pAdjustMethod,
-                              verbose       = verbose,
-                              USER_DATA     = GO_DATA,
-                              seed          = seed,
-                              by            = by)
-    } else {
-        res <-  GSEA_internal(geneList      = geneList,
-                              exponent      = exponent,
-                              nPerm         = nPerm,
-                              minGSSize     = minGSSize,
-                              maxGSSize     = maxGSSize,
-                              pvalueCutoff  = pvalueCutoff,
-                              pAdjustMethod = pAdjustMethod,
-                              verbose       = verbose,
-                              USER_DATA     = GO_DATA,
-                              seed          = seed,
-                              by            = by)
-    }
+
+    res <-  GSEA_internal(geneList      = geneList,
+                          exponent      = exponent,
+                          minGSSize     = minGSSize,
+                          maxGSSize     = maxGSSize,
+                          eps           = eps,
+                          pvalueCutoff  = pvalueCutoff,
+                          pAdjustMethod = pAdjustMethod,
+                          verbose       = verbose,
+                          USER_DATA     = GO_DATA,
+                          seed          = seed,
+                          by            = by,
+                          ...)
+  
     
 
     if (is.null(res))

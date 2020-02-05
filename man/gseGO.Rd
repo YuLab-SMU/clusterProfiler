@@ -10,7 +10,6 @@ gseGO(
   OrgDb,
   keyType = "ENTREZID",
   exponent = 1,
-  nPerm = 1000,
   minGSSize = 10,
   maxGSSize = 500,
   eps = 1e-10,
@@ -18,7 +17,8 @@ gseGO(
   pAdjustMethod = "BH",
   verbose = TRUE,
   seed = FALSE,
-  by = "fgsea"
+  by = "fgsea",
+  ...
 )
 }
 \arguments{
@@ -31,8 +31,6 @@ gseGO(
 \item{keyType}{keytype of gene}
 
 \item{exponent}{weight of each step}
-
-\item{nPerm}{permutation numbers}
 
 \item{minGSSize}{minimal size of each geneSet for analyzing}
 
@@ -49,6 +47,8 @@ gseGO(
 \item{seed}{logical}
 
 \item{by}{one of 'fgsea' or 'DOSE'}
+
+\item{...}{other parameter}
 }
 \value{
 gseaResult object
