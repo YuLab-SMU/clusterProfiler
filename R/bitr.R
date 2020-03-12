@@ -25,7 +25,6 @@ idType <- function(OrgDb = "org.Hs.eg.db") {
 ##' @return data.frame
 ##' @importFrom magrittr %>%
 ##' @importFrom magrittr %<>%
-##' @importFrom AnnotationDbi select
 ##' @export
 ##' @author Guangchuang Yu
 bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
@@ -38,9 +37,10 @@ bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
         stop("'toType' ", msg)
     }
 
+    ## should use AnnotationDbi::select, since dplyr::select method was implemented
     geneID %<>% as.character %>% unique
     db <- load_OrgDb(OrgDb)
-    res <- suppressWarnings(select(db,
+    res <- suppressWarnings(AnnotationDbi::select(db,
                                    keys = geneID,
                                    keytype = fromType,
                                    columns=c(fromType, toType)))

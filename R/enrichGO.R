@@ -96,7 +96,6 @@ enrichGO <- function(gene,
 }
 
 ##' @importFrom AnnotationDbi keys
-##' @importFrom AnnotationDbi select
 ##' @importFrom AnnotationDbi keytypes
 ##' @importFrom AnnotationDbi toTable
 ##' @importFrom GO.db GOTERM

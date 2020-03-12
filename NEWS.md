@@ -1,3 +1,8 @@
+# clusterProfiler 3.15.3
+
++ incorporate clusterProfiler.dplyr (2020-03-12, Thu)
+  + arrange, filter, group_by, mutate, rename, select, slice and summarize
+
 # clusterProfiler 3.15.2
 
 + remove `Suggests` of `KEGG.db` as it will be deprecated in Bioconductor 3.11 (2020-01-14, Tue)

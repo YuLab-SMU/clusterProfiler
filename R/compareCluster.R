@@ -14,7 +14,6 @@
 ##' @importFrom plyr llply
 ##' @importFrom plyr ldply
 ##' @importFrom plyr dlply
-##' @importFrom plyr rename
 ##' @importFrom utils modifyList
 ##' @importClassesFrom DOSE compareClusterResult
 ##' @export
@@ -74,7 +73,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         stop("No enrichment found in any of gene cluster, please check your input...")
     }
 
-    clProf.df <- rename(clProf.df, c(.id="Cluster"))
+    clProf.df <- dplyr::rename(clProf.df, c(.id="Cluster"))
     clProf.df$Cluster = factor(clProf.df$Cluster, levels=clusters.levels)
 
     if (is.data.frame(data) && grepl('+', grouping.formula)) {
