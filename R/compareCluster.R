@@ -233,7 +233,7 @@ merge_result <- function(enrichResultList) {
     x <- lapply(enrichResultList, as.data.frame)
     names(x) <- names(enrichResultList)
     y <- ldply(x, "rbind")
-    y <- rename(y, c(.id="Cluster"))
+    y <- plyr::rename(y, c(.id="Cluster"))
     y$Cluster = factor(y$Cluster, levels=names(enrichResultList))
     new("compareClusterResult",
         compareClusterResult = y)
