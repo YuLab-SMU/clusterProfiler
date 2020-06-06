@@ -44,9 +44,9 @@
 ##' as.data.frame(xx.formula.twogroups)
 ##' }
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
-    if (is.character(fun)) {
-        fun <- eval(parse(text=fun))
-    }
+    # Convert the string into a real function
+    fun_name <- fun
+    fun <- eval(parse(text=fun))
 
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
@@ -105,7 +105,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 
     res@keytype <- keytype
     res@readable <- as.logical(readable)
-    res@fun <- params[['fun']]
+    res@fun <- fun_name
 
     return(res)
 }
