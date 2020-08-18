@@ -44,6 +44,7 @@
 ##' as.data.frame(xx.formula.twogroups)
 ##' }
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
+
     if (is.character(fun)) {
         fun <- eval(parse(text=fun))
     }
@@ -115,8 +116,9 @@ extract_params <- function(x) {
     if (is.function(x)) y <- sub('\nNULL$', '', y)
 
     y <- gsub('"', '', y) %>%
-        sub(".*\\(", "", .) %>%
-        sub("\\)", "", .) %>%
+        ## sub(".*\\(", "", .) %>%
+        sub("[^\\(]+\\(", "", .) %>% 
+        sub("\\)$", "", .) %>%
         gsub("\\s+", "", .)
 
     y <- strsplit(y, ",")[[1]]

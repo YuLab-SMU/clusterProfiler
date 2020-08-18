@@ -34,10 +34,10 @@ below to see their documentation.
 \describe{
   \item{DOSE}{\code{\link[DOSE]{geneID}}, \code{\link[DOSE]{geneInCategory}}, \code{\link[DOSE]{gsfilter}}, \code{\link[DOSE]{setReadable}}}
 
-  \item{dplyr}{\code{\link[dplyr]{arrange}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr]{n}}, \code{\link[dplyr]{rename}}, \code{\link[dplyr]{select}}, \code{\link[dplyr]{slice}}, \code{\link[dplyr]{summarise}}}
+  \item{dplyr}{\code{\link[dplyr]{arrange}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr:context]{n}}, \code{\link[dplyr]{rename}}, \code{\link[dplyr]{select}}, \code{\link[dplyr]{slice}}, \code{\link[dplyr]{summarise}}}
 
   \item{enrichplot}{\code{\link[enrichplot]{cnetplot}}, \code{\link[enrichplot]{dotplot}}, \code{\link[enrichplot]{emapplot}}, \code{\link[enrichplot]{goplot}}, \code{\link[enrichplot]{gseaplot}}, \code{\link[enrichplot]{heatplot}}, \code{\link[enrichplot]{ridgeplot}}}
 
-  \item{magrittr}{\code{\link[magrittr]{\%<>\%}}, \code{\link[magrittr]{\%>\%}}}
+  \item{magrittr}{\code{\link[magrittr:compound]{\%<>\%}}, \code{\link[magrittr:pipe]{\%>\%}}}
 }}
 

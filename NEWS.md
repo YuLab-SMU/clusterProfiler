@@ -1,3 +1,12 @@
+# clusterProfiler 3.17.1
+
++ bug fixed of `extract_params` (2020-08-18, Tue)
+  - <https://github.com/YuLab-SMU/clusterProfiler/issues/282>
+
+# clusterProfiler 3.16.0
+
++ Bioconductor 3.11 release
+
 # clusterProfiler 3.15.3
 
 + incorporate clusterProfiler.dplyr (2020-03-12, Thu)
