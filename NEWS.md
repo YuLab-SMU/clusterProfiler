@@ -1,3 +1,8 @@
+# clusterProfiler 3.17.2
+
++ use `libcurl` if capable (2020-09-08, Tue)
+  - <https://github.com/YuLab-SMU/clusterProfiler/pull/290>
+
 # clusterProfiler 3.17.1
 
 + bug fixed of `extract_params` (2020-08-18, Tue)
