@@ -31,7 +31,7 @@ GSEA(
 
 \item{eps}{This parameter sets the boundary for calculating the p value.}
 
-\item{pvalueCutoff}{pvalue cutoff}
+\item{pvalueCutoff}{adjusted pvalue cutoff}
 
 \item{pAdjustMethod}{p value adjustment method}
 
