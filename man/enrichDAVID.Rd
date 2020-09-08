@@ -31,7 +31,7 @@ enrichDAVID(
 
 \item{annotation}{david annotation}
 
-\item{pvalueCutoff}{pvalue cutoff on enrichment tests to report}
+\item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 

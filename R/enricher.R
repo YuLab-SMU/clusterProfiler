@@ -3,7 +3,7 @@
 ##'
 ##' @title enricher
 ##' @param gene a vector of gene id
-##' @param pvalueCutoff pvalue cutoff on enrichment tests to report
+##' @param pvalueCutoff adjusted pvalue cutoff on enrichment tests to report
 ##' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.
 ##' @param minGSSize minimal size of genes annotated for testing
@@ -44,7 +44,7 @@ enricher <- function(gene,
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param eps This parameter sets the boundary for calculating the p value.
-##' @param pvalueCutoff pvalue cutoff
+##' @param pvalueCutoff adjusted pvalue cutoff
 ##' @param pAdjustMethod p value adjustment method
 ##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
 ##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name

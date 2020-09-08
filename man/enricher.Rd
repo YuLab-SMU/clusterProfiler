@@ -19,7 +19,7 @@ enricher(
 \arguments{
 \item{gene}{a vector of gene id}
 
-\item{pvalueCutoff}{pvalue cutoff on enrichment tests to report}
+\item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
