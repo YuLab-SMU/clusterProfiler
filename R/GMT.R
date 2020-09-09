@@ -40,6 +40,7 @@ read.gmt <- function(gmtfile) {
 
 ##' @rdname read-gmt
 ##' @importFrom rlang .data
+##' @export
 read.gmt.wp <- function(gmtfile) {
     read.gmt(gmtfile) %>%
         tidyr::separate(.data$term, c("name","version","wpid","org"), "%")
