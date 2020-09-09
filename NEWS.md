@@ -1,5 +1,6 @@
 # clusterProfiler 3.17.2
 
++ `read.gmt.wp` for parsing gmt file downloaded from wikiPathways (2020-09-09, Wed)
 + use `libcurl` if capable (2020-09-08, Tue)
   - <https://github.com/YuLab-SMU/clusterProfiler/pull/290>
 

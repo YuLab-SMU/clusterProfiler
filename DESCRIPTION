@@ -40,7 +40,7 @@ Suggests:
 VignetteBuilder: knitr
 ByteCompile: true
 License: Artistic-2.0
-URL: https://guangchuangyu.github.io/software/clusterProfiler
+URL: https://yulab-smu.top/biomedical-knowledge-mining-book/
 BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
 biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,

@@ -2,9 +2,12 @@
 % Please edit documentation in R/GMT.R
 \name{read.gmt}
 \alias{read.gmt}
+\alias{read.gmt.wp}
 \title{read.gmt}
 \usage{
 read.gmt(gmtfile)
+
+read.gmt.wp(gmtfile)
 }
 \arguments{
 \item{gmtfile}{gmt file}

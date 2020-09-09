@@ -37,7 +37,7 @@ library("ypages")
 This package implements methods to analyze and visualize functional profiles of genomic coordinates (supported by [ChIPseeker](http://www.bioconductor.org/packages/ChIPseeker)), gene and gene clusters.
 
 
-For details, please visit <https://yulab-smu.github.io/clusterProfiler-book/>.
+For details, please visit <https://yulab-smu.top/biomedical-knowledge-mining-book/>.
 
 
 ## :writing_hand: Authors

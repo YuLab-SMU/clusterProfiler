@@ -2,6 +2,7 @@
 ##'
 ##'
 ##' @title read.gmt
+##' @rdname read-gmt
 ##' @param gmtfile gmt file
 ##' @importFrom utils stack
 ##' @importFrom rvcheck get_fun_from_pkg
@@ -36,3 +37,11 @@ read.gmt <- function(gmtfile) {
     colnames(ont2gene) <- c("term", "gene")
     return(ont2gene)
 }
+
+##' @rdname read-gmt
+##' @importFrom rlang .data
+read.gmt.wp <- function(gmtfile) {
+    read.gmt(gmtfile) %>%
+        tidyr::separate(.data$term, c("name","version","wpid","org"), "%")
+}
+
