@@ -114,6 +114,7 @@ kegg_rest <- function(rest_url) {
     return(res)
 }
 
+
 ## http://www.genome.jp/kegg/rest/keggapi.html
 ## kegg_link('hsa', 'pathway')
 kegg_link <- function(target_db, source_db) {

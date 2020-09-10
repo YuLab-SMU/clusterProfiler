@@ -1,3 +1,16 @@
+# clusterProfiler 3.17.3
+
++ internal suports of enrichment analyses using WikiPathways (2020-09-09, Wed)
+  - `enrichWP` for ORA analysis
+  - `gseWP` for GSEA analysis
+  - `get_wp_organisms` for listing supported organisms
+  - `read.gmt.wp` for parsing gmt file downloaded from wikiPathways 
+
+# clusterProfiler 3.17.2
+
++ use `libcurl` if capable (2020-09-08, Tue)
+  - <https://github.com/YuLab-SMU/clusterProfiler/pull/290>
+
 # clusterProfiler 3.17.1
 
 + bug fixed of `extract_params` (2020-08-18, Tue)
