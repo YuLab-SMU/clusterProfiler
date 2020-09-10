@@ -93,13 +93,15 @@ kegg_rest <- function(rest_url) {
     message("Reading KEGG annotation online:\n" )
     f <- tempfile()
     ## dl <- tryCatch(downloader::download(rest_url, destfile = f, quiet = TRUE),
-    if (capabilities("libcurl")) {
-        dl <- tryCatch(utils::download.file(rest_url, destfile = f, quiet = TRUE, method = "libcurl"),
-                   error = function(e) NULL)
-    } else {
-        dl <- tryCatch(downloader::download(rest_url, destfile = f, quiet = TRUE),
-                   error = function(e) NULL)
-    }
+    # if (capabilities("libcurl")) {
+        # dl <- tryCatch(utils::download.file(rest_url, destfile = f, quiet = TRUE, method = "libcurl"),
+                   # error = function(e) NULL)
+    # } else {
+        # dl <- tryCatch(downloader::download(rest_url, destfile = f, quiet = TRUE),
+                   # error = function(e) NULL)
+    # }
+    
+    dl <- mydownload(rest_url, destfile = f)
     
     if (is.null(dl)) {
         message("fail to download KEGG data...")
