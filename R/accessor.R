@@ -1,8 +1,6 @@
 ##' @method as.data.frame compareClusterResult
 ##' @export
-as.data.frame.compareClusterResult <- function(x, ...) {
-    as.data.frame(x@compareClusterResult, ...)
-}
+as.data.frame.compareClusterResult <- getFromNamespace("as.data.frame.compareClusterResult", "enrichplot")
 
 ##' @method as.data.frame groupGOResult
 ##' @export
