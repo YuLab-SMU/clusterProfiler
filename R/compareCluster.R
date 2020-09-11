@@ -103,7 +103,8 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     keytype <- params[['keyType']]
     if (is.null(keytype)) keytype <- "UNKNOWN"
     readable <- params[['readable']]
-
+    if (length(readable) == 0) readable <- FALSE
+    
     res@keytype <- keytype
     res@readable <- as.logical(readable)
     res@fun <- params[['fun']]
