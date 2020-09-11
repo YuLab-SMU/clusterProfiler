@@ -43,6 +43,6 @@ read.gmt <- function(gmtfile) {
 ##' @export
 read.gmt.wp <- function(gmtfile) {
     read.gmt(gmtfile) %>%
-        tidyr::separate(.data$term, c("name","version","wpid","org"), "%")
+        tidyr::separate(.data$term, c("name","version","wpid","species"), "%")
 }
 
