@@ -100,7 +100,7 @@ enrichDAVID <- function(gene,
     }
     
     if (nrow(x) == 0) {
-        warning("No enriched GO term found...")
+        warning("No enriched term found...")
         return(NULL)
     }
     
