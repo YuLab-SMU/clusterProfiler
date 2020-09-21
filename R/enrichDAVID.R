@@ -96,7 +96,7 @@ enrichDAVID <- function(gene,
     x <- getFunctionalAnnotationChart(david, threshold=1, count=minGSSize)
     
     if (!is.na(maxGSSize) && !is.null(maxGSSize)) {
-        x <- x[x$Count <= maxGSSize, ]
+        x <- x[x$Pop.Hits <= maxGSSize, ]
     }
     
     if (nrow(x) == 0) {
