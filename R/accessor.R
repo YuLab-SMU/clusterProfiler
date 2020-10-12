@@ -10,7 +10,7 @@ as.data.frame.groupGOResult <- function(x, ...) {
 
 ##' @method [ compareClusterResult
 ##' @export
-`[.compareClusterResult` <- function(x, i, j, asis, ...) {
+`[.compareClusterResult` <- function(x, i, j, asis = FALSE, ...) {
     result <- as.data.frame(x)
     y <- result[i,j, ...]
     if (!asis)
@@ -23,9 +23,12 @@ as.data.frame.groupGOResult <- function(x, ...) {
 ##' @export
 `[[.compareClusterResult` <- function(x, i) {
     gc <- geneInCategory(x)
-    if (!i %in% names(gc))
+    ids <- grep(i, names(gc))
+    # if (!i %in% names(gc))
+    if (length(ids) == 0)
         stop("input term not found...")
-    gc[[i]]
+    setNames(sapply(ids, function(x) return(gc[[x]])),
+        x@compareClusterResult$Cluster[ids])
 }
 
 
