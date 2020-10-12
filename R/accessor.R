@@ -25,7 +25,7 @@ as.data.frame.groupGOResult <- function(x, ...) {
     gc <- geneInCategory(x)
     ids <- grep(i, names(gc))
     # if (!i %in% names(gc))
-    if (length(ids) == 0)
+    if (length(ids) == 0 || !i %in% x@compareClusterResult$ID)
         stop("input term not found...")
     setNames(sapply(ids, function(x) return(gc[[x]])),
         x@compareClusterResult$Cluster[ids])
