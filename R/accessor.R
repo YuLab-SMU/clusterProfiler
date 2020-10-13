@@ -22,7 +22,7 @@ as.data.frame.groupGOResult <- function(x, ...) {
 ##' @method [[ compareClusterResult
 ##' @export
 `[[.compareClusterResult` <- function(x, i) {
-    gc <- geneInCategory(x)
+    gc <- DOSE::geneInCategory2(x)
     ids <- grep(i, names(gc))
     # if (!i %in% names(gc))
     if (length(ids) == 0 || !i %in% x@compareClusterResult$ID)
