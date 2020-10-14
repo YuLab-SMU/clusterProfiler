@@ -1,3 +1,7 @@
+# clusterProfiler 3.17.5
+
++ update `[[.compareClusterResult` (2020-10-14, Wed)
+
 # clusterProfiler 3.17.3
 
 + internal suports of enrichment analyses using WikiPathways (2020-09-09, Wed)
