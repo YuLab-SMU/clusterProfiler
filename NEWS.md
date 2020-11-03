@@ -1,3 +1,7 @@
+# clusterProfiler 3.18.0
+
++ Bioconductor 3.12 release (2020-10-28, Wed)
+
 # clusterProfiler 3.17.5
 
 + update `[[.compareClusterResult` (2020-10-14, Wed)
