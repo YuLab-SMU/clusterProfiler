@@ -212,6 +212,7 @@ download.KEGG.Module <- function(species) {
 ##'England), 29:14 1830--1831, 2013. ISSN 1367-4803
 ##'\url{http://bioinformatics.oxfordjournals.org/content/abstract/29/14/1830.abstract}
 ##'PMID: 23740750
+##' @noRd
 viewKEGG <- function(obj, pathwayID, foldChange,
                        color.low="green",
                        color.high="red",

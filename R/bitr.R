@@ -143,6 +143,7 @@ KEGG_convert <- function(fromType, toType, species) {
 ##' @param keyType KEGG gene type, one of "ncbi-proteinid", "ncbi-geneid", "uniprot", or "kegg"
 ##' @return extid vector
 ##' @author guangchuang yu
+##' @noRd
 KEGG_path2extid <- function(keggID, species=sub("\\d+$", "", keggID),
                           keggType = "Path", keyType = "kegg") {
     path2extid <- KEGGPATHID2EXTID(species, keggType, keyType)
