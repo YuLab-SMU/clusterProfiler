@@ -1,3 +1,7 @@
+# clusterProfiler 3.19.0.991
+
++ capable of setting KEGG download method via `options(clusterProfiler.download.method = METHOD)` (2020-12-31, Thu)
+
 # clusterProfiler 3.18.0
 
 + Bioconductor 3.12 release (2020-10-28, Wed)
