@@ -1,12 +1,8 @@
 
 mydownload <- function(url, method, quiet = TRUE, ...) {
-    if (capabilities("libcurl")) {
-        dl <- tryCatch(utils::download.file(url, quiet = quiet, method = "libcurl", ...),
-                       error = function(e) NULL)
-    } else {
-        dl <- tryCatch(downloader::download(url, quiet = TRUE, method = method, ...),
-                       error = function(e) NULL)
-    }
+    method <- getOption("clusterProfiler.download.method")
+    dl <- tryCatch(downloader::download(url, quiet = TRUE, method = method, ...),
+                   error = function(e) NULL)
     return(dl)
 }
 
