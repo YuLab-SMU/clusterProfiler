@@ -86,20 +86,8 @@ get_species_name_idx <- function(y, table='Eukaryotes') {
 
 ##' @importFrom downloader download
 kegg_rest <- function(rest_url) {
-    ## content <- tryCatch(suppressWarnings(readLines(rest_url)), error=function(e) NULL)
-    ## if (is.null(content))
-    ##     return(content)
-
     message("Reading KEGG annotation online:\n" )
     f <- tempfile()
-    ## dl <- tryCatch(downloader::download(rest_url, destfile = f, quiet = TRUE),
-    # if (capabilities("libcurl")) {
-        # dl <- tryCatch(utils::download.file(rest_url, destfile = f, quiet = TRUE, method = "libcurl"),
-                   # error = function(e) NULL)
-    # } else {
-        # dl <- tryCatch(downloader::download(rest_url, destfile = f, quiet = TRUE),
-                   # error = function(e) NULL)
-    # }
     
     dl <- mydownload(rest_url, destfile = f)
     
