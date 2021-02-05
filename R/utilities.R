@@ -1,6 +1,8 @@
 
-mydownload <- function(url, method, quiet = TRUE, ...) {
-    method <- getOption("clusterProfiler.download.method")
+mydownload <- function(url, method = NULL, quiet = TRUE, ...) {
+    if (is.null(method))
+        method <- getOption("clusterProfiler.download.method")
+
     dl <- tryCatch(downloader::download(url, quiet = TRUE, method = method, ...),
                    error = function(e) NULL)
     return(dl)
