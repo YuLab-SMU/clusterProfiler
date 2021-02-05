@@ -11,7 +11,8 @@
     }
 
     options(clusterProfiler.download.method = dl.method)
-
+    options(timeout = max(300, getOption("timeout"))) # see ?download.file
+    
     citation <- paste0("If you use ", pkgname, " in published research, please cite:\n",
                        "Guangchuang Yu, Li-Gen Wang, Yanyan Han, Qing-Yu He. ",
                        "clusterProfiler: an R package for comparing biological themes among gene clusters. ",

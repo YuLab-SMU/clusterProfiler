@@ -1,5 +1,7 @@
-# clusterProfiler 3.19.0.991
+# clusterProfiler 3.19.1
 
++ setting default timeout to 300 for downloads (2021-04-05, Fri)
++ fixed download method setting 
 + capable of setting KEGG download method via `options(clusterProfiler.download.method = METHOD)` (2020-12-31, Thu)
 
 # clusterProfiler 3.18.0
