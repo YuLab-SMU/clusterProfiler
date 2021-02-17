@@ -13,3 +13,5 @@ docs
 .github
 site_src
 TODO.md
+^.*\.Rproj$
+^\.Rproj\.user$
