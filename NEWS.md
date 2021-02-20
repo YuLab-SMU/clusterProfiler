@@ -1,6 +1,7 @@
-# clusterProfiler 3.19.1
+# clusterProfiler 3.19.1.991
 
-+ setting default timeout to 300 for downloads (2021-04-05, Fri)
++ Add KEGG enrichment analysis of Human Gut Microbiome data (2021-02-20, Sat)
++ setting default timeout to 300 for downloads (2021-02-05, Fri)
 + fixed download method setting 
 + capable of setting KEGG download method via `options(clusterProfiler.download.method = METHOD)` (2020-12-31, Thu)
 
