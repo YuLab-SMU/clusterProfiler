@@ -1,3 +1,7 @@
+# clusterProfiler 3.99.1
+
++ Add new data set, `DE_GSE8057`, which contains DE genes obtained from GSE8057 (2020-03-08, Mon)
+
 # clusterProfiler 3.99.0
 
 + Add KEGG enrichment analysis of Human Gut Microbiome data (2021-02-20, Sat)
