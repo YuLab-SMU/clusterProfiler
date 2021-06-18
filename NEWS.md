@@ -1,6 +1,14 @@
+# clusterProfiler 3.99.1
+
++ Add new data set, `DE_GSE8057`, which contains DE genes obtained from GSE8057 (2020-03-08, Mon)
+
+# clusterProfiler 3.99.0
+
++ Add KEGG enrichment analysis of Human Gut Microbiome data (2021-02-20, Sat)
+
 # clusterProfiler 3.19.1
 
-+ setting default timeout to 300 for downloads (2021-04-05, Fri)
++ setting default timeout to 300 for downloads (2021-02-05, Fri)
 + fixed download method setting 
 + capable of setting KEGG download method via `options(clusterProfiler.download.method = METHOD)` (2020-12-31, Thu)
 

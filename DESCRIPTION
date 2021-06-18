@@ -2,10 +2,12 @@ Package: clusterProfiler
 Type: Package
 Title: statistical analysis and visualization of functional profiles for
     genes and gene clusters
-Version: 3.19.1
+Version: 4.1.0
 Authors@R: c(
     person(given = "Guangchuang", family = "Yu",        email = "guangchuangyu@gmail.com",   role  = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
     person(given = "Li-Gen",      family = "Wang",      email = "reeganwang020@gmail.com",   role  = "ctb"),
+    person(given = "Erqiang",     family = "Hu",        email = "13766876214@163.com",       role = "ctb"),
+    person(given = "Meijun",      family = "Chen",      email = "mjchen1996@outlook.com",    role  = "ctb"),
     person(given = "Giovanni",    family = "Dall'Olio", email = "giovanni.dallolio@upf.edu", role = "ctb",                   comment = "formula interface of compareCluster")
 		)
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
@@ -33,6 +35,7 @@ Imports:
 Suggests:
     AnnotationHub,
     knitr,
+    rmarkdown,
     org.Hs.eg.db,
     prettydoc,
     ReactomePA,
