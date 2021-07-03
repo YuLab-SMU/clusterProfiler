@@ -22,12 +22,12 @@ citEntry(entry  ="ARTICLE",
          year    = "2021",
          volume  = "2",
          number  = "",
-         pages   = "",
+         pages   = "100141",
          PMID    = "",
          doi     = "10.1016/j.xinn.2021.100141",
          textVersion = paste("Wu, T., Hu, E., Xu, S., Chen, M., Guo, P., Dai, Z., Feng, T., Zhou, L.", 
                              "Tang, W., Zhan, L., Fu, X., Liu, S., Bo, X., Yu, G.", 
                              "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data.", 
-                             "The Innovation. 2021, doi: 10.1016/j.xinn.2021.1001417")
+                             "The Innovation. 2021, doi: 10.1016/j.xinn.2021.100141")
             
          )
