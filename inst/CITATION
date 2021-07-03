@@ -1,21 +1,33 @@
-citHeader("Please cite G. Yu (2012) for using clusterProfiler. In addition, please cite G. Yu (2010) when using GOSemSim, G. Yu (2015) when using DOSE and G. Yu (2015) when using ChIPseeker.")
+citHeader("Please cite W. Zhi (2021) for using clusterProfiler. In addition, please cite G. Yu (2010) when using GOSemSim, G. Yu (2015) when using DOSE and G. Yu (2015) when using ChIPseeker.")
 
 citEntry(entry  ="ARTICLE",
-         title  = "clusterProfiler: an R package for comparing biological themes among gene clusters",
+         title  = "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data",
          author = personList(
-             as.person("Guangchuang Yu"),
-             as.person("Li-Gen Wang"),
-             as.person("Yanyan Han"),
-             as.person("Qing-Yu He")
+             as.person("Tianzhi Wu"),
+             as.person("Erqiang Hu"),
+             as.person("Shuangbin Xu"),
+             as.person("Meijun Chen"),
+             as.person("Pingfan Guo"),
+             as.person("Zehan Dai"),
+             as.person("Tingze Feng"),
+             as.person("Lang Zhou"),
+             as.person("Wenli Tang"),
+             as.person("Li Zhan"),
+             as.person("xiaochong Fu"),
+             as.person("Shanshan Liu"),
+             as.person("Xiaochen Bo"),
+             as.person("Guangchuang Yu")
              ),
-         journal = "OMICS: A Journal of Integrative Biology",
-         year    = "2012",
-         volume  = "16",
-         number  = "5",
-         pages   = "284-287",
-         PMID    = "22455463",
-         doi     = "10.1089/omi.2011.0118",
-         textVersion = paste("Guangchuang Yu, Li-Gen Wang, Yanyan Han and Qing-Yu He.",
-             "clusterProfiler: an R package for comparing biological themes among gene clusters.",
-             "OMICS: A Journal of Integrative Biology 2012, 16(5):284-287")
+         journal = "The Innovation",
+         year    = "2021",
+         volume  = "2",
+         number  = "",
+         pages   = "",
+         PMID    = "",
+         doi     = "10.1016/j.xinn.2021.100141",
+         textVersion = paste("Wu, T., Hu, E., Xu, S., Chen, M., Guo, P., Dai, Z., Feng, T., Zhou, L.", 
+                             "Tang, W., Zhan, L., Fu, X., Liu, S., Bo, X., Yu, G.", 
+                             "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data.", 
+                             "The Innovation. 2021, doi: 10.1016/j.xinn.2021.1001417")
+            
          )

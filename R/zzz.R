@@ -2,8 +2,7 @@
 .onAttach <- function(libname, pkgname) {
     pkgVersion <- packageDescription(pkgname, fields="Version")
     msg <- paste0(pkgname, " v", pkgVersion, "  ",
-                  "For help: https://guangchuangyu.github.io/software/", pkgname, "\n\n")
-
+                  "For help: https://yulab-smu.top/biomedical-knowledge-mining-book/", "\n\n")
     if (capabilities("libcurl")) {
         dl.method <- "libcurl"
     } else {
@@ -14,10 +13,10 @@
     options(timeout = max(300, getOption("timeout"))) # see ?download.file
     
     citation <- paste0("If you use ", pkgname, " in published research, please cite:\n",
-                       "Guangchuang Yu, Li-Gen Wang, Yanyan Han, Qing-Yu He. ",
-                       "clusterProfiler: an R package for comparing biological themes among gene clusters. ",
-                       "OMICS: A Journal of Integrative Biology. 2012, 16(5):284-287.")
-
+                       "Wu, T., Hu, E., Xu, S., Chen, M., Guo, P., Dai, Z., Feng, T., Zhou, L. ", 
+                       "Tang, W., Zhan, L., Fu, X., Liu, S., Bo, X., Yu, G. ", 
+                       "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data. ", 
+                       "The Innovation. 2021, doi: 10.1016/j.xinn.2021.100141.")
     packageStartupMessage(paste0(msg, citation))
 }
 
