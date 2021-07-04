@@ -8,7 +8,7 @@ html_preview: false
 
 ```{r echo=FALSE, results="hide", message=FALSE}
 library("badger")
-library("ypages")
+# library("ypages")
 ```
 
 
