@@ -15,7 +15,7 @@
     
     citation <- paste0("If you use ", pkgname, " in published research, please cite:\n",
                        "T Wu, E Hu, S Xu, M Chen, P Guo, Z Dai, T Feng, L Zhou, ",
-                       "W Tang, L Zhan, X Fu, S Liu, X Bo*, and G Yu. ", 
+                       "W Tang, L Zhan, X Fu, S Liu, X Bo, and G Yu. ", 
                        "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data. ", 
                        "The Innovation. 2021, doi: 10.1016/j.xinn.2021.100141")
                        
