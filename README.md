@@ -6,7 +6,7 @@
 state and is being actively
 developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![](https://img.shields.io/badge/release%20version-4.0.0-green.svg)](https://www.bioconductor.org/packages/clusterProfiler)
-[![](https://img.shields.io/badge/devel%20version-4.1.0-green.svg)](https://github.com/guangchuangyu/clusterProfiler)
+[![](https://img.shields.io/badge/devel%20version-4.1.0.991-green.svg)](https://github.com/guangchuangyu/clusterProfiler)
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
 
 [![platform](http://www.bioconductor.org/shields/availability/devel/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#archives)
@@ -47,7 +47,7 @@ School of Basic Medical Sciences, Southern Medical University
 Please cite the following article when using `clusterProfiler`:
 
 ***Wu T***, ***Hu, E***, Xu S, Chen M, Guo P, Dai Z, Feng T, Zhou L,
-"Tang W, Zhan L, Fu X, Liu S, Bo X<sup>\*</sup> and Yu G<sup>\*</sup>.
+Tang W, Zhan L, Fu X, Liu S, Bo X<sup>\*</sup> and Yu G<sup>\*</sup>.
 clusterProfiler 4.0: A universaltool for interpreting omics data. The
 Innovation. 2021, <doi:10.1016/j.xinn.2021.100141>.
 

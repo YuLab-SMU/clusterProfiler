@@ -59,7 +59,7 @@ School of Basic Medical Sciences, Southern Medical University
 Please cite the following article when using `clusterProfiler`:
 
 __*Wu T*__, __*Hu, E*__, Xu S, Chen M, Guo P, Dai Z, Feng T, Zhou L, 
-"Tang W, Zhan L, Fu X, Liu S, Bo X^\*^ and Yu G^\*^. 
+Tang W, Zhan L, Fu X, Liu S, Bo X^\*^ and Yu G^\*^. 
 clusterProfiler 4.0: A universaltool for interpreting omics data. 
 The Innovation. 2021, doi:10.1016/j.xinn.2021.100141.
 
