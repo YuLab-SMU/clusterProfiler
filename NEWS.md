@@ -1,3 +1,12 @@
+# clusterProfiler 4.0.1
+
++ add citation (new paper published on The Innovation) (2021-07-04, Sun)
+
+# clusterProfiler 4.0.0
+
++ Bioconductor 3.13 release
+
+
 # clusterProfiler 3.99.1
 
 + Add new data set, `DE_GSE8057`, which contains DE genes obtained from GSE8057 (2020-03-08, Mon)

@@ -1,14 +1,7 @@
----
-output:
-  md_document:
-    variant: gfm
-html_preview: false
----
-
 
 ```{r echo=FALSE, results="hide", message=FALSE}
 library("badger")
-library("ypages")
+#library("ypages")
 ```
 
 
@@ -46,7 +39,7 @@ Guangchuang YU
 
 School of Basic Medical Sciences, Southern Medical University
 
-<https://guangchuangyu.github.io>
+<https://yulab-smu.top>
 
 
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?hashtags=clusterProfiler&url=http://online.liebertpub.com/doi/abs/10.1089/omi.2011.0118&screen_name=guangchuangyu)
@@ -58,16 +51,20 @@ School of Basic Medical Sciences, Southern Medical University
 
 Please cite the following article when using `clusterProfiler`:
 
-__*Yu G*__, Wang L, Han Y and He Q^\*^. clusterProfiler: an R package for comparing biological themes among gene clusters. OMICS: A Journal of Integrative Biology. 2012, 16(5):284-287.
+T Wu<sup>#</sup>, E Hu<sup>#</sup>, S Xu, M Chen, P Guo, Z Dai, T Feng, L Zhou, W Tang, L Zhan, X Fu, S Liu, X Bo<sup>\*</sup>, and **G Yu**<sup>\*</sup>. clusterProfiler 4.0: A universal enrichment tool for interpreting omics data. **_The Innovation_**. 2021. doi: <https://doi.org/10.1016/j.xinn.2021.100141>
 
 
-`r badge_custom("1st most cited paper", "in OMICS", "green",
-  "http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi")`
-`r badge_custom("ESI", "Highly Cited Paper", "green")`
-`r badge_doi("10.1089/omi.2011.0118", "green")`
 
 
 <!--
+
+
+
+ r badge_custom("1st most cited paper", "in OMICS", "green",
+  "http://online.liebertpub.com/action/showMostCitedArticles?journalCode=omi")`
+ r badge_custom("ESI", "Highly Cited Paper", "green")`
+ r badge_doi("10.1089/omi.2011.0118", "green")`
+
 
 ------------------------------------------------------------------------
 

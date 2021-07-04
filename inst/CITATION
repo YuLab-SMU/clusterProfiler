@@ -1,4 +1,36 @@
-citHeader("Please cite G. Yu (2012) for using clusterProfiler. In addition, please cite G. Yu (2010) when using GOSemSim, G. Yu (2015) when using DOSE and G. Yu (2015) when using ChIPseeker.")
+citHeader("Please cite T. Wu (2021) for using clusterProfiler. In addition, please cite G. Yu (2010) when using GOSemSim, G. Yu (2015) when using DOSE and G. Yu (2015) when using ChIPseeker.")
+
+
+citEntry(entry  ="ARTICLE",
+         title  = "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data",
+         author = personList(
+             as.person("Tianzhi Wu"),
+             as.person("Erqiang Hu"),
+             as.person("Shuangbin Xu"),
+             as.person("Meijun Chen"),
+             as.person("Pingfan Guo"),
+             as.person("Zehan Dai"),
+             as.person("Tingze Feng"),
+             as.person("Lang Zhou"),
+             as.person("Wenli Tang"),
+             as.person("Li Zhan"),
+             as.person("xiaochong Fu"),
+             as.person("Shanshan Liu"),
+             as.person("Xiaochen Bo"),
+             as.person("Guangchuang Yu")
+             ),
+         journal = "The Innovation",
+         year    = "2021",
+         volume  = "2",
+         number  = "3",
+         pages   = "100141",
+         PMID    = "",
+         doi     = "10.1016/j.xinn.2021.100141",
+         textVersion = paste("T Wu, E Hu, S Xu, M Chen, P Guo, Z Dai, T Feng, L Zhou,",
+                             "W Tang, L Zhan, X Fu, S Liu, X Bo*, and G Yu.", 
+                             "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data.", 
+                             "The Innovation. 2021, doi: 10.1016/j.xinn.2021.100141")
+         )
 
 citEntry(entry  ="ARTICLE",
          title  = "clusterProfiler: an R package for comparing biological themes among gene clusters",
