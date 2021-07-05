@@ -2,7 +2,7 @@
 .onAttach <- function(libname, pkgname) {
     pkgVersion <- packageDescription(pkgname, fields="Version")
     msg <- paste0(pkgname, " v", pkgVersion, "  ",
-                  "For help: https://yulab-smu.top/biomedical-knowledge-mining-book/", pkgname, "\n\n")
+                  "For help: https://yulab-smu.top/biomedical-knowledge-mining-book/", "\n\n")
 
     if (capabilities("libcurl")) {
         dl.method <- "libcurl"
