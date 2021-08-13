@@ -22,12 +22,32 @@ browseKEGG <- function(x, pathID) {
 ##' @param str string
 ##' @param by one of 'kegg.code', 'scientific_name' and 'common_name'
 ##' @param ignore.case TRUE or FALSE
+##' @param use_internal_data logical, use kegg_species.rda or latest online KEGG data
 ##' @return data.frame
 ##' @export
 ##' @author Guangchuang Yu
-search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE) {
-    by <- match.arg(by, c("kegg_code", "scientific_name", "common_name"))
-    kegg_species <- kegg_species_data()
+search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE, 
+                                 use_internal_data = TRUE) {
+    if (use_internal_data) {
+        by <- match.arg(by, c("kegg_code", "scientific_name", "common_name"))
+        kegg_species <- kegg_species_data() 
+        # Message <- paste("You are using the internal data. ",
+        #               "If you want to use the latest data",
+        #               "and your internet speed is fast enough, ",
+        #                "please set use_internal_data = FALSE")
+        # message(Message)
+    } else {
+        url <- "http://rest.kegg.jp/list/organism"
+        species <- data.table::fread(url, fill = TRUE, sep = "\t", header = F)
+        class(species) <- "data.frame"
+        species <- species[, -1]
+        scientific_name <- gsub(" \\(.*", "", species[,2])
+        common_name <- gsub(".*\\(", "", species[,2])
+        common_name <- gsub("\\)", "", common_name)
+        kegg_species <- data.frame(kegg_code = species[, 1], 
+                                    scientific_name = scientific_name, 
+                                    common_name = common_name)
+    }
     idx <- grep(str, kegg_species[, by], ignore.case = ignore.case)
     kegg_species[idx,]
 }
@@ -37,6 +57,7 @@ kegg_species_data <- function() {
     utils::data(list="kegg_species", package="clusterProfiler")
     get("kegg_species", envir = .GlobalEnv)
 }
+
 
 get_kegg_species <- function() {
     pkg <- "XML"

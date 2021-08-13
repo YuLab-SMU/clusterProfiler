@@ -19,13 +19,12 @@
 ##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
 ##' @examples
-##'
-##' 	data(geneList, package='DOSE')
+##' \dontrun{
+##'   data(geneList, package='DOSE')
 ##'   de <- names(geneList)[1:100]
-##' 	yy <- enrichKEGG(de, pvalueCutoff=0.01)
-##' 	head(yy)
-##'
-##'
+##'   yy <- enrichKEGG(de, pvalueCutoff=0.01)
+##'   head(yy)
+##' }
 enrichKEGG <- function(gene,
                        organism          = "hsa",
                        keyType           = "kegg",
