@@ -38,8 +38,7 @@ search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE,
         # message(Message)
     } else {
         url <- "http://rest.kegg.jp/list/organism"
-        species <- data.table::fread(url, fill = TRUE, sep = "\t", header = F)
-        class(species) <- "data.frame"
+        species <- read.table(url, fill = TRUE, sep = "\t", header = F, quote = "")
         species <- species[, -1]
         scientific_name <- gsub(" \\(.*", "", species[,2])
         common_name <- gsub(".*\\(", "", species[,2])

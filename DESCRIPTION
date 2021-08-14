@@ -39,8 +39,7 @@ Suggests:
     org.Hs.eg.db,
     prettydoc,
     ReactomePA,
-    testthat,
-    data.table
+    testthat
 VignetteBuilder: knitr
 ByteCompile: true
 License: Artistic-2.0

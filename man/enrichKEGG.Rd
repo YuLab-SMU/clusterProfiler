@@ -49,13 +49,12 @@ Given a vector of genes, this function will return the enrichment KEGG
 categories with FDR control.
 }
 \examples{
-
-	data(geneList, package='DOSE')
+\dontrun{
+  data(geneList, package='DOSE')
   de <- names(geneList)[1:100]
-	yy <- enrichKEGG(de, pvalueCutoff=0.01)
-	head(yy)
-
-
+  yy <- enrichKEGG(de, pvalueCutoff=0.01)
+  head(yy)
+}
 }
 \seealso{
 \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
