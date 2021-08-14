@@ -1,6 +1,6 @@
 # clusterProfiler 4.0.1.991
 
-+ update kegg_species.rda and allow online download (2021-08-14, Sat)
++ update kegg_species.rda and allow online download using KEGG api (2021-08-14, Sat)
 
 # clusterProfiler 4.0.1
 
@@ -9,7 +9,6 @@
 # clusterProfiler 4.0.0
 
 + Bioconductor 3.13 release
-
 
 # clusterProfiler 3.99.1
 
