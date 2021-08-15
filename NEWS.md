@@ -1,3 +1,7 @@
+# clusterProfiler 4.0.2.991
+
++ Remove Human Gut Microbiome dataset as the functionalities are provided in <https://github.com/YuLab-SMU/MicrobiomeProfiler> (2021-08-15, Sun)
+
 # clusterProfiler 4.0.2
 
 + update citation and DESCRIPTION (2021-08-15, Sun)
