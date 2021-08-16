@@ -6,7 +6,7 @@
 state and is being actively
 developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![](https://img.shields.io/badge/release%20version-4.0.2-green.svg)](https://www.bioconductor.org/packages/clusterProfiler)
-[![](https://img.shields.io/badge/devel%20version-4.1.2-green.svg)](https://github.com/guangchuangyu/clusterProfiler)
+[![](https://img.shields.io/badge/devel%20version-4.1.3-green.svg)](https://github.com/guangchuangyu/clusterProfiler)
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
 
 [![platform](http://www.bioconductor.org/shields/availability/devel/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#archives)
@@ -19,7 +19,7 @@ Status](https://img.shields.io/appveyor/ci/Guangchuangyu/clusterProfiler/master.
 [![codecov](https://codecov.io/gh/GuangchuangYu/clusterProfiler/branch/master/graph/badge.svg)](https://codecov.io/gh/GuangchuangYu/clusterProfiler/)
 
 <!--
-[![Last-changedate](https://img.shields.io/badge/last%20change-2021--08--15-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2021--08--16-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
 -->
 
 -   [clusterProfiler](http://bioconductor.org/packages/clusterProfiler)
@@ -59,9 +59,9 @@ published research, please cite the most appropriate paper(s) from this
 list:
 
 1.  T Wu<sup>#</sup>, E Hu<sup>#</sup>, S Xu, M Chen, P Guo, Z Dai, T
-    Feng, L Zhou, W Tang, L Zhan, X Fu, S Liu, X Bo<sup>\*</sup>, and
-    **G Yu**<sup>\*</sup>. clusterProfiler 4.0: A universal enrichment
-    tool for interpreting omics data. ***The Innovation***. 2021,
+    Feng, L Zhou, W Tang, L Zhan, X Fu, S Liu, X Bo<sup>\*</sup>, **G
+    Yu**<sup>\*</sup>. clusterProfiler 4.0: A universal enrichment tool
+    for interpreting omics data. ***The Innovation***. 2021,
     2(3):100141. doi:
     [10.1016/j.xinn.2021.100141](https://doi.org/10.1016/j.xinn.2021.100141)
 2.  **G Yu**<sup>\*</sup>. Gene Ontology Semantic Similarity Analysis
