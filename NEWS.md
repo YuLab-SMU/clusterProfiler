@@ -1,5 +1,10 @@
-# clusterProfiler 4.0.1.991
+# clusterProfiler 4.0.3
 
++ Remove Human Gut Microbiome dataset as the functionalities are provided in <https://github.com/YuLab-SMU/MicrobiomeProfiler> (2021-08-15, Sun)
+
+# clusterProfiler 4.0.2
+
++ update citation and DESCRIPTION (2021-08-15, Sun)
 + update kegg_species.rda and allow online download using KEGG api (2021-08-14, Sat)
 
 # clusterProfiler 4.0.1
