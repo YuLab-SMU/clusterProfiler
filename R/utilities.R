@@ -57,6 +57,6 @@ removeEmptyEntry.list <- function(x) {
 
 GSEA_internal <- DOSE:::GSEA_internal
 enricher_internal <- DOSE:::enricher_internal
-get_fun_from_pkg <- rvcheck:::get_fun_from_pkg
+get_fun_from_pkg <- yulab.utils:::get_fun_from_pkg
 
 globalVariables(".")
