@@ -38,8 +38,7 @@ search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE,
         # message(Message)
     } else {
         url <- "http://rest.kegg.jp/list/organism"
-        species <- data.table::fread(url, fill = TRUE, sep = "\t", header = F)
-        class(species) <- "data.frame"
+        species <- read.table(url, fill = TRUE, sep = "\t", header = F, quote = "")
         species <- species[, -1]
         scientific_name <- gsub(" \\(.*", "", species[,2])
         common_name <- gsub(".*\\(", "", species[,2])
@@ -59,51 +58,51 @@ kegg_species_data <- function() {
 }
 
 
-get_kegg_species <- function() {
-    pkg <- "XML"
-    requireNamespace(pkg)
-    readHTMLTable <- eval(parse(text="XML::readHTMLTable"))
-    x <- readHTMLTable("http://www.genome.jp/kegg/catalog/org_list.html")
+## get_kegg_species <- function() {
+##     pkg <- "XML"
+##     requireNamespace(pkg)
+##     readHTMLTable <- eval(parse(text="XML::readHTMLTable"))
+##     x <- readHTMLTable("http://www.genome.jp/kegg/catalog/org_list.html")
 
-    y <- get_species_name(x[[2]], "Eukaryotes")
-    y2 <- get_species_name(x[[3]], 'Prokaryotes')
+##     y <- get_species_name(x[[2]], "Eukaryotes")
+##     y2 <- get_species_name(x[[3]], 'Prokaryotes')
 
-    sci_name <- gsub(" \\(.*$", '', y[,2])
-    com_name <- gsub("[^\\(]+ \\(([^\\)]+)\\)$", '\\1', y[,2])
-    eu <- data.frame(kegg_code=unlist(y[,1]),
-                     scientific_name = sci_name,
-                     common_name = com_name,
-                     stringsAsFactors = FALSE)
-    pr <- data.frame(kegg_code=unlist(y2[,1]),
-                     scientific_name = unlist(y2[,2]),
-                     common_name = NA,
-                     stringsAsFactors = FALSE)
-    kegg_species <- rbind(eu, pr)
-    save(kegg_species, file="kegg_species.rda")
-    invisible(kegg_species)
-}
+##     sci_name <- gsub(" \\(.*$", '', y[,2])
+##     com_name <- gsub("[^\\(]+ \\(([^\\)]+)\\)$", '\\1', y[,2])
+##     eu <- data.frame(kegg_code=unlist(y[,1]),
+##                      scientific_name = sci_name,
+##                      common_name = com_name,
+##                      stringsAsFactors = FALSE)
+##     pr <- data.frame(kegg_code=unlist(y2[,1]),
+##                      scientific_name = unlist(y2[,2]),
+##                      common_name = NA,
+##                      stringsAsFactors = FALSE)
+##     kegg_species <- rbind(eu, pr)
+##     save(kegg_species, file="kegg_species.rda")
+##     invisible(kegg_species)
+## }
 
-get_species_name <- function(y, table) {
-    idx <- get_species_name_idx(y, table)
-    t(sapply(1:nrow(idx), function(i) {
-        y[] = lapply(y, as.character)
-        y[i, idx[i,]]
-    }))
-}
+## get_species_name <- function(y, table) {
+##     idx <- get_species_name_idx(y, table)
+##     t(sapply(1:nrow(idx), function(i) {
+##         y[] = lapply(y, as.character)
+##         y[i, idx[i,]]
+##     }))
+## }
 
 
-get_species_name_idx <- function(y, table='Eukaryotes') {
-    table <- match.arg(table, c("Eukaryotes", "Prokaryotes"))
-    t(apply(y, 1, function(x) {
-        ii <- which(!is.na(x))
-        n <- length(ii)
-        if (table == "Eukaryotes") {
-            return(ii[(n-2):(n-1)])
-        } else {
-            return(ii[(n-3):(n-2)])
-        }
-    }))
-}
+## get_species_name_idx <- function(y, table='Eukaryotes') {
+##     table <- match.arg(table, c("Eukaryotes", "Prokaryotes"))
+##     t(apply(y, 1, function(x) {
+##         ii <- which(!is.na(x))
+##         n <- length(ii)
+##         if (table == "Eukaryotes") {
+##             return(ii[(n-2):(n-1)])
+##         } else {
+##             return(ii[(n-3):(n-2)])
+##         }
+##     }))
+## }
 
 ##' @importFrom downloader download
 kegg_rest <- function(rest_url) {

@@ -9,6 +9,7 @@
 ##' @param useFullNames logical
 ##' @param ... additional parameter of showSigOfNodes, please refer to topGO
 ##' @return GO DAG graph
+##' @importFrom yulab.utils get_fun_from_pkg
 ## @importClassesFrom topGO topGOdata
 ## @importFrom topGO showSigOfNodes
 ## @importFrom topGO annFUN.gene2GO

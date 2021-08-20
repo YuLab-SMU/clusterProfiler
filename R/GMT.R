@@ -5,7 +5,6 @@
 ##' @rdname read-gmt
 ##' @param gmtfile gmt file
 ##' @importFrom utils stack
-##' @importFrom rvcheck get_fun_from_pkg
 ##' @export
 ##' @return data.frame
 ##' @author Guangchuang Yu

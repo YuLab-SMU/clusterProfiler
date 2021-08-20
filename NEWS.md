@@ -1,15 +1,23 @@
-# clusterProfiler 4.0.1.991
+# clusterProfiler 4.1.3.991
 
-+ update kegg_species.rda and allow online download (2021-08-14, Sat)
++ import `yulab.utils` (2021-08-20, Fri)
 
-# clusterProfiler 4.0.1
+# clusterProfiler 4.1.3
+
++ Remove Human Gut Microbiome dataset as the functionalities are provided in <https://github.com/YuLab-SMU/MicrobiomeProfiler> (2021-08-15, Sun)
+
+# clusterProfiler 4.1.2
+
++ update citation and DESCRIPTION (2021-08-15, Sun)
++ update kegg_species.rda and allow online download using KEGG api (2021-08-14, Sat)
+
+# clusterProfiler 4.1.1
 
 + add citation (new paper published on The Innovation) (2021-07-04, Sun)
 
 # clusterProfiler 4.0.0
 
 + Bioconductor 3.13 release
-
 
 # clusterProfiler 3.99.1
 
