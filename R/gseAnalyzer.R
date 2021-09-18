@@ -37,7 +37,7 @@ gseGO <- function(geneList,
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
-
+    OrgDb <- load_OrgDb(OrgDb)
     GO_DATA <- get_GO_data(OrgDb, ont, keyType)
 
     res <-  GSEA_internal(geneList      = geneList,
