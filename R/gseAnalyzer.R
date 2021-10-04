@@ -58,7 +58,7 @@ gseGO <- function(geneList,
     if (is.null(res))
         return(res)
 
-    res@organism <- AnnotationDbi::species(OrgDb)
+    res@organism <- get_organism(OrgDb)
     res@setType <- ont
     res@keytype <- keyType
 
