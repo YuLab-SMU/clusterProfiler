@@ -41,7 +41,7 @@ Suggests:
 VignetteBuilder: knitr
 ByteCompile: true
 License: Artistic-2.0
-URL: https://yulab-smu.top/biomedical-knowledge-mining-book/
+URL: https://yulab-smu.top/biomedical-knowledge-mining-book/ (docs), https://doi.org/10.1016/j.xinn.2021.100141 (paper)
 BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
 biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,
