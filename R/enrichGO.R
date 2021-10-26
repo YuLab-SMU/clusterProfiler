@@ -12,6 +12,8 @@
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param readable whether mapping gene ID to gene Name
 ##' @param pool If ont='ALL', whether pool 3 GO sub-ontologies
+##' @param simplify a logical value indicating whether output from enrichGO should be simplified.
+##' @param ... further arguments passed to simplify methods.
 ##' @return An \code{enrichResult} instance.
 ##' @importClassesFrom DOSE enrichResult
 ##' @importFrom DOSE setReadable
@@ -24,6 +26,8 @@
 ##'   data(geneList, package = "DOSE")
 ##' 	de <- names(geneList)[1:100]
 ##' 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
+##' 	# if output from enrichGO should be simplified
+##' 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01, simplify = TRUE)
 ##' 	head(yy)
 ##' }
 enrichGO <- function(gene,
@@ -36,7 +40,7 @@ enrichGO <- function(gene,
                      qvalueCutoff = 0.2,
                      minGSSize = 10,
                      maxGSSize = 500,
-                     readable=FALSE, pool=FALSE) {
+                     readable=FALSE, pool=FALSE, simplify = FALSE, ...) {
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
@@ -56,6 +60,10 @@ enrichGO <- function(gene,
         lres <- lres[!vapply(lres, is.null, logical(1))]
         if (length(lres) == 0)
             return(NULL)
+        
+        if (simplify) {
+            lres <- lapply(lres, function(x) clusterProfiler::simplify(x,...))
+        }
 
         df <- do.call('rbind', lapply(lres, as.data.frame))
         geneSets <- lres[[1]]@geneSets
@@ -88,6 +96,10 @@ enrichGO <- function(gene,
         res <- setReadable(res, OrgDb)
     }
     res@ontology <- ont
+    
+    if (ont != "ALL" & simplify) {
+        res <- clusterProfiler::simplify(res,...)
+    }
 
     if (ont == "ALL") {
         res <- add_GO_Ontology(res, GO_DATA)

@@ -18,7 +18,9 @@ enrichGO(
   minGSSize = 10,
   maxGSSize = 500,
   readable = FALSE,
-  pool = FALSE
+  pool = FALSE,
+  simplify = FALSE,
+  ...
 )
 }
 \arguments{
@@ -45,6 +47,10 @@ enrichGO(
 \item{readable}{whether mapping gene ID to gene Name}
 
 \item{pool}{If ont='ALL', whether pool 3 GO sub-ontologies}
+
+\item{simplify}{a logical value indicating whether output from enrichGO should be simplified.}
+
+\item{...}{further arguments passed to simplify methods.}
 }
 \value{
 An \code{enrichResult} instance.
