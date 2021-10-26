@@ -27,7 +27,7 @@
 ##' 	de <- names(geneList)[1:100]
 ##' 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
 ##' 	# if output from enrichGO should be simplified
-##' 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01, simplify = TRUE)
+##' 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="ALL", pvalueCutoff=0.01, simplify = TRUE)
 ##' 	head(yy)
 ##' }
 enrichGO <- function(gene,
