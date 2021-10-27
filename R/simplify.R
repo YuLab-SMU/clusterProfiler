@@ -21,13 +21,25 @@
 ##' @author Guangchuang Yu
 setMethod("simplify", signature(x="enrichResult"),
           function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData = NULL) {
-              if (!x@ontology %in% c("BP", "MF", "CC"))
-                  stop("simplify only applied to output from gsegO and enrichGO...")
-
-
-              x@result  <-  simplify_internal(as.data.frame(x), cutoff,
-                                              by, select_fun, measure,
-                                              x@ontology, semData)
+              # if (!x@ontology %in% c("BP", "MF", "CC", "GOALL"))
+              #     stop("simplify only applied to output from gsegO and enrichGO...")
+              
+              if (x@ontology %in% c("BP", "MF", "CC")) {
+                  x@result  <-  simplify_internal(as.data.frame(x), cutoff,
+                                                  by, select_fun, measure,
+                                                  x@ontology, semData)
+              } else if (x@ontology == "GOALL") {
+                  dat <- as.data.frame(x)
+                  dats <- lapply(unique(dat[,"ONTOLOGY"]), function(x)
+                      simplify_internal(dat[dat[,"ONTOLOGY"] == x,], cutoff,
+                                        by, select_fun, measure,
+                                        x, semData)
+                  )
+                  names(dats) <- unique(dat[,"ONTOLOGY"])
+                  x@result <- do.call(rbind,dats)
+              } else {
+                stop("simplify only applied to output from gsegO and enrichGO...")
+              }
 
               return(x)
           }
