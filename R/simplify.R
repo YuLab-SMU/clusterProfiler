@@ -1,5 +1,3 @@
-
-
 ##' simplify output from enrichGO and gseGO by removing redundancy of enriched GO terms
 ##'
 ##'
@@ -21,17 +19,23 @@
 ##' @author Guangchuang Yu
 setMethod("simplify", signature(x="enrichResult"),
           function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData = NULL) {
-              if (!x@ontology %in% c("BP", "MF", "CC"))
+              if (!x@ontology %in% c("BP", "MF", "CC", "GOALL"))
                   stop("simplify only applied to output from gsegO and enrichGO...")
-
-
-              x@result  <-  simplify_internal(as.data.frame(x), cutoff,
-                                              by, select_fun, measure,
-                                              x@ontology, semData)
-
+              res <- as.data.frame(x)
+              if (x@ontology == "GOALL") {
+                  x@result <- simplify_ALL(res = res, cutoff = cutoff, by = by,
+                      select_fun = select_fun, measure = measure,
+                      semData = semData)
+              } else {
+                  x@result <- simplify_internal(res = res, cutoff = cutoff,
+                                    by = by, select_fun = select_fun, 
+                                    measure = measure,
+                                    ontology = x@ontology, 
+                                    semData = semData)                      
+              }
               return(x)
           }
-          )
+)
 
 ##' @rdname simplify-methods
 ##' @exportMethod simplify
@@ -41,12 +45,20 @@ setMethod("simplify", signature(x="enrichResult"),
 ##' @author Gwang-Jin Kim and Guangchuang Yu
 setMethod("simplify", signature(x="gseaResult"),
           function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData=NULL) {
-            if (!x@setType %in% c("BP", "MF", "CC"))
+            if (!x@setType %in% c("BP", "MF", "CC", "GOALL"))
               stop("simplify only applied to output from gseGO and enrichGO...")
-
-            x@result  <- simplify_internal(as.data.frame(x), cutoff,
-                                            by, select_fun, measure,
-                                            x@setType, semData)
+            res <- as.data.frame(x)
+            if (x@setType == "GOALL") {
+                x@result <- simplify_ALL(res = res, cutoff = cutoff, by = by,
+                                select_fun = select_fun, measure = measure,
+                                semData = semData)
+              } else {
+                x@result <- simplify_internal(res = res, cutoff = cutoff,
+                                by = by, select_fun = select_fun, 
+                                measure = measure,
+                                ontology = x@setType, 
+                                semData = semData)
+              }
             return(x)
           }
 )
@@ -54,7 +66,8 @@ setMethod("simplify", signature(x="gseaResult"),
 ##' @importFrom GOSemSim mgoSim
 ##' @importFrom GOSemSim godata
 ##' @importFrom tidyr gather
-simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, measure="Rel", ontology, semData) {
+simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min, 
+                              measure="Rel", ontology, semData) {
     if (missing(semData) || is.null(semData)) {
         if (measure == "Wang") {
             semData <- godata(ont = ontology)
@@ -132,18 +145,44 @@ setMethod("simplify", signature(x="compareClusterResult"),
               ## to satisfy codetools in calling subset
               Cluster <- NULL
               lres <- lapply(unique(res$Cluster), function(cls) subset(res, Cluster == cls))
-
-              lres %<>% lapply(., simplify_internal,
-                               cutoff=cutoff,
-                               by = by,
-                               select_fun = select_fun,
-                               measure = measure,
-                               ontology = ont,
-                               semData = semData)
-
+              if (ont == "ALL") {
+                  lres %<>% lapply(., simplify_ALL,
+                      cutoff = cutoff, by = by,
+                      select_fun = select_fun,
+                      measure = measure,
+                      semData = semData)
+              } else {
+                  lres %<>% lapply(., simplify_internal,
+                                   cutoff=cutoff,
+                                   by = by,
+                                   select_fun = select_fun,
+                                   measure = measure,
+                                   ontology = ont,
+                                   semData = semData)
+              }
               x@compareClusterResult <- do.call("rbind", lres)
               return(x)
           }
-          )
+)
 
 
+##' @param data.frame of enrichment result 
+##' @param cutoff similarity cutoff
+##' @param by feature to select representative term, selected by 'select_fun' function
+##' @param select_fun function to select feature passed by 'by' parameter
+##' @param measure method to measure similarity
+##' @param semData GOSemSimDATA object
+##' @noRd
+simplify_ALL <- function(res, cutoff, by, select_fun, measure, semData) {
+    ONTOLOGY <- NULL
+    lres <- lapply(unique(res[, "ONTOLOGY"]), function(y)
+                      simplify_internal(dplyr::filter(res, ONTOLOGY == y),
+                          cutoff = cutoff,
+                          by = by,
+                          select_fun = select_fun,
+                          measure = measure,
+                          ontology = y,
+                          semData = NULL)
+                  )
+    do.call(rbind, lres)
+}

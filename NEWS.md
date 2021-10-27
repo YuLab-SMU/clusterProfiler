@@ -1,3 +1,7 @@
+# clusterProfiler 4.1.4.991
+
++ update `simplify` function to support `ont = ALL` (2021-10-27, Wed)
+
 # clusterProfiler 4.1.4
 
 + import `yulab.utils` (2021-08-20, Fri)
