@@ -15,6 +15,7 @@
 ##' @importFrom plyr ldply
 ##' @importFrom plyr dlply
 ##' @importFrom utils modifyList
+##' @importFrom rlang '%||%'
 ##' @importClassesFrom DOSE compareClusterResult
 ##' @export
 ##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
@@ -104,10 +105,12 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     if (is.null(keytype)) keytype <- "UNKNOWN"
     readable <- params[['readable']]
     if (length(readable) == 0) readable <- FALSE
-    
+
     res@keytype <- keytype
     res@readable <- as.logical(readable)
-    res@fun <- params[['fun']]
+
+    ## work-around for bug in extract_parameters -- it doesn't match default args
+    res@fun <- params[['fun']] %||% 'enrichGO'
 
     return(res)
 }
@@ -118,7 +121,7 @@ extract_params <- function(x) {
 
     y <- gsub('"', '', y) %>%
         ## sub(".*\\(", "", .) %>%
-        sub("[^\\(]+\\(", "", .) %>% 
+        sub("[^\\(]+\\(", "", .) %>%
         sub("\\)$", "", .) %>%
         gsub("\\s+", "", .)
 
