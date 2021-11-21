@@ -157,8 +157,14 @@ prepare_KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
 
 download.KEGG.Path <- function(species) {
     keggpathid2extid.df <- kegg_link(species, "pathway")
-    if (is.null(keggpathid2extid.df))
-        stop("'species' should be one of organisms listed in 'http://www.genome.jp/kegg/catalog/org_list.html'...")
+    if (is.null(keggpathid2extid.df)) {
+        message <- paste("Failed to download KEGG data.",
+                         "Wrong 'species' or the network is unreachable.",
+                         "The 'species' should be one of organisms listed in",
+                         "'http://www.genome.jp/kegg/catalog/org_list.html'")
+        stop(message)
+    }
+
     keggpathid2extid.df[,1] %<>% gsub("[^:]+:", "", .)
     keggpathid2extid.df[,2] %<>% gsub("[^:]+:", "", .)
 
@@ -179,7 +185,11 @@ download.KEGG.Path <- function(species) {
 download.KEGG.Module <- function(species) {
     keggmodule2extid.df <- kegg_link(species, "module")
     if (is.null(keggmodule2extid.df)) {
-        stop("'species' should be one of organisms listed in 'http://www.genome.jp/kegg/catalog/org_list.html'...")
+        message <- paste("Failed to download KEGG data.",
+                         "Wrong 'species' or the network is unreachable.",
+                         "The 'species' should be one of organisms listed in",
+                         "'http://www.genome.jp/kegg/catalog/org_list.html'")
+        stop(message)
     }
 
     keggmodule2extid.df[,1] %<>% gsub("[^:]+:", "", .) %>% gsub(species, "", .) %>% gsub("^_", "", .)
