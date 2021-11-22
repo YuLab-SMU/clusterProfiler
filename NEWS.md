@@ -1,5 +1,6 @@
-# clusterProfiler 4.3.0.991
+# clusterProfiler 4.3.0.992
 
++ update error message of `download.KEGG.Path` and `download.KEGG.Module`(2021-11-21, Sun)
 + update `simplify` function to support `ont = ALL` (2021-10-27, Wed)
 
 # clusterProfiler 4.2.0
