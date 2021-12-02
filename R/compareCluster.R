@@ -71,7 +71,8 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     clProf.df <- ldply(clProf, rbind)
 
     if (nrow(clProf.df) == 0) {
-        stop("No enrichment found in any of gene cluster, please check your input...")
+        warning("No enrichment found in any of gene cluster, please check your input...")
+        return(NULL)
     }
 
     #clProf.df <- dplyr::rename(clProf.df, c(.id="Cluster"))
