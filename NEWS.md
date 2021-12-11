@@ -1,5 +1,6 @@
-# clusterProfiler 4.3.0.992
+# clusterProfiler 4.3.0.993
 
++ support compareCluster with GSEA algorithm(2021-12-11, Sat)
 + update error message of `download.KEGG.Path` and `download.KEGG.Module`(2021-11-21, Sun)
 + update `simplify` function to support `ont = ALL` (2021-10-27, Wed)
 
