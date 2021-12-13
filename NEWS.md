@@ -1,17 +1,16 @@
+
 <!--
 
 TODO:
 
-+ support scientific notation in `gseaplot2`
-  - <https://github.com/YuLab-SMU/clusterProfiler/issues/335>
-+ GSEA in `compareCluster`
-  - <https://github.com/YuLab-SMU/clusterProfiler/issues/364#issuecomment-911083687>
-  
+
 -->
 
 
-# clusterProfiler 4.3.0.992
 
+# clusterProfiler 4.3.1
+
++ `compareCluster` supports GSEA algorithm (2021-12-11, Sat)
 + update error message of `download.KEGG.Path` and `download.KEGG.Module`(2021-11-21, Sun)
 + update `simplify` function to support `ont = ALL` (2021-10-27, Wed)
 
