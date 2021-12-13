@@ -1,3 +1,15 @@
+<!--
+
+TODO:
+
++ support scientific notation in `gseaplot2`
+  - <https://github.com/YuLab-SMU/clusterProfiler/issues/335>
++ GSEA in `compareCluster`
+  - <https://github.com/YuLab-SMU/clusterProfiler/issues/364#issuecomment-911083687>
+  
+-->
+
+
 # clusterProfiler 4.3.0.992
 
 + update error message of `download.KEGG.Path` and `download.KEGG.Module`(2021-11-21, Sun)
