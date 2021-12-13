@@ -3,6 +3,8 @@
 
 TODO:
 
++ Uniprot to KO, <https://www.biostars.org/p/415837/>
+  - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
 
 -->
 
