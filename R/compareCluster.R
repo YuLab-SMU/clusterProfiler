@@ -44,6 +44,13 @@
 ##' as.data.frame(xx.formula.twogroups)
 ##' }
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
+    fun.name <- fun
+    if (is.function(fun)) {
+        fun.name <- deparse(substitute(fun))
+        fun.name.ns <- strsplit(fun.name, "::")[[1]]
+        if (length(fun.name.ns) > 1)
+            fun.name <- fun.name.ns[2]
+    }
 
     if (is.character(fun)) {
         fun <- eval(parse(text=fun))
@@ -57,14 +64,12 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
             genes.var       = all.vars(geneClusters)[1]
             grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
             geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {
-                geneList <- x[[genes.var]]
-                if (is.numeric(geneList)) {
-                    if (!is.null(rownames(x)))
-                        names(geneList) <- rownames(x)
+                if (fun.name == "gseGO") {
+                    fc.var = all.vars(geneClusters)[2]
+                    structure(x[[fc.var]], names = x[[genes.var]])
                 } else {
-                    geneList <- as.character(geneList)
+                    as.character(x[[genes.var]])
                 }
-                geneList
             })
         }
     }
