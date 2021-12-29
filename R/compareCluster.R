@@ -56,7 +56,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         } else {
             genes.var       = all.vars(geneClusters)[1]
             grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
-            geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {as.character(x[[genes.var]])})
+            geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {x[[genes.var]]})
         }
     }
     clProf <- llply(geneClusters,
