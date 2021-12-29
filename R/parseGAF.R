@@ -10,9 +10,7 @@
 ##' @importFrom utils read.delim
 ##' @importFrom stats na.omit
 ##' @importFrom AnnotationDbi columns
-
 parse.GAF <- function(gafFile,nrows=-1){
-
   gafFile <-read.GAF(gafFile)
   extr.gafFile <- gafFile[,c( "DB_Object_ID","GOID")]
   requireNamespace('GO.db')
@@ -37,6 +35,7 @@ parse.GAF <- function(gafFile,nrows=-1){
   list(TERM2GENE = end.info[,c("GOID","DB_Object_ID")], TERM2NAME = need.anno[,c("GOID","TERM")])
   
 }
+
 ##' @importFrom utils read.delim
 read.GAF <- function(gafFile, nrows = -1) {
   cat("Reading ", gafFile, ": ", sep="")
