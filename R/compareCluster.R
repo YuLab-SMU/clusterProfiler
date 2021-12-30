@@ -4,7 +4,8 @@
 ##' cluster.
 ##'
 ##'
-##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type Entrez~group
+##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
+##' or a formula of type \code{Entrez | logFC ~ group} for "gseGO"
 ##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .
 ##' @param data if geneClusters is a formula, the data from which the clusters must be extracted.
 ##' @param ...  Other arguments.
