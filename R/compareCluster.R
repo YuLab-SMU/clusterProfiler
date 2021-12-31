@@ -45,13 +45,6 @@
 ##' as.data.frame(xx.formula.twogroups)
 ##' }
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
-    fun.name <- fun
-    if (is.function(fun)) {
-        fun.name <- deparse(substitute(fun))
-        fun.name.ns <- strsplit(fun.name, "::")[[1]]
-        if (length(fun.name.ns) > 1)
-            fun.name <- fun.name.ns[2]
-    }
 
     if (is.character(fun)) {
         fun <- eval(parse(text=fun))
@@ -62,14 +55,19 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         if (!is.data.frame(data)) {
             stop ('no data provided with formula for compareCluster')
         } else {
-            genes.var       = all.vars(geneClusters)[1]
+            genes.var = all.vars(geneClusters)[1]
+            n.var = length(all.vars(geneClusters))
             grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
+            n.group.var = length(all.vars(formula(grouping.formula)))
             geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {
-                if (fun.name == "gseGO") {
-                    fc.var = all.vars(geneClusters)[2]
-                    structure(x[[fc.var]], names = x[[genes.var]])
-                } else {
+                if ( (n.var - n.group.var) == 1 ) {
                     as.character(x[[genes.var]])
+                } else if ( (n.var - n.group.var) == 2 ) {
+                    fc.var = all.vars(geneClusters)[2]
+                    geneList = structure(x[[fc.var]], names = x[[genes.var]])
+                    sort(geneList, decreasing=TRUE)
+                } else {
+                    stop('only Entrez~group or Entrez|logFC~group type formula is supported')
                 }
             })
         }
