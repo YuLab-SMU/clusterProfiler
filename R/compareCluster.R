@@ -33,6 +33,7 @@
 ##' ## formula interface
 ##' mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
 ##'                             '100127206', '100128071'),
+##'                    logFC = c(1.1, -0.5, 5, 2.5, -3, 3),
 ##'                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
 ##'                    othergroup = c('good', 'good', 'bad', 'bad', 'good', 'bad'))
 ##' xx.formula <- compareCluster(Entrez~group, data=mydf,
@@ -43,6 +44,11 @@
 ##' xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf,
 ##'                                        fun='groupGO', OrgDb='org.Hs.eg.db')
 ##' as.data.frame(xx.formula.twogroups)
+##'
+##' ## formula interface for GSEA
+##' gsea.formula.twogroups <- compareCluster(Entrez|logFC~group+othergroup, data=mydf,
+##'                                        fun='gseGO', OrgDb='org.Hs.eg.db')
+##' as.data.frame(gsea.formula.twogroups)
 ##' }
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 

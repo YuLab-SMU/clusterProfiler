@@ -7,7 +7,8 @@
 compareCluster(geneClusters, fun = "enrichGO", data = "", ...)
 }
 \arguments{
-\item{geneClusters}{a list of entrez gene id. Alternatively, a formula of type Entrez~group}
+\item{geneClusters}{a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
+or a formula of type \code{Entrez | logFC ~ group} for "gseGO"}
 
 \item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .}
 
@@ -33,6 +34,7 @@ as.data.frame(xx)
 ## formula interface
 mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
                             '100127206', '100128071'),
+                   logFC = c(1.1, -0.5, 5, 2.5, -3, 3),
                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
                    othergroup = c('good', 'good', 'bad', 'bad', 'good', 'bad'))
 xx.formula <- compareCluster(Entrez~group, data=mydf,
@@ -43,6 +45,11 @@ as.data.frame(xx.formula)
 xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf,
                                        fun='groupGO', OrgDb='org.Hs.eg.db')
 as.data.frame(xx.formula.twogroups)
+
+## formula interface for GSEA
+gsea.formula.twogroups <- compareCluster(Entrez|logFC~group+othergroup, data=mydf,
+                                       fun='gseGO', OrgDb='org.Hs.eg.db')
+as.data.frame(gsea.formula.twogroups)
 }
 }
 \seealso{
