@@ -8,7 +8,7 @@ compareCluster(geneClusters, fun = "enrichGO", data = "", ...)
 }
 \arguments{
 \item{geneClusters}{a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
-or a formula of type \code{Entrez | logFC ~ group} for "gseGO"}
+or a formula of type \code{Entrez | logFC ~ group} for "gseGO", "gseKEGG" and "GSEA".}
 
 \item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .}
 
@@ -30,6 +30,7 @@ xx <- compareCluster(gcSample, fun="enrichKEGG",
                      organism="hsa", pvalueCutoff=0.05)
 as.data.frame(xx)
 # plot(xx, type="dot", caption="KEGG Enrichment Comparison")
+dotplot(xx)
 
 ## formula interface
 mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
@@ -46,10 +47,6 @@ xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf,
                                        fun='groupGO', OrgDb='org.Hs.eg.db')
 as.data.frame(xx.formula.twogroups)
 
-## formula interface for GSEA
-gsea.formula.twogroups <- compareCluster(Entrez|logFC~group+othergroup, data=mydf,
-                                       fun='gseGO', OrgDb='org.Hs.eg.db')
-as.data.frame(gsea.formula.twogroups)
 }
 }
 \seealso{

@@ -19,7 +19,7 @@ buildGOmap <- function(gomap) {
     gomap <- gomap[gomap[,1] != "", ]
     
     Gene2GO <- split(as.character(gomap[,1]), as.character(gomap[,2]))
-    
+
     Gene2ALLGO <- lapply(Gene2GO,
                          function(i) {
                              mfans <- unlist(mget(i, GOMFANCESTOR, ifnotfound=NA))
@@ -32,6 +32,22 @@ buildGOmap <- function(gomap) {
                              ans <- ans[ans != "all"]
                              return(ans)
                          })
+
+    ## AMF <- as.list(GOMFANCESTOR)
+    ## ACC <- as.list(GOCCANCESTOR)
+    ## ABP <- as.list(GOBPANCESTOR)
+
+    ## Gene2ALLGO <- lapply(Gene2GO, function(i) {
+    ##     mfans <- AMF[i]
+    ##     bpans <- ABP[i]
+    ##     ccans <- ACC[i]
+    ##     ans <- unlist(c(mfans,  bpans,  ccans))
+    ##     ans <- ans[ !is.na(ans) ]
+    ##     ans <- c(i, ans)
+    ##     ans <- unique(ans)
+    ##     ans <- ans[ans != "all"]
+    ##     return(ans)
+    ## })
 
     go2gene <- stack(Gene2ALLGO)
     colnames(go2gene) <- c("GO", "Gene")
