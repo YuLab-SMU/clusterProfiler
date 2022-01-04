@@ -6,7 +6,9 @@
 ##' @param nrows   a parameter
 ##' @return a list with two dataframes
 ##' @export
-##' @import GO.db
+##' @importFrom GO.db GOCCOFFSPRING
+##' @importFrom GO.db GOMFOFFSPRING
+##' @importFrom GO.db GOBPOFFSPRING
 ##' @importFrom utils read.delim
 ##' @importFrom stats na.omit
 ##' @importFrom AnnotationDbi columns
@@ -41,11 +43,8 @@ read.GAF <- function(gafFile, nrows = -1) {
   cat("Reading ", gafFile, ": ", sep="")
   gafFile <- read.delim(gafFile, sep="\t", as.is=TRUE, quote="\"", fill=TRUE,
                         header=FALSE, nrows=nrows,comment.char="!")
-  names(gafFile) = c("DB", "DB_Object_ID", "DB_Object_Symbol", "Qualifier", "GOID",
-                     "DB:Reference(|DB:Reference)", "Evidence_Code", "With(or)Form", "Aspect","DB_Object_Name","DB_Object_Synonym(|Synonym)",
-                     "DB_Object_Type","Taxon(|taxon)",
-                     "Date","Assigned_by","Annotation_Extention","Gene_Product_Form_ID")
-  
+  gafFile =gafFile[,c(2,3,5,7,9,10)]
+  names(gafFile) <- c("DB_Object_ID", "DB_Object_Symbol", "GOID","Evidence_Code","Aspect","DB_Object_Name")
   cat("found", nrow(gafFile), "rows with classes:",
       paste(sapply(gafFile, class), collapse=", "), "\n")
   return(gafFile)
