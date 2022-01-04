@@ -4,7 +4,8 @@
 ##' cluster.
 ##'
 ##'
-##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type Entrez~group
+##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
+##' or a formula of type \code{Entrez | logFC ~ group} for "gseGO", "gseKEGG" and "GSEA".
 ##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .
 ##' @param data if geneClusters is a formula, the data from which the clusters must be extracted.
 ##' @param ...  Other arguments.
@@ -28,10 +29,12 @@
 ##'                      organism="hsa", pvalueCutoff=0.05)
 ##' as.data.frame(xx)
 ##' # plot(xx, type="dot", caption="KEGG Enrichment Comparison")
+##' dotplot(xx)
 ##'
 ##' ## formula interface
 ##' mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
 ##'                             '100127206', '100128071'),
+##'                    logFC = c(1.1, -0.5, 5, 2.5, -3, 3),
 ##'                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
 ##'                    othergroup = c('good', 'good', 'bad', 'bad', 'good', 'bad'))
 ##' xx.formula <- compareCluster(Entrez~group, data=mydf,
@@ -42,6 +45,7 @@
 ##' xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf,
 ##'                                        fun='groupGO', OrgDb='org.Hs.eg.db')
 ##' as.data.frame(xx.formula.twogroups)
+##'
 ##' }
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 
@@ -54,9 +58,21 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         if (!is.data.frame(data)) {
             stop ('no data provided with formula for compareCluster')
         } else {
-            genes.var       = all.vars(geneClusters)[1]
+            genes.var = all.vars(geneClusters)[1]
+            n.var = length(all.vars(geneClusters))
             grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
-            geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {as.character(x[[genes.var]])})
+            n.group.var = length(all.vars(formula(grouping.formula)))
+            geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {
+                if ( (n.var - n.group.var) == 1 ) {
+                    as.character(x[[genes.var]])
+                } else if ( (n.var - n.group.var) == 2 ) {
+                    fc.var = all.vars(geneClusters)[2]
+                    geneList = structure(x[[fc.var]], names = x[[genes.var]])
+                    sort(geneList, decreasing=TRUE)
+                } else {
+                    stop('only Entrez~group or Entrez|logFC~group type formula is supported')
+                }
+            })
         }
     }
     clProf <- llply(geneClusters,
