@@ -46,69 +46,6 @@
 ##'                                        fun='groupGO', OrgDb='org.Hs.eg.db')
 ##' as.data.frame(xx.formula.twogroups)
 ##'
-##' ## formula interface for GSEA algorithm
-##' require(breastCancerMAINZ)
-##' data(mainz)
-##' require(stringr)
-##' require("hgu133a.db")
-##' require(plyr)
-##' clmainz=pData(mainz)$grade
-##' dd <- exprs(mainz)
-##' g1 <- dd[,clmainz == 1]
-##' g2 <- dd[,clmainz == 2]
-##' g3 <- dd[,clmainz == 3]
-##' 
-##' buildGenelist <- function(mat1, mat2) {
-##'     geneList <- exp(rowMeans(mat1))/exp(rowMeans(mat2))
-##'     geneList <- sort(geneList, decreasing=TRUE)
-##'     geneList <- log(geneList, base=2)
-##'     
-##'     eg <- mget(names(geneList), hgu133aENTREZID, ifnotfound=NA)   
-##'     gg <- data.frame(probe=names(geneList), val = geneList)
-##'     eg.df <- data.frame(probe=names(eg), eg=unlist(eg))
-##'     
-##'     xx <- merge(gg, eg.df, by.x="probe", by.y="probe")
-##'     xx <- xx[,-1]
-##'     xx <- unique(xx)
-##'     xx <- xx[!is.na(xx[,2]),]
-##'     yy <- ddply(xx, .(eg), function(x) data.frame(val=mean(x$val)))
-##'     
-##'     geneList <- yy$val
-##'     names(geneList) <- yy$eg
-##'     geneList <- sort(geneList, decreasing=TRUE)
-##' }
-##' 
-##' geneList21 <- buildGenelist(g2, g1)
-##' geneList31 <- buildGenelist(g3, g1)
-##' geneList32 <- buildGenelist(g3, g2)
-##' 
-##' mydf2 <- data.frame(Entrez = c(names(geneList21), names(geneList31), names(geneList32)),
-##'                     logFC = c(geneList21, geneList31, geneList32),
-##'                     group = c(rep("grade2_1", length(geneList21)), 
-##'                               rep("grade3_1", length(geneList31)), 
-##'                               rep("grade3_2", length(geneList32))))
-##' ## formula interface for gseGO
-##' gsea.formula <- compareCluster(Entrez|logFC~group, data=mydf2,
-##'                                fun='gseGO', OrgDb='org.Hs.eg.db',
-##'                                eps = 0)
-##' dotplot(gsea.formula)
-##'                                  
-##' ##  formula interface for gseKEGG                               
-##' gsea.formula2 <- compareCluster(Entrez|logFC~group, data=mydf2,
-##'                                 fun='gseKEGG', eps = 0)   
-##' dotplot(gsea.formula2)
-##' 
-##' ## formula interface for GSEA
-##' library(org.Hs.eg.db)
-##' kegg_clu <- download_KEGG("hsa", keggType="KEGG")
-##' TERM2GENE <- kegg_clu$KEGGPATHID2EXTID
-##' TERM2NAME <- kegg_clu$KEGGPATHID2NAME
-##'                                        
-##' gsea.formula3 <- compareCluster(Entrez|logFC~group, data=mydf2,
-##'                                 fun='GSEA', TERM2GENE = TERM2GENE, 
-##'                                 TERM2NAME = TERM2NAME, eps = 0)    
-##' dotplot(gsea.formula3)  
-##' 
 ##' }
 compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 
