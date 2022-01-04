@@ -15,7 +15,6 @@
 parse.GAF <- function(gafFile,nrows=-1){
   gafFile <-read.GAF(gafFile)
   extr.gafFile <- gafFile[,c( "DB_Object_ID","GOID")]
-  requireNamespace('GO.db')
   offspring.CC <- as.data.frame(GOCCOFFSPRING)
   offspring.MF <- as.data.frame(GOMFOFFSPRING)
   offspring.BP <- as.data.frame(GOBPOFFSPRING)
