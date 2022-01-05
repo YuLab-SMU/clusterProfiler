@@ -6,6 +6,7 @@
 ##' @param nrows   a parameter
 ##' @return a list with two dataframes
 ##' @export
+##' @importFrom GO.db GO.db
 ##' @importFrom GO.db GOCCOFFSPRING
 ##' @importFrom GO.db GOMFOFFSPRING
 ##' @importFrom GO.db GOBPOFFSPRING
