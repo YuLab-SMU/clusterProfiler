@@ -45,8 +45,7 @@ read.GAF <- function(gafFile, nrows = -1) {
                         header=FALSE, nrows=nrows,comment.char="!")
   gafFile =gafFile[,c(2,3,5,7,9,10)]
   names(gafFile) <- c("DB_Object_ID", "DB_Object_Symbol", "GOID","Evidence_Code","Aspect","DB_Object_Name")
-  cat("found", nrow(gafFile), "rows with classes:",
-      paste(sapply(gafFile, class), collapse=", "), "\n")
+  cat("found", nrow(gafFile), "rows in this GAF file")
   return(gafFile)
 }
 
