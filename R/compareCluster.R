@@ -50,15 +50,21 @@
 ##' }
 compareCluster <- function(geneClusters, 
                            fun="enrichGO", data='', ...) {
+  
+   if(any(!is.character(fun),!fun %in% c("groupGO", "enrichGO", 
+                                         "enrichKEGG", "enrichDO" ,
+                  "enrichPathway"))){
+     stop("fun should be a character and one of groupGO, enrichGO, enrichKEGG, 
+          enrichDO or enrichPathway")
+   }
 
-    if (is.character(fun)) {
-        if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
+    if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
           fun <- utils::getFromNamespace(fun, "clusterProfiler")
         }
       else{
         fun <- utils::getFromNamespace(fun , "DOSE")
       }
-    }
+    
 
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
