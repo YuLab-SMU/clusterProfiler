@@ -48,10 +48,16 @@
 ##' as.data.frame(xx.formula.twogroups)
 ##'
 ##' }
-compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
+compareCluster <- function(geneClusters, 
+                           fun="enrichGO", data='', ...) {
 
     if (is.character(fun)) {
-        fun <- eval(parse(text=fun))
+        if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
+          fun <- utils::getFromNamespace(fun, "clusterProfiler")
+        }
+      else{
+        fun <- utils::getFromNamespace(fun , "DOSE")
+      }
     }
 
     # Use formula interface for compareCluster
@@ -61,9 +67,11 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         } else {
             genes.var = all.vars(geneClusters)[1]
             n.var = length(all.vars(geneClusters))
-            grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
+            grouping.formula = gsub('^.*~', '~', 
+                                    as.character(as.expression(geneClusters)))   # For formulas like x~y+z
             n.group.var = length(all.vars(formula(grouping.formula)))
-            geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {
+            geneClusters = dlply(.data=data, formula(grouping.formula),
+                                 .fun=function(x) {
                 if ( (n.var - n.group.var) == 1 ) {
                     as.character(x[[genes.var]])
                 } else if ( (n.var - n.group.var) == 2 ) {
@@ -71,7 +79,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
                     geneList = structure(x[[fc.var]], names = x[[genes.var]])
                     sort(geneList, decreasing=TRUE)
                 } else {
-                    stop('only Entrez~group or Entrez|logFC~group type formula is supported')
+          stop('only Entrez~group or Entrez|logFC~group type formula is supported')
                 }
             })
         }
@@ -79,8 +87,9 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     clProf <- llply(geneClusters,
                     .fun=function(i) {
                         x=suppressMessages(fun(i, ...))
-                        # if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
-                        if (inherits(x, c("enrichResult", "groupGOResult", "gseaResult"))){
+        
+                        if (inherits(x, c("enrichResult", 
+                                          "groupGOResult", "gseaResult"))){
                             as.data.frame(x)
                         }
                     }
@@ -100,7 +109,8 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     if (is.data.frame(data) && grepl('+', grouping.formula)) {
         groupVarName <- strsplit(grouping.formula, split="\\+") %>% unlist %>%
             gsub("~", "", .) %>% gsub("^\\s*", "", .) %>% gsub("\\s*$", "", .)
-        groupVars <- sapply(as.character(clProf.df$Cluster), strsplit, split="\\.") %>% do.call(rbind, .)
+        groupVars <- sapply(as.character(clProf.df$Cluster), 
+                            strsplit, split="\\.") %>% do.call(rbind, .)
         for (i in seq_along(groupVarName)) {
             clProf.df[, groupVarName[i]] <- groupVars[,i]
         }
