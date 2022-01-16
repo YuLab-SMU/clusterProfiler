@@ -6,7 +6,8 @@
 ##'
 ##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
 ##' or a formula of type \code{Entrez | logFC ~ group} for "gseGO", "gseKEGG" and "GSEA".
-##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .
+##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" . 
+##' Users can also supply their own function. 
 ##' @param data if geneClusters is a formula, the data from which the clusters must be extracted.
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
@@ -51,20 +52,21 @@
 compareCluster <- function(geneClusters, 
                            fun="enrichGO", data='', ...) {
   
-   if(any(!is.character(fun),!fun %in% c("groupGO", "enrichGO", 
-                                         "enrichKEGG", "enrichDO" ,
-                  "enrichPathway"))){
-     stop("fun should be a character and one of groupGO, enrichGO, enrichKEGG, 
-          enrichDO or enrichPathway")
+   if(is.character(fun)){
+     if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
+       fun <- utils::getFromNamespace(fun, "clusterProfiler")
+     }
+     if(fun %in% c("enrichDO", "enrichPathway")){
+       fun <- utils::getFromNamespace(fun , "DOSE")
+     }
+     else{
+       # If fun is in global or any loaded package, this will get it
+       # This assumes that a user will actually load said package. 
+       fun <- utils::getAnywhere(fun)
+     }
+    
    }
 
-    if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
-          fun <- utils::getFromNamespace(fun, "clusterProfiler")
-        }
-      else{
-        fun <- utils::getFromNamespace(fun , "DOSE")
-      }
-    
 
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
@@ -73,8 +75,9 @@ compareCluster <- function(geneClusters,
         } else {
             genes.var = all.vars(geneClusters)[1]
             n.var = length(all.vars(geneClusters))
+            # For formulas like x~y+z
             grouping.formula = gsub('^.*~', '~', 
-                                    as.character(as.expression(geneClusters)))   # For formulas like x~y+z
+                       as.character(as.expression(geneClusters)))   
             n.group.var = length(all.vars(formula(grouping.formula)))
             geneClusters = dlply(.data=data, formula(grouping.formula),
                                  .fun=function(x) {
