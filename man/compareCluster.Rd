@@ -4,15 +4,25 @@
 \alias{compareCluster}
 \title{Compare gene clusters functional profile}
 \usage{
-compareCluster(geneClusters, fun = "enrichGO", data = "", ...)
+compareCluster(
+  geneClusters,
+  fun = "enrichGO",
+  data = "",
+  source_from = NULL,
+  ...
+)
 }
 \arguments{
 \item{geneClusters}{a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
 or a formula of type \code{Entrez | logFC ~ group} for "gseGO", "gseKEGG" and "GSEA".}
 
-\item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .}
+\item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" . 
+Users can also supply their own function.}
 
 \item{data}{if geneClusters is a formula, the data from which the clusters must be extracted.}
+
+\item{source_from}{If using a custom function in "fun", provide the source package as
+a string here. Otherwise, the function will be obtained from the global environment.}
 
 \item{...}{Other arguments.}
 }

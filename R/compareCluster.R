@@ -6,8 +6,11 @@
 ##'
 ##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
 ##' or a formula of type \code{Entrez | logFC ~ group} for "gseGO", "gseKEGG" and "GSEA".
-##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .
+##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" . 
+##' Users can also supply their own function. 
 ##' @param data if geneClusters is a formula, the data from which the clusters must be extracted.
+##' @param source_from If using a custom function in "fun", provide the source package as
+##' a string here. Otherwise, the function will be obtained from the global environment. 
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
@@ -48,11 +51,29 @@
 ##' as.data.frame(xx.formula.twogroups)
 ##'
 ##' }
-compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
+compareCluster <- function(geneClusters, 
+                           fun="enrichGO", data='', 
+                           source_from=NULL, ...) {
+  
+   if(is.character(fun)){
+     if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
+       fun <- utils::getFromNamespace(fun, "clusterProfiler")
+     }
+     if(fun %in% c("enrichDO", "enrichPathway")){
+       fun <- utils::getFromNamespace(fun , "DOSE")
+     }
+     else{
+       source_env <- .GlobalEnv
+       if(!is.null(source_from)){
+         source_env <- loadNamespace(source_from)
+       }
+       # If fun is in global or any loaded package, this will get it
+       # This assumes that a user will actually load said package. 
+       fun <- get(fun, envir = source_env)
+     }
+    
+   }
 
-    if (is.character(fun)) {
-        fun <- eval(parse(text=fun))
-    }
 
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
@@ -61,9 +82,12 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
         } else {
             genes.var = all.vars(geneClusters)[1]
             n.var = length(all.vars(geneClusters))
-            grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
+            # For formulas like x~y+z
+            grouping.formula = gsub('^.*~', '~', 
+                       as.character(as.expression(geneClusters)))   
             n.group.var = length(all.vars(formula(grouping.formula)))
-            geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {
+            geneClusters = dlply(.data=data, formula(grouping.formula),
+                                 .fun=function(x) {
                 if ( (n.var - n.group.var) == 1 ) {
                     as.character(x[[genes.var]])
                 } else if ( (n.var - n.group.var) == 2 ) {
@@ -71,7 +95,7 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
                     geneList = structure(x[[fc.var]], names = x[[genes.var]])
                     sort(geneList, decreasing=TRUE)
                 } else {
-                    stop('only Entrez~group or Entrez|logFC~group type formula is supported')
+          stop('only Entrez~group or Entrez|logFC~group type formula is supported')
                 }
             })
         }
@@ -79,8 +103,9 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     clProf <- llply(geneClusters,
                     .fun=function(i) {
                         x=suppressMessages(fun(i, ...))
-                        # if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
-                        if (inherits(x, c("enrichResult", "groupGOResult", "gseaResult"))){
+        
+                        if (inherits(x, c("enrichResult", 
+                                          "groupGOResult", "gseaResult"))){
                             as.data.frame(x)
                         }
                     }
@@ -100,7 +125,8 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     if (is.data.frame(data) && grepl('+', grouping.formula)) {
         groupVarName <- strsplit(grouping.formula, split="\\+") %>% unlist %>%
             gsub("~", "", .) %>% gsub("^\\s*", "", .) %>% gsub("\\s*$", "", .)
-        groupVars <- sapply(as.character(clProf.df$Cluster), strsplit, split="\\.") %>% do.call(rbind, .)
+        groupVars <- sapply(as.character(clProf.df$Cluster), 
+                            strsplit, split="\\.") %>% do.call(rbind, .)
         for (i in seq_along(groupVarName)) {
             clProf.df[, groupVarName[i]] <- groupVars[,i]
         }
