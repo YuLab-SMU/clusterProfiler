@@ -9,6 +9,8 @@
 ##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" . 
 ##' Users can also supply their own function. 
 ##' @param data if geneClusters is a formula, the data from which the clusters must be extracted.
+##' @param source_from If using a custom function in "fun", provide the source package as
+##' a string here. Otherwise, the function will be obtained from the global environment. 
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
@@ -50,7 +52,8 @@
 ##'
 ##' }
 compareCluster <- function(geneClusters, 
-                           fun="enrichGO", data='', ...) {
+                           fun="enrichGO", data='', 
+                           source_from=NULL, ...) {
   
    if(is.character(fun)){
      if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
@@ -60,9 +63,13 @@ compareCluster <- function(geneClusters,
        fun <- utils::getFromNamespace(fun , "DOSE")
      }
      else{
+       source_env <- .GlobalEnv
+       if(!is.null(source_from)){
+         source_env <- loadNamespace(source_from)
+       }
        # If fun is in global or any loaded package, this will get it
        # This assumes that a user will actually load said package. 
-       fun <- utils::getAnywhere(fun)
+       fun <- get(fun, envir = source_env)
      }
     
    }
