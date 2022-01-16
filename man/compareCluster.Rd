@@ -10,7 +10,8 @@ compareCluster(geneClusters, fun = "enrichGO", data = "", ...)
 \item{geneClusters}{a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
 or a formula of type \code{Entrez | logFC ~ group} for "gseGO", "gseKEGG" and "GSEA".}
 
-\item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .}
+\item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" . 
+Users can also supply their own function.}
 
 \item{data}{if geneClusters is a formula, the data from which the clusters must be extracted.}
 
