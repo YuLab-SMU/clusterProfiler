@@ -1,7 +1,7 @@
 ##' parse GAF files
 ##'
 ##' given a GAF file, this function extracts the information from it 
-##' @title ParseGafFile
+##' @title parse_gff
 ##' @param GafFile GAF file
 ##' @param nrows   a parameter
 ##' @return a list with two dataframes
@@ -13,9 +13,9 @@
 ##' @importFrom utils read.delim
 ##' @importFrom stats na.omit
 ##' @importFrom AnnotationDbi columns
-ParseGafFile <- function(GafFile, nrows=-1) {
+parse_gff <- function(GafFile, nrows=-1) {
   
-    GafFile <- ReadGafFile(GafFile)
+    GafFile <- read.gff(GafFile)
     extr.gafFile <- GafFile[, c("DB_Object_ID", "GOID")]
   
     offspring.CC <- as.data.frame(GOCCOFFSPRING)
@@ -58,7 +58,7 @@ ParseGafFile <- function(GafFile, nrows=-1) {
 }
 
 ##' @importFrom utils read.delim
-ReadGafFile <- function(GafFile, nrows=-1) {
+read.gff <- function(GafFile, nrows=-1) {
   
     cat("Reading ", GafFile, ": ", sep = "")
     GafFile <-
