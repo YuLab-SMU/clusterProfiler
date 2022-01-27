@@ -3,16 +3,22 @@
 
 TODO:
 
++ Uniprot to KO, <https://www.biostars.org/p/415837/>
+  - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
 
 -->
 
+# clusterProfiler 4.3.2
 
++ bug fixed in `extract_params()` (2022-01-12, Wed, #392, @amcdavid)
++ make `simplify()` works for `gseGO()` in `compareCluster()`
++ support formula interface for GSEA methods in `compareCluster()` (2022-01-04, Tue, @altairwei, #416)
 
 # clusterProfiler 4.3.1
 
-+ `compareCluster` supports GSEA algorithm (2021-12-11, Sat)
-+ update error message of `download.KEGG.Path` and `download.KEGG.Module`(2021-11-21, Sun)
-+ update `simplify` function to support `ont = ALL` (2021-10-27, Wed)
++ `compareCluster()` supports GSEA algorithm (2021-12-11, Sat)
++ update error message of `download.KEGG.Path()` and `download.KEGG.Module()`(2021-11-21, Sun)
++ update `simplify()` function to support `ont = ALL` (2021-10-27, Wed)
 
 # clusterProfiler 4.2.0
 

@@ -158,7 +158,7 @@ add_GO_Ontology <- function(obj, GO_DATA) {
 
 get_go_ontology <- function(x) {
     if (is(x, "compareClusterResult")) {
-        if (x@fun != "enrichGO" && x@fun != "groupGO") {
+        if (x@fun != "enrichGO" && x@fun != "groupGO" && x@fun != "gseGO") {
             stop("simplify only work for GO...")
         }
         ont <- x@.call$ont
