@@ -58,11 +58,9 @@ compareCluster <- function(geneClusters,
    if(is.character(fun)){
      if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
        fun <- utils::getFromNamespace(fun, "clusterProfiler")
-     }
-     if(fun %in% c("enrichDO", "enrichPathway")){
+     } else if(fun %in% c("enrichDO", "enrichPathway")){
        fun <- utils::getFromNamespace(fun , "DOSE")
-     }
-     else{
+     } else {
        source_env <- .GlobalEnv
        if(!is.null(source_from)){
          source_env <- loadNamespace(source_from)

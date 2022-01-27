@@ -7,6 +7,8 @@ TODO:
   - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
 
 -->
+# clusterProfiler 4.3.2.991
++ bug fixed in `compareCluster()` (2022-01-27, Thu, #424)
 
 # clusterProfiler 4.3.2
 
