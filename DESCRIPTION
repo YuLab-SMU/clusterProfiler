@@ -1,15 +1,16 @@
 Package: clusterProfiler
 Type: Package
 Title: A universal enrichment tool for interpreting omics data
-Version: 4.3.2
+Version: 4.3.3
 Authors@R: c(
     person(given = "Guangchuang", family = "Yu",        email = "guangchuangyu@gmail.com",   role  = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
     person(given = "Li-Gen",      family = "Wang",      email = "reeganwang020@gmail.com",   role  = "ctb"),
-    person(given = "Erqiang",     family = "Hu",        email = "13766876214@163.com",       role = "ctb"),
+    person(given = "Erqiang",     family = "Hu",        email = "woshihuerqiang@qq.com",     role = "ctb"),
+    person(given = "Xiao",        family = "Luo",       email = "l77880853349@163.com",      role  = "ctb"),
     person(given = "Meijun",      family = "Chen",      email = "mjchen1996@outlook.com",    role  = "ctb"),
     person(given = "Giovanni",    family = "Dall'Olio", email = "giovanni.dallolio@upf.edu", role = "ctb"),
     person(given = "Wanqian",     family = "Wei",       email = "altair_wei@outlook.com",    role = "ctb")
-		)
+	)
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
 Description: This package supports functional characteristics of both coding and non-coding genomics data for thousands of species with up-to-date gene annotation. It provides a univeral interface for gene functional annotation from a variety of sources and thus can be applied in diverse scenarios. It provides a tidy interface to access, manipulate, and visualize enrichment results to help users achieve efficient data interpretation. Datasets obtained from multiple treatments and time points can be analyzed and compared in a single run, easily revealing functional consensus and differences among distinct conditions.
 Depends:
