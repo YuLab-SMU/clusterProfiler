@@ -9,7 +9,7 @@ TODO:
 -->
 # clusterProfiler 4.3.3.991
 
-+ fix `enrichGO` when `keyType = 'SYMBOL'` and `readable=TRUE`(2022-4-9, Sat)
++ fix `enrichGO` , `gseGO` and `groupGO` when `keyType = 'SYMBOL'` && `readable=TRUE`(2022-4-9, Sat)
 
 # clusterProfiler 4.3.3
 

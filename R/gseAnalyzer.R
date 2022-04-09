@@ -57,7 +57,10 @@ gseGO <- function(geneList,
 
     if (is.null(res))
         return(res)
-
+        
+    if (keyType == 'SYMBOL') {
+        res@readable <- TRUE
+    }
     res@organism <- get_organism(OrgDb)
     res@setType <- ont
     res@keytype <- keyType
