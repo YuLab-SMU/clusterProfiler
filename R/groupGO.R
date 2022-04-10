@@ -63,7 +63,7 @@ groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readab
              )
              
     if (keyType == 'SYMBOL') {
-        res@readable <- TRUE
+        x@readable <- TRUE
     }
     if(readable == TRUE)
         x <- setReadable(x, OrgDb)
