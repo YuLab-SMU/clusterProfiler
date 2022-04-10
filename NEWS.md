@@ -7,6 +7,10 @@ TODO:
   - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
 
 -->
+# clusterProfiler 4.3.3.991
+
++ fix `enrichGO` , `gseGO` and `groupGO` when `keyType = 'SYMBOL'` && `readable=TRUE`(2022-4-9, Sat)
+
 # clusterProfiler 4.3.3
 
 + parse GAF file to prepare GO annotation data (esp for proteomic study) (2022-03-08, Tue, #397, #418, #421, #442)
