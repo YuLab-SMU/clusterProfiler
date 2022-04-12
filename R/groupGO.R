@@ -61,6 +61,10 @@ groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readab
              gene = gene,
              keytype = keyType
              )
+             
+    if (keyType == 'SYMBOL') {
+        x@readable <- TRUE
+    }
     if(readable == TRUE)
         x <- setReadable(x, OrgDb)
 

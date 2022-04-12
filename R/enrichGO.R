@@ -81,7 +81,9 @@ enrichGO <- function(gene,
         if (is.null(res))
             return(res)
     }
-
+    if (keyType == 'SYMBOL') {
+        res@readable <- TRUE
+    }
     res@keytype <- keyType
     res@organism <- get_organism(OrgDb)
     if(readable) {
