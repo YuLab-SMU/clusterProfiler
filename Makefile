@@ -1,7 +1,7 @@
 PKGNAME := $(shell sed -n "s/Package: *\([^ ]*\)/\1/p" DESCRIPTION)
 PKGVERS := $(shell sed -n "s/Version: *\([^ ]*\)/\1/p" DESCRIPTION)
 PKGSRC  := $(shell basename `pwd`)
-BIOCVER := RELEASE_3_14
+BIOCVER := RELEASE_3_15
 
 
 all: rd check clean
