@@ -7,8 +7,9 @@ TODO:
   - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
 
 -->
-# clusterProfiler 4.3.5.991
+# clusterProfiler 4.3.5.992
 
++ mv `read.gmt` and `read.gmt.wp` to the 'gson' package and reexport these two functions from 'gson' (2022-04-28, Thu)
 + fix `compareCluster` when fun = `enrichPathway`(2022-4-28, Thu)
 
 # clusterProfiler 4.3.4

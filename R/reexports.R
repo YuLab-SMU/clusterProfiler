@@ -6,6 +6,14 @@ magrittr::`%>%`
 ##' @export
 magrittr::`%<>%`
 
+##' @importFrom gson read.gmt
+##' @export
+gson::read.gmt
+
+##' @importFrom gson read.gmt.wp
+##' @export
+gson::read.gmt.wp
+
 
 ##' @importFrom dplyr arrange
 ##' @export

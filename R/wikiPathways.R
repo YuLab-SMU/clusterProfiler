@@ -50,6 +50,7 @@ gseWP <- function(geneList, organism, ...) {
     return(res)
 }
 
+##' @importFrom rlang .data
 prepare_WP_data <- function(organism) {
     wp2gene <- get_wp_data(organism)
     ##TERM2GENE

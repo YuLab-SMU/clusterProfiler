@@ -16,6 +16,8 @@
 \alias{ridgeplot}
 \alias{\%>\%}
 \alias{\%<>\%}
+\alias{read.gmt}
+\alias{read.gmt.wp}
 \alias{arrange}
 \alias{filter}
 \alias{group_by}
@@ -37,6 +39,8 @@ below to see their documentation.
   \item{dplyr}{\code{\link[dplyr]{arrange}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr:context]{n}}, \code{\link[dplyr]{rename}}, \code{\link[dplyr]{select}}, \code{\link[dplyr]{slice}}, \code{\link[dplyr]{summarise}}}
 
   \item{enrichplot}{\code{\link[enrichplot]{cnetplot}}, \code{\link[enrichplot]{dotplot}}, \code{\link[enrichplot]{emapplot}}, \code{\link[enrichplot]{goplot}}, \code{\link[enrichplot]{gseaplot}}, \code{\link[enrichplot]{heatplot}}, \code{\link[enrichplot]{ridgeplot}}}
+
+  \item{gson}{\code{\link[gson:read-gmt]{read.gmt}}, \code{\link[gson:read-gmt]{read.gmt.wp}}}
 
   \item{magrittr}{\code{\link[magrittr:compound]{\%<>\%}}, \code{\link[magrittr:pipe]{\%>\%}}}
 }}
