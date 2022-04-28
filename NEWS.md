@@ -7,6 +7,10 @@ TODO:
   - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
 
 -->
+# clusterProfiler 4.3.5.991
+
++ fix `compareCluster` when fun = `enrichPathway`(2022-4-28, Thu)
+
 # clusterProfiler 4.3.4
 
 + fix `enrichGO` , `gseGO` and `groupGO` when `keyType = 'SYMBOL'` && `readable=TRUE`(2022-4-9, Sat)

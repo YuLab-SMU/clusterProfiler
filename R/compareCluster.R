@@ -56,10 +56,16 @@ compareCluster <- function(geneClusters,
                            source_from=NULL, ...) {
   
    if(is.character(fun)){
-     if(fun %in% c("groupGO", "enrichGO", "enrichKEGG")){
+     if(fun %in% c("groupGO", "enrichGO", "enrichKEGG",
+                   "gseGO", "gseKEGG", "GSEA", "gseWP")){
        fun <- utils::getFromNamespace(fun, "clusterProfiler")
-     } else if(fun %in% c("enrichDO", "enrichPathway")){
+     } else if(fun %in% c("enrichDO", "enrichDGN", "enrichDGNv", 
+                          "enrichNCG", "gseDO", "gseNCG", "gseDGN")){
        fun <- utils::getFromNamespace(fun , "DOSE")
+     } else if(fun %in% c("enrichPathway", "gsePathway")){
+        fun <- utils::getFromNamespace(fun , "ReactomePA")
+     } else if(fun %in% c("enrichMeSH", "gseMeSH")){
+        fun <- utils::getFromNamespace(fun , "meshes")
      } else {
        source_env <- .GlobalEnv
        if(!is.null(source_from)){
