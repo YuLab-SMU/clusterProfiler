@@ -30,7 +30,7 @@ enrichWP <- function(gene, organism, ...) {
 ##' @title gseWP
 ##' @param geneList ranked gene list
 ##' @param organism supported organisms, which can be accessed via the get_wp_organisms() function
-##' @param ... additional parameters, see also the parameters supported by the enricher() function
+##' @param ... additional parameters, see also the parameters supported by the GSEA() function
 ##' @return A \code{gseaResult} instance
 ##' @export
 ##' @author Guangchuang Yu 
