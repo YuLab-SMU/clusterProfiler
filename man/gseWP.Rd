@@ -11,7 +11,7 @@ gseWP(geneList, organism, ...)
 
 \item{organism}{supported organisms, which can be accessed via the get_wp_organisms() function}
 
-\item{...}{additional parameters, see also the parameters supported by the enricher() function}
+\item{...}{additional parameters, see also the parameters supported by the GSEA() function}
 }
 \value{
 A \code{gseaResult} instance

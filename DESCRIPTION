@@ -48,4 +48,5 @@ BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
 biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,
     MultipleComparison, Pathways, Reactome, Visualization
+Encoding: UTF-8
 RoxygenNote: 7.1.2
