@@ -6,12 +6,10 @@
 
     if (.Platform$OS.type == "windows") {
         dl.method <- "wininet"
+    } else if (capabilities("libcurl")) {
+        dl.method <- "libcurl"
     } else {
-        if (capabilities("libcurl")) {
-            dl.method <- "libcurl"
-        } else {
-            dl.method <- getOption("download.file.method", default = "auto")        
-        }
+        dl.method <- getOption("download.file.method", default = "auto") 
     }
 
 
