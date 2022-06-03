@@ -4,11 +4,17 @@
     msg <- paste0(pkgname, " v", pkgVersion, "  ",
                   "For help: https://yulab-smu.top/biomedical-knowledge-mining-book/", "\n\n")
 
-    if (capabilities("libcurl")) {
-        dl.method <- "libcurl"
+    if (.Platform$OS.type == "windows") {
+        dl.method <- "wininet"
     } else {
-        dl.method <- getOption("download.file.method", default = "auto")        
+        if (capabilities("libcurl")) {
+            dl.method <- "libcurl"
+        } else {
+            dl.method <- getOption("download.file.method", default = "auto")        
+        }
     }
+
+
 
     options(clusterProfiler.download.method = dl.method)
     options(timeout = max(300, getOption("timeout"))) # see ?download.file
