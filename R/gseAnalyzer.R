@@ -78,7 +78,7 @@ gseGO <- function(geneList,
 ##'
 ##' @title gseMKEGG
 ##' @param geneList order ranked geneList
-##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
+##' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 ##' @param exponent weight of each step
 ##' @param minGSSize minimal size of each geneSet for analyzing

@@ -9,7 +9,7 @@
 ## ##' @return plot
 ## ##' @importFrom stats4 plot
 ## ##' @export
-## ##' @author Guangchuang Yu \url{http://ygc.name}
+## ##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ## if ( !isGeneric("plot") )
 ## 	setGeneric("plot", function(x, ...) standardGeneric("plot"))
 

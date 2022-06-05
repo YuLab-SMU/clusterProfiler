@@ -23,7 +23,7 @@ gseMKEGG(
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
