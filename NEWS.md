@@ -8,6 +8,9 @@ TODO:
 
 -->
 
+# clusterProfiler 4.5.1.900
+
++ support passing a GSON object to `enrichKEGG(organism)` (2022-06-06, Mon)
 
 # clusterProfiler 4.5.1
 
