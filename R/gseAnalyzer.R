@@ -160,12 +160,21 @@ gseKEGG <- function(geneList,
                     by                = 'fgsea',
                     ...) {
 
-    species <- organismMapper(organism)
-    if (use_internal_data) {
-        KEGG_DATA <- get_data_from_KEGG_db(species)
+
+    if (inherits(organism, "character")) {                       
+        species <- organismMapper(organism)
+        if (use_internal_data) {
+            KEGG_DATA <- get_data_from_KEGG_db(species)
+        } else {
+            KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
+        }
+    } else if (inherits(organism, "GSON")) {
+        KEGG_DATA <- organism
+        species <- KEGG_DATA@species
     } else {
-        KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
+        stop("organism should be a species name or a GSON object")
     }
+
 
     res <-  GSEA_internal(geneList         = geneList,
                           exponent         = exponent,
