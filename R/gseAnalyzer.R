@@ -78,7 +78,7 @@ gseGO <- function(geneList,
 ##'
 ##' @title gseMKEGG
 ##' @param geneList order ranked geneList
-##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
+##' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 ##' @param exponent weight of each step
 ##' @param minGSSize minimal size of each geneSet for analyzing
@@ -160,12 +160,21 @@ gseKEGG <- function(geneList,
                     by                = 'fgsea',
                     ...) {
 
-    species <- organismMapper(organism)
-    if (use_internal_data) {
-        KEGG_DATA <- get_data_from_KEGG_db(species)
+
+    if (inherits(organism, "character")) {                       
+        species <- organismMapper(organism)
+        if (use_internal_data) {
+            KEGG_DATA <- get_data_from_KEGG_db(species)
+        } else {
+            KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
+        }
+    } else if (inherits(organism, "GSON")) {
+        KEGG_DATA <- organism
+        species <- KEGG_DATA@species
     } else {
-        KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
+        stop("organism should be a species name or a GSON object")
     }
+
 
     res <-  GSEA_internal(geneList         = geneList,
                           exponent         = exponent,

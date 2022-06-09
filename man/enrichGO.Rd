@@ -66,6 +66,6 @@ categories after FDR control.
 \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 }
 \author{
-Guangchuang Yu \url{https://guangchuangyu.github.io}
+Guangchuang Yu \url{https://yulab-smu.top}
 }
 \keyword{manip}

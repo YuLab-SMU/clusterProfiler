@@ -22,7 +22,7 @@
 ##' @importFrom rlang '%||%'
 ##' @importClassesFrom DOSE compareClusterResult
 ##' @export
-##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
+##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
 ##'   \code{\link{enrichGO}}
 ##' @keywords manip
@@ -195,7 +195,7 @@ extract_params <- function(x) {
 ## @param object A \code{compareClusterResult} instance.
 ## @return message
 ## @importFrom methods show
-## @author Guangchuang Yu \url{https://guangchuangyu.github.io}
+## @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @importFrom utils str
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
@@ -254,7 +254,7 @@ setMethod("show", signature(object="compareClusterResult"),
 ## @return A data frame
 ## @importFrom stats4 summary
 ## @exportMethod summary
-## @author Guangchuang Yu \url{https://guangchuangyu.github.io}
+## @author Guangchuang Yu \url{https://yulab-smu.top}
 setMethod("summary", signature(object="compareClusterResult"),
           function(object, ...) {
               warning("summary method to convert the object to data.frame is deprecated, please use as.data.frame instead.")

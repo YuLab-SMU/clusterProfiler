@@ -1,7 +1,7 @@
 Package: clusterProfiler
 Type: Package
 Title: A universal enrichment tool for interpreting omics data
-Version: 4.5.0.992
+Version: 4.5.1.901
 Authors@R: c(
     person(given = "Guangchuang", family = "Yu",        email = "guangchuangyu@gmail.com",   role  = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
     person(given = "Li-Gen",      family = "Wang",      email = "reeganwang020@gmail.com",   role  = "ctb"),
@@ -18,7 +18,7 @@ Depends:
 Imports:
     AnnotationDbi,
     downloader,
-    DOSE (>= 3.13.1),
+    DOSE (>= 3.23.2),
     dplyr,
     enrichplot (>= 1.9.3),
     GO.db,

@@ -54,5 +54,5 @@ gseaResult object
 a universal gene set enrichment analysis tools
 }
 \author{
-Guangchuang Yu
+Guangchuang Yu \url{https://yulab-smu.top}
 }

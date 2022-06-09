@@ -10,12 +10,12 @@
 ##' @export
 ##' @author Guangchuang Yu
 browseKEGG <- function(x, pathID) {
-    url <- paste0("http://www.kegg.jp/kegg-bin/show_pathway?", pathID, '/', x[pathID, "geneID"])
+    url <- paste0("https://www.kegg.jp/kegg-bin/show_pathway?", pathID, '/', x[pathID, "geneID"])
     browseURL(url)
     invisible(url)
 }
 
-##' search kegg organism, listed in http://www.genome.jp/kegg/catalog/org_list.html
+##' search kegg organism, listed in https://www.genome.jp/kegg/catalog/org_list.html
 ##'
 ##'
 ##' @title search_kegg_organism
@@ -37,7 +37,7 @@ search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE,
         #                "please set use_internal_data = FALSE")
         # message(Message)
     } else {
-        url <- "http://rest.kegg.jp/list/organism"
+        url <- "https://rest.kegg.jp/list/organism"
         species <- read.table(url, fill = TRUE, sep = "\t", header = F, quote = "")
         species <- species[, -1]
         scientific_name <- gsub(" \\(.*", "", species[,2])
@@ -62,7 +62,7 @@ kegg_species_data <- function() {
 ##     pkg <- "XML"
 ##     requireNamespace(pkg)
 ##     readHTMLTable <- eval(parse(text="XML::readHTMLTable"))
-##     x <- readHTMLTable("http://www.genome.jp/kegg/catalog/org_list.html")
+##     x <- readHTMLTable("https://www.genome.jp/kegg/catalog/org_list.html")
 
 ##     y <- get_species_name(x[[2]], "Eukaryotes")
 ##     y2 <- get_species_name(x[[3]], 'Prokaryotes')
@@ -125,16 +125,16 @@ kegg_rest <- function(rest_url) {
 }
 
 
-## http://www.genome.jp/kegg/rest/keggapi.html
+## https://www.genome.jp/kegg/rest/keggapi.html
 ## kegg_link('hsa', 'pathway')
 kegg_link <- function(target_db, source_db) {
-    url <- paste0("http://rest.kegg.jp/link/", target_db, "/", source_db, collapse="")
+    url <- paste0("https://rest.kegg.jp/link/", target_db, "/", source_db, collapse="")
     kegg_rest(url)
 }
 
 
 kegg_list <- function(db) {
-    url <- paste0("http://rest.kegg.jp/list/", db, collapse="")
+    url <- paste0("https://rest.kegg.jp/list/", db, collapse="")
     kegg_rest(url)
 }
 

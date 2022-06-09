@@ -7,10 +7,23 @@ TODO:
   - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
 
 -->
-# clusterProfiler 4.3.5.992
 
+# clusterProfiler 4.5.1.901
+
++ `gson_KEGG()` download latest KEGG and output a GSON object (2022-06-08, Wed)
++ support passing a GSON object to `gseKEGG(organism)` 
++ support passing a GSON object to `enrichKEGG(organism)` (2022-06-06, Mon)
+
+# clusterProfiler 4.5.1
+
++ follow KEGG api upgrade that change from http to https (2022-06-06, Mon)
++ use 'wininet' to download KEGG data when `.Platform$OS.type = "windows"` (2022-06-03, Fri)
 + mv `read.gmt` and `read.gmt.wp` to the 'gson' package and reexport these two functions from 'gson' (2022-04-28, Thu)
 + fix `compareCluster` when fun = `enrichPathway`(2022-4-28, Thu)
+
+# clusterProfiler 4.4.0
+
++ Bioconductor 3.15 release
 
 # clusterProfiler 4.3.4
 

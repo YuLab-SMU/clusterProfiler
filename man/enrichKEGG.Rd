@@ -22,7 +22,7 @@ enrichKEGG(
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
@@ -60,6 +60,6 @@ categories with FDR control.
 \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 }
 \author{
-Guangchuang Yu \url{http://guangchuangyu.github.io}
+Guangchuang Yu \url{https://yulab-smu.top}
 }
 \keyword{manip}

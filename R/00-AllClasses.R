@@ -15,7 +15,7 @@
 ##' @slot gene Gene IDs
 ##' @slot readable logical flag of gene ID in symbol or not.
 ##' @exportClass groupGOResult
-##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
+##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @importMethodsFrom DOSE summary
 ##' @importFrom DOSE setReadable
 ##' @seealso \code{\linkS4class{compareClusterResult}}

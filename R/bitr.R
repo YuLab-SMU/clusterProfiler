@@ -104,7 +104,7 @@ bitr_kegg <- function(geneID, fromType, toType, organism, drop=TRUE) {
 
 KEGG_convert <- function(fromType, toType, species) {
     if (fromType == "kegg" || toType != "kegg") {
-        turl <- paste("http://rest.kegg.jp/conv", toType, species, sep='/')
+        turl <- paste("https://rest.kegg.jp/conv", toType, species, sep='/')
         tidconv <- kegg_rest(turl)
         if (is.null(tidconv))
             stop(toType, " is not supported for ", species, " ...")
@@ -112,7 +112,7 @@ KEGG_convert <- function(fromType, toType, species) {
     }
 
     if (toType == "kegg" || fromType != "kegg") {
-        furl <- paste("http://rest.kegg.jp/conv", fromType, species, sep='/')
+        furl <- paste("https://rest.kegg.jp/conv", fromType, species, sep='/')
         fidconv <- kegg_rest(furl)
         if (is.null(fidconv))
             stop(fromType, " is not supported for ", species, " ...")

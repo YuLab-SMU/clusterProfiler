@@ -4,7 +4,7 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'
+##' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param maxGSSize maximal size of genes annotated for testing
@@ -15,7 +15,7 @@
 ##' @importMethodsFrom AnnotationDbi mappedkeys
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importClassesFrom methods data.frame
-##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 ##' @keywords manip
 ##' @examples
@@ -36,12 +36,20 @@ enrichKEGG <- function(gene,
                        qvalueCutoff      = 0.2,
                        use_internal_data = FALSE) {
 
-    species <- organismMapper(organism)
-    if (use_internal_data) {
-        KEGG_DATA <- get_data_from_KEGG_db(species)
+    if (inherits(organism, "character")) {                       
+        species <- organismMapper(organism)
+        if (use_internal_data) {
+            KEGG_DATA <- get_data_from_KEGG_db(species)
+        } else {
+            KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
+        }
+    } else if (inherits(organism, "GSON")) {
+        KEGG_DATA <- organism
+        species <- KEGG_DATA@species
     } else {
-        KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
+        stop("organism should be a species name or a GSON object")
     }
+
     res <- enricher_internal(gene,
                              pvalueCutoff  = pvalueCutoff,
                              pAdjustMethod = pAdjustMethod,
@@ -161,7 +169,7 @@ download.KEGG.Path <- function(species) {
         message <- paste("Failed to download KEGG data.",
                          "Wrong 'species' or the network is unreachable.",
                          "The 'species' should be one of organisms listed in",
-                         "'http://www.genome.jp/kegg/catalog/org_list.html'")
+                         "'https://www.genome.jp/kegg/catalog/org_list.html'")
         stop(message)
     }
 
@@ -173,8 +181,8 @@ download.KEGG.Path <- function(species) {
 
     ## if 'species="ko"', ko and map path are duplicated, only keep ko path.
     ##
-    ## http://www.kegg.jp/dbget-bin/www_bget?ko+ko00010
-    ## http://www.kegg.jp/dbget-bin/www_bget?ko+map0001
+    ## https://www.kegg.jp/dbget-bin/www_bget?ko+ko00010
+    ## https://www.kegg.jp/dbget-bin/www_bget?ko+map0001
     ##
     keggpathid2extid.df <- keggpathid2extid.df[keggpathid2extid.df[,1] %in% keggpathid2name.df[,1],]
 
@@ -188,7 +196,7 @@ download.KEGG.Module <- function(species) {
         message <- paste("Failed to download KEGG data.",
                          "Wrong 'species' or the network is unreachable.",
                          "The 'species' should be one of organisms listed in",
-                         "'http://www.genome.jp/kegg/catalog/org_list.html'")
+                         "'https://www.genome.jp/kegg/catalog/org_list.html'")
         stop(message)
     }
 

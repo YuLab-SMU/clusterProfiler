@@ -42,5 +42,5 @@ A \code{enrichResult} instance
 A universal enrichment analyzer
 }
 \author{
-Guangchuang Yu
+Guangchuang Yu \url{https://yulab-smu.top}
 }

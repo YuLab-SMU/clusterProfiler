@@ -64,6 +64,6 @@ as.data.frame(xx.formula.twogroups)
   \code{\link{enrichGO}}
 }
 \author{
-Guangchuang Yu \url{https://guangchuangyu.github.io}
+Guangchuang Yu \url{https://yulab-smu.top}
 }
 \keyword{manip}

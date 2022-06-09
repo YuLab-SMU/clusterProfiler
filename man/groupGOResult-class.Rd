@@ -33,6 +33,6 @@ specific GO level.
   \code{\link{compareCluster}} \code{\link{groupGO}}
 }
 \author{
-Guangchuang Yu \url{https://guangchuangyu.github.io}
+Guangchuang Yu \url{https://yulab-smu.top}
 }
 \keyword{classes}

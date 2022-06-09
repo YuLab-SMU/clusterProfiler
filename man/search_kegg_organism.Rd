@@ -24,7 +24,7 @@ search_kegg_organism(
 data.frame
 }
 \description{
-search kegg organism, listed in http://www.genome.jp/kegg/catalog/org_list.html
+search kegg organism, listed in https://www.genome.jp/kegg/catalog/org_list.html
 }
 \author{
 Guangchuang Yu
