@@ -37,15 +37,7 @@ search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE,
         #                "please set use_internal_data = FALSE")
         # message(Message)
     } else {
-        url <- "https://rest.kegg.jp/list/organism"
-        species <- read.table(url, fill = TRUE, sep = "\t", header = F, quote = "")
-        species <- species[, -1]
-        scientific_name <- gsub(" \\(.*", "", species[,2])
-        common_name <- gsub(".*\\(", "", species[,2])
-        common_name <- gsub("\\)", "", common_name)
-        kegg_species <- data.frame(kegg_code = species[, 1], 
-                                    scientific_name = scientific_name, 
-                                    common_name = common_name)
+        kegg_species <- get_kegg_species()
     }
     idx <- grep(str, kegg_species[, by], ignore.case = ignore.case)
     kegg_species[idx,]
@@ -55,6 +47,21 @@ search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE,
 kegg_species_data <- function() {
     utils::data(list="kegg_species", package="clusterProfiler")
     get("kegg_species", envir = .GlobalEnv)
+}
+
+get_kegg_species <- function(save = FALSE) {
+    url <- "https://rest.kegg.jp/list/organism"
+    species <- read.table(url, fill = TRUE, sep = "\t", header = F, quote = "")
+    species <- species[, -1]
+    scientific_name <- gsub(" \\(.*", "", species[,2])
+    common_name <- gsub(".*\\(", "", species[,2])
+    common_name <- gsub("\\)", "", common_name)
+    kegg_species <- data.frame(kegg_code = species[, 1], 
+                            scientific_name = scientific_name, 
+                            common_name = common_name)
+
+    if (save) save(kegg_species, file="kegg_species.rda")
+    invisible(kegg_species)                                
 }
 
 
