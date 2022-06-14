@@ -4,7 +4,8 @@
 \alias{enrichGO}
 \title{GO Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment GO
-categories after FDR control.}
+categories after FDR control. If a list of vectors is given, enrichment
+will be applied over all sets and returned as a list of results.}
 \usage{
 enrichGO(
   gene,
@@ -22,7 +23,7 @@ enrichGO(
 )
 }
 \arguments{
-\item{gene}{a vector of entrez gene id.}
+\item{gene}{a vector of entrez gene id or a list of vectors (to perfomr several independent enrichments).}
 
 \item{OrgDb}{OrgDb}
 
@@ -47,19 +48,20 @@ enrichGO(
 \item{pool}{If ont='ALL', whether pool 3 GO sub-ontologies}
 }
 \value{
-An \code{enrichResult} instance.
+An \code{enrichResult} instance or a list of \code{enrichResult}.
 }
 \description{
 GO Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment GO
-categories after FDR control.
+categories after FDR control. If a list of vectors is given, enrichment
+will be applied over all sets and returned as a list of results.
 }
 \examples{
 \dontrun{
-  data(geneList, package = "DOSE")
-	de <- names(geneList)[1:100]
-	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
-	head(yy)
+    data(geneList, package = "DOSE")
+    de <- names(geneList)[1:100]
+    yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
+    head(yy)
 }
 }
 \seealso{

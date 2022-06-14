@@ -1,9 +1,10 @@
 ##' GO Enrichment Analysis of a gene set.
 ##' Given a vector of genes, this function will return the enrichment GO
-##' categories after FDR control.
+##' categories after FDR control. If a list of vectors is given, enrichment
+##' will be applied over all sets and returned as a list of results.
 ##'
 ##'
-##' @param gene a vector of entrez gene id.
+##' @param gene a vector of entrez gene id or a list of vectors (to perfomr several independent enrichments).
 ##' @param OrgDb OrgDb
 ##' @param keyType keytype of input gene
 ##' @param ont One of "BP", "MF", and "CC" subontologies, or "ALL" for all three.
@@ -12,7 +13,7 @@
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param readable whether mapping gene ID to gene Name
 ##' @param pool If ont='ALL', whether pool 3 GO sub-ontologies
-##' @return An \code{enrichResult} instance.
+##' @return An \code{enrichResult} instance or a list of \code{enrichResult}.
 ##' @importClassesFrom DOSE enrichResult
 ##' @importFrom DOSE setReadable
 ##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
@@ -21,10 +22,10 @@
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @examples
 ##' \dontrun{
-##'   data(geneList, package = "DOSE")
-##' 	de <- names(geneList)[1:100]
-##' 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
-##' 	head(yy)
+##'     data(geneList, package = "DOSE")
+##'     de <- names(geneList)[1:100]
+##'     yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
+##'     head(yy)
 ##' }
 enrichGO <- function(gene,
                      OrgDb,
@@ -36,7 +37,8 @@ enrichGO <- function(gene,
                      qvalueCutoff = 0.2,
                      minGSSize = 10,
                      maxGSSize = 500,
-                     readable=FALSE, pool=FALSE) {
+                     readable=FALSE, 
+                     pool=FALSE) {
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
@@ -44,6 +46,69 @@ enrichGO <- function(gene,
 
     if (missing(universe))
         universe <- NULL
+
+    # Check if it's a list of elements
+    if(is.list(gene)){
+        enrichResult <- lapply(gene, function(gn){
+            enrichGO_iter(gene          = gn,
+                          OrgDb         = OrgDb,
+                          keyType       = keyType,
+                          ont           = ont,
+                          pvalueCutoff  = pvalueCutoff,
+                          pAdjustMethod = pAdjustMethod,
+                          universe      = universe,
+                          qvalueCutoff  = qvalueCutoff,
+                          minGSSize     = minGSSize,
+                          maxGSSize     = maxGSSize,
+                          readable      = readable, pool = pool,
+                          GO_DATA       = GO_DATA)
+        })
+        # Check if it's named
+        if(!is.null(names(gene))){
+            names(enrichResult) <- names(gene)
+        }
+    } else {
+        enrichResult <- enrichGO_iter(gene = gene,
+                                      OrgDb         = OrgDb,
+                                      keyType       = keyType,
+                                      ont           = ont,
+                                      pvalueCutoff  = pvalueCutoff,
+                                      pAdjustMethod = pAdjustMethod,
+                                      universe      = universe,
+                                      qvalueCutoff  = qvalueCutoff,
+                                      minGSSize     = minGSSize,
+                                      maxGSSize     = maxGSSize,
+                                      readable      = readable, 
+                                      pool          = pool,
+                                      GO_DATA       = GO_DATA)
+    }
+    return(enrichResult)
+}
+
+
+##' GO Enrichment Analysis of a gene set.
+##' Given a vector of genes, this function will return the enrichment GO
+##' categories after FDR control.
+##'
+##' @inheritParams enrichGO
+##' @param GO_DATA GO annotation data.
+##' @return An \code{enrichResult} instance.
+##' @importClassesFrom DOSE enrichResult
+##' @importFrom DOSE setReadable
+##' @noRd
+enrichGO_iter <- function(gene,
+                          OrgDb,
+                          keyType = "ENTREZID",
+                          ont="MF",
+                          pvalueCutoff=0.05,
+                          pAdjustMethod="BH",
+                          universe,
+                          qvalueCutoff = 0.2,
+                          minGSSize = 10,
+                          maxGSSize = 500,
+                          readable=FALSE, 
+                          pool=FALSE,
+                          GO_DATA) {
 
     if (ont == "ALL" && !pool) {
         lres <- lapply(c("BP", "CC", "MF"), function(ont)
@@ -81,9 +146,11 @@ enrichGO <- function(gene,
         if (is.null(res))
             return(res)
     }
+    
     if (keyType == 'SYMBOL') {
         res@readable <- TRUE
     }
+    
     res@keytype <- keyType
     res@organism <- get_organism(OrgDb)
     if(readable) {

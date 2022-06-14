@@ -8,8 +8,9 @@ TODO:
 
 -->
 
-# clusterProfiler 4.5.1.901
+# clusterProfiler 4.5.1.902
 
++ support passing 'a list of gene vectors' for `enrichGO` (2022-6-15, Wed)
 + `gson_KEGG()` download latest KEGG and output a GSON object (2022-06-08, Wed)
 + support passing a GSON object to `gseKEGG(organism)` 
 + support passing a GSON object to `enrichKEGG(organism)` (2022-06-06, Mon)
