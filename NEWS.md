@@ -24,8 +24,9 @@ TODO:
 
 -->
 
-# clusterProfiler 4.5.1.901
+# clusterProfiler 4.5.1.902
 
++ fix `show` method for `compareClusterResult` (2022-06-21, Tue, #473)
 + `gson_KEGG()` download latest KEGG and output a GSON object (2022-06-08, Wed)
 + support passing a GSON object to `gseKEGG(organism)` 
 + support passing a GSON object to `enrichKEGG(organism)` (2022-06-06, Mon)

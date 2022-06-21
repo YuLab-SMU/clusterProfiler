@@ -223,7 +223,9 @@ setMethod("show", signature(object="compareClusterResult"),
               }
               cat("#\n#...Citation\n")
               citation_msg <- NULL
-              if (fun == "enrichDO" || fun == "enrichNCG") {
+              if (length(fun) == 0) {
+                  # do nothing
+              } else if (fun == "enrichDO" || fun == "enrichNCG") {
                   citation_msg <- paste("  Guangchuang Yu, Li-Gen Wang, Guang-Rong Yan, Qing-Yu He. DOSE: an",
                                         "  R/Bioconductor package for Disease Ontology Semantic and Enrichment",
                                         "  analysis. Bioinformatics 2015 31(4):608-609",
