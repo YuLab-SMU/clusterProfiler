@@ -65,3 +65,10 @@ release:
 biocinit:
 	git remote add upstream git@git.bioconductor.org:packages/$(PKGNAME).git;\
 	git fetch --all
+
+
+prerelease:
+	cd data;\
+	Rscript -e 'clusterProfiler:::get_kegg_species(save=TRUE)'
+
+	

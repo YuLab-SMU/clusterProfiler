@@ -5,11 +5,28 @@ TODO:
 
 + Uniprot to KO, <https://www.biostars.org/p/415837/>
   - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
++ aggregate multiple p values
+  - <https://en.wikipedia.org/wiki/Fisher's_method>
+  - e.g. independent test of cancer sample 1 vs control 1 and cancer sample 2 vs control 2, then combine results
+  - e.g. independent test for different omics data and then combine results
+
+
+## KEGG
+
++ <https://www.kegg.jp/kegg/rest/keggapi.html>
++ [x] get KEGG organism list using api
+  - <http://rest.kegg.jp/list/organism>
+  - Currently, the `get_kegg_species()` function parses html page
+
+
+
+
 
 -->
 
-# clusterProfiler 4.5.1.901
+# clusterProfiler 4.5.1.902
 
++ fix `show` method for `compareClusterResult` (2022-06-21, Tue, #473)
 + `gson_KEGG()` download latest KEGG and output a GSON object (2022-06-08, Wed)
 + support passing a GSON object to `gseKEGG(organism)` 
 + support passing a GSON object to `enrichKEGG(organism)` (2022-06-06, Mon)
