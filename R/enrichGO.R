@@ -26,7 +26,6 @@
 ##'   yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
 ##'   head(yy)
 ##'   humango <- gson_GO(org.Hs.eg.db)
-##'   dada <- enrichKEGG(de, organism = humango, pvalueCutoff=0.01)
 ##'   yy2 <- enrichGO(de, OrgDb = humango)
 ##'   head(yy2)
 ##' }
