@@ -9,7 +9,7 @@ gseWP(geneList, organism, ...)
 \arguments{
 \item{geneList}{ranked gene list}
 
-\item{organism}{supported organisms, which can be accessed via the get_wp_organisms() function}
+\item{organism}{a supported organism, which can be accessed via the get_wp_organisms() function, or a GSON object.}
 
 \item{...}{additional parameters, see also the parameters supported by the GSEA() function}
 }
@@ -21,6 +21,14 @@ GSEA analysis for WikiPathways
 }
 \details{
 This function performs GSEA using WikiPathways
+}
+\examples{
+\dontrun{
+data(geneList, package="DOSE")
+gsewp <- gseWP(geneList, organism = "Homo sapiens") 
+wp_gson <- gson_WP("Homo sapiens")
+gsewp2 <- gseWP(geneList, organism = wp_gson) 
+}
 }
 \author{
 Guangchuang Yu

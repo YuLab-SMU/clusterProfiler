@@ -62,3 +62,12 @@ gson_GO <- function(OrgDb, keytype = 'ENTREZID', ont = "BP") {
         keytype = keytype
     )
 }
+##' Download the latest version of WikiPathways data and stored in a 'GSON' object
+##'
+##'
+##' @title gson_WP
+##' @param organism supported organism, which can be accessed via the get_wp_organisms() function.
+##' @export
+gson_WP <- function(organism) {
+    get_wp_data(organism, output = "GSON")
+}

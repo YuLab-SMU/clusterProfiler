@@ -9,7 +9,8 @@ enrichWP(gene, organism, ...)
 \arguments{
 \item{gene}{a vector of entrez gene id}
 
-\item{organism}{supported organisms, which can be accessed via the get_wp_organisms() function}
+\item{organism}{a supported organism, which can be accessed via 
+the get_wp_organisms() function, or a GSON object.}
 
 \item{...}{additional parameters, see also the parameters supported by the enricher() function}
 }
@@ -21,6 +22,15 @@ ORA analysis for WikiPathways
 }
 \details{
 This function performs over-representation analysis using WikiPathways
+}
+\examples{
+\dontrun{
+data(geneList, package="DOSE")
+gene <- names(geneList)[abs(geneList) > 2]
+ewp <- enrichWP(gene, organism = "Homo sapiens") 
+wp_gson <- gson_WP("Homo sapiens")
+ewp2 <- enrichWP(gene, organism = wp_gson) 
+}
 }
 \author{
 Guangchuang Yu
