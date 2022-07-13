@@ -50,7 +50,7 @@ categories with FDR control.
 \dontrun{
   data(geneList, package='DOSE')
   de <- names(geneList)[1:100]
-  mkk <- enrichMKEGG(gene = gene,
+  mkk <- enrichMKEGG(gene = de,
       organism = 'hsa',
       pvalueCutoff = 1,
       qvalueCutoff = 1)

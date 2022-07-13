@@ -10,7 +10,7 @@
 ##' \dontrun{
 ##'   data(geneList, package='DOSE')
 ##'   de <- names(geneList)[1:100]
-##'   mkk <- enrichMKEGG(gene = gene,
+##'   mkk <- enrichMKEGG(gene = de,
 ##'       organism = 'hsa',
 ##'       pvalueCutoff = 1,
 ##'       qvalueCutoff = 1)
@@ -32,9 +32,9 @@ enrichMKEGG <- function(gene,
                         maxGSSize = 500,
                         qvalueCutoff = 0.2) {
 
-    if (inherits(organism, "character")) {                       
+    if (inherits(organism, "character")) {   
+        species <- organismMapper(organism)                    
         KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)  
-        species <- organismMapper(organism)
     } else if (inherits(organism, "GSON")) {
         KEGG_DATA <- organism
         species <- KEGG_DATA@species
