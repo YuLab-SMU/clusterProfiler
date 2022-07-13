@@ -4,7 +4,7 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param OrgDb OrgDb
+##' @param OrgDb an OrgDb or a GSON object.
 ##' @param keyType keytype of input gene
 ##' @param ont One of "BP", "MF", and "CC" subontologies, or "ALL" for all three.
 ##' @inheritParams enricher
@@ -22,9 +22,13 @@
 ##' @examples
 ##' \dontrun{
 ##'   data(geneList, package = "DOSE")
-##' 	de <- names(geneList)[1:100]
-##' 	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
-##' 	head(yy)
+##'   de <- names(geneList)[1:100]
+##'   yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
+##'   head(yy)
+##'   humango <- gson_GO(org.Hs.eg.db)
+##'   dada <- enrichKEGG(de, organism = humango, pvalueCutoff=0.01)
+##'   yy2 <- enrichGO(de, OrgDb = humango)
+##'   head(yy2)
 ##' }
 enrichGO <- function(gene,
                      OrgDb,
@@ -40,12 +44,17 @@ enrichGO <- function(gene,
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
-    GO_DATA <- get_GO_data(OrgDb, ont, keyType)
+    if (missing(universe)) universe <- NULL
+    if (inherits(OrgDb, "GSON")) {
+        GO_DATA <- OrgDb
+        species <- GO_DATA@species
+        # keyType <- GO_DATA@keytype
+    } else {
+        GO_DATA <- get_GO_data(OrgDb, ont, keyType)
+        species <- get_organism(OrgDb)
+    }
 
-    if (missing(universe))
-        universe <- NULL
-
-    if (ont == "ALL" && !pool) {
+    if (ont == "ALL" && !pool && !inherits(OrgDb, "GSON")) {
         lres <- lapply(c("BP", "CC", "MF"), function(ont)
             suppressMessages(enrichGO(gene, OrgDb, keyType, ont,
                      pvalueCutoff, pAdjustMethod, universe,
@@ -66,36 +75,45 @@ enrichGO <- function(gene,
         }
         res <- lres[[1]]
         res@result <- df
-        res@geneSets <- geneSets
+        res@geneSets <- geneSets  
     } else {
         res <- enricher_internal(gene,
-                                 pvalueCutoff=pvalueCutoff,
-                                 pAdjustMethod=pAdjustMethod,
-                                 universe = universe,
-                                 qvalueCutoff = qvalueCutoff,
-                                 minGSSize = minGSSize,
-                                 maxGSSize = maxGSSize,
-                                 USER_DATA = GO_DATA
-                                 )
-
-        if (is.null(res))
-            return(res)
+                    pvalueCutoff=pvalueCutoff,
+                    pAdjustMethod=pAdjustMethod,
+                    universe = universe,
+                    qvalueCutoff = qvalueCutoff,
+                    minGSSize = minGSSize,
+                    maxGSSize = maxGSSize,
+                    USER_DATA = GO_DATA
+        ) 
+        if (is.null(res)) return(res)  
     }
+
+
     if (keyType == 'SYMBOL') {
         res@readable <- TRUE
     }
     res@keytype <- keyType
-    res@organism <- get_organism(OrgDb)
+    res@organism <- species
     if(readable) {
-        res <- setReadable(res, OrgDb)
+        if (!inherits(OrgDb, "GSON")){
+            res <- setReadable(res, OrgDb)
+        } else {
+            # do nothing for now
+        }
     }
     res@ontology <- ont
 
     if (ont == "ALL") {
-        res <- add_GO_Ontology(res, GO_DATA)
+        if (!inherits(OrgDb, "GSON")){
+            res <- add_GO_Ontology(res, GO_DATA)
+        } else {
+            # do nothing for now
+        }    
     }
     return(res)
 }
+
 
 ##' @importFrom AnnotationDbi keys
 ##' @importFrom AnnotationDbi keytypes

@@ -24,7 +24,7 @@ enrichGO(
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{OrgDb}{OrgDb}
+\item{OrgDb}{an OrgDb or a GSON object.}
 
 \item{keyType}{keytype of input gene}
 
@@ -57,9 +57,13 @@ categories after FDR control.
 \examples{
 \dontrun{
   data(geneList, package = "DOSE")
-	de <- names(geneList)[1:100]
-	yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
-	head(yy)
+  de <- names(geneList)[1:100]
+  yy <- enrichGO(de, 'org.Hs.eg.db', ont="BP", pvalueCutoff=0.01)
+  head(yy)
+  humango <- gson_GO(org.Hs.eg.db)
+  dada <- enrichKEGG(de, organism = humango, pvalueCutoff=0.01)
+  yy2 <- enrichGO(de, OrgDb = humango)
+  head(yy2)
 }
 }
 \seealso{

@@ -26,7 +26,7 @@ gseGO(
 
 \item{ont}{one of "BP", "MF", and "CC" subontologies, or "ALL" for all three.}
 
-\item{OrgDb}{OrgDb}
+\item{OrgDb}{an OrgDb or a GSON object.}
 
 \item{keyType}{keytype of gene}
 

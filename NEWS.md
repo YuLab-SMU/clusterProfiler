@@ -24,8 +24,11 @@ TODO:
 
 -->
 
-# clusterProfiler 4.5.1.902
+# clusterProfiler 4.5.1.903
 
++ add `keytype` slot for `gson_GO()` (2022-07-13, Wed)
++ add `KEGG_Type` and `kegg` parameters for `gson_KEGG()`(2022-07-13, Wed)
++ support passing a GSON object to `gseMKEGG(organism)`, `enrichMKEGG(organism)`, `gseGO(OrgDb)`, and `enrichGO(OrgDb)` (2022-07-13, Wed)
 + fix `show` method for `compareClusterResult` (2022-06-21, Tue, #473)
 + `gson_KEGG()` download latest KEGG and output a GSON object (2022-06-08, Wed)
 + support passing a GSON object to `gseKEGG(organism)` 

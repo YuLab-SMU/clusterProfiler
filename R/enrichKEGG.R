@@ -4,7 +4,8 @@
 ##'
 ##'
 ##' @param gene a vector of entrez gene id.
-##' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
+##' @param organism a supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html',
+##' or a GSON object.
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param maxGSSize maximal size of genes annotated for testing
@@ -24,6 +25,9 @@
 ##'   de <- names(geneList)[1:100]
 ##'   yy <- enrichKEGG(de, pvalueCutoff=0.01)
 ##'   head(yy)
+##'   kk <- gson_KEGG('hsa')
+##'   yy2 <- enrichKEGG(de, organism = kk, pvalueCutoff=0.01)
+##'   head(yy2)
 ##' }
 enrichKEGG <- function(gene,
                        organism          = "hsa",

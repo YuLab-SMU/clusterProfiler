@@ -4,7 +4,7 @@
 ##' @title gseGO
 ##' @param geneList order ranked geneList
 ##' @param ont one of "BP", "MF", and "CC" subontologies, or "ALL" for all three.
-##' @param OrgDb OrgDb
+##' @param OrgDb an OrgDb or a GSON object.
 ##' @param keyType keytype of gene
 ##' @param exponent weight of each step
 ##' @param minGSSize minimal size of each geneSet for analyzing
@@ -37,8 +37,14 @@ gseGO <- function(geneList,
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
-
-    GO_DATA <- get_GO_data(OrgDb, ont, keyType)
+    if (inherits(OrgDb, "GSON")) {
+        GO_DATA <- OrgDb
+        species <- GO_DATA@species
+    } else {
+        GO_DATA <- get_GO_data(OrgDb, ont, keyType)
+        species <- get_organism(OrgDb)
+    }
+    
 
     res <-  GSEA_internal(geneList      = geneList,
                           exponent      = exponent,
@@ -61,13 +67,18 @@ gseGO <- function(geneList,
     if (keyType == 'SYMBOL') {
         res@readable <- TRUE
     }
-    res@organism <- get_organism(OrgDb)
+    res@organism <- species
     res@setType <- ont
     res@keytype <- keyType
 
     if (ont == "ALL") {
-        res <- add_GO_Ontology(res, GO_DATA)
+        if (!inherits(OrgDb, "GSON")){
+            res <- add_GO_Ontology(res, GO_DATA)
+        } else {
+            # do nothing for now
+        }    
     }
+
     return(res)
 }
 
@@ -78,7 +89,8 @@ gseGO <- function(geneList,
 ##'
 ##' @title gseMKEGG
 ##' @param geneList order ranked geneList
-##' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
+##' @param organism a supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html',
+##' or a GSON object.
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 ##' @param exponent weight of each step
 ##' @param minGSSize minimal size of each geneSet for analyzing
@@ -93,6 +105,19 @@ gseGO <- function(geneList,
 ##' @export
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
+##' @examples
+##' \dontrun{
+##'   data(geneList, package='DOSE')
+##'   mkk <- gseMKEGG(geneList = geneList,
+##'                    organism = 'hsa',
+##'                    pvalueCutoff = 1)
+##'   head(mkk)
+##'   kk2 <- gson_KEGG('hsa', KEGG_Type="MKEGG")
+##'   mkk2 <- gseMKEGG(geneList = geneList,
+##'                   organism = kk2,
+##'                   pvalueCutoff = 1)
+##'   head(mkk2)
+##' }
 gseMKEGG <- function(geneList,
                      organism          = 'hsa',
                      keyType           = 'kegg',
@@ -107,9 +132,17 @@ gseMKEGG <- function(geneList,
                      by                = 'fgsea',
                      ...) {
 
-    species <- organismMapper(organism)
-    KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)
-    
+    if (inherits(organism, "character")) {                       
+        species <- organismMapper(organism)
+        KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)
+    } else if (inherits(organism, "GSON")) {
+        KEGG_DATA <- organism
+        species <- KEGG_DATA@species
+    } else {
+        stop("organism should be a species name or a GSON object")
+    }
+
+
     res <-  GSEA_internal(geneList       = geneList,
                           exponent       = exponent,
                           minGSSize      = minGSSize,
@@ -145,6 +178,15 @@ gseMKEGG <- function(geneList,
 ##' @export
 ##' @return gseaResult object
 ##' @author Yu Guangchuang
+##' @examples
+##' \dontrun{
+##'   data(geneList, package='DOSE')
+##'   gsekegg <- gseKEGG(geneList)
+##'   head(gsekegg)
+##'   kk <- gson_KEGG('hsa')
+##'   gsekegg2 <- gseKEGG(de, organism = kk)
+##'   head(gsekegg2)
+##' }
 gseKEGG <- function(geneList,
                     organism          = 'hsa',
                     keyType           = 'kegg',

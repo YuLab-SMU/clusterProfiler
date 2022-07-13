@@ -24,7 +24,8 @@ gseKEGG(
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{a supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html',
+or a GSON object.}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
@@ -55,6 +56,16 @@ gseaResult object
 }
 \description{
 Gene Set Enrichment Analysis of KEGG
+}
+\examples{
+\dontrun{
+  data(geneList, package='DOSE')
+  gsekegg <- gseKEGG(geneList)
+  head(gsekegg)
+  kk <- gson_KEGG('hsa')
+  gsekegg2 <- gseKEGG(de, organism = kk)
+  head(gsekegg2)
+}
 }
 \author{
 Yu Guangchuang

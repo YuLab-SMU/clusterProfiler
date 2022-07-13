@@ -22,7 +22,8 @@ enrichKEGG(
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{a supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html',
+or a GSON object.}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
@@ -54,6 +55,9 @@ categories with FDR control.
   de <- names(geneList)[1:100]
   yy <- enrichKEGG(de, pvalueCutoff=0.01)
   head(yy)
+  kk <- gson_KEGG('hsa')
+  yy2 <- enrichKEGG(de, organism = kk, pvalueCutoff=0.01)
+  head(yy2)
 }
 }
 \seealso{

@@ -21,7 +21,8 @@ enrichMKEGG(
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{a supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html',
+or a GSON object.}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
@@ -44,4 +45,21 @@ A \code{enrichResult} instance.
 KEGG Module Enrichment Analysis of a gene set.
 Given a vector of genes, this function will return the enrichment KEGG Module
 categories with FDR control.
+}
+\examples{
+\dontrun{
+  data(geneList, package='DOSE')
+  de <- names(geneList)[1:100]
+  mkk <- enrichMKEGG(gene = gene,
+      organism = 'hsa',
+      pvalueCutoff = 1,
+      qvalueCutoff = 1)
+  head(mkk) 
+  
+  kk <- gson_KEGG('hsa', KEGG_Type="MKEGG")
+  mkk2 <- enrichMKEGG(de,
+                  organism = kk,
+                  pvalueCutoff = 1)
+  head(mkk2)
+}
 }
