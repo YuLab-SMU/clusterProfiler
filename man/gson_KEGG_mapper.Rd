@@ -2,10 +2,7 @@
 % Please edit documentation in R/gson.R
 \name{gson_KEGG_mapper}
 \alias{gson_KEGG_mapper}
-\title{Build KEGG annotation for novel species using KEGG Mapper
-KEGG Mapper service can annotate protein sequences for novel species with KO database, 
-and KO annotation need to be converted into Pathway or Module annotation, which
-can then be used in `clusterProfiler`}
+\title{Build KEGG annotation for novel species using KEGG Mapper}
 \usage{
 gson_KEGG_mapper(
   file,
@@ -16,7 +13,7 @@ gson_KEGG_mapper(
 )
 }
 \arguments{
-\item{file}{the name of the file which comes from the KEGG Mapper service}
+\item{file}{the name of the file which comes from the KEGG Mapper service, see Details for file format}
 
 \item{format}{string indicate format of KEGG Mapper result}
 
@@ -30,10 +27,22 @@ gson_KEGG_mapper(
 a gson instance
 }
 \description{
-Build KEGG annotation for novel species using KEGG Mapper
 KEGG Mapper service can annotate protein sequences for novel species with KO database, 
 and KO annotation need to be converted into Pathway or Module annotation, which
 can then be used in `clusterProfiler`
+}
+\details{
+File is a two-column dataset with K numbers in the second column, optionally preceded by 
+         the user's identifiers in the first column. This is consistent with the output 
+         files of automatic annotation servers, BlastKOALA, GhostKOALA, and KofamKOALA. 
+         KOALA (KEGG Orthology And Links Annotation) is KEGG's internal annotation tool 
+         for K number assignment of KEGG GENES using SSEARCH computation. BlastKOALA 
+         and GhostKOALA assign K numbers to the user's sequence data by BLAST and GHOSTX 
+         searches, respectively, against a nonredundant set of KEGG GENES. KofamKOALA 
+         is a new member of the KOALA family available at GenomeNet using the HMM profile 
+         search, rather than the sequence similarity search, for K number assignment. 
+         see https://www.kegg.jp/blastkoala/, https://www.kegg.jp/ghostkoala/ and 
+         https://www.genome.jp/tools/kofamkoala/ for more information.
 }
 \examples{
 \dontrun{

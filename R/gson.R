@@ -56,17 +56,29 @@ gson_GO <- function(OrgDb, keytype = 'ENTREZID', ont = "BP") {
 
 
 #' Build KEGG annotation for novel species using KEGG Mapper
+#' 
 #' KEGG Mapper service can annotate protein sequences for novel species with KO database, 
 #' and KO annotation need to be converted into Pathway or Module annotation, which
 #' can then be used in `clusterProfiler`
 #' 
 #' @export
 #' @return  a gson instance
-#' @param file the name of the file which comes from the KEGG Mapper service
+#' @param file the name of the file which comes from the KEGG Mapper service, see Details for file format
 #' @param format string indicate format of KEGG Mapper result
 #' @param type string indicate annotation database
 #' @param species your species, NULL if ignored
 #' @param ... pass to gson::gson()
+#' @details File is a two-column dataset with K numbers in the second column, optionally preceded by 
+#'          the user's identifiers in the first column. This is consistent with the output 
+#'          files of automatic annotation servers, BlastKOALA, GhostKOALA, and KofamKOALA. 
+#'          KOALA (KEGG Orthology And Links Annotation) is KEGG's internal annotation tool 
+#'          for K number assignment of KEGG GENES using SSEARCH computation. BlastKOALA 
+#'          and GhostKOALA assign K numbers to the user's sequence data by BLAST and GHOSTX 
+#'          searches, respectively, against a nonredundant set of KEGG GENES. KofamKOALA 
+#'          is a new member of the KOALA family available at GenomeNet using the HMM profile 
+#'          search, rather than the sequence similarity search, for K number assignment. 
+#'          see https://www.kegg.jp/blastkoala/, https://www.kegg.jp/ghostkoala/ and 
+#'          https://www.genome.jp/tools/kofamkoala/ for more information.
 #' @examples 
 #' \dontrun{
 #'  file = system.file('extdata', "kegg_mapper_blast.txt", package='clusterProfiler')
