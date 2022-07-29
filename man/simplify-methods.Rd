@@ -69,6 +69,4 @@ issue #162
 Guangchuang Yu
 
 Gwang-Jin Kim and Guangchuang Yu
-
-Guangchuang Yu
 }
