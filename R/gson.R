@@ -117,8 +117,9 @@ gson_KEGG_mapper = function(file,
     ko2pathway %<>%
       dplyr::mutate_all(.funs = "remove_db_prefix") %>%
       # remove redundant ko prefix pathway ids, only keep those like map00010
-      dplyr::filter(stringr::str_starts(.data[["pathway"]], "map"))
-    
+      # dplyr::filter(stringr::str_starts(.data[["pathway"]], "map"))
+      dplyr::filter(grepl(.data$pathway, pattern = "^map"))
+      
     # some KOs don't have pathway mapping, in which case NA will be induced at pathway
     gsid2gene = protein2ko %>%
       dplyr::left_join(ko2pathway, by = "ko") %>%
