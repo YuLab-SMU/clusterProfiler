@@ -4,10 +4,14 @@
 \alias{gson_KEGG}
 \title{gson_KEGG}
 \usage{
-gson_KEGG(species)
+gson_KEGG(species, KEGG_Type = "KEGG", keyType = "kegg")
 }
 \arguments{
 \item{species}{species}
+
+\item{KEGG_Type}{one of "KEGG" and "MKEGG"}
+
+\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'.}
 }
 \value{
 a 'GSON' object

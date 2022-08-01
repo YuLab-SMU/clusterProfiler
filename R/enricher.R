@@ -3,18 +3,22 @@
 ##'
 ##' @title enricher
 ##' @param gene a vector of gene id
+##' @param USER_DATA If not NULL, use it as annotation data. Should be an environment object or a GSON object.
 ##' @param pvalueCutoff adjusted pvalue cutoff on enrichment tests to report
 ##' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.
 ##' @param minGSSize minimal size of genes annotated for testing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param qvalueCutoff qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.
-##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
-##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
+##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
+##' Only used when USER_DATA is NULL.
+##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
+##' Only used when USER_DATA is NULL.
 ##' @return A \code{enrichResult} instance
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @export
 enricher <- function(gene,
+                     USER_DATA  = NULL,
                      pvalueCutoff = 0.05,
                      pAdjustMethod = "BH",
                      universe,
@@ -22,8 +26,16 @@ enricher <- function(gene,
                      maxGSSize=500,
                      qvalueCutoff = 0.2,
                      TERM2GENE,
-                     TERM2NAME = NA) {
-    USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
+                     TERM2NAME = NA
+                     ) {
+    if (is.null(USER_DATA)) {
+        USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
+    } else {
+        if (!inherits(USER_DATA, c("environment", "GSON"))) {
+            stop("USER_DATA shoud be an environment object or a GSON object")
+        }
+    }
+    
     enricher_internal(gene = gene,
                       pvalueCutoff = pvalueCutoff,
                       pAdjustMethod = pAdjustMethod,
@@ -39,15 +51,18 @@ enricher <- function(gene,
 ##'
 ##'
 ##' @title GSEA
+##' @param USER_DATA If not NULL, use it as annotation data. Should be an environment object or a GSON object.
 ##' @param geneList order ranked geneList
 ##' @param exponent weight of each step
 ##' @param minGSSize minimal size of each geneSet for analyzing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param eps This parameter sets the boundary for calculating the p value.
 ##' @param pvalueCutoff adjusted pvalue cutoff
-##' @param pAdjustMethod p value adjustment method
-##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
-##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
+##' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
+##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
+##' Only used when USER_DATA is NULL.
+##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
+##' Only used when USER_DATA is NULL.
 ##' @param verbose logical
 ##' @param seed logical
 ##' @param by one of 'fgsea' or 'DOSE'
@@ -56,6 +71,7 @@ enricher <- function(gene,
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @export
 GSEA <- function(geneList,
+                 USER_DATA  = NULL,
                  exponent = 1,
                  minGSSize = 10,
                  maxGSSize = 500,
@@ -69,8 +85,14 @@ GSEA <- function(geneList,
                  by = 'fgsea',
                  ...) {
 
-    USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
-
+    if (is.null(USER_DATA)) {
+        USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
+    } else {
+        if (!inherits(USER_DATA, c("environment", "GSON"))) {
+            stop("USER_DATA shoud be an environment object or a GSON object")
+        }
+    }
+    
     GSEA_internal(geneList      = geneList,
                   exponent      = exponent,
                   minGSSize     = minGSSize,

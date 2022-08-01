@@ -277,6 +277,7 @@ setMethod("summary", signature(object="compareClusterResult"),
 ##' @return a compareClusterResult instance
 ##' @author Guangchuang Yu
 ##' @importFrom plyr ldply
+##' @importFrom methods is
 ##' @export
 merge_result <- function(enrichResultList) {
     if ( !is(enrichResultList, "list")) {

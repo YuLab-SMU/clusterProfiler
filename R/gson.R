@@ -3,12 +3,14 @@
 ##'
 ##' @title gson_KEGG
 ##' @param species species
+##' @param KEGG_Type one of "KEGG" and "MKEGG"
+##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'.
 ##' @return a 'GSON' object
 ##' @author Guangchuang Yu
 ##' @importFrom gson gson
 ##' @export
-gson_KEGG <- function(species) {
-    x <- download_KEGG(species)
+gson_KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
+    x <- download_KEGG(species, KEGG_Type, keyType)
     gsid2gene <- setNames(x[[1]], c("gsid", "gene"))
     gsid2name <- setNames(x[[2]], c("gsid", "name"))
     version <- kegg_release(species)
@@ -17,12 +19,27 @@ gson_KEGG <- function(species) {
         species = species,
         gsname = "KEGG",
         version = version,
-        accessed_date = as.character(Sys.Date())
+        accessed_date = as.character(Sys.Date(),
+        keytype = "ENTREZID")
     )
 }
 
-
+##' download the latest version of KEGG pathway and stored in a 'GSON' object
+##'
+##'
+##' @title gson_KEGG
+##' @param OrgDb OrgDb
+##' @param keytype keytype of genes.
+##' @param ont one of "BP", "MF", "CC", and "ALL"
+##' @return a 'GSON' object
+##' @importFrom gson gson
+##' @export
 gson_GO <- function(OrgDb, keytype = 'ENTREZID', ont = "BP") {
+
+    if (is(OrgDb, "character")) {
+        require(OrgDb, character.only = TRUE)
+        OrgDb <- eval(parse(text = OrgDb))
+    }
 
     goterms <- AnnotationDbi::Ontology(GO.db::GOTERM)
     if (ont != "ALL") {
@@ -43,16 +60,35 @@ gson_GO <- function(OrgDb, keytype = 'ENTREZID', ont = "BP") {
     species <- AnnotationDbi::species(OrgDb)
     m <- AnnotationDbi::metadata(OrgDb)
     version <- m$value[m$name == "GOSOURCEDATE"]
-    gsname <- m$value[m$name == 'GOSOURCENAME']
+    # gsname <- m$value[m$name == 'GOSOURCENAME']
+    gsname <- paste(m$value[m$name == 'GOSOURCENAME'], ont, sep = ";")
+
+   # gene2name
+    genes <- unique(gsid2gene[, 2])
+    gene2name <- bitr(geneID = genes, fromType = keytype, 
+        toType = "SYMBOL", OrgDb = OrgDb, drop = TRUE)
+
 
     gson(gsid2gene = gsid2gene, 
         gsid2name = gsid2name,
+        gene2name = gene2name,
         species = species,
         gsname = gsname,
         version = version,
-        accessed_date = as.character(Sys.Date())
+        accessed_date = as.character(Sys.Date()),
+        keytype = keytype
     )
 }
+##' Download the latest version of WikiPathways data and stored in a 'GSON' object
+##'
+##'
+##' @title gson_WP
+##' @param organism supported organism, which can be accessed via the get_wp_organisms() function.
+##' @export
+gson_WP <- function(organism) {
+    get_wp_data(organism, output = "GSON")
+}
+
 
 
 #' Build KEGG annotation for novel species using KEGG Mapper

@@ -6,6 +6,7 @@
 \usage{
 enricher(
   gene,
+  USER_DATA = NULL,
   pvalueCutoff = 0.05,
   pAdjustMethod = "BH",
   universe,
@@ -19,6 +20,8 @@ enricher(
 \arguments{
 \item{gene}{a vector of gene id}
 
+\item{USER_DATA}{If not NULL, use it as annotation data. Should be an environment object or a GSON object.}
+
 \item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
@@ -31,9 +34,11 @@ enricher(
 
 \item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
 
-\item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene}
+\item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
+Only used when USER_DATA is NULL.}
 
-\item{TERM2NAME}{user input of TERM TO NAME mapping, a data.frame of 2 column with term and name}
+\item{TERM2NAME}{user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
+Only used when USER_DATA is NULL.}
 }
 \value{
 A \code{enrichResult} instance
