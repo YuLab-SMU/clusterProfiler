@@ -6,7 +6,7 @@
 \usage{
 GSEA(
   geneList,
-  USER_DATA = NULL,
+  gson = NULL,
   exponent = 1,
   minGSSize = 10,
   maxGSSize = 500,
@@ -24,7 +24,7 @@ GSEA(
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{USER_DATA}{If not NULL, use it as annotation data. Should be an environment object or a GSON object.}
+\item{gson}{a GSON object, if not NULL, use it as annotation data.}
 
 \item{exponent}{weight of each step}
 
@@ -39,10 +39,10 @@ GSEA(
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
 \item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
-Only used when USER_DATA is NULL.}
+Only used when gson is NULL.}
 
 \item{TERM2NAME}{user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
-Only used when USER_DATA is NULL.}
+Only used when gson is NULL.}
 
 \item{verbose}{logical}
 
