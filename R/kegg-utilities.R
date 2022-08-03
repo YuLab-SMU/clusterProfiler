@@ -113,7 +113,7 @@ get_kegg_species <- function(save = FALSE) {
 
 ##' @importFrom downloader download
 kegg_rest <- function(rest_url) {
-    message("Reading KEGG annotation online:\n" )
+    message('Reading KEGG annotation online: "', rest_url, '"...')
     f <- tempfile()
     
     dl <- mydownload(rest_url, destfile = f)
