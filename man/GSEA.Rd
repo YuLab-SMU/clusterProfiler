@@ -6,13 +6,13 @@
 \usage{
 GSEA(
   geneList,
-  gson = NULL,
   exponent = 1,
   minGSSize = 10,
   maxGSSize = 500,
   eps = 1e-10,
   pvalueCutoff = 0.05,
   pAdjustMethod = "BH",
+  gson = NULL,
   TERM2GENE,
   TERM2NAME = NA,
   verbose = TRUE,
@@ -23,8 +23,6 @@ GSEA(
 }
 \arguments{
 \item{geneList}{order ranked geneList}
-
-\item{gson}{a GSON object, if not NULL, use it as annotation data.}
 
 \item{exponent}{weight of each step}
 
@@ -37,6 +35,8 @@ GSEA(
 \item{pvalueCutoff}{adjusted pvalue cutoff}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
+
+\item{gson}{a GSON object, if not NULL, use it as annotation data.}
 
 \item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
 Only used when gson is NULL.}
