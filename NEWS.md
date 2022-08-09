@@ -24,7 +24,7 @@ TODO:
 
 -->
 
-# clusterProfiler 4.5.1.904
+# clusterProfiler 4.5.2
 
 + support passing a GSON object to `enricher(USER_DATA)` and `GSEA(USER_DATA)` (2022-8-01, Mon)
 + `gson_kegg_mapper()` allows building a gson object from outputs of KEGG Mapper service (2022-07-29, Fri, #492)
