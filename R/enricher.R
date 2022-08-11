@@ -9,8 +9,11 @@
 ##' @param minGSSize minimal size of genes annotated for testing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param qvalueCutoff qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.
-##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
-##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
+##' @param gson a GSON object, if not NULL, use it as annotation data. 
+##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
+##' Only used when gson is NULL.
+##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
+##' Only used when gson is NULL.
 ##' @return A \code{enrichResult} instance
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @export
@@ -21,9 +24,19 @@ enricher <- function(gene,
                      minGSSize=10,
                      maxGSSize=500,
                      qvalueCutoff = 0.2,
+                     gson  = NULL,
                      TERM2GENE,
-                     TERM2NAME = NA) {
-    USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
+                     TERM2NAME = NA
+                     ) {
+    if (is.null(gson)) {
+        USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
+    } else {
+        if (!inherits(gson,  "GSON")) {
+            stop("gson shoud be a GSON object")
+        }
+        USER_DATA <- gson
+    }
+    
     enricher_internal(gene = gene,
                       pvalueCutoff = pvalueCutoff,
                       pAdjustMethod = pAdjustMethod,
@@ -45,9 +58,12 @@ enricher <- function(gene,
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param eps This parameter sets the boundary for calculating the p value.
 ##' @param pvalueCutoff adjusted pvalue cutoff
-##' @param pAdjustMethod p value adjustment method
-##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene
-##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name
+##' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
+##' @param gson a GSON object, if not NULL, use it as annotation data. 
+##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
+##' Only used when gson is NULL.
+##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
+##' Only used when gson is NULL.
 ##' @param verbose logical
 ##' @param seed logical
 ##' @param by one of 'fgsea' or 'DOSE'
@@ -62,6 +78,7 @@ GSEA <- function(geneList,
                  eps  = 1e-10,
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
+                 gson  = NULL,
                  TERM2GENE,
                  TERM2NAME = NA,
                  verbose = TRUE,
@@ -69,8 +86,15 @@ GSEA <- function(geneList,
                  by = 'fgsea',
                  ...) {
 
-    USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
-
+    if (is.null(gson)) {
+        USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
+    } else {
+        if (!inherits(gson,  "GSON")) {
+            stop("gson shoud be a GSON object")
+        }
+        USER_DATA <- gson
+    }
+    
     GSEA_internal(geneList      = geneList,
                   exponent      = exponent,
                   minGSSize     = minGSSize,

@@ -83,7 +83,8 @@ get_wp_organisms <- function() {
     sub("_", " ",  orgs)
 }
 
-get_wp_data <- function(organism) {
+##' @importFrom gson read.gmt.wp
+get_wp_data <- function(organism, output = "data.frame") {
     organism <- sub(" ", "_", organism)
     gmtfile <- get_wp_gmtfile()
     wpurl <- 'https://data.wikipathways.org/current/gmt/'
@@ -95,5 +96,6 @@ get_wp_data <- function(organism) {
         message("fail to download wikiPathways data...")
         return(NULL)
     }
-    read.gmt.wp(f)
+    read.gmt.wp(f, output = output)
 }
+

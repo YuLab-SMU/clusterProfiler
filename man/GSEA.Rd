@@ -12,6 +12,7 @@ GSEA(
   eps = 1e-10,
   pvalueCutoff = 0.05,
   pAdjustMethod = "BH",
+  gson = NULL,
   TERM2GENE,
   TERM2NAME = NA,
   verbose = TRUE,
@@ -33,11 +34,15 @@ GSEA(
 
 \item{pvalueCutoff}{adjusted pvalue cutoff}
 
-\item{pAdjustMethod}{p value adjustment method}
+\item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
-\item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene}
+\item{gson}{a GSON object, if not NULL, use it as annotation data.}
 
-\item{TERM2NAME}{user input of TERM TO NAME mapping, a data.frame of 2 column with term and name}
+\item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
+Only used when gson is NULL.}
+
+\item{TERM2NAME}{user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
+Only used when gson is NULL.}
 
 \item{verbose}{logical}
 

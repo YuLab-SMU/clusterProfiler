@@ -12,6 +12,7 @@ enricher(
   minGSSize = 10,
   maxGSSize = 500,
   qvalueCutoff = 0.2,
+  gson = NULL,
   TERM2GENE,
   TERM2NAME = NA
 )
@@ -31,9 +32,13 @@ enricher(
 
 \item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
 
-\item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene}
+\item{gson}{a GSON object, if not NULL, use it as annotation data.}
 
-\item{TERM2NAME}{user input of TERM TO NAME mapping, a data.frame of 2 column with term and name}
+\item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
+Only used when gson is NULL.}
+
+\item{TERM2NAME}{user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
+Only used when gson is NULL.}
 }
 \value{
 A \code{enrichResult} instance
