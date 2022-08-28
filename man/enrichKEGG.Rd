@@ -10,6 +10,7 @@ enrichKEGG(
   gene,
   organism = "hsa",
   keyType = "kegg",
+  OrgDb,
   pvalueCutoff = 0.05,
   pAdjustMethod = "BH",
   universe,
@@ -25,6 +26,8 @@ enrichKEGG(
 \item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
+
+\item{OrgDb}{OrgDb}
 
 \item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 

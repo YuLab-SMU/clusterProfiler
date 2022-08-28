@@ -6,6 +6,7 @@
 ##' @param gene a vector of entrez gene id.
 ##' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
+##' @param OrgDb OrgDb
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @inheritParams enricher
@@ -26,8 +27,9 @@
 ##'   head(yy)
 ##' }
 enrichKEGG <- function(gene,
-                       organism          = "hsa",
+                       organism          = "hsa",             
                        keyType           = "kegg",
+                       OrgDb,
                        pvalueCutoff      = 0.05,
                        pAdjustMethod     = "BH",
                        universe,
@@ -41,6 +43,11 @@ enrichKEGG <- function(gene,
         if (use_internal_data) {
             KEGG_DATA <- get_data_from_KEGG_db(species)
         } else {
+            if (!keyType %in% c("kegg", 'ncbi-geneid', 'ncib-proteinid', 'uniprot')) {
+                gene <- bitr(geneID = gene, fromType = keyType, 
+                             toType = "ENTREZID", OrgDb = OrgDb)[, 2]
+                keyType = "kegg"
+            }
             KEGG_DATA <- prepare_KEGG(species, "KEGG", keyType)
         }
     } else if (inherits(organism, "GSON")) {
