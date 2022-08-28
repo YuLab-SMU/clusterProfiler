@@ -3,13 +3,13 @@
 ##'
 ##' @title enricher
 ##' @param gene a vector of gene id
-##' @param gson a GSON object, if not NULL, use it as annotation data. 
 ##' @param pvalueCutoff adjusted pvalue cutoff on enrichment tests to report
 ##' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 ##' @param universe background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.
 ##' @param minGSSize minimal size of genes annotated for testing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param qvalueCutoff qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.
+##' @param gson a GSON object, if not NULL, use it as annotation data. 
 ##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
 ##' Only used when gson is NULL.
 ##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
@@ -18,13 +18,13 @@
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @export
 enricher <- function(gene,
-                     gson  = NULL,
                      pvalueCutoff = 0.05,
                      pAdjustMethod = "BH",
                      universe,
                      minGSSize=10,
                      maxGSSize=500,
                      qvalueCutoff = 0.2,
+                     gson  = NULL,
                      TERM2GENE,
                      TERM2NAME = NA
                      ) {
@@ -52,7 +52,6 @@ enricher <- function(gene,
 ##'
 ##'
 ##' @title GSEA
-##' @param gson a GSON object, if not NULL, use it as annotation data. 
 ##' @param geneList order ranked geneList
 ##' @param exponent weight of each step
 ##' @param minGSSize minimal size of each geneSet for analyzing
@@ -60,6 +59,7 @@ enricher <- function(gene,
 ##' @param eps This parameter sets the boundary for calculating the p value.
 ##' @param pvalueCutoff adjusted pvalue cutoff
 ##' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
+##' @param gson a GSON object, if not NULL, use it as annotation data. 
 ##' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
 ##' Only used when gson is NULL.
 ##' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
@@ -72,13 +72,13 @@ enricher <- function(gene,
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @export
 GSEA <- function(geneList,
-                 gson  = NULL,
                  exponent = 1,
                  minGSSize = 10,
                  maxGSSize = 500,
                  eps  = 1e-10,
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
+                 gson  = NULL,
                  TERM2GENE,
                  TERM2NAME = NA,
                  verbose = TRUE,
