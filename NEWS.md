@@ -24,10 +24,11 @@ TODO:
 
 -->
 
-# clusterProfiler 4.5.1.905
 
+# clusterProfiler 4.5.2.991
 + support biological id translator for `enrichKEGG()` (2022-8-29, Mon)
-+ support passing a GSON object to `enricher(USER_DATA)` and `GSEA(USER_DATA)` (2022-8-01, Mon)
+
+# clusterProfiler 4.5.2
 + `gson_kegg_mapper()` allows building a gson object from outputs of KEGG Mapper service (2022-07-29, Fri, #492)
 + fix `show` method for `compareClusterResult` (2022-06-21, Tue, #473)
 + `gson_KEGG()` download latest KEGG and output a GSON object (2022-06-08, Wed)

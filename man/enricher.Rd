@@ -6,21 +6,19 @@
 \usage{
 enricher(
   gene,
-  gson = NULL,
   pvalueCutoff = 0.05,
   pAdjustMethod = "BH",
   universe,
   minGSSize = 10,
   maxGSSize = 500,
   qvalueCutoff = 0.2,
+  gson = NULL,
   TERM2GENE,
   TERM2NAME = NA
 )
 }
 \arguments{
 \item{gene}{a vector of gene id}
-
-\item{gson}{a GSON object, if not NULL, use it as annotation data.}
 
 \item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 
@@ -33,6 +31,8 @@ enricher(
 \item{maxGSSize}{maximal size of genes annotated for testing}
 
 \item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
+
+\item{gson}{a GSON object, if not NULL, use it as annotation data.}
 
 \item{TERM2GENE}{user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
 Only used when gson is NULL.}
