@@ -11,17 +11,6 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 
 
-## KEGG
-
-+ <https://www.kegg.jp/kegg/rest/keggapi.html>
-+ [x] get KEGG organism list using api
-  - <http://rest.kegg.jp/list/organism>
-  - Currently, the `get_kegg_species()` function parses html page
-
-
-
-
-
 -->
 
 # clusterProfiler 4.5.2.001
