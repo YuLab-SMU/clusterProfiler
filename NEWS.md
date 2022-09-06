@@ -24,6 +24,10 @@ TODO:
 
 -->
 
+# clusterProfiler 4.5.2.001
+
++ `enricher` supports `GSONList` object (2022-09-06, Tue)
+
 # clusterProfiler 4.5.2
 
 + support passing a GSON object to `enricher(USER_DATA)` and `GSEA(USER_DATA)` (2022-8-01, Mon)

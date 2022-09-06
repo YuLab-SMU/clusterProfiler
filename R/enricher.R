@@ -20,7 +20,7 @@
 enricher <- function(gene,
                      pvalueCutoff = 0.05,
                      pAdjustMethod = "BH",
-                     universe,
+                     universe = NULL,
                      minGSSize=10,
                      maxGSSize=500,
                      qvalueCutoff = 0.2,
@@ -28,11 +28,26 @@ enricher <- function(gene,
                      TERM2GENE,
                      TERM2NAME = NA
                      ) {
+    if (inherits(gson, 'GSONList')) {
+        res <- lapply(gson, function(USER_DATA) {
+                enricher_internal(gene = gene,
+                      pvalueCutoff = pvalueCutoff,
+                      pAdjustMethod = pAdjustMethod,
+                      universe = universe,
+                      minGSSize = minGSSize,
+                      maxGSSize = maxGSSize,
+                      qvalueCutoff = qvalueCutoff,
+                      USER_DATA = USER_DATA)
+        })
+        class(res) <- "enrichResultList"
+        return(res)
+    }
+
     if (is.null(gson)) {
         USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
     } else {
         if (!inherits(gson,  "GSON")) {
-            stop("gson shoud be a GSON object")
+            stop("gson shoud be a GSON or GSONList object")
         }
         USER_DATA <- gson
     }
