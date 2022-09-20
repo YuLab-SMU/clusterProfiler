@@ -30,7 +30,7 @@ enricher <- function(gene,
                      ) {
     if (inherits(gson, 'GSONList')) {
         res <- lapply(gson, function(USER_DATA) {
-                enricher_internal(gene = gene,
+                res <- enricher_internal(gene = gene,
                       pvalueCutoff = pvalueCutoff,
                       pAdjustMethod = pAdjustMethod,
                       universe = universe,
@@ -101,11 +101,30 @@ GSEA <- function(geneList,
                  by = 'fgsea',
                  ...) {
 
+    if (inherits(gson, 'GSONList')) {
+        res <- lapply(gson, function(USER_DATA) {
+            GSEA_internal(geneList      = geneList,
+                          exponent      = exponent,
+                          minGSSize     = minGSSize,
+                          maxGSSize     = maxGSSize,
+                          eps           = eps,
+                          pvalueCutoff  = pvalueCutoff,
+                          pAdjustMethod = pAdjustMethod,
+                          verbose       = verbose,
+                          USER_DATA     = USER_DATA,
+                          seed          = seed,
+                          by            = by,
+                          ...)
+        })
+        
+        class(res) <- "gseaResultList"
+        return(res)
+    }
     if (is.null(gson)) {
         USER_DATA <- build_Anno(TERM2GENE, TERM2NAME)
     } else {
         if (!inherits(gson,  "GSON")) {
-            stop("gson shoud be a GSON object")
+            stop("gson shoud be a GSON or GSONList object")
         }
         USER_DATA <- gson
     }
