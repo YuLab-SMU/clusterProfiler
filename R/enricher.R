@@ -30,7 +30,7 @@ enricher <- function(gene,
                      ) {
     if (inherits(gson, 'GSONList')) {
         res <- lapply(gson, function(USER_DATA) {
-                res <- enricher_internal(gene = gene,
+                enricher_internal(gene = gene,
                       pvalueCutoff = pvalueCutoff,
                       pAdjustMethod = pAdjustMethod,
                       universe = universe,
