@@ -13,9 +13,10 @@ TODO:
 
 -->
 
-# clusterProfiler 4.5.2.001
+# clusterProfiler 4.5.2.002
 
-+ `enricher` supports `GSONList` object (2022-09-06, Tue)
++ `GSEA()` supports `GSONList` object (2022-09-21, Wed)
++ `enricher()` supports `GSONList` object (2022-09-06, Tue)
 
 # clusterProfiler 4.5.2
 
