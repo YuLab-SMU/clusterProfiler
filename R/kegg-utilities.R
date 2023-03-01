@@ -140,8 +140,14 @@ kegg_link <- function(target_db, source_db) {
 }
 
 
-kegg_list <- function(db) {
-    url <- paste0("https://rest.kegg.jp/list/", db, collapse="")
+kegg_list <- function(db, species = NULL) {
+    if (db == "pathway") {
+        url <- paste("https://rest.kegg.jp/list", db, species, sep="/")
+    } else {
+        ## module do not need species
+        url <- paste("https://rest.kegg.jp/list", db, sep="/")
+    }
+    
     kegg_rest(url)
 }
 
