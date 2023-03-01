@@ -16,8 +16,13 @@ TODO:
 
 
 -->
-# clusterProfiler 4.7.0.991
-+ update KEGG api (2023-03-01, Wed)
+# clusterProfiler 4.7.1
+
++ update according to the KEGG api changes (2023-03-01, Wed)
+
+# clusterProfiler 4.6.0
+
++ Bioconductor 3.16 release 
 
 # clusterProfiler 4.5.3
 
