@@ -143,7 +143,7 @@ gson_KEGG_mapper = function(file,
   }
   
   if (type == "pathway"){
-    all_pathway = kegg_list("pathway")
+    all_pathway = kegg_list("pathway", species)
     colnames(all_pathway) = c("pathway","pathway_name")
     all_pathway %<>%
       dplyr::mutate_at(.vars = "pathway", .funs = "remove_db_prefix")
