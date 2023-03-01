@@ -176,8 +176,8 @@ download.KEGG.Path <- function(species) {
     keggpathid2extid.df[,1] %<>% gsub("[^:]+:", "", .)
     keggpathid2extid.df[,2] %<>% gsub("[^:]+:", "", .)
 
-    keggpathid2name.df <- kegg_list("pathway")
-    keggpathid2name.df[,1] %<>% gsub("path:map", species, .)
+    keggpathid2name.df <- kegg_list("pathway", species)
+    # keggpathid2name.df[,1] %<>% gsub("path:map", species, .)
 
     ## if 'species="ko"', ko and map path are duplicated, only keep ko path.
     ##
@@ -204,7 +204,8 @@ download.KEGG.Module <- function(species) {
     keggmodule2extid.df[,2] %<>% gsub("[^:]+:", "", .)
 
     keggmodule2name.df <- kegg_list("module")
-    keggmodule2name.df[,1] %<>% gsub("md:", "", .)
+    # now module do not nedd sub 'md:'
+    # keggmodule2name.df[,1] %<>% gsub("md:", "", .)
     return(list(KEGGPATHID2EXTID=keggmodule2extid.df,
                 KEGGPATHID2NAME =keggmodule2name.df))
 }
