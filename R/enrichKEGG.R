@@ -177,6 +177,8 @@ download.KEGG.Path <- function(species) {
     keggpathid2extid.df[,2] %<>% gsub("[^:]+:", "", .)
 
     keggpathid2name.df <- kegg_list("pathway", species)
+
+    keggpathid2name.df[,2] <- sub("\\s-\\s[a-zA-Z ]+\\(\\w+\\)$", "", keggpathid2name.df[,2])
     # keggpathid2name.df[,1] %<>% gsub("path:map", species, .)
 
     ## if 'species="ko"', ko and map path are duplicated, only keep ko path.
