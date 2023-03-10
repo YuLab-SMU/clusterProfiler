@@ -13,7 +13,7 @@ supported organism list
 list supported organism of WikiPathways
 }
 \details{
-This function extracts information from 'https://data.wikipathways.org/current/gmt/'
+This function extracts information from 'https://wikipathways-data.wmcloud.org/current/gmt/'
 and lists all supported organisms
 }
 \author{

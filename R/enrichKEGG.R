@@ -5,7 +5,7 @@
 ##'
 ##' @param gene a vector of entrez gene id.
 ##' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
-##' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
+##' @param keyType one of "kegg", 'ncbi-geneid', 'ncbi-proteinid' and 'uniprot'
 ##' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @inheritParams enricher

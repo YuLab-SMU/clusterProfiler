@@ -24,7 +24,7 @@ enrichKEGG(
 
 \item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
 
-\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
+\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncbi-proteinid' and 'uniprot'}
 
 \item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 
