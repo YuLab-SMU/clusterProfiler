@@ -16,8 +16,9 @@ TODO:
 
 
 -->
-# clusterProfiler 4.7.1.002
+# clusterProfiler 4.7.1.003
 
++ change wikiPathways link. (2023-03-10, Fri)
 + update `get_data_from_KEGG_db()` for the KEGG api changes (2023-03-05, Sun)
 + removing species info at the end of KEGG pathway names (2023-03-05, Sun)
  
