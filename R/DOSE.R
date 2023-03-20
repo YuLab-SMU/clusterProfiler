@@ -21,5 +21,5 @@ build_Anno <- getFromNamespace("build_Anno", "DOSE")
 TERMID2EXTID <- getFromNamespace("TERMID2EXTID", "DOSE")
 TERM2NAME <- getFromNamespace("TERM2NAME", "DOSE")
 get_organism <- getFromNamespace("get_organism", "DOSE")
-
+enricher_internal <- getFromNamespace("enricher_internal", "DOSE")
 
