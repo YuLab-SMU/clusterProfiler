@@ -1,9 +1,3 @@
-# clusterProfiler\n\n+ Bioconductor RELEASE_3_17 (2023-05-03, Wed)\n
-# clusterProfiler
-
-+ Bioconductor RELEASE_3_16 (2022-11-02, Wed)
-
-
 <!--
 
 TODO:
@@ -14,10 +8,14 @@ TODO:
   - <https://en.wikipedia.org/wiki/Fisher's_method>
   - e.g. independent test of cancer sample 1 vs control 1 and cancer sample 2 vs control 2, then combine results
   - e.g. independent test for different omics data and then combine results
-
-
 -->
-# clusterProfiler 4.7.1.003
+
+
+# clusterProfiler 4.8.0
+
++ Bioconductor RELEASE_3_17 (2023-05-03, Wed)
+
+# clusterProfiler 4.7.2
 
 + change wikiPathways link. (2023-03-10, Fri)
 + update `get_data_from_KEGG_db()` for the KEGG api changes (2023-03-05, Sun)
