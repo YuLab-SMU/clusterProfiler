@@ -26,8 +26,7 @@ getPPI_oldversion <- function(x, ID=1, taxID = "auto", limit = NULL, output = 'i
                 limit
             )
     
-    fromJSON <- yulab.utils::get_fun_from_pkg("jsonlite", 'fromJSON')
-    res <- fromJSON(url)
+    res <- jsonlite::fromJSON(url)
     if (output == "data.frame") {
         return(res)
     }
@@ -160,9 +159,9 @@ getPPI <- function(
     node <- unique(c(res$preferredName_A, res$preferredName_B))
     
     igraph::graph_from_data_frame(
-        d = res[,c(3,4,6)],
+        d = unique(res[,c(3,4,6)]),
         vertices = node,
-        directed=F
+        directed=FALSE
     )    
 }
 

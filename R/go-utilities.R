@@ -162,7 +162,7 @@ get_go_ontology <- function(x) {
             stop("simplify only work for GO...")
         }
         ont <- x@.call$ont
-        if (is.null(ont) || class(ont) != "character") {
+        if (is.null(ont) || !inherits(ont, "character")) {
             ## should be "MF", default value of enrichGO
             ## it's safe to determine from the output
             ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology
