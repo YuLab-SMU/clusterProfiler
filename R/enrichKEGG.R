@@ -239,7 +239,7 @@ viewKEGG <- function(obj, pathwayID, foldChange,
                        kegg.native=TRUE,
                        out.suffix="clusterProfiler") {
 
-    if (class(obj) != "enrichResult")
+    if (!inherits(obj, "enrichResult"))
         stop("only enrichResult object supported.")
     if (obj@ontology != "KEGG")
         stop("only KEGG supported.")

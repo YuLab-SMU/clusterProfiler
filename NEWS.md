@@ -11,6 +11,11 @@ TODO:
 -->
 
 
+# clusterProfiler 4.9.0.002
+
++ `getPPI()` to query PPI network from 'stringdb' (2023-05-15, Mon)
++ `getTaxID()` and `getTaxInfo()` functions to query taxonomy information (2023-05-14, Sun)
+
 # clusterProfiler 4.8.0
 
 + Bioconductor RELEASE_3_17 (2023-05-03, Wed)

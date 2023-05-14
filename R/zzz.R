@@ -12,7 +12,9 @@
         dl.method <- getOption("download.file.method", default = "auto") 
     }
 
-
+    
+    # Define a cache directory
+    options(clusterProfiler_cache_dir = tempdir())
 
     options(clusterProfiler.download.method = dl.method)
     options(timeout = max(300, getOption("timeout"))) # see ?download.file
