@@ -48,3 +48,22 @@ gsePC <- function(geneList, organism, ...) {
     return(res)
 }
 
+##' @importFrom rlang .data
+prepare_PC_data <- function(organism) {
+  pc2gene <- get_pc_data(organism)
+  ##TERM2GENE
+  pcid2gene <- pc2gene %>% dplyr::select(.data$pcid, .data$gene)
+  ##TERM2NAME
+  pcid2name <- pc2gene %>% dplyr::select(.data$pcid, .data$name)
+  list(PCID2GENE = pcid2gene,
+       PCID2NAME = pcid2name)
+}
+
+get_pc_gmtfile <- function() {
+  pcurl <- 'https://www.pathwaycommons.org/archives/PC2/v12/'
+  x <- readLines(pcurl)
+  y <- x[grep('\\.gmt',x)]
+  sub(".*(PathwayCommons.*\\.gmt.gz).*", "\\1",  y[grep('', y)])
+}
+
+
