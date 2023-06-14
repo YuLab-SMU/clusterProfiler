@@ -32,7 +32,6 @@ enrichPC <- function(gene, organism, ...) {
 ##' @param ... additional parameters, see also the parameters supported by the GSEA() function
 ##' @return A \code{gseaResult} instance
 ##' @export
-##' @author Guangchuang Yu 
 gsePC <- function(geneList, organism, ...) {
     pcdata <- prepare_PC_data(organism)
     res <- GSEA(geneList,
