@@ -67,7 +67,7 @@ get_pc_gmtfile <- function() {
 }
 
 get_pc_source <- function() {
-    gmtfile <- get_wp_gmtfile()
+    gmtfile <- get_pc_gmtfile()
     orgs <- sub("PathwayCommons\\d+\\.([_A-Za-z]+)\\.([_A-Za-z]+)\\.gmt.gz", "\\1", gmtfile)
 }
 
