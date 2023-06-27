@@ -18,7 +18,7 @@ enrichPC <- function(gene, organism, ...) {
 
     res@ontology <- "Pathway Commons"
     res@organism <- organism
-    res@keytype <-  "ENTREZID"
+    res@keytype <-  "HGNCID"
 
     return(res)
 }
@@ -43,7 +43,7 @@ gsePC <- function(geneList, organism, ...) {
 
     res@setType <- "Pathway Commons"
     res@organism <- organism
-    res@keytype <-  "ENTREZID"
+    res@keytype <-  "HGNCID"
 
     return(res)
 }
