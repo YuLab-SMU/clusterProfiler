@@ -69,6 +69,19 @@ get_pc_gmtfile <- function() {
 #list supported data sources of Pathway Commons
 get_pc_source <- function() {
     gmtfile <- get_pc_gmtfile()
-    orgs <- sub("PathwayCommons\\d+\\.([_A-Za-z]+)\\.([_A-Za-z]+)\\.gmt.gz", "\\1", gmtfile)
+    source <- sub("PathwayCommons\\d+\\.([_A-Za-z]+)\\.([_A-Za-z]+)\\.gmt.gz", "\\1", gmtfile)
 }
 
+get_pc_data <- function(source, output = "data.frame") {
+    gmtfile <- get_pc_gmtfile()
+    pcurl <- 'https://www.pathwaycommons.org/archives/PC2/v12/'
+    url <- paste0(wpurl,
+                  gmtfile[grep(source, gmtfile)])
+    f <- tempfile(fileext = ".gmt")
+    dl <- mydownload(url, destfile = f)
+    if (is.null(f)) {
+        message("fail to download wikiPathways data...")
+        return(NULL)
+    }
+    read.gmt.pc(f, output = output)
+}
