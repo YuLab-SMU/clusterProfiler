@@ -66,6 +66,7 @@ get_pc_gmtfile <- function() {
   sub(".*(PathwayCommons.*\\.gmt.gz).*", "\\1",  y[grep('', y)])
 }
 
+#list supported data sources of Pathway Commons
 get_pc_source <- function() {
     gmtfile <- get_pc_gmtfile()
     orgs <- sub("PathwayCommons\\d+\\.([_A-Za-z]+)\\.([_A-Za-z]+)\\.gmt.gz", "\\1", gmtfile)
