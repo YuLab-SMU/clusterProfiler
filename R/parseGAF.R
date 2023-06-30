@@ -1,17 +1,16 @@
 ##' parse GAF files
 ##'
-##' given a GAF file, this function extracts the information from it
-##' @title parse_gff
+##' given a GAF file, this function extracts the information from it and add indirect GO annotation
+##' @title read.gaf
+##' @rdname read-gaf
 ##' @param GafFile GAF file
-##' @param nrows   a parameter
 ##' @return a list with two dataframes
 ##' @export
 ##' @importFrom GO.db GO.db
 ##' @importFrom utils read.delim
 ##' @importFrom AnnotationDbi columns
-
-parse_gff <- function(GafFile, nrows = -1) {
-  GafFile <- read.gff(GafFile)
+read.gaf <- function(GafFile) {
+  GafFile <- read.gaf2(GafFile)
   new.data.frame <- GafFile[, c("GOID", "DB_Object_ID")]
   
   ##use buildGOmap function to get information related
@@ -35,7 +34,13 @@ parse_gff <- function(GafFile, nrows = -1) {
        TERM2NAME = need.anno[, c("GOID", "TERM")])
 }
 
-read.gff <- function(GafFile, nrows = -1) {
+
+##' @rdname read-gaf
+##' @export
+parse_gff <- read.gaf
+
+# only read the file with selected columns
+read.gaf2 <- function(GafFile, nrows = -1) {
   cat("Reading ", GafFile, ": ", sep = "")
   GafFile <-
     read.delim(

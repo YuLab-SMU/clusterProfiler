@@ -11,8 +11,9 @@ TODO:
 -->
 
 
-# clusterProfiler 4.9.0.002
+# clusterProfiler 4.9.0.003
 
++ rename `parse_gff()` to `read.gaf()` (2023-06-30, Fri)
 + `getPPI()` to query PPI network from 'stringdb' (2023-05-15, Mon)
 + `getTaxID()` and `getTaxInfo()` functions to query taxonomy information (2023-05-14, Sun)
 
