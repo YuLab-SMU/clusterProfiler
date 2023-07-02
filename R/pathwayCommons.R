@@ -72,6 +72,30 @@ get_pc_source <- function() {
     source <- sub("PathwayCommons\\d+\\.([_A-Za-z]+)\\.([_A-Za-z]+)\\.gmt.gz", "\\1", gmtfile)
 }
 
+##' @rdname read-gmt
+##' @param output one of 'data.frame' or 'GSON'
+##' @importFrom rlang .data
+##' @importFrom tidyr separate
+##' @export
+read.gmt.pc <- function(gmtfile, output = "data.frame") {
+  output <- match.arg(output, c("data.frame", "gson", "GSON"))
+  x <- read.gmt(gmtfile)
+  x <- tidyr::separate(x, .data$term, c("name","datasource","organism","idtype"), "; ")
+  if (output == "data.frame") {
+    return(x)
+  }
+  
+  gsid2gene <- data.frame(gsid=x$idtype, gene=x$gene)
+  gsid2name <- unique(data.frame(gsid=x$idtype, name=x$name))
+  datasource <- unique(x$datasource)
+  species <- unique(x$organism)
+  gson(gsid2gene = gsid2gene, 
+      gsid2name = gsid2name, 
+      gsname = "Pathway Commons",
+      datasource = datasource, 
+      version = version)
+}
+
 get_pc_data <- function(source, output = "data.frame") {
     gmtfile <- get_pc_gmtfile()
     pcurl <- 'https://www.pathwaycommons.org/archives/PC2/v12/'
