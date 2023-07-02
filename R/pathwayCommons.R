@@ -88,12 +88,12 @@ read.gmt.pc <- function(gmtfile, output = "data.frame") {
   gsid2gene <- data.frame(gsid=x$idtype, gene=x$gene)
   gsid2name <- unique(data.frame(gsid=x$idtype, name=x$name))
   datasource <- unique(x$datasource)
-  species <- unique(x$organism)
+  organism <- unique(x$organism)
   gson(gsid2gene = gsid2gene, 
       gsid2name = gsid2name, 
       gsname = "Pathway Commons",
       datasource = datasource, 
-      version = version)
+      organism = organism)
 }
 
 get_pc_data <- function(source, output = "data.frame") {
