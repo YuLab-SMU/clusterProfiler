@@ -99,7 +99,7 @@ read.gmt.pc <- function(gmtfile, output = "data.frame") {
 get_pc_data <- function(source, output = "data.frame") {
     gmtfile <- get_pc_gmtfile()
     pcurl <- 'https://www.pathwaycommons.org/archives/PC2/v12/'
-    url <- paste0(wpurl,
+    url <- paste0(pcurl,
                   gmtfile[grep(source, gmtfile)])
     f <- tempfile(fileext = ".gmt")
     dl <- mydownload(url, destfile = f)
