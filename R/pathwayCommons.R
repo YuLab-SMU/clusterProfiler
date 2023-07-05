@@ -106,7 +106,7 @@ get_pc_data <- function(source, output = "data.frame") {
     f <- tempfile(fileext = ".gmt")
     dl <- mydownload(url, destfile = f)
     if (is.null(f)) {
-        message("fail to download wikiPathways data...")
+        message("fail to download Pathway Commons data...")
         return(NULL)
     }
     read.gmt.pc(f, output = output)
