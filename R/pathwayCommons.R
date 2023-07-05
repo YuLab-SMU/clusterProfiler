@@ -69,7 +69,7 @@ get_pc_gmtfile <- function() {
 #list supported data sources of Pathway Commons
 get_pc_source <- function() {
     gmtfile <- get_pc_gmtfile()
-    source <- sub("PathwayCommons\\d+\\.([_A-Za-z]+)\\.([_A-Za-z]+)\\.gmt.gz", "\\1", gmtfile)
+    source <- unique(sub("PathwayCommons\\d+\\.([_A-Za-z]+)\\.([_A-Za-z]+)\\.gmt.gz", "\\1", gmtfile))
 
     return(source)
 }
