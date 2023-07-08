@@ -103,7 +103,7 @@ get_pc_data <- function(source, output = "data.frame") {
     pcurl <- 'https://www.pathwaycommons.org/archives/PC2/v12/'
     url <- paste0(pcurl,
                   gmtfile[grep(source, gmtfile)])
-    f <- tempfile(fileext = ".gmt")
+    f <- tempfile()
     dl <- mydownload(url, destfile = f)
     if (is.null(f)) {
         message("fail to download Pathway Commons data...")
