@@ -63,7 +63,7 @@ get_pc_gmtfile <- function() {
   pcurl <- 'https://www.pathwaycommons.org/archives/PC2/v12/'
   x <- readLines(pcurl)
   y <- x[grep('\\.gmt.gz',x)]
-  sub(".*(PathwayCommons.*\\.gmt.gz).*", "\\1",  y[grep('', y)])
+  sub(".*(PathwayCommons.*\\.gmt.gz).*", "\\1",  y)
 }
 
 #list supported data sources of Pathway Commons
