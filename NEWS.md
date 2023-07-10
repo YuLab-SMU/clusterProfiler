@@ -10,10 +10,13 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
+# clusterProfiler 4.9.1.001
+
++ mv `parse_gff()` to `GOSemSim::read.gaf()` and re-export (2023-07-10, Mon)
++ mv `buildGOmap()` to `GOSemSim::buildGOmap() and re-export
 
 # clusterProfiler 4.9.1
 
-+ rename `parse_gff()` to `read.gaf()` (2023-06-30, Fri)
 + `getPPI()` to query PPI network from 'stringdb' (2023-05-15, Mon)
 + `getTaxID()` and `getTaxInfo()` functions to query taxonomy information (2023-05-14, Sun)
 

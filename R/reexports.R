@@ -1,3 +1,11 @@
+##' @importFrom GOSemSim read.gaf
+##' @export
+GOSemSim::read.gaf
+
+##' @importFrom GOSemSim buildGOmap
+##' @export
+GOSemSim::buildGOmap
+
 ##' @importFrom magrittr %>%
 ##' @export
 magrittr::`%>%`
