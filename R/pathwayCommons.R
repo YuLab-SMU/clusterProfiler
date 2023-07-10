@@ -62,7 +62,7 @@ prepare_PC_data <- function(organism) {
 get_pc_gmtfile <- function() {
   pcurl <- 'https://www.pathwaycommons.org/archives/PC2/v12/'
   x <- readLines(pcurl)
-  y <- x[grep('\\.gmt',x)]
+  y <- x[grep('\\.gmt.gz',x)]
   sub(".*(PathwayCommons.*\\.gmt.gz).*", "\\1",  y[grep('', y)])
 }
 
