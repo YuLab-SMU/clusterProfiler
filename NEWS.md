@@ -10,8 +10,9 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
-# clusterProfiler 4.9.1.002
+# clusterProfiler 4.9.1.003
 
++ parse KEGG Pathway Category information (2023-07-11, Tue)
 + mv `parse_gff()` to `GOSemSim::read.gaf()` and re-export (2023-07-10, Mon)
 + mv `buildGOmap()` to `GOSemSim::buildGOmap() and re-export
 

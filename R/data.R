@@ -19,7 +19,15 @@ NULL
 #' @keywords datasets
 NULL
 
-
+#' Datasets
+#' kegg_category contains kegg pathway category information
+#'
+#'
+#' @name DataSet
+#' @aliases kegg_category
+#' @docType data
+#' @keywords datasets
+NULL
 
 
 #' Datasets

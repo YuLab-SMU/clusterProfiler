@@ -5,6 +5,7 @@
 \alias{DataSet}
 \alias{gcSample}
 \alias{kegg_species}
+\alias{kegg_category}
 \alias{DE_GSE8057}
 \title{Datasets
 gcSample contains a sample of gene clusters.}
@@ -14,6 +15,9 @@ gcSample contains a sample of gene clusters.
 
 Datasets
 kegg_species contains kegg species information
+
+Datasets
+kegg_category contains kegg pathway category information
 
 Datasets
 DE_GSE8057 contains differential epxressed genes obtained from GSE8057 dataset

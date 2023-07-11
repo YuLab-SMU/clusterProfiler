@@ -6,6 +6,9 @@ BIOCVER := RELEASE_3_17
 
 all: rd check clean
 
+updatedata:
+	Rscript -e 'source(system.file("extdata/kegg_pathway_category.r", package="clusterProfiler"))'
+
 alldocs: rd readme 
 
 rd:
