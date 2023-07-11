@@ -35,20 +35,21 @@ term <- lapply(keggmap, function(x) {
 
     id <- sub("^(\\d+)\\D.*$", "\\1", y)
     name <- sub("^\\d+", "", y)
+    name <- sub("Including:.*$", "", name)
     d <- data.frame(id = id, name = name)
 
-    ii <- grep("Including:", name)
-    if (length(ii) > 0) {
-        for (i in ii) {
-            tmp <- unlist(strsplit(name[i], split="Including: "))
-            d$name[i] <- tmp[1]
-            d2 <- data.frame(
-                id = id[i],
-                name = unlist(strsplit(tmp[2], split=", "))
-            )
-            d <- rbind(d, d2)
-        }    
-    }
+    # ii <- grep("Including:", name)
+    # if (length(ii) > 0) {
+    #    for (i in ii) {
+    #        tmp <- unlist(strsplit(name[i], split="Including: "))
+    #        d$name[i] <- tmp[1]
+    #        d2 <- data.frame(
+    #            id = id[i],
+    #            name = unlist(strsplit(tmp[2], split=", "))
+    #        )
+    #        d <- rbind(d, d2)
+    #    }    
+    #}
     return(d)
 })
 
