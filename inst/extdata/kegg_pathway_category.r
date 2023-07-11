@@ -7,6 +7,9 @@ categories <- html_nodes(webpage, "b") |> html_text()
 cat1 <- categories[grep("^\\d\\.\\s", categories)]
 cat2 <- categories[grep("^\\d\\.\\d", categories)]
 
+cat1 <- cat1[as.numeric(sub("(\\d).*", "\\1", cat2))]
+cat1 <- sub("^\\d\\.\\s", "", cat1)
+cat2 <- sub("^\\d\\.\\d+\\s", "", cat2)
 
 keggmap <- html_nodes(webpage, "dl") |> html_text()
 keggmap <- keggmap[grep("^\\d{5}", keggmap)]
@@ -51,8 +54,8 @@ term <- lapply(keggmap, function(x) {
 
 
 cat.df <- tibble::tibble(
-    cat1 = cat1[as.numeric(sub("(\\d).*", "\\1", cat2))],
-    cat2 = cat2,
+    category = cat1,
+    subcategory = cat2,
     term = term
 )
 kegg_category <- tidyr::unnest(cat.df, cols = c("term"))
