@@ -15,6 +15,7 @@
 \alias{heatplot}
 \alias{ridgeplot}
 \alias{read.gaf}
+\alias{read.blast2go}
 \alias{buildGOmap}
 \alias{\%>\%}
 \alias{\%<>\%}
@@ -42,7 +43,7 @@ below to see their documentation.
 
   \item{enrichplot}{\code{\link[enrichplot]{cnetplot}}, \code{\link[enrichplot]{dotplot}}, \code{\link[enrichplot]{emapplot}}, \code{\link[enrichplot]{goplot}}, \code{\link[enrichplot]{gseaplot}}, \code{\link[enrichplot]{heatplot}}, \code{\link[enrichplot]{ridgeplot}}}
 
-  \item{GOSemSim}{\code{\link[GOSemSim]{buildGOmap}}, \code{\link[GOSemSim:read-gaf]{read.gaf}}}
+  \item{GOSemSim}{\code{\link[GOSemSim]{buildGOmap}}, \code{\link[GOSemSim]{read.blast2go}}, \code{\link[GOSemSim:read-gaf]{read.gaf}}}
 
   \item{gson}{\code{\link[gson:read-gmt]{read.gmt}}, \code{\link[gson:read-gmt]{read.gmt.wp}}}
 
