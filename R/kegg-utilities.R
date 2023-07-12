@@ -95,8 +95,14 @@ get_kegg_species <- function(save = FALSE) {
     kegg_species <- data.frame(kegg_code = species[, 1], 
                             scientific_name = scientific_name, 
                             common_name = common_name)
-
-    if (save) save(kegg_species, file="kegg_species.rda")
+    
+    file <- 'kegg_species.rda'
+    if (dir.exists('data')) file <- paste0('data/', file) 
+    if (save) {
+        message(sprintf("--> Number of species %s", nrow(kegg_species)))
+        message(sprintf("--> Save to %s\n", file))
+        save(kegg_species, file=file)
+    }
     invisible(kegg_species)                                
 }
 

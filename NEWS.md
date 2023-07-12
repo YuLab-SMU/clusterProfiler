@@ -10,7 +10,7 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
-# clusterProfiler 4.9.1.004
+# clusterProfiler 4.9.2
 
 + `append_kegg_category()` function to add KEGG pathway category information to KEGG enrichment result and now it is the default behavior of `enrichKEGG()` and `gseKEGG()` (2023-07-12, Wed)
 + parse KEGG Pathway Category information (2023-07-11, Tue)
