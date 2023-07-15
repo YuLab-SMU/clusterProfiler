@@ -74,6 +74,18 @@ get_pc_source <- function() {
     return(source)
 }
 
+read.gmt2 <- function(gmtfile) {
+    x <- readLines(gmtfile)
+    res <- strsplit(x, "\t")
+    names(res) <- vapply(res, function(y) y[2], character(1))
+    res <- lapply(res, "[", -c(1:2))
+  
+    ont2gene <- stack(res)
+    ont2gene <- ont2gene[, c("ind", "values")]
+    colnames(ont2gene) <- c("term", "gene")
+    return(ont2gene)
+}
+                         
 ##' @rdname read-gmt
 ##' @param output one of 'data.frame' or 'GSON'
 ##' @importFrom rlang .data
@@ -81,7 +93,7 @@ get_pc_source <- function() {
 ##' @export
 read.gmt.pc <- function(gmtfile, output = "data.frame") {
   output <- match.arg(output, c("data.frame", "gson", "GSON"))
-  x <- read.gmt(gmtfile)
+  x <- read.gmt2(gmtfile)
   x <- tidyr::separate(x, .data$term, c("name","datasource","organism","idtype"), "; ")
   if (output == "data.frame") {
     return(x)
