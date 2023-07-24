@@ -9,7 +9,7 @@
 ##' @export
 
 enrichPC <- function(gene, source, ...) {
-    pcdata <- prepare_PC_data(organism)
+    pcdata <- prepare_PC_data(source)
     res <- enricher(gene,
                     TERM2GENE = pcdata$PCID2GENE,
                     TERM2NAME = pcdata$PCID2NAME,
@@ -33,7 +33,7 @@ enrichPC <- function(gene, source, ...) {
 ##' @return A \code{gseaResult} instance
 ##' @export
 gsePC <- function(geneList, source, ...) {
-    pcdata <- prepare_PC_data(organism)
+    pcdata <- prepare_PC_data(source)
     res <- GSEA(geneList,
                 TERM2GENE = pcdata$PCID2GENE,
                 TERM2NAME = pcdata$PCID2NAME,
