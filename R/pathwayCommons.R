@@ -8,7 +8,7 @@
 ##' @return A \code{enrichResult} instance
 ##' @export
 
-enrichPC <- function(gene, organism, ...) {
+enrichPC <- function(gene, source, ...) {
     pcdata <- prepare_PC_data(organism)
     res <- enricher(gene,
                     TERM2GENE = pcdata$PCID2GENE,
@@ -32,7 +32,7 @@ enrichPC <- function(gene, organism, ...) {
 ##' @param ... additional parameters, see also the parameters supported by the GSEA() function
 ##' @return A \code{gseaResult} instance
 ##' @export
-gsePC <- function(geneList, organism, ...) {
+gsePC <- function(geneList, source, ...) {
     pcdata <- prepare_PC_data(organism)
     res <- GSEA(geneList,
                 TERM2GENE = pcdata$PCID2GENE,
