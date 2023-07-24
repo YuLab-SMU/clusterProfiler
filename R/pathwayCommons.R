@@ -49,8 +49,8 @@ gsePC <- function(geneList, organism, ...) {
 }
 
 ##' @importFrom rlang .data
-prepare_PC_data <- function(organism) {
-  pc2gene <- get_pc_data(organism)
+prepare_PC_data <- function(source) {
+  pc2gene <- get_pc_data(source)
   ##TERM2GENE
   pcid2gene <- pc2gene %>% dplyr::select(.data$pcid, .data$gene)
   ##TERM2NAME
