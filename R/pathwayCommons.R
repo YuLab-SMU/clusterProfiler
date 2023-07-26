@@ -86,7 +86,6 @@ read.gmt2 <- function(gmtfile) {
     return(ont2gene)
 }
                          
-##' @rdname read-gmt
 ##' @param output one of 'data.frame' or 'GSON'
 ##' @importFrom rlang .data
 ##' @importFrom tidyr separate
