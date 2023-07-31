@@ -106,10 +106,10 @@ read.gmt.pc <- function(gmtfile, output = "data.frame") {
     return(x)
   }
     
-  id <- get_id(gmtfile)
+  pcid <- get_id(gmtfile)
     
-  gsid2gene <- data.frame(gsid=id, gene=x$gene)
-  gsid2name <- unique(data.frame(gsid=id, name=x$name))
+  gsid2gene <- data.frame(gsid=pcid, gene=x$gene)
+  gsid2name <- unique(data.frame(gsid=pcid, name=x$name))
   organism <- "Homo sapiens"
   gson(gsid2gene = gsid2gene, 
       gsid2name = gsid2name, 
