@@ -108,7 +108,7 @@ read.gmt.pc <- function(gmtfile, output = "data.frame") {
   gson(gsid2gene = gsid2gene, 
       gsid2name = gsid2name, 
       gsname = "Pathway Commons", 
-      organism = " Homo sapiens")
+      organism = "Homo sapiens")
 }
 
 get_pc_data <- function(source, output = "data.frame") {
