@@ -52,9 +52,9 @@ gsePC <- function(geneList, source, ...) {
 prepare_PC_data <- function(source) {
   pc2gene <- get_pc_data(source)
   ##TERM2GENE
-  pcid2gene <- pc2gene %>% dplyr::select(.data$pcid, .data$gene)
+  pcid2gene <- pc2gene %>% dplyr::select(pcid, gene)
   ##TERM2NAME
-  pcid2name <- pc2gene %>% dplyr::select(.data$pcid, .data$name)
+  pcid2name <- pc2gene %>% dplyr::select(pcid, name)
   list(PCID2GENE = pcid2gene,
        PCID2NAME = pcid2name)
 }
