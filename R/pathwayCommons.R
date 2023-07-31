@@ -105,15 +105,16 @@ read.gmt.pc <- function(gmtfile, output = "data.frame") {
   if (output == "data.frame") {
     return(x)
   }
-  id <- 
-  gsid2gene <- data.frame(gsid=x$idtype, gene=x$gene)
-  gsid2name <- unique(data.frame(gsid=x$idtype, name=x$name))
-  datasource <- unique(x$datasource)
-  organism <- unique(x$organism)
+    
+  id <- get_id(gmtfile)
+    
+  gsid2gene <- data.frame(gsid=id, gene=x$gene)
+  gsid2name <- unique(data.frame(gsid=id, name=x$name))
+  organism <- "Homo sapiens"
   gson(gsid2gene = gsid2gene, 
       gsid2name = gsid2name, 
       gsname = "Pathway Commons", 
-      organism = "Homo sapiens")
+      organism = organism)
 }
 
 get_pc_data <- function(source, output = "data.frame") {
