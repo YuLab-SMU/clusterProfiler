@@ -76,10 +76,7 @@ get_pc_source <- function() {
 
 read.gmt2 <- function(gmtfile) {
     x <- readLines(gmtfile)
-    res <- strsplit(x, "\t")
-    id<- vapply(res, function(y) y[1], character(1))
-    id<- sub(".*/", "", id)
-                
+    res <- strsplit(x, "\t")                
     names(res) <- vapply(res, function(y) y[2], character(1))         
     res <- lapply(res, "[", -c(1:2))
   
@@ -87,6 +84,13 @@ read.gmt2 <- function(gmtfile) {
     ont2gene <- ont2gene[, c("ind", "values")]
     colnames(ont2gene) <- c("term", "gene")
     return(ont2gene)
+}
+
+get_id <-  function(gmtfile) {
+    x <- readLines(gmtfile)
+    res <- strsplit(x, "\t")
+    id<- vapply(res, function(y) y[1], character(1))
+    id<- sub(".*/", "", id)
 }
                          
 ##' @param output one of 'data.frame' or 'GSON'
