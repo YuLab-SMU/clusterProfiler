@@ -79,6 +79,8 @@ read.gmt2 <- function(gmtfile) {
     res <- strsplit(x, "\t")
     names(res) <- vapply(res, function(y) y[2], character(1))
     id<- vapply(res, function(y) y[1], character(1))
+    id<- sub(".*/", "", id)
+
     res <- lapply(res, "[", -c(1:2))
   
     ont2gene <- stack(res)
