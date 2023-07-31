@@ -52,9 +52,9 @@ gsePC <- function(geneList, source, ...) {
 prepare_PC_data <- function(source) {
   pc2gene <- get_pc_data(source)
   ##TERM2GENE
-  pcid2gene <- pc2gene %>% dplyr::select(pcid, .data$gene)
+  pcid2gene <- pc2gene %>% dplyr::select(.data$pcid, .data$gene)
   ##TERM2NAME
-  pcid2name <- pc2gene %>% dplyr::select(pcid, .data$name)
+  pcid2name <- pc2gene %>% dplyr::select(.data$pcid, .data$name)
   list(PCID2GENE = pcid2gene,
        PCID2NAME = pcid2name)
 }
@@ -102,6 +102,8 @@ read.gmt.pc <- function(gmtfile, output = "data.frame") {
   output <- match.arg(output, c("data.frame", "gson", "GSON"))
   x <- read.gmt2(gmtfile)
   x <- tidyr::separate(x, .data$term, c("name","datasource","organism","idtype"), "; ")
+  pcid <- get_id(gmtfile)
+  x$pcid <- pcid
   if (output == "data.frame") {
     return(x)
   }
