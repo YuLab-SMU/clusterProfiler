@@ -17,8 +17,8 @@ enrichPC <- function(gene, source, ...) {
     if (is.null(res)) return(res)
 
     res@ontology <- "Pathway Commons"
-    res@organism <- organism
-    res@keytype <-  "HGNCID"
+    res@organism <- "Homo sapiens"
+    res@keytype <-  "HGNC"
 
     return(res)
 }
@@ -42,8 +42,8 @@ gsePC <- function(geneList, source, ...) {
     if (is.null(res)) return(res)
 
     res@setType <- "Pathway Commons"
-    res@organism <- organism
-    res@keytype <-  "HGNCID"
+    res@organism <- "Homo sapiens"
+    res@keytype <-  "HGNC"
 
     return(res)
 }
