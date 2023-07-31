@@ -91,6 +91,7 @@ get_id <-  function(gmtfile) {
     res <- strsplit(x, "\t")
     id<- vapply(res, function(y) y[1], character(1))
     id<- sub(".*/", "", id)
+    return(id)
 }
                          
 ##' @param output one of 'data.frame' or 'GSON'
@@ -104,7 +105,7 @@ read.gmt.pc <- function(gmtfile, output = "data.frame") {
   if (output == "data.frame") {
     return(x)
   }
-  
+  id <- 
   gsid2gene <- data.frame(gsid=x$idtype, gene=x$gene)
   gsid2name <- unique(data.frame(gsid=x$idtype, name=x$name))
   datasource <- unique(x$datasource)
