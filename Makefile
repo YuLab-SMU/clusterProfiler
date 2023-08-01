@@ -6,6 +6,10 @@ BIOCVER := RELEASE_3_17
 
 all: rd check clean
 
+updatedata:
+	Rscript -e 'source(system.file("extdata/kegg_pathway_category.r", package="clusterProfiler"))' ;\
+	Rscript -e 'clusterProfiler:::get_kegg_species(save=TRUE)'
+
 alldocs: rd readme 
 
 rd:
@@ -47,14 +51,14 @@ clean:
 
 update:
 	git fetch --all;\
-	git checkout master;\
-	git merge upstream/master;\
-	git merge origin/master
+	git checkout devel;\
+	git merge upstream/devel;\
+	git merge origin/devel
 
 
 push:
-	git push upstream master;\
-	git push origin master
+	git push upstream devel;\
+	git push origin devel
 
 rmrelease:
 	git branch -D $(BIOCVER)

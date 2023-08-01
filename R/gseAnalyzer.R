@@ -132,6 +132,7 @@ gseMKEGG <- function(geneList,
     res@setType <- "MKEGG"
     res@keytype <- "UNKNOWN"
 
+    res <- append_kegg_category(res)
     return(res)
 }
 

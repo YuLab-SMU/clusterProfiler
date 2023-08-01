@@ -65,6 +65,7 @@ enrichKEGG <- function(gene,
     res@organism <- species
     res@keytype <- keyType
 
+    res <- append_kegg_category(res)
     return(res)
 }
 

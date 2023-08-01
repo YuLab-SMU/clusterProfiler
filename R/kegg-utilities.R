@@ -1,3 +1,34 @@
+##' add KEGG pathway category information
+##'
+##' This function appends the KEGG pathway category information to KEGG enrichment result 
+##' (either output of 'enrichKEGG' or 'gseKEGG'
+##' @title append_kegg_category
+##' @param x KEGG enrichment result
+##' @return update KEGG enrichment result with category information
+##' @export
+##' @author Guangchuang Yu
+append_kegg_category <- function(x) {
+    if (inherits(x, "enrichResult")) {
+        type <- x@ontology
+    } else if (inherits(x, "gseaResult")) {
+        type <- x@setType
+    } else {
+        message("--> Not an enrichment result.\n")
+        return(x)
+    }
+
+    if (type != "KEGG") {
+        message("--> Not a KEGG enrichment result")
+        return(x)
+    }
+    kegg_category <- kegg_category_data()
+    d <- x@result
+    id <- sub("^\\D+", "", d$ID)
+    idx <- match(id, kegg_category$id)
+    d2 <- cbind(kegg_category[idx, 1:2], d)
+    x@result <- d2
+    return(x)
+}
 
 ##' open KEGG pathway with web browser
 ##'
@@ -49,6 +80,11 @@ kegg_species_data <- function() {
     get("kegg_species", envir = .GlobalEnv)
 }
 
+kegg_category_data <- function() {
+    utils::data(list="kegg_category", package="clusterProfiler")
+    get("kegg_category", envir = .GlobalEnv)
+}
+
 get_kegg_species <- function(save = FALSE) {
     url <- "https://rest.kegg.jp/list/organism"
     species <- read.table(url, fill = TRUE, sep = "\t", header = F, quote = "")
@@ -59,8 +95,14 @@ get_kegg_species <- function(save = FALSE) {
     kegg_species <- data.frame(kegg_code = species[, 1], 
                             scientific_name = scientific_name, 
                             common_name = common_name)
-
-    if (save) save(kegg_species, file="kegg_species.rda")
+    
+    file <- 'kegg_species.rda'
+    if (dir.exists('data')) file <- paste0('data/', file) 
+    if (save) {
+        message(sprintf("--> Number of species %s", nrow(kegg_species)))
+        message(sprintf("--> Save to %s\n", file))
+        save(kegg_species, file=file)
+    }
     invisible(kegg_species)                                
 }
 
@@ -114,16 +156,17 @@ get_kegg_species <- function(save = FALSE) {
 ##' @importFrom downloader download
 kegg_rest <- function(rest_url) {
     message('Reading KEGG annotation online: "', rest_url, '"...')
-    f <- tempfile()
-    
-    dl <- mydownload(rest_url, destfile = f)
-    
-    if (is.null(dl)) {
-        message("fail to download KEGG data...")
-        return(NULL)
-    }
 
-    content <- readLines(f)
+    # f <- tempfile()
+    # dl <- mydownload(rest_url, destfile = f)
+    # 
+    # if (is.null(dl)) {
+    #     message("fail to download KEGG data...")
+    #     return(NULL)
+    # }
+
+    # content <- readLines(f)
+    content <- read_with_cache(rest_url)
 
     content %<>% strsplit(., "\t") %>% do.call('rbind', .)
     res <- data.frame(from=content[,1],
