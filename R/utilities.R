@@ -79,6 +79,12 @@ GI2EG <- function(GI, organism="D39") {
     return(gi.eg)
 }
 
+taxID2name <- function(taxID) {
+    kegg_taxa <- readRDS(system.file("extdata/kegg_taxa.rds",
+        package = "clusterProfiler"))
+    kegg_taxa$kegg.name[kegg_taxa$kegg.taxa == taxID]
+}
+
 
 removeEmptyEntry.list <- function(x) {
     notNA.idx <- unlist(lapply(x, function(i) !is.null(i) && !all(is.na(i))))
