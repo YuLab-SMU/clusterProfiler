@@ -10,7 +10,7 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
-# clusterProfiler 4.9.2.001
+# clusterProfiler 4.9.2.002
 
 + supports Pathways Common (2023-08-02, Wed, #613)
 

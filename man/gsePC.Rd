@@ -7,11 +7,13 @@
 gsePC(geneList, source, keyType, ...)
 }
 \arguments{
-\item{geneList}{ranked gene list}
+\item{geneList}{a ranked gene list}
+
+\item{source}{Data source of Pathway Commons, e.g., 'reactome', 'kegg', 'pathbank', 'netpath', 'panther', etc.}
+
+\item{keyType}{specify the type of input 'gene' (one of 'hgnc' or 'uniprot')}
 
 \item{...}{additional parameters, see also the parameters supported by the GSEA() function}
-
-\item{organism}{supported organisms, which can be accessed via the get_pc_organisms() function}
 }
 \value{
 A \code{gseaResult} instance
