@@ -7,11 +7,13 @@
 enrichPC(gene, source, keyType = "hgnc", ...)
 }
 \arguments{
-\item{gene}{a vector of entrez gene id}
+\item{gene}{a vector of genes (either hgnc symbols or uniprot IDs)}
+
+\item{source}{Data source of Pathway Commons, e.g., 'reactome', 'kegg', 'pathbank', 'netpath', 'panther', etc.}
+
+\item{keyType}{specify the type of input 'gene' (one of 'hgnc' or 'uniprot')}
 
 \item{...}{additional parameters, see also the parameters supported by the enricher() function}
-
-\item{organism}{supported organisms, which can be accessed via the get_pc_organisms() function}
 }
 \value{
 A \code{enrichResult} instance

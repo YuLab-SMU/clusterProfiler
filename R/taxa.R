@@ -126,3 +126,12 @@ getTaxID <- function(species) {
     res <- getTaxInfo(species)
     return(res$id)
 }
+
+
+
+taxID2name <- function(taxID) {
+    kegg_taxa <- readRDS(system.file("extdata/kegg_taxa.rds",
+        package = "clusterProfiler"))
+    kegg_taxa$kegg.name[kegg_taxa$kegg.taxa == taxID]
+}
+
