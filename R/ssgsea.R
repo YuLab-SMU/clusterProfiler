@@ -1,6 +1,8 @@
-#Perform ssGSEA Analysis
+# This function performs ssGSEA Analysis
 
-ssgsea <- function(gene_expression, genes, num_gene_sets, genes_per_set) {
+
+
+ssgsea <- function(gene_expression, genes, num_gene_sets=100, genes_per_set=10) {
   gs <- list()
   for (i in 1:num_gene_sets) {
     sampled_genes <- sample(genes, genes_per_set, replace = FALSE)
