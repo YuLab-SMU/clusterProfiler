@@ -27,6 +27,7 @@ Imports:
     GO.db,
     GOSemSim (>= 2.27.2),
     gson (>= 0.0.7),
+    GSVA,
     httr,
     igraph,
     magrittr,
