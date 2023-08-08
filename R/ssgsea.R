@@ -1,6 +1,6 @@
 ##' Single Sample Gene Set Enrichment Analysis (ssGSEA)
 ##'
-##' This function performs single-sample gene set enrichment analysis (ssGSEA)
+##' This function performs single-sample gene set enrichment analysis (ssGSEA) 
 ##'
 ##' @title ssgsea
 ##' @param gene_expression a matrix of gene expression data with genes in rows and samples in columns
