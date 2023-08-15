@@ -37,7 +37,7 @@ enrichKEGG <- function(gene,
                        use_internal_data = FALSE) {
 
     if (inherits(organism, "character")) {                       
-        species <- organismMapper(organism)
+        species <- organism
         if (use_internal_data) {
             KEGG_DATA <- get_data_from_KEGG_db(species)
         } else {
