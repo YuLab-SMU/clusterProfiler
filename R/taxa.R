@@ -2,7 +2,7 @@
 kegg_taxa <- function(append = TRUE) {
     kegg_species_url <- "https://rest.kegg.jp/list/organism"
     # Read the files with caching
-    kegg_species <- yread_tsv(kegg_species_url)
+    kegg_species <- yread_tsv(kegg_species_url, params = list(header = FALSE))
 
     sn <- sub("\\s\\(.*$", "", kegg_species[,3])
     kegg.code = kegg_species[,2]
