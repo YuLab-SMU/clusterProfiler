@@ -153,7 +153,7 @@ get_kegg_species <- function(save = FALSE) {
 ##     }))
 ## }
 
-##' @importFrom downloader download
+##' @importFrom yulab.utils yread
 kegg_rest <- function(rest_url) {
     message('Reading KEGG annotation online: "', rest_url, '"...')
 
@@ -166,7 +166,7 @@ kegg_rest <- function(rest_url) {
     # }
 
     # content <- readLines(f)
-    content <- read_with_cache(rest_url)
+    content <- yread(rest_url)
 
     content %<>% strsplit(., "\t") %>% do.call('rbind', .)
     res <- data.frame(from=content[,1],

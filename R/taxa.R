@@ -2,7 +2,7 @@
 kegg_taxa <- function(append = TRUE) {
     kegg_species_url <- "https://rest.kegg.jp/list/organism"
     # Read the files with caching
-    kegg_species <- read_tsv_with_cache(kegg_species_url)
+    kegg_species <- yread_tsv(kegg_species_url)
 
     sn <- sub("\\s\\(.*$", "", kegg_species[,3])
     kegg.code = kegg_species[,2]
@@ -85,7 +85,7 @@ getTaxInfo_stringdb <- function() {
     stringdb_species_url <- paste0(
         "https://stringdb-static.org/download/species.v",
         ver$string_version, ".txt")
-    stringdb_species <- read_tsv_with_cache(stringdb_species_url,header = TRUE)
+    stringdb_species <- yread_tsv(stringdb_species_url, params = list(header = TRUE))
     names(stringdb_species)[1] <- 'taxon_id'
     return(stringdb_species)
 }
