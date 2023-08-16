@@ -10,14 +10,21 @@
 ##' @return A matrix of ssGSEA enrichment scores with gene sets as rows and samples as columns
 ##' @export
 
-ssgsea <- function(gene_expression, genes, num_gene_sets=100, genes_per_set=10) {
-  gs <- list()
-  for (i in 1:num_gene_sets) {
-    sampled_genes <- sample(genes, genes_per_set, replace = FALSE)
-    gs[[i]] <- sampled_genes
-  }
-  names(gs) <- paste0("gs", 1:length(gs))
-
-  ssGSEA_scores <- gsva(gene_expression, gs, method = "ssgsea")
+ssgsea<- function(gene_expression, gene_sets, num_gene_sets=100, genes_per_set=10) {
+  gene_expression <- convert_id(gene_expression)
+  gene_sets <- gene_sets[1:num_gene_sets]
+  names(gene_sets) <- paste0("gs", 1:length(gene_sets))
+  ssGSEA_scores <- gsva(gene_expression,gene_sets, method = "ssgsea")
   return(ssGSEA_scores)
 }
+
+convert_id <- function(gene_expr) {
+  genes <- rownames(gene_expr)
+  entrez_ids <- mapIds(org.Hs.eg.db, keys=genes, column="ENTREZID", keytype="SYMBOL", multiVals="first")
+  uniprot_ids <- mapIds(org.Hs.eg.db, keys=entrez_ids, column="UNIPROT", keytype="ENTREZID", multiVals="first")
+  rownames(gene_expr) <- uniprot_ids
+  converted_genes <- rownames(gene_expr)
+  return(gene_expr)
+}
+
+
