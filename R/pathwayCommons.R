@@ -77,7 +77,9 @@ get_pc_source <- function() {
 }
 
 read.gmt.pc_internal <- function(gmtfile) {
-    x <- readLines(gmtfile)
+    # x <- readLines(gmtfile)
+    x <- yread(gmtfile, readr::read_lines)
+    
     y <- strsplit(x, "\t")
     id <- vapply(y, `[`, 1, FUN.VALUE = character(1))
     pcid <- sub(".*/", "", id)
@@ -134,12 +136,13 @@ get_pc_data <- function(source, keyType, output = "data.frame") {
 
     pcurl <- 'https://www.pathwaycommons.org/archives/PC2/v12/'
     url <- paste0(pcurl, gmtfile)
-    f <- tempfile(fileext = ".gmt.gz")
-    dl <- mydownload(url, destfile = f)    
-    if (is.null(f)) {
-        message("fail to download Pathway Commons data...")
-        return(NULL)
-    }
+    # f <- tempfile(fileext = ".gmt.gz")
+    # dl <- mydownload(url, destfile = f)    
+    # if (is.null(f)) {
+    #     message("fail to download Pathway Commons data...")
+    #     return(NULL)
+    # }
     
-    read.gmt.pc(f, output = output)
+    # read.gmt.pc(f, output = output)
+    read.gmt.pc(url, output = output)
 }

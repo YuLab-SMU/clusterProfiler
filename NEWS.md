@@ -10,8 +10,9 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
-# clusterProfiler 4.9.2.002
+# clusterProfiler 4.9.2.004
 
++ use `yulab.utils::yread()` to parse file (2023-08-15, Tue)
 + supports Pathways Common (2023-08-02, Wed, #613)
 
 # clusterProfiler 4.9.2

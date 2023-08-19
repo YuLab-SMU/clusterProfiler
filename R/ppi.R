@@ -103,6 +103,7 @@ networkParamsParser <- function(
 #' @param output one of `data.frame` or `igraph`
 #' @author Yonghe Xia and modified by Guangchuang Yu
 #' @return a `data.frame` or an `igraph` object
+#' @importFrom yulab.utils yread_tsv
 #' @export
 getPPI <- function(
     x, 
@@ -150,7 +151,7 @@ getPPI <- function(
 
     # read data from stringDB api
     response <- httr::GET(paste(address, "/api/tsv/network", sep = ""), query = networkParams)
-    res <- read_tsv_with_cache(response$url, header = TRUE)
+    res <- yread_tsv(response$url, params = list(header = TRUE))
 
     if (output == "data.frame") {
         return(res)
