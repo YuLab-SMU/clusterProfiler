@@ -6,7 +6,6 @@
 ##' @param gene_expression a matrix of gene expression data with genes in rows and samples in columns
 ##' @param genes a vector of gene identifiers
 ##' @param num_gene_sets the number of gene sets to generate and use for ssGSEA (default: 100)
-##' @param genes_per_set the number of genes to include in each generated gene set (default: 10)
 ##' @return A matrix of ssGSEA enrichment scores with gene sets as rows and samples as columns
 ##' @export
 
