@@ -9,7 +9,6 @@
 ##' @return A matrix of ssGSEA enrichment scores with gene sets as rows and samples as columns.
 ##' @export
 
-
 ssgsea<- function(gene_expression, gene_sets, num_gene_sets=100) {
   gene_expression <- convert_id(gene_expression)
   gene_sets <- gene_sets[1:num_gene_sets]
