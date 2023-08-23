@@ -4,10 +4,11 @@
 ##'
 ##' @title ssgsea
 ##' @param gene_expression a matrix of gene expression data with genes in rows and samples in columns
-##' @param genes a vector of gene identifiers
-##' @param num_gene_sets the number of gene sets to generate and use for ssGSEA (default: 100)
-##' @return A matrix of ssGSEA enrichment scores with gene sets as rows and samples as columns
+##' @param gene_sets a list of gene sets used for enrichment analysis.
+##' @param num_gene_sets the number of gene sets to generate and use for ssGSEA (default: 100).
+##' @return A matrix of ssGSEA enrichment scores with gene sets as rows and samples as columns.
 ##' @export
+
 
 ssgsea<- function(gene_expression, gene_sets, num_gene_sets=100) {
   gene_expression <- convert_id(gene_expression)
