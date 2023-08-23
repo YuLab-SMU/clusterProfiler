@@ -21,7 +21,6 @@ convert_id <- function(gene_expr) {
   entrez_ids <- mapIds(org.Hs.eg.db, keys=genes, column="ENTREZID", keytype="SYMBOL", multiVals="first")
   uniprot_ids <- mapIds(org.Hs.eg.db, keys=entrez_ids, column="UNIPROT", keytype="ENTREZID", multiVals="first")
   rownames(gene_expr) <- uniprot_ids
-  converted_genes <- rownames(gene_expr)
   return(gene_expr)
 }
 
