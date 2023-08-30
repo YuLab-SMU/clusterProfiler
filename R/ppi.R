@@ -1,4 +1,3 @@
-##' @importFrom rlang check_installed
 getPPI_oldversion <- function(x, ID=1, taxID = "auto", limit = NULL, output = 'igraph') {
     output <- match.arg(output, c("igraph", "data.frame"))
 
@@ -27,7 +26,7 @@ getPPI_oldversion <- function(x, ID=1, taxID = "auto", limit = NULL, output = 'i
                 limit
             )
    
-    check_installed('jsonlite', 'for `getPPI_olderversion`.')
+    rlang::check_installed('jsonlite', 'for `getPPI_olderversion`.')
 
     res <- jsonlite::fromJSON(url)
     if (output == "data.frame") {
