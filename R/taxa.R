@@ -65,6 +65,9 @@ stringdb_version <- function(current = TRUE) {
 #' @export
 getTaxInfo <- function(species, source = "stringdb") {
     source <- match.arg(source, c("stringdb", "ensembl"))
+ 
+    rlang::check_install('jsonlite', 'for `getTaxInfo()`.')
+    
     if (source == "ensembl") {
         url <- paste0(
             "https://rest.ensembl.org/taxonomy/id/",
