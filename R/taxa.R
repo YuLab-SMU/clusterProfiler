@@ -60,13 +60,14 @@ stringdb_version <- function(current = TRUE) {
 #' Query taxonomy information from `stringdb` or `ensembl` web services
 #' @param species scientific name of a species
 #' @param source one of `stringdb` or `ensembl`
+#' @importFrom rlang check_installed
 #' @return a `data.frame` of query information
 #' @author Guangchuang Yu
 #' @export
 getTaxInfo <- function(species, source = "stringdb") {
     source <- match.arg(source, c("stringdb", "ensembl"))
  
-    rlang::check_install('jsonlite', 'for `getTaxInfo()`.')
+    check_installed('jsonlite', 'for `getTaxInfo()`.')
     
     if (source == "ensembl") {
         url <- paste0(
