@@ -24,6 +24,31 @@ gson_KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
     )
 }
 
+
+
+gson_cpd <- function() {
+  k1 <- kegg_rest("https://rest.kegg.jp/link/cpd/pathway")
+  k1[, 1]  <- gsub("[^:]+:", "", k1[, 1])
+  k1[, 2]  <-  gsub("[^:]+:", "",  k1[, 2])
+  k1 <- k1[grep("map", k1[, 1]),]
+  k2  <- kegg_rest("https://rest.kegg.jp/list/pathway")
+  k2[, 1]  <- gsub("path:", "", k2[, 1])
+  gsid2gene <- setNames(k1, c("gsid", "gene"))
+  gsid2name <- setNames(k2, c("gsid", "name"))
+  y <- yulab.utils::yread("https://rest.kegg.jp/info/ko")
+  version <- sub("\\w+\\s+", "", y[grep('Release', y)])
+  gson::gson(
+    gsid2gene = gsid2gene,
+    gsid2name = gsid2name,
+    species = "KEGG Compound",
+    gsname = "KEGG",
+    version = version,
+    keytype = "kegg_compound",
+    accessed_date = as.character(Sys.Date())
+  )
+}
+
+
 ##' download the latest version of KEGG pathway and stored in a 'GSON' object
 ##'
 ##'

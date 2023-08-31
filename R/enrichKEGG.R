@@ -2,7 +2,7 @@
 ##' Given a vector of genes, this function will return the enrichment KEGG
 ##' categories with FDR control.
 ##'
-##'
+##' @rdname enrichKEGG
 ##' @param gene a vector of entrez gene id.
 ##' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
 ##' @param keyType one of "kegg", 'ncbi-geneid', 'ncbi-proteinid' and 'uniprot'
@@ -36,7 +36,13 @@ enrichKEGG <- function(gene,
                        qvalueCutoff      = 0.2,
                        use_internal_data = FALSE) {
 
-    if (inherits(organism, "character")) {                       
+    if (inherits(organism, "character")) {           
+        if (organism == "cpd") {
+            organism = gson_cpd()
+        }
+    }
+
+    if (inherits(organism, "character")) {           
         species <- organismMapper(organism)
         if (use_internal_data) {
             KEGG_DATA <- get_data_from_KEGG_db(species)
@@ -46,6 +52,7 @@ enrichKEGG <- function(gene,
     } else if (inherits(organism, "GSON")) {
         KEGG_DATA <- organism
         species <- KEGG_DATA@species
+        keyType <- KEGG_DATA@keytype
     } else {
         stop("organism should be a species name or a GSON object")
     }
