@@ -63,7 +63,7 @@ prepare_WP_data <- function(organism) {
 
 get_wp_gmtfile <- function() {
     wpurl <- 'https://wikipathways-data.wmcloud.org/current/gmt/'
-    x <- readLines(wpurl)
+    x <- yulab.utils::yread(wpurl)
     y <- x[grep('\\.gmt',x)]
     sub(".*(wikipathways-.*\\.gmt).*", "\\1",  y[grep('File', y)])
 }
@@ -90,12 +90,14 @@ get_wp_data <- function(organism, output = "data.frame") {
     wpurl <- 'https://wikipathways-data.wmcloud.org/current/gmt/'
     url <- paste0(wpurl,
                   gmtfile[grep(organism, gmtfile)])
-    f <- tempfile(fileext = ".gmt")
-    dl <- mydownload(url, destfile = f)
-    if (is.null(f)) {
-        message("fail to download wikiPathways data...")
-        return(NULL)
-    }
-    read.gmt.wp(f, output = output)
+    # f <- tempfile(fileext = ".gmt")
+    # dl <- mydownload(url, destfile = f)
+    # if (is.null(f)) {
+    #     message("fail to download wikiPathways data...")
+    #     return(NULL)
+    # }
+    # read.gmt.wp(f, output = output)
+
+    read.gmt.wp(url, output = output)
 }
 
