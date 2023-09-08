@@ -25,7 +25,9 @@ getPPI_oldversion <- function(x, ID=1, taxID = "auto", limit = NULL, output = 'i
                 "&species=", taxID,
                 limit
             )
-    
+   
+    rlang::check_installed('jsonlite', 'for `getPPI_olderversion()`.')
+
     res <- jsonlite::fromJSON(url)
     if (output == "data.frame") {
         return(res)
