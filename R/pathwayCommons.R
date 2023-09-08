@@ -80,7 +80,7 @@ get_pc_source <- function() {
 read.gmt.pc_internal <- function(gmtfile) {
     # x <- readLines(gmtfile)
     
-    check_installed('readr', 'for `read.gmt.pc_internal()`.')
+    check_installed('readr', 'for `read.gmt.pc_internal()`, which is an internal function.')
     
     x <- yread(gmtfile, readr::read_lines)
     

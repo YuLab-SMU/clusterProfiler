@@ -61,10 +61,13 @@ compareCluster <- function(geneClusters,
        fun <- utils::getFromNamespace(fun, "clusterProfiler")
      } else if(fun %in% c("enrichDO", "enrichDGN", "enrichDGNv", 
                           "enrichNCG", "gseDO", "gseNCG", "gseDGN")){
+       check_installed('DOSE', paste0('for compareCluster with "fun =', fun,' ."'), action = BiocManager::install)
        fun <- utils::getFromNamespace(fun , "DOSE")
      } else if(fun %in% c("enrichPathway", "gsePathway")){
+        check_installed('ReactomePA', paste0('for compareCluster with "fun =', fun,' ."'), action = BiocManager::install)
         fun <- utils::getFromNamespace(fun , "ReactomePA")
      } else if(fun %in% c("enrichMeSH", "gseMeSH")){
+        check_installed('meshes', paste0('for compareCluster with "fun =', fun,' ."'), action = BiocManager::install)
         fun <- utils::getFromNamespace(fun , "meshes")
      } else {
        source_env <- .GlobalEnv
