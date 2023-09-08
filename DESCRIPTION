@@ -44,7 +44,7 @@ Suggests:
     rmarkdown,
     org.Hs.eg.db,
     prettydoc,
-    ReactomePA,
+    BiocManager,
     testthat
 VignetteBuilder: knitr
 ByteCompile: true

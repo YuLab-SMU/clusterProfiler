@@ -32,6 +32,7 @@ enrichPC <- function(gene, source, keyType = "hgnc", ...) {
 ##' @param source Data source of Pathway Commons, e.g., 'reactome', 'kegg', 'pathbank', 'netpath', 'panther', etc. 
 ##' @param keyType specify the type of input 'gene' (one of 'hgnc' or 'uniprot')
 ##' @param ... additional parameters, see also the parameters supported by the GSEA() function
+##' @importFrom rlang check_installed
 ##' @return A \code{gseaResult} instance
 ##' @export
 gsePC <- function(geneList, source, keyType, ...) {
@@ -78,6 +79,9 @@ get_pc_source <- function() {
 
 read.gmt.pc_internal <- function(gmtfile) {
     # x <- readLines(gmtfile)
+    
+    check_installed('readr', 'for `read.gmt.pc_internal()`, which is an internal function.')
+    
     x <- yread(gmtfile, readr::read_lines)
     
     y <- strsplit(x, "\t")
