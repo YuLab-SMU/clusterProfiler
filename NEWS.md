@@ -10,7 +10,7 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
-# clusterProfiler 4.9.3.002
+# clusterProfiler 4.9.4
 
 + use `check_installed()` to check package dependency (2023-09-08, Fri, #621)
 + use `yread()` in WikiPathway utilities (2023-09-07, Thu)
