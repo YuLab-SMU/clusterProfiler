@@ -1,49 +1,58 @@
 Package: clusterProfiler
 Type: Package
-Title: statistical analysis and visualization of functional profiles for
-    genes and gene clusters
-Version: 3.9.2
+Title: A universal enrichment tool for interpreting omics data
+Version: 4.9.4
 Authors@R: c(
     person(given = "Guangchuang", family = "Yu",        email = "guangchuangyu@gmail.com",   role  = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
     person(given = "Li-Gen",      family = "Wang",      email = "reeganwang020@gmail.com",   role  = "ctb"),
-    person(given = "Giovanni",    family = "Dall'Olio", email = "giovanni.dallolio@upf.edu", role = "ctb",                   comment = "formula interface of compareCluster")
-		)
+    person(given = "Erqiang",     family = "Hu",        email = "woshihuerqiang@qq.com",     role = "ctb"),
+    person(given = "Xiao",        family = "Luo",       email = "l77880853349@163.com",      role  = "ctb"),
+    person(given = "Meijun",      family = "Chen",      email = "mjchen1996@outlook.com",    role  = "ctb"),
+    person(given = "Giovanni",    family = "Dall'Olio", email = "giovanni.dallolio@upf.edu", role = "ctb"),
+    person(given = "Wanqian",     family = "Wei",       email = "altair_wei@outlook.com",    role = "ctb"),
+    person(given = "Chun-Hui",    family = "Gao",       email = "gaospecial@gmail.com",      role = "ctb", comment = c(ORCID = "0000-0002-1445-7939"))
+	)
 Maintainer: Guangchuang Yu <guangchuangyu@gmail.com>
-Description: This package implements methods to analyze and visualize
-    functional profiles (GO and KEGG) of gene and gene clusters.
+Description: This package supports functional characteristics of both coding and non-coding genomics data for thousands of species with up-to-date gene annotation. It provides a univeral interface for gene functional annotation from a variety of sources and thus can be applied in diverse scenarios. It provides a tidy interface to access, manipulate, and visualize enrichment results to help users achieve efficient data interpretation. Datasets obtained from multiple treatments and time points can be analyzed and compared in a single run, easily revealing functional consensus and differences among distinct conditions.
 Depends:
-    R (>= 3.4.0)
+    R (>= 3.5.0)
 Imports:
     AnnotationDbi,
-    DOSE (>= 3.5.1),
-    enrichplot (>= 0.99.7),
-    ggplot2,
+    downloader,
+    DOSE (>= 3.23.2),
+    dplyr,
+    enrichplot (>= 1.9.3),
     GO.db,
-    GOSemSim,
+    GOSemSim (>= 2.27.2),
+    gson (>= 0.0.7),
+    httr,
+    igraph,
     magrittr,
     methods,
     plyr,
     qvalue,
-    rvcheck,
+    rlang,
     stats,
     tidyr,
-    utils
+    utils,
+    yulab.utils (>= 0.0.7)
 Suggests:
     AnnotationHub,
-    GSEABase,
-    KEGG.db,
     knitr,
+    jsonlite,
+    readr,
+    rmarkdown,
     org.Hs.eg.db,
     prettydoc,
-    pathview,
-    ReactomePA,
+    BiocManager,
     testthat
 VignetteBuilder: knitr
 ByteCompile: true
 License: Artistic-2.0
-URL: https://guangchuangyu.github.io/software/clusterProfiler
+URL: https://yulab-smu.top/biomedical-knowledge-mining-book/ (docs), https://doi.org/10.1016/j.xinn.2021.100141 (paper)
 BugReports: https://github.com/GuangchuangYu/clusterProfiler/issues
 Packaged: NA
 biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,
     MultipleComparison, Pathways, Reactome, Visualization
-RoxygenNote: 6.0.1
+Encoding: UTF-8
+RoxygenNote: 7.2.3

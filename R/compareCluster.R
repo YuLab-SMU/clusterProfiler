@@ -4,9 +4,13 @@
 ##' cluster.
 ##'
 ##'
-##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type Entrez~group
-##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .
+##' @param geneClusters a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
+##' or a formula of type \code{Entrez | logFC ~ group} for "gseGO", "gseKEGG" and "GSEA".
+##' @param fun One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" . 
+##' Users can also supply their own function. 
 ##' @param data if geneClusters is a formula, the data from which the clusters must be extracted.
+##' @param source_from If using a custom function in "fun", provide the source package as
+##' a string here. Otherwise, the function will be obtained from the global environment. 
 ##' @param ...  Other arguments.
 ##' @return A \code{clusterProfResult} instance.
 ##' @importFrom methods new
@@ -14,9 +18,11 @@
 ##' @importFrom plyr llply
 ##' @importFrom plyr ldply
 ##' @importFrom plyr dlply
-##' @importFrom plyr rename
+##' @importFrom utils modifyList
+##' @importFrom rlang '%||%'
+##' @importClassesFrom DOSE compareClusterResult
 ##' @export
-##' @author Guangchuang Yu \url{https://guangchuangyu.github.io}
+##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @seealso \code{\link{compareClusterResult-class}}, \code{\link{groupGO}}
 ##'   \code{\link{enrichGO}}
 ##' @keywords manip
@@ -27,10 +33,12 @@
 ##'                      organism="hsa", pvalueCutoff=0.05)
 ##' as.data.frame(xx)
 ##' # plot(xx, type="dot", caption="KEGG Enrichment Comparison")
+##' dotplot(xx)
 ##'
 ##' ## formula interface
 ##' mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
 ##'                             '100127206', '100128071'),
+##'                    logFC = c(1.1, -0.5, 5, 2.5, -3, 3),
 ##'                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
 ##'                    othergroup = c('good', 'good', 'bad', 'bad', 'good', 'bad'))
 ##' xx.formula <- compareCluster(Entrez~group, data=mydf,
@@ -41,25 +49,70 @@
 ##' xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf,
 ##'                                        fun='groupGO', OrgDb='org.Hs.eg.db')
 ##' as.data.frame(xx.formula.twogroups)
+##'
 ##' }
-compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
-    fun_name <- fun
-    fun <- eval(parse(text=fun))
+compareCluster <- function(geneClusters, 
+                           fun="enrichGO", data='', 
+                           source_from=NULL, ...) {
+  
+   if(is.character(fun)){
+     if(fun %in% c("groupGO", "enrichGO", "enrichKEGG",
+                   "gseGO", "gseKEGG", "GSEA", "gseWP")){
+       fun <- utils::getFromNamespace(fun, "clusterProfiler")
+     } else if(fun %in% c("enrichDO", "enrichDGN", "enrichDGNv", 
+                          "enrichNCG", "gseDO", "gseNCG", "gseDGN")){
+       check_installed('DOSE', paste0('for compareCluster with "fun =', fun,' ."'), action = BiocManager::install)
+       fun <- utils::getFromNamespace(fun , "DOSE")
+     } else if(fun %in% c("enrichPathway", "gsePathway")){
+        check_installed('ReactomePA', paste0('for compareCluster with "fun =', fun,' ."'), action = BiocManager::install)
+        fun <- utils::getFromNamespace(fun , "ReactomePA")
+     } else if(fun %in% c("enrichMeSH", "gseMeSH")){
+        check_installed('meshes', paste0('for compareCluster with "fun =', fun,' ."'), action = BiocManager::install)
+        fun <- utils::getFromNamespace(fun , "meshes")
+     } else {
+       source_env <- .GlobalEnv
+       if(!is.null(source_from)){
+         source_env <- loadNamespace(source_from)
+       }
+       # If fun is in global or any loaded package, this will get it
+       # This assumes that a user will actually load said package. 
+       fun <- get(fun, envir = source_env)
+     }
+    
+   }
+
 
     # Use formula interface for compareCluster
     if (typeof(geneClusters) == 'language') {
         if (!is.data.frame(data)) {
             stop ('no data provided with formula for compareCluster')
         } else {
-            genes.var       = all.vars(geneClusters)[1]
-            grouping.formula = gsub('^.*~', '~', as.character(as.expression(geneClusters)))   # For formulas like x~y+z
-            geneClusters = dlply(.data=data, formula(grouping.formula), .fun=function(x) {as.character(x[[genes.var]])})
+            genes.var = all.vars(geneClusters)[1]
+            n.var = length(all.vars(geneClusters))
+            # For formulas like x~y+z
+            grouping.formula = gsub('^.*~', '~', 
+                       as.character(as.expression(geneClusters)))   
+            n.group.var = length(all.vars(formula(grouping.formula)))
+            geneClusters = dlply(.data=data, formula(grouping.formula),
+                                 .fun=function(x) {
+                if ( (n.var - n.group.var) == 1 ) {
+                    as.character(x[[genes.var]])
+                } else if ( (n.var - n.group.var) == 2 ) {
+                    fc.var = all.vars(geneClusters)[2]
+                    geneList = structure(x[[fc.var]], names = x[[genes.var]])
+                    sort(geneList, decreasing=TRUE)
+                } else {
+          stop('only Entrez~group or Entrez|logFC~group type formula is supported')
+                }
+            })
         }
     }
     clProf <- llply(geneClusters,
                     .fun=function(i) {
                         x=suppressMessages(fun(i, ...))
-                        if (class(x) == "enrichResult" || class(x) == "groupGOResult") {
+        
+                        if (inherits(x, c("enrichResult", 
+                                          "groupGOResult", "gseaResult"))){
                             as.data.frame(x)
                         }
                     }
@@ -68,16 +121,19 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     clProf.df <- ldply(clProf, rbind)
 
     if (nrow(clProf.df) == 0) {
-        stop("No enrichment found in any of gene cluster, please check your input...")
+        warning("No enrichment found in any of gene cluster, please check your input...")
+        return(NULL)
     }
 
-    clProf.df <- rename(clProf.df, c(.id="Cluster"))
+    #clProf.df <- dplyr::rename(clProf.df, c(.id="Cluster"))
+    clProf.df <- plyr::rename(clProf.df, c(.id="Cluster"))
     clProf.df$Cluster = factor(clProf.df$Cluster, levels=clusters.levels)
 
     if (is.data.frame(data) && grepl('+', grouping.formula)) {
         groupVarName <- strsplit(grouping.formula, split="\\+") %>% unlist %>%
             gsub("~", "", .) %>% gsub("^\\s*", "", .) %>% gsub("\\s*$", "", .)
-        groupVars <- sapply(as.character(clProf.df$Cluster), strsplit, split="\\.") %>% do.call(rbind, .)
+        groupVars <- sapply(as.character(clProf.df$Cluster), 
+                            strsplit, split="\\.") %>% do.call(rbind, .)
         for (i in seq_along(groupVarName)) {
             clProf.df[, groupVarName[i]] <- groupVars[,i]
         }
@@ -87,14 +143,47 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
     }
 
     ##colnames(clProf.df)[1] <- "Cluster"
-    new("compareClusterResult",
-        compareClusterResult = clProf.df,
-        geneClusters = geneClusters,
-        fun = fun_name,
-        .call = match.call(expand.dots=TRUE)
-	)
+    res <- new("compareClusterResult",
+               compareClusterResult = clProf.df,
+               geneClusters = geneClusters,
+               .call = match.call(expand.dots=TRUE)
+               )
+
+    params <- modifyList(extract_params(args(fun)),
+                         extract_params(res@.call))
+
+    keytype <- params[['keyType']]
+    if (is.null(keytype)) keytype <- "UNKNOWN"
+    readable <- params[['readable']]
+    if (length(readable) == 0) readable <- FALSE
+    
+    res@keytype <- keytype
+    res@readable <- as.logical(readable)
+    ## work-around for bug in extract_parameters -- it doesn't match default args
+    res@fun <- params[['fun']] %||% 'enrichGO'
+
+    return(res)
 }
 
+extract_params <- function(x) {
+    y <- rlang::quo_text(x)
+    if (is.function(x)) y <- sub('\nNULL$', '', y)
+
+    y <- gsub('"', '', y) %>%
+        ## sub(".*\\(", "", .) %>%
+        sub("[^\\(]+\\(", "", .) %>% 
+        sub("\\)$", "", .) %>%
+        gsub("\\s+", "", .)
+
+    y <- strsplit(y, ",")[[1]]
+    params <- sub("=.*", "", y)
+    vals <- sub(".*=", "", y)
+    i <- params != vals
+    params <- params[i]
+    vals <- vals[i]
+    names(vals) <- params
+    return(as.list(vals))
+}
 
 
 ## show method for \code{compareClusterResult} instance
@@ -109,14 +198,14 @@ compareCluster <- function(geneClusters, fun="enrichGO", data='', ...) {
 ## @param object A \code{compareClusterResult} instance.
 ## @return message
 ## @importFrom methods show
-## @author Guangchuang Yu \url{https://guangchuangyu.github.io}
+## @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @importFrom utils str
 setMethod("show", signature(object="compareClusterResult"),
           function (object){
-              cmsg <- paste("  Guangchuang Yu, Li-Gen Wang, Yanyan Han and Qing-Yu He.",
-                            "  clusterProfiler: an R package for comparing biological themes among",
-                            "  gene clusters. OMICS: A Journal of Integrative Biology 2012,",
-                            "  16(5):284-287",
+              cmsg <- paste("T Wu, E Hu, S Xu, M Chen, P Guo, Z Dai, T Feng, L Zhou, ",
+                       "W Tang, L Zhan, X Fu, S Liu, X Bo, and G Yu. ", 
+                       "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data. ", 
+                       "The Innovation. 2021, 2(3):100141",
                             sep="\n", collapse="\n")
 
               geneClusterLen <- length(object@geneClusters)
@@ -137,7 +226,9 @@ setMethod("show", signature(object="compareClusterResult"),
               }
               cat("#\n#...Citation\n")
               citation_msg <- NULL
-              if (fun == "enrichDO" || fun == "enrichNCG") {
+              if (length(fun) == 0) {
+                  # do nothing
+              } else if (fun == "enrichDO" || fun == "enrichNCG") {
                   citation_msg <- paste("  Guangchuang Yu, Li-Gen Wang, Guang-Rong Yan, Qing-Yu He. DOSE: an",
                                         "  R/Bioconductor package for Disease Ontology Semantic and Enrichment",
                                         "  analysis. Bioinformatics 2015 31(4):608-609",
@@ -168,7 +259,7 @@ setMethod("show", signature(object="compareClusterResult"),
 ## @return A data frame
 ## @importFrom stats4 summary
 ## @exportMethod summary
-## @author Guangchuang Yu \url{https://guangchuangyu.github.io}
+## @author Guangchuang Yu \url{https://yulab-smu.top}
 setMethod("summary", signature(object="compareClusterResult"),
           function(object, ...) {
               warning("summary method to convert the object to data.frame is deprecated, please use as.data.frame instead.")
@@ -178,92 +269,7 @@ setMethod("summary", signature(object="compareClusterResult"),
 
 
 
-## ##' @rdname plot-methods
-## ##' @importFrom stats4 plot
-## ##' @importFrom enrichplot dotplot
-## ##' @aliases plot,compareClusterResult,ANY-method
-## ##' @param x compareClusterResult object
-## ##' @param type one of bar or dot
-## ##' @param colorBy one of pvalue or p.adjust
-## ##' @param showCategory category numbers
-## ##' @param by one of geneRatio, Percentage or count
-## ##' @param split ONTOLOGY or NULL
-## ##' @param includeAll logical
-## ##' @param font.size font size
-## ##' @param title figure title
-## setMethod("plot", signature(x="compareClusterResult"),
-##           function(x,
-##                    type="dot",
-##                    colorBy="p.adjust",
-##                    showCategory=5,
-##                    by="geneRatio",
-##                    split=NULL,
-##                    includeAll=TRUE,
-##                    font.size=12,
-##                    title=""
-##                    ) {
-##               if (type == "dot" || type == "dotplot") {
-##                   dotplot(x,
-##                           colorBy      = colorBy,
-##                           showCategory = showCategory,
-##                           by           = by,
-##                           split        = split,
-##                           includeAll   = includeAll,
-##                           font.size    = font.size,
-##                           title        = title
-##                           )
-##               } else if (type == "bar" || type == "barplot") {
-##                   barplot.compareClusterResult(x, colorBy, showCategory, by, split = split, includeAll, font.size, title)
-##               } else {
-##                   stop("type should be one of 'dot' or 'bar'...")
-##               }
-##           })
 
-
-##' dot plot method
-##'
-##'
-##' @docType methods
-##' @title dotplot
-##' @rdname dotplot-methods
-##' @aliases dotplot,compareClusterResult,ANY-method
-##' @param object compareClusterResult object
-##' @param x x variable
-##' @param color one of pvalue or p.adjust
-##' @param showCategory category numbers
-##' @param by one of geneRatio, Percentage or count
-##' @param split ONTOLOGY or NULL
-##' @param includeAll logical
-##' @param font.size font size
-##' @param title figure title
-##' @importFrom enrichplot dotplot
-##' @exportMethod dotplot
-setMethod("dotplot", signature(object="compareClusterResult"),
-          function(object,
-                   x = ~Cluster,
-                   color ="p.adjust",
-                   showCategory=5,
-                   split=NULL,
-                   font.size=12,
-                   title="",
-                   by="geneRatio",
-                   includeAll=TRUE
-                   ) {
-              dotplot.compareClusterResult(object, x=x, colorBy = color,
-                                           showCategory = showCategory, by = by,
-                                           includeAll = includeAll,
-                                           split=split, font.size = font.size,
-                                           title = title)
-          })
-
-
-barplot.compareClusterResult <- function(height, color="p.adjust", showCategory=5,
-                                         by="geneRatio", includeAll=TRUE, font.size=12, title="", ...) {
-    ## use *height* to satisy barplot generic definition
-    ## actually here is an compareClusterResult object.
-    df <- fortify(height, showCategory=showCategory, by=by, includeAll=includeAll)
-    plotting.clusterProfile(df, type="bar", colorBy=color, by=by, title=title, font.size=font.size)
-}
 
 
 ##' merge a list of enrichResult objects to compareClusterResult
@@ -274,6 +280,7 @@ barplot.compareClusterResult <- function(height, color="p.adjust", showCategory=
 ##' @return a compareClusterResult instance
 ##' @author Guangchuang Yu
 ##' @importFrom plyr ldply
+##' @importFrom methods is
 ##' @export
 merge_result <- function(enrichResultList) {
     if ( !is(enrichResultList, "list")) {
@@ -285,7 +292,7 @@ merge_result <- function(enrichResultList) {
     x <- lapply(enrichResultList, as.data.frame)
     names(x) <- names(enrichResultList)
     y <- ldply(x, "rbind")
-    y <- rename(y, c(.id="Cluster"))
+    y <- plyr::rename(y, c(.id="Cluster"))
     y$Cluster = factor(y$Cluster, levels=names(enrichResultList))
     new("compareClusterResult",
         compareClusterResult = y)

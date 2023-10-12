@@ -25,7 +25,6 @@ idType <- function(OrgDb = "org.Hs.eg.db") {
 ##' @return data.frame
 ##' @importFrom magrittr %>%
 ##' @importFrom magrittr %<>%
-##' @importFrom AnnotationDbi select
 ##' @export
 ##' @author Guangchuang Yu
 bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
@@ -38,9 +37,10 @@ bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
         stop("'toType' ", msg)
     }
 
+    ## should use AnnotationDbi::select, since dplyr::select method was implemented
     geneID %<>% as.character %>% unique
     db <- load_OrgDb(OrgDb)
-    res <- suppressWarnings(select(db,
+    res <- suppressWarnings(AnnotationDbi::select(db,
                                    keys = geneID,
                                    keytype = fromType,
                                    columns=c(fromType, toType)))
@@ -104,7 +104,7 @@ bitr_kegg <- function(geneID, fromType, toType, organism, drop=TRUE) {
 
 KEGG_convert <- function(fromType, toType, species) {
     if (fromType == "kegg" || toType != "kegg") {
-        turl <- paste("http://rest.kegg.jp/conv", toType, species, sep='/')
+        turl <- paste("https://rest.kegg.jp/conv", toType, species, sep='/')
         tidconv <- kegg_rest(turl)
         if (is.null(tidconv))
             stop(toType, " is not supported for ", species, " ...")
@@ -112,7 +112,7 @@ KEGG_convert <- function(fromType, toType, species) {
     }
 
     if (toType == "kegg" || fromType != "kegg") {
-        furl <- paste("http://rest.kegg.jp/conv", fromType, species, sep='/')
+        furl <- paste("https://rest.kegg.jp/conv", fromType, species, sep='/')
         fidconv <- kegg_rest(furl)
         if (is.null(fidconv))
             stop(fromType, " is not supported for ", species, " ...")
@@ -143,6 +143,7 @@ KEGG_convert <- function(fromType, toType, species) {
 ##' @param keyType KEGG gene type, one of "ncbi-proteinid", "ncbi-geneid", "uniprot", or "kegg"
 ##' @return extid vector
 ##' @author guangchuang yu
+##' @noRd
 KEGG_path2extid <- function(keggID, species=sub("\\d+$", "", keggID),
                           keggType = "Path", keyType = "kegg") {
     path2extid <- KEGGPATHID2EXTID(species, keggType, keyType)

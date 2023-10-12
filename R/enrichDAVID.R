@@ -4,13 +4,10 @@
 ##' @title enrichDAVID
 ##' @param gene input gene
 ##' @param idType id type
-##' @param universe background genes
 ##' @param minGSSize minimal size of genes annotated for testing
 ##' @param maxGSSize maximal size of genes annotated for testing
 ##' @param annotation david annotation
-##' @param pvalueCutoff pvalueCutoff
-##' @param pAdjustMethod one of "BH" and "bonferroni"
-##' @param qvalueCutoff qvalutCutoff
+##' @inheritParams enricher
 ##' @param species species
 ##' @param david.user david user
 ##' @return A \code{enrichResult} instance
@@ -133,7 +130,7 @@ enrichDAVID <- function(gene,
 
     qobj <- tryCatch(qvalue(p=Over$pvalue, lambda=0.05, pi0.method="bootstrap"),
                      error=function(e) NULL)
-    if (class(qobj) == "qvalue") {
+    if (inherits(qobj, "qvalue")) {
         qvalues <- qobj$qvalues
     } else {
         qvalues <- NA

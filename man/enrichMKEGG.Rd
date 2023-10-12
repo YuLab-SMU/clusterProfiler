@@ -6,28 +6,36 @@
 Given a vector of genes, this function will return the enrichment KEGG Module
 categories with FDR control.}
 \usage{
-enrichMKEGG(gene, organism = "hsa", keyType = "kegg", pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", universe, minGSSize = 10, maxGSSize = 500,
-  qvalueCutoff = 0.2)
+enrichMKEGG(
+  gene,
+  organism = "hsa",
+  keyType = "kegg",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  universe,
+  minGSSize = 10,
+  maxGSSize = 500,
+  qvalueCutoff = 0.2
+)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
 
-\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
+\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncbi-proteinid' and 'uniprot'}
 
-\item{pvalueCutoff}{Cutoff value of pvalue.}
+\item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
-\item{universe}{background genes}
+\item{universe}{background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.}
 
 \item{minGSSize}{minimal size of genes annotated by Ontology term for testing.}
 
 \item{maxGSSize}{maximal size of genes annotated for testing}
 
-\item{qvalueCutoff}{qvalue cutoff}
+\item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
 }
 \value{
 A \code{enrichResult} instance.

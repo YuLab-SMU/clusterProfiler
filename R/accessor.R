@@ -1,8 +1,6 @@
 ##' @method as.data.frame compareClusterResult
 ##' @export
-as.data.frame.compareClusterResult <- function(x, ...) {
-    as.data.frame(x@compareClusterResult, ...)
-}
+as.data.frame.compareClusterResult <- getFromNamespace("as.data.frame.compareClusterResult", "enrichplot")
 
 ##' @method as.data.frame groupGOResult
 ##' @export
@@ -12,18 +10,29 @@ as.data.frame.groupGOResult <- function(x, ...) {
 
 ##' @method [ compareClusterResult
 ##' @export
-`[.compareClusterResult` <- function(x, i, j) {
+`[.compareClusterResult` <- function(x, i, j, asis = FALSE, ...) {
     result <- as.data.frame(x)
-    result[i,j]
+    y <- result[i,j, ...]
+    if (!asis)
+        return(y)
+    x@compareClusterResult <- y
+    return(x)
 }
 
 ##' @method [[ compareClusterResult
 ##' @export
 `[[.compareClusterResult` <- function(x, i) {
-    gc <- geneInCategory(x)
-    if (!i %in% names(gc))
+    ## gc <- geneInCategory(x)
+    ## if (!i %in% names(gc))
+    ##     stop("input term not found...")
+    ## gc[[i]]
+
+    idx <- which(i == x[, "ID"])
+    if (length(idx) == 0) 
         stop("input term not found...")
-    gc[[i]]
+
+    y <- x[idx, asis = TRUE]
+    geneInCategory(y)
 }
 
 

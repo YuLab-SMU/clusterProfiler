@@ -4,14 +4,27 @@
 \alias{gseGO}
 \title{gseGO}
 \usage{
-gseGO(geneList, ont = "BP", OrgDb, keyType = "ENTREZID", exponent = 1,
-  nPerm = 1000, minGSSize = 10, maxGSSize = 500, pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", verbose = TRUE, seed = FALSE, by = "fgsea")
+gseGO(
+  geneList,
+  ont = "BP",
+  OrgDb,
+  keyType = "ENTREZID",
+  exponent = 1,
+  minGSSize = 10,
+  maxGSSize = 500,
+  eps = 1e-10,
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  verbose = TRUE,
+  seed = FALSE,
+  by = "fgsea",
+  ...
+)
 }
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{ont}{one of "BP", "MF", "CC" or "GO"}
+\item{ont}{one of "BP", "MF", and "CC" subontologies, or "ALL" for all three.}
 
 \item{OrgDb}{OrgDb}
 
@@ -19,11 +32,11 @@ gseGO(geneList, ont = "BP", OrgDb, keyType = "ENTREZID", exponent = 1,
 
 \item{exponent}{weight of each step}
 
-\item{nPerm}{permutation numbers}
-
 \item{minGSSize}{minimal size of each geneSet for analyzing}
 
 \item{maxGSSize}{maximal size of genes annotated for testing}
+
+\item{eps}{This parameter sets the boundary for calculating the p value.}
 
 \item{pvalueCutoff}{pvalue Cutoff}
 
@@ -34,6 +47,8 @@ gseGO(geneList, ont = "BP", OrgDb, keyType = "ENTREZID", exponent = 1,
 \item{seed}{logical}
 
 \item{by}{one of 'fgsea' or 'DOSE'}
+
+\item{...}{other parameter}
 }
 \value{
 gseaResult object

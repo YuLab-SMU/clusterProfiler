@@ -4,8 +4,14 @@
 \alias{plotGOgraph}
 \title{plotGOgraph}
 \usage{
-plotGOgraph(x, firstSigNodes = 10, useInfo = "all", sigForAll = TRUE,
-  useFullNames = TRUE, ...)
+plotGOgraph(
+  x,
+  firstSigNodes = 10,
+  useInfo = "all",
+  sigForAll = TRUE,
+  useFullNames = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{output of enrichGO or gseGO}
@@ -25,9 +31,6 @@ GO DAG graph
 }
 \description{
 plot GO graph
-}
-\seealso{
-\link[topGO]{showSigOfNodes}
 }
 \author{
 Guangchuang Yu

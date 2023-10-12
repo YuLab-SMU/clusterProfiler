@@ -102,7 +102,8 @@ keepGOterm <- function(x, term) {
 ##' @importFrom GO.db GOCCCHILDREN
 ##' @importFrom GO.db GOMFCHILDREN
 ##' @importMethodsFrom AnnotationDbi mget
-##' @author Guangchuang Yu \url{http://guangchuangyu.github.io}
+##' @author Guangchuang Yu \url{https://yulab-smu.top}
+##' @noRd
 getGOLevel <- function(ont, level) {
     switch(ont,
            MF = {
@@ -157,11 +158,11 @@ add_GO_Ontology <- function(obj, GO_DATA) {
 
 get_go_ontology <- function(x) {
     if (is(x, "compareClusterResult")) {
-        if (x@fun != "enrichGO" && x@fun != "groupGO") {
+        if (x@fun != "enrichGO" && x@fun != "groupGO" && x@fun != "gseGO") {
             stop("simplify only work for GO...")
         }
         ont <- x@.call$ont
-        if (is.null(ont) || class(ont) != "character") {
+        if (is.null(ont) || !inherits(ont, "character")) {
             ## should be "MF", default value of enrichGO
             ## it's safe to determine from the output
             ont <- x@compareClusterResult$ID[1] %>% GOTERM[[.]] %>% Ontology

@@ -4,7 +4,12 @@
 \alias{search_kegg_organism}
 \title{search_kegg_organism}
 \usage{
-search_kegg_organism(str, by = "scientific_name", ignore.case = FALSE)
+search_kegg_organism(
+  str,
+  by = "scientific_name",
+  ignore.case = FALSE,
+  use_internal_data = TRUE
+)
 }
 \arguments{
 \item{str}{string}
@@ -12,12 +17,14 @@ search_kegg_organism(str, by = "scientific_name", ignore.case = FALSE)
 \item{by}{one of 'kegg.code', 'scientific_name' and 'common_name'}
 
 \item{ignore.case}{TRUE or FALSE}
+
+\item{use_internal_data}{logical, use kegg_species.rda or latest online KEGG data}
 }
 \value{
 data.frame
 }
 \description{
-search kegg organism, listed in http://www.genome.jp/kegg/catalog/org_list.html
+search kegg organism, listed in https://www.genome.jp/kegg/catalog/org_list.html
 }
 \author{
 Guangchuang Yu

@@ -6,9 +6,20 @@
 Given a vector of genes, this function will return the enrichment GO
 categories after FDR control.}
 \usage{
-enrichGO(gene, OrgDb, keyType = "ENTREZID", ont = "MF",
-  pvalueCutoff = 0.05, pAdjustMethod = "BH", universe, qvalueCutoff = 0.2,
-  minGSSize = 10, maxGSSize = 500, readable = FALSE, pool = FALSE)
+enrichGO(
+  gene,
+  OrgDb,
+  keyType = "ENTREZID",
+  ont = "MF",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  universe,
+  qvalueCutoff = 0.2,
+  minGSSize = 10,
+  maxGSSize = 500,
+  readable = FALSE,
+  pool = FALSE
+)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
@@ -17,15 +28,15 @@ enrichGO(gene, OrgDb, keyType = "ENTREZID", ont = "MF",
 
 \item{keyType}{keytype of input gene}
 
-\item{ont}{One of "MF", "BP", and "CC" subontologies.}
+\item{ont}{One of "BP", "MF", and "CC" subontologies, or "ALL" for all three.}
 
-\item{pvalueCutoff}{Cutoff value of pvalue.}
+\item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
-\item{universe}{background genes}
+\item{universe}{background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.}
 
-\item{qvalueCutoff}{qvalue cutoff}
+\item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
 
 \item{minGSSize}{minimal size of genes annotated by Ontology term for testing.}
 
@@ -55,6 +66,6 @@ categories after FDR control.
 \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 }
 \author{
-Guangchuang Yu \url{https://guangchuangyu.github.io}
+Guangchuang Yu \url{https://yulab-smu.top}
 }
 \keyword{manip}

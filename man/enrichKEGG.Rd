@@ -6,28 +6,37 @@
 Given a vector of genes, this function will return the enrichment KEGG
 categories with FDR control.}
 \usage{
-enrichKEGG(gene, organism = "hsa", keyType = "kegg", pvalueCutoff = 0.05,
-  pAdjustMethod = "BH", universe, minGSSize = 10, maxGSSize = 500,
-  qvalueCutoff = 0.2, use_internal_data = FALSE)
+enrichKEGG(
+  gene,
+  organism = "hsa",
+  keyType = "kegg",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  universe,
+  minGSSize = 10,
+  maxGSSize = 500,
+  qvalueCutoff = 0.2,
+  use_internal_data = FALSE
+)
 }
 \arguments{
 \item{gene}{a vector of entrez gene id.}
 
-\item{organism}{supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
 
-\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
+\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncbi-proteinid' and 'uniprot'}
 
-\item{pvalueCutoff}{Cutoff value of pvalue.}
+\item{pvalueCutoff}{adjusted pvalue cutoff on enrichment tests to report}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
-\item{universe}{background genes}
+\item{universe}{background genes. If missing, the all genes listed in the database (eg TERM2GENE table) will be used as background.}
 
 \item{minGSSize}{minimal size of genes annotated by Ontology term for testing.}
 
 \item{maxGSSize}{maximal size of genes annotated for testing}
 
-\item{qvalueCutoff}{qvalue cutoff}
+\item{qvalueCutoff}{qvalue cutoff on enrichment tests to report as significant.  Tests must pass i) \code{pvalueCutoff} on unadjusted pvalues, ii) \code{pvalueCutoff} on adjusted pvalues and iii) \code{qvalueCutoff} on qvalues to be reported.}
 
 \item{use_internal_data}{logical, use KEGG.db or latest online KEGG data}
 }
@@ -40,18 +49,17 @@ Given a vector of genes, this function will return the enrichment KEGG
 categories with FDR control.
 }
 \examples{
-
-	data(geneList, package='DOSE')
+\dontrun{
+  data(geneList, package='DOSE')
   de <- names(geneList)[1:100]
-	yy <- enrichKEGG(de, pvalueCutoff=0.01)
-	head(yy)
-
-
+  yy <- enrichKEGG(de, pvalueCutoff=0.01)
+  head(yy)
+}
 }
 \seealso{
 \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
 }
 \author{
-Guangchuang Yu \url{http://ygc.name}
+Guangchuang Yu \url{https://yulab-smu.top}
 }
 \keyword{manip}

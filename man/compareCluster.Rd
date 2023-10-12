@@ -4,14 +4,25 @@
 \alias{compareCluster}
 \title{Compare gene clusters functional profile}
 \usage{
-compareCluster(geneClusters, fun = "enrichGO", data = "", ...)
+compareCluster(
+  geneClusters,
+  fun = "enrichGO",
+  data = "",
+  source_from = NULL,
+  ...
+)
 }
 \arguments{
-\item{geneClusters}{a list of entrez gene id. Alternatively, a formula of type Entrez~group}
+\item{geneClusters}{a list of entrez gene id. Alternatively, a formula of type \code{Entrez~group}
+or a formula of type \code{Entrez | logFC ~ group} for "gseGO", "gseKEGG" and "GSEA".}
 
-\item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" .}
+\item{fun}{One of "groupGO", "enrichGO", "enrichKEGG", "enrichDO" or "enrichPathway" . 
+Users can also supply their own function.}
 
 \item{data}{if geneClusters is a formula, the data from which the clusters must be extracted.}
+
+\item{source_from}{If using a custom function in "fun", provide the source package as
+a string here. Otherwise, the function will be obtained from the global environment.}
 
 \item{...}{Other arguments.}
 }
@@ -29,10 +40,12 @@ xx <- compareCluster(gcSample, fun="enrichKEGG",
                      organism="hsa", pvalueCutoff=0.05)
 as.data.frame(xx)
 # plot(xx, type="dot", caption="KEGG Enrichment Comparison")
+dotplot(xx)
 
 ## formula interface
 mydf <- data.frame(Entrez=c('1', '100', '1000', '100101467',
                             '100127206', '100128071'),
+                   logFC = c(1.1, -0.5, 5, 2.5, -3, 3),
                    group = c('A', 'A', 'A', 'B', 'B', 'B'),
                    othergroup = c('good', 'good', 'bad', 'bad', 'good', 'bad'))
 xx.formula <- compareCluster(Entrez~group, data=mydf,
@@ -43,6 +56,7 @@ as.data.frame(xx.formula)
 xx.formula.twogroups <- compareCluster(Entrez~group+othergroup, data=mydf,
                                        fun='groupGO', OrgDb='org.Hs.eg.db')
 as.data.frame(xx.formula.twogroups)
+
 }
 }
 \seealso{
@@ -50,6 +64,6 @@ as.data.frame(xx.formula.twogroups)
   \code{\link{enrichGO}}
 }
 \author{
-Guangchuang Yu \url{https://guangchuangyu.github.io}
+Guangchuang Yu \url{https://yulab-smu.top}
 }
 \keyword{manip}

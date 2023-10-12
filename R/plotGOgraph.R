@@ -9,13 +9,12 @@
 ##' @param useFullNames logical
 ##' @param ... additional parameter of showSigOfNodes, please refer to topGO
 ##' @return GO DAG graph
+##' @importFrom yulab.utils get_fun_from_pkg
 ## @importClassesFrom topGO topGOdata
 ## @importFrom topGO showSigOfNodes
 ## @importFrom topGO annFUN.gene2GO
 ## @importFrom topGO groupGOTerms
 ##' @export
-##' @seealso
-##' \link[topGO]{showSigOfNodes}
 ##' @author Guangchuang Yu
 plotGOgraph <- function(x,
                         firstSigNodes=10,
