@@ -10,6 +10,11 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
+
+# clusterProfiler 4.9.5
+
++ fixed R check (2023-10-18, Wed)
+
 # clusterProfiler 4.9.4
 
 + use `check_installed()` to check package dependency (2023-09-08, Fri, #621)
