@@ -1,7 +1,3 @@
-# clusterProfiler 4.10.0
-
-+ Bioconductor RELEASE_3_18 (2023-10-25, Wed)
-
 <!--
 
 TODO:
@@ -14,6 +10,13 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
+# clusterProfiler 4.10.0.001
+
++ update citation (#656) and wikipedia data URL (#633) (2024-01-10, Wed)
+
+# clusterProfiler 4.10.0
+
++ Bioconductor RELEASE_3_18 (2023-10-25, Wed)
 
 # clusterProfiler 4.9.5
 
