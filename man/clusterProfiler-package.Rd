@@ -2,11 +2,34 @@
 % Please edit documentation in R/clusterProfiler-package.R
 \docType{package}
 \name{clusterProfiler-package}
-\alias{clusterProfiler-package}
 \alias{clusterProfiler}
-\title{statistical analysis and visualization of functional profiles for genes and
-gene clusters}
+\alias{clusterProfiler-package}
+\title{clusterProfiler: A universal enrichment tool for interpreting omics data}
 \description{
-The package implements methods to analyze and visualize functional profiles
-of gene and gene clusters.
+This package supports functional characteristics of both coding and non-coding genomics data for thousands of species with up-to-date gene annotation. It provides a univeral interface for gene functional annotation from a variety of sources and thus can be applied in diverse scenarios. It provides a tidy interface to access, manipulate, and visualize enrichment results to help users achieve efficient data interpretation. Datasets obtained from multiple treatments and time points can be analyzed and compared in a single run, easily revealing functional consensus and differences among distinct conditions.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://yulab-smu.top/biomedical-knowledge-mining-book/ (docs)}
+  \item \doi{10.1016/j.xinn.2021.100141 (paper)}
+  \item Report bugs at \url{https://github.com/GuangchuangYu/clusterProfiler/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Guangchuang Yu \email{guangchuangyu@gmail.com} (\href{https://orcid.org/0000-0002-6485-8781}{ORCID}) [copyright holder]
+
+Other contributors:
+\itemize{
+  \item Li-Gen Wang \email{reeganwang020@gmail.com} [contributor]
+  \item Erqiang Hu \email{woshihuerqiang@qq.com} [contributor]
+  \item Xiao Luo \email{l77880853349@163.com} [contributor]
+  \item Meijun Chen \email{mjchen1996@outlook.com} [contributor]
+  \item Giovanni Dall'Olio \email{giovanni.dallolio@upf.edu} [contributor]
+  \item Wanqian Wei \email{altair_wei@outlook.com} [contributor]
+  \item Chun-Hui Gao \email{gaospecial@gmail.com} (\href{https://orcid.org/0000-0002-1445-7939}{ORCID}) [contributor]
+}
+
+}
+\keyword{internal}

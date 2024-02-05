@@ -19,7 +19,7 @@
 ##' @importFrom plyr ldply
 ##' @importFrom plyr dlply
 ##' @importFrom utils modifyList
-##' @importFrom rlang '%||%'
+##' @importFrom rlang %||%
 ##' @importClassesFrom DOSE compareClusterResult
 ##' @export
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
