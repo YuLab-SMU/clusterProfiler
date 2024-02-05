@@ -33,8 +33,8 @@ term <- lapply(keggmap, function(x) {
     y <- sub("^(\\d+)\\sR(.*)$", "\\1\\2", y)
     y <- sub("^(\\d+)\\sN(.*)$", "\\1\\2", y)
 
-    id <- sub("^(\\d+)\\D.*$", "\\1", y)
-    name <- sub("^\\d+", "", y)
+    id <- sub("^(\\d{5})\\S.*$", "\\1", y)
+    name <- sub("^\\d{5}", "", y)
     name <- sub("Including:.*$", "", name)
     d <- data.frame(id = id, name = name)
 
