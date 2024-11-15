@@ -36,6 +36,8 @@ groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readab
 
     GO2ExtID <- TERMID2EXTID(GOLevel, GO_DATA) ## mapping GOID to External Gene IDs.
 
+    gene %<>% unique
+    
     geneID.list <- lapply(GO2ExtID, function(x) gene[gene %in% x]) ## retain External Gene IDs which appear in *gene*
 
     ## if (readable) {
