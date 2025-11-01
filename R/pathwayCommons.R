@@ -3,7 +3,7 @@
 ##' This function performs over-representation analysis using  Pathway Commons
 ##' @title enrichPC
 ##' @param gene a vector of genes (either hgnc symbols or uniprot IDs)
-## @param source Data source of Pathway Commons, e.g., 'reactome', 'kegg', 'pathbank', 'netpath', 'panther', etc. 
+## @param source Data source of Pathway Commons, e.g., 'reactome', 'kegg', 'pathbank', 'netpath', 'panther', etc.
 ## @param keyType specify the type of input 'gene' (one of 'hgnc' or 'uniprot')
 ##' @param ... additional parameters, see also the parameters supported by the enricher() function
 ##' @return A \code{enrichResult} instance
@@ -12,11 +12,13 @@ enrichPC <- function(gene, ...) {
     # keyType <- match.arg(keyType, c("hgnc", "uniprot"))
     # source <- match.arg(source, get_pc_source())
     # pcdata <- get_pc_data(source, keyType, output = 'gson')
-    
+
     pcdata <- get_pc_data(output = 'gson')
     res <- enricher(gene, gson = pcdata, ...)
 
-    if (is.null(res)) return(res)
+    if (is.null(res)) {
+        return(res)
+    }
 
     res@ontology <- pcdata@gsname
     res@organism <- pcdata@species
@@ -30,7 +32,7 @@ enrichPC <- function(gene, ...) {
 ##' This function performs GSEA using  Pathway Commons
 ##' @title gsePC
 ##' @param geneList a ranked gene list
-## @param source Data source of Pathway Commons, e.g., 'reactome', 'kegg', 'pathbank', 'netpath', 'panther', etc. 
+## @param source Data source of Pathway Commons, e.g., 'reactome', 'kegg', 'pathbank', 'netpath', 'panther', etc.
 ## @param keyType specify the type of input 'gene' (one of 'hgnc' or 'uniprot')
 ##' @param ... additional parameters, see also the parameters supported by the GSEA() function
 ##' @importFrom rlang check_installed
@@ -44,7 +46,9 @@ gsePC <- function(geneList, ...) {
     pcdata <- get_pc_data(output = 'gson')
     res <- GSEA(geneList, gson = pcdata, ...)
 
-    if (is.null(res)) return(res)
+    if (is.null(res)) {
+        return(res)
+    }
 
     res@ontology <- pcdata@gsname
     res@organism <- pcdata@species
@@ -60,8 +64,7 @@ prepare_pc_data <- function() {
     ##TERM2NAME
     pcid2name <- unique(pc2gene[, c("id", "name")])
 
-    list(PCID2GENE = pcid2gene,
-        PCID2NAME = pcid2name)
+    list(PCID2GENE = pcid2gene, PCID2NAME = pcid2name)
 }
 
 get_pc_gmtfile <- function() {
@@ -77,7 +80,7 @@ get_pc_gmtfile <- function() {
     pcurl <- sprintf('%sv%s/', pc2, latest_version)
 
     x <- readLines(pcurl)
-    y <- x[grep('\\.gmt.gz',x)]
+    y <- x[grep('\\.gmt.gz', x)]
     # sub(".*(PathwayCommons.*\\.gmt.gz).*", "\\1",  y)
     file <- sub(".*>(.*\\.gmt\\.gz)</a>.*", "\\1", y)
     sprintf("%s%s", pcurl, file)
@@ -93,11 +96,14 @@ get_pc_gmtfile <- function() {
 
 read.gmt.pc_internal <- function(gmtfile) {
     # x <- readLines(gmtfile)
-    
-    check_installed('readr', 'for `read.gmt.pc_internal()`, which is an internal function.')
-    
+
+    check_installed(
+        'readr',
+        'for `read.gmt.pc_internal()`, which is an internal function.'
+    )
+
     x <- yread(gmtfile, readr::read_lines)
-    
+
     y <- strsplit(x, "\t")
     id <- vapply(y, `[`, 1, FUN.VALUE = character(1))
     pcid <- sub(".*/", "", id)
@@ -108,7 +114,7 @@ read.gmt.pc_internal <- function(gmtfile) {
     names(y) <- sprintf("id: %s; %s", pcid, nn)
 
     y <- lapply(y, "[", -c(1:2))
-  
+
     ont2gene <- stack(y)
     ont2gene <- ont2gene[, c("ind", "values")]
     colnames(ont2gene) <- c("term", "gene")
@@ -121,7 +127,7 @@ read.gmt.pc_internal <- function(gmtfile) {
 ##'
 ##' This function parse gmt file downloaded from Pathway common
 ##' @title read.gmt.pc
-##' @param gmtfile A gmt file   
+##' @param gmtfile A gmt file
 ##' @param output one of 'data.frame' or 'GSON'
 ##' @return A data.frame or A GSON object depends on the value of 'output'
 ##' @importFrom rlang .data
@@ -131,26 +137,34 @@ read.gmt.pc <- function(gmtfile, output = "data.frame") {
     output <- match.arg(output, c("data.frame", "gson", "GSON"))
 
     pcdata <- read.gmt.pc_internal(gmtfile)
-    x <- tidyr::separate(pcdata, .data$term, c("id", "name","datasource","organism","idtype"), "; ")
+    # x <- tidyr::separate(pcdata, .data$term, c("id", "name","datasource","organism","idtype"), "; ")
+    x <- tidyr::separate_wider_delim(
+        pcdata,
+        cols = "term",
+        names = c("id", "name", "datasource", "organism", "idtype"),
+        delim = "; ",
+        too_many = "merge"
+    )
     x <- lapply(x, function(col) sub("\\w+:\\s*", "", col)) |> as.data.frame()
     if (output == "data.frame") {
         return(x)
     }
-    
 
-    gsid2gene <- data.frame(gsid=x$id, gene=x$gene)
-    gsid2name <- unique(data.frame(gsid=x$id, name=x$name))
+    gsid2gene <- data.frame(gsid = x$id, gene = x$gene)
+    gsid2name <- unique(data.frame(gsid = x$id, name = x$name))
     organism <- taxID2name(x$organism[1])
-    gson(gsid2gene = gsid2gene, 
-        gsid2name = gsid2name, 
-        gsname = "Pathway Commons", 
-        species = organism)
+    gson(
+        gsid2gene = gsid2gene,
+        gsid2name = gsid2name,
+        gsname = "Pathway Commons",
+        species = organism
+    )
 }
 
 
 get_pc_data <- function(output = "data.frame") {
     url <- get_pc_gmtfile()
     # gmtfile <- gmtfile[grepl(source, gmtfile) & grepl(keyType, gmtfile)]
-    
+
     read.gmt.pc(url, output = output)
 }
