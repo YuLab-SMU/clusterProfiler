@@ -1,4 +1,3 @@
-
 ##' Functional Profile of a gene set at specific GO level.
 ##' Given a vector of genes, this function will return the GO profile at
 ##' a specific level.
@@ -12,7 +11,7 @@
 ##' @param readable if readable is TRUE, the gene IDs will mapping to gene
 ##'   symbols.
 ##' @return A \code{groupGOResult} instance.
-##' @seealso \code{\link{groupGOResult-class}}, \code{\link{compareCluster}}
+##' @seealso [groupGOResult-class], [compareCluster]
 ##' @keywords manip
 ##' @importFrom methods new
 ##' @importClassesFrom methods data.frame
@@ -26,7 +25,14 @@
 ##' 	head(summary(yy))
 ##' 	#plot(yy)
 ##'
-groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readable=FALSE) {
+groupGO <- function(
+    gene,
+    OrgDb,
+    keyType = "ENTREZID",
+    ont = "CC",
+    level = 2,
+    readable = FALSE
+) {
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "CC", "MF"))
 
@@ -37,38 +43,42 @@ groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readab
     GO2ExtID <- TERMID2EXTID(GOLevel, GO_DATA) ## mapping GOID to External Gene IDs.
 
     gene <- unique(gene)
-    
+
     geneID.list <- lapply(GO2ExtID, function(x) gene[gene %in% x]) ## retain External Gene IDs which appear in *gene*
 
     ## if (readable) {
-        ## mapping Gene IDs to Gene Names.
+    ## mapping Gene IDs to Gene Names.
     ##    geneID.list <- lapply(geneID.list, EXTID2NAME, organism=organism)
     ## }
-    geneID <- sapply(geneID.list, function(i) paste(i, collapse="/"))
+    geneID <- sapply(geneID.list, function(i) paste(i, collapse = "/"))
 
     Count <- unlist(lapply(geneID.list, length))
-    GeneRatio <- paste(Count, length(unique(unlist(gene))), sep="/")
+    GeneRatio <- paste(Count, length(unique(unlist(gene))), sep = "/")
     Descriptions <- TERM2NAME(GOLevel, GO_DATA)
-    result = data.frame(ID=as.character(GOLevel),
-        Description=Descriptions,
-        Count=Count,
-        GeneRatio=GeneRatio,
-        geneID=geneID)
+    result = data.frame(
+        ID = as.character(GOLevel),
+        Description = Descriptions,
+        Count = Count,
+        GeneRatio = GeneRatio,
+        geneID = geneID
+    )
 
-    x <- new("groupGOResult",
-             result=result,
-             ontology = ont,
-             level = level,
-             organism = get_organism(OrgDb),
-             gene = gene,
-             keytype = keyType
-             )
-             
+    x <- new(
+        "groupGOResult",
+        result = result,
+        ontology = ont,
+        level = level,
+        organism = get_organism(OrgDb),
+        gene = gene,
+        keytype = keyType
+    )
+
     if (keyType == 'SYMBOL') {
         x@readable <- TRUE
     }
-    if(readable == TRUE)
+    if (readable == TRUE) {
         x <- setReadable(x, OrgDb)
+    }
 
     return(x)
 }
@@ -85,12 +95,21 @@ groupGO <- function(gene, OrgDb, keyType="ENTREZID", ont="CC", level = 2, readab
 ## @return message
 ## @importFrom methods show
 ## @author Guangchuang Yu \url{https://yulab-smu.top}
-setMethod("show", signature(object="groupGOResult"),
-          function (object){
-              ont = object@ontology
-              Level = object@level
-              Organism = object@organism
-              Gene = object@gene
-              cat ("GO", ont, "Profiles", "at level", Level, "of", length(Gene),  Organism, "genes", "\n")
-          }
-          )
+setMethod("show", signature(object = "groupGOResult"), function(object) {
+    ont = object@ontology
+    Level = object@level
+    Organism = object@organism
+    Gene = object@gene
+    cat(
+        "GO",
+        ont,
+        "Profiles",
+        "at level",
+        Level,
+        "of",
+        length(Gene),
+        Organism,
+        "genes",
+        "\n"
+    )
+})

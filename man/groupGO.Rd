@@ -46,7 +46,7 @@ a specific level.
 
 }
 \seealso{
-\code{\link{groupGOResult-class}}, \code{\link{compareCluster}}
+[groupGOResult-class], [compareCluster]
 }
 \author{
 Guangchuang Yu \url{https://yulab-smu.top}

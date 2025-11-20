@@ -16,7 +16,7 @@
 ##' @importMethodsFrom AnnotationDbi mget
 ##' @importClassesFrom methods data.frame
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
-##' @seealso \code{\link{enrichResult-class}}, \code{\link{compareCluster}}
+##' @seealso [enrichResult-class], [compareCluster]
 ##' @keywords manip
 ##' @examples
 ##' \dontrun{
@@ -25,24 +25,25 @@
 ##'   yy <- enrichKEGG(de, pvalueCutoff=0.01)
 ##'   head(yy)
 ##' }
-enrichKEGG <- function(gene,
-                       organism          = "hsa",
-                       keyType           = "kegg",
-                       pvalueCutoff      = 0.05,
-                       pAdjustMethod     = "BH",
-                       universe,
-                       minGSSize         = 10,
-                       maxGSSize         = 500,
-                       qvalueCutoff      = 0.2,
-                       use_internal_data = FALSE) {
-
-    if (inherits(organism, "character")) {           
+enrichKEGG <- function(
+    gene,
+    organism = "hsa",
+    keyType = "kegg",
+    pvalueCutoff = 0.05,
+    pAdjustMethod = "BH",
+    universe,
+    minGSSize = 10,
+    maxGSSize = 500,
+    qvalueCutoff = 0.2,
+    use_internal_data = FALSE
+) {
+    if (inherits(organism, "character")) {
         if (organism == "cpd") {
             organism = gson_cpd()
         }
     }
 
-    if (inherits(organism, "character")) {           
+    if (inherits(organism, "character")) {
         species <- organismMapper(organism)
         if (use_internal_data) {
             KEGG_DATA <- get_data_from_KEGG_db(species)
@@ -57,16 +58,19 @@ enrichKEGG <- function(gene,
         stop("organism should be a species name or a GSON object")
     }
 
-    res <- enricher_internal(gene,
-                             pvalueCutoff  = pvalueCutoff,
-                             pAdjustMethod = pAdjustMethod,
-                             universe      = universe,
-                             minGSSize     = minGSSize,
-                             maxGSSize     = maxGSSize,
-                             qvalueCutoff  = qvalueCutoff,
-                             USER_DATA = KEGG_DATA)
-    if (is.null(res))
+    res <- enricher_internal(
+        gene,
+        pvalueCutoff = pvalueCutoff,
+        pAdjustMethod = pAdjustMethod,
+        universe = universe,
+        minGSSize = minGSSize,
+        maxGSSize = maxGSSize,
+        qvalueCutoff = qvalueCutoff,
+        USER_DATA = KEGG_DATA
+    )
+    if (is.null(res)) {
         return(res)
+    }
 
     res@ontology <- "KEGG"
     res@organism <- species
@@ -77,10 +81,10 @@ enrichKEGG <- function(gene,
 }
 
 get_KEGG_Env <- function() {
-    if (! exists(".KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
+    if (!exists(".KEGG_clusterProfiler_Env", envir = .GlobalEnv)) {
         pos <- 1
         envir <- as.environment(pos)
-        assign(".KEGG_clusterProfiler_Env", new.env(), envir=envir)
+        assign(".KEGG_clusterProfiler_Env", new.env(), envir = envir)
     }
     get(".KEGG_clusterProfiler_Env", envir = .GlobalEnv)
 }
@@ -96,28 +100,31 @@ get_KEGG_Env <- function() {
 ##' @author Guangchuang Yu
 ##' @importFrom magrittr %<>%
 ##' @export
-download_KEGG <- function(species, keggType="KEGG", keyType="kegg") {
+download_KEGG <- function(species, keggType = "KEGG", keyType = "kegg") {
     KEGG_Env <- get_KEGG_Env()
 
     use_cached <- FALSE
 
-    if (exists("organism", envir = KEGG_Env, inherits = FALSE) &&
-        exists("_type_", envir = KEGG_Env, inherits = FALSE) ) {
+    if (
+        exists("organism", envir = KEGG_Env, inherits = FALSE) &&
+            exists("_type_", envir = KEGG_Env, inherits = FALSE)
+    ) {
+        org <- get("organism", envir = KEGG_Env)
+        type <- get("_type_", envir = KEGG_Env)
 
-        org <- get("organism", envir=KEGG_Env)
-        type <- get("_type_", envir=KEGG_Env)
-
-        if (org == species && type == keggType &&
-            exists("KEGGPATHID2NAME", envir=KEGG_Env, inherits = FALSE) &&
-            exists("KEGGPATHID2EXTID", envir=KEGG_Env, inherits = FALSE)) {
-
+        if (
+            org == species &&
+                type == keggType &&
+                exists("KEGGPATHID2NAME", envir = KEGG_Env, inherits = FALSE) &&
+                exists("KEGGPATHID2EXTID", envir = KEGG_Env, inherits = FALSE)
+        ) {
             use_cached <- TRUE
         }
     }
 
     if (use_cached) {
-        KEGGPATHID2EXTID <- get("KEGGPATHID2EXTID", envir=KEGG_Env)
-        KEGGPATHID2NAME <- get("KEGGPATHID2NAME", envir=KEGG_Env)
+        KEGGPATHID2EXTID <- get("KEGGPATHID2EXTID", envir = KEGG_Env)
+        KEGGPATHID2NAME <- get("KEGGPATHID2NAME", envir = KEGG_Env)
     } else {
         if (keggType == "KEGG") {
             kres <- download.KEGG.Path(species)
@@ -128,22 +135,23 @@ download_KEGG <- function(species, keggType="KEGG", keyType="kegg") {
         KEGGPATHID2EXTID <- kres$KEGGPATHID2EXTID
         KEGGPATHID2NAME <- kres$KEGGPATHID2NAME
 
-        assign("organism", species, envir=KEGG_Env)
-        assign("_type_", keggType, envir=KEGG_Env)
-        assign("KEGGPATHID2NAME", KEGGPATHID2NAME, envir=KEGG_Env)
-        assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir=KEGG_Env)
+        assign("organism", species, envir = KEGG_Env)
+        assign("_type_", keggType, envir = KEGG_Env)
+        assign("KEGGPATHID2NAME", KEGGPATHID2NAME, envir = KEGG_Env)
+        assign("KEGGPATHID2EXTID", KEGGPATHID2EXTID, envir = KEGG_Env)
     }
 
     if (keyType != "kegg") {
         need_idconv <- FALSE
         idconv <- NULL
-        if (use_cached &&
-            exists("key", envir=KEGG_Env, inherits = FALSE) &&
-            exists("idconv", envir=KEGG_Env, inherits = FALSE)) {
-
-            key <- get("key", envir=KEGG_Env)
+        if (
+            use_cached &&
+                exists("key", envir = KEGG_Env, inherits = FALSE) &&
+                exists("idconv", envir = KEGG_Env, inherits = FALSE)
+        ) {
+            key <- get("key", envir = KEGG_Env)
             if (key == keyType) {
-                idconv <- get("idconv", envir=KEGG_Env)
+                idconv <- get("idconv", envir = KEGG_Env)
             } else {
                 need_idconv <- TRUE
             }
@@ -153,41 +161,49 @@ download_KEGG <- function(species, keggType="KEGG", keyType="kegg") {
 
         if (need_idconv || is.null(idconv)) {
             idconv <- KEGG_convert("kegg", keyType, species)
-            assign("key", keyType, envir=KEGG_Env)
-            assign("idconv", idconv, envir=KEGG_Env)
+            assign("key", keyType, envir = KEGG_Env)
+            assign("idconv", idconv, envir = KEGG_Env)
         }
         colnames(KEGGPATHID2EXTID) <- c("from", "kegg")
-        KEGGPATHID2EXTID <- merge(KEGGPATHID2EXTID, idconv, by.x='kegg', by.y='from')
+        KEGGPATHID2EXTID <- merge(
+            KEGGPATHID2EXTID,
+            idconv,
+            by.x = 'kegg',
+            by.y = 'from'
+        )
         KEGGPATHID2EXTID <- unique(KEGGPATHID2EXTID[, -1])
     }
 
-    return(list(KEGGPATHID2EXTID = KEGGPATHID2EXTID,
-                KEGGPATHID2NAME  = KEGGPATHID2NAME))
+    return(list(
+        KEGGPATHID2EXTID = KEGGPATHID2EXTID,
+        KEGGPATHID2NAME = KEGGPATHID2NAME
+    ))
 }
 
-prepare_KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
+prepare_KEGG <- function(species, KEGG_Type = "KEGG", keyType = "kegg") {
     kegg <- download_KEGG(species, KEGG_Type, keyType)
-    build_Anno(kegg$KEGGPATHID2EXTID,
-               kegg$KEGGPATHID2NAME)
+    build_Anno(kegg$KEGGPATHID2EXTID, kegg$KEGGPATHID2NAME)
 }
 
 download.KEGG.Path <- function(species) {
     keggpathid2extid.df <- kegg_link(species, "pathway")
     if (is.null(keggpathid2extid.df)) {
-        message <- paste("Failed to download KEGG data.",
-                         "Wrong 'species' or the network is unreachable.",
-                         "The 'species' should be one of organisms listed in",
-                         "'https://www.genome.jp/kegg/catalog/org_list.html'")
+        message <- paste(
+            "Failed to download KEGG data.",
+            "Wrong 'species' or the network is unreachable.",
+            "The 'species' should be one of organisms listed in",
+            "'https://www.genome.jp/kegg/catalog/org_list.html'"
+        )
         stop(message)
     }
 
-    keggpathid2extid.df[,1] %<>% gsub("[^:]+:", "", .)
-    keggpathid2extid.df[,2] %<>% gsub("[^:]+:", "", .)
+    keggpathid2extid.df[, 1] %<>% gsub("[^:]+:", "", .)
+    keggpathid2extid.df[, 2] %<>% gsub("[^:]+:", "", .)
 
     keggpathid2name.df <- kegg_list("pathway", species)
 
     # keggpathid2name.df[,2] <- sub("\\s-\\s[a-zA-Z ]+\\([a-zA-Z ]+\\)$", "", keggpathid2name.df[,2])
-    keggpathid2name.df[,2] <- sub("\\s-\\s[^-]+$", "", keggpathid2name.df[, 2])
+    keggpathid2name.df[, 2] <- sub("\\s-\\s[^-]+$", "", keggpathid2name.df[, 2])
     # keggpathid2name.df[,1] %<>% gsub("path:map", species, .)
 
     ## if 'species="ko"', ko and map path are duplicated, only keep ko path.
@@ -195,30 +211,41 @@ download.KEGG.Path <- function(species) {
     ## https://www.kegg.jp/dbget-bin/www_bget?ko+ko00010
     ## https://www.kegg.jp/dbget-bin/www_bget?ko+map0001
     ##
-    keggpathid2extid.df <- keggpathid2extid.df[keggpathid2extid.df[,1] %in% keggpathid2name.df[,1],]
+    keggpathid2extid.df <- keggpathid2extid.df[
+        keggpathid2extid.df[, 1] %in% keggpathid2name.df[, 1],
+    ]
 
-    return(list(KEGGPATHID2EXTID=keggpathid2extid.df,
-                KEGGPATHID2NAME=keggpathid2name.df))
+    return(list(
+        KEGGPATHID2EXTID = keggpathid2extid.df,
+        KEGGPATHID2NAME = keggpathid2name.df
+    ))
 }
 
 download.KEGG.Module <- function(species) {
     keggmodule2extid.df <- kegg_link(species, "module")
     if (is.null(keggmodule2extid.df)) {
-        message <- paste("Failed to download KEGG data.",
-                         "Wrong 'species' or the network is unreachable.",
-                         "The 'species' should be one of organisms listed in",
-                         "'https://www.genome.jp/kegg/catalog/org_list.html'")
+        message <- paste(
+            "Failed to download KEGG data.",
+            "Wrong 'species' or the network is unreachable.",
+            "The 'species' should be one of organisms listed in",
+            "'https://www.genome.jp/kegg/catalog/org_list.html'"
+        )
         stop(message)
     }
 
-    keggmodule2extid.df[,1] %<>% gsub("[^:]+:", "", .) %>% gsub(species, "", .) %>% gsub("^_", "", .)
-    keggmodule2extid.df[,2] %<>% gsub("[^:]+:", "", .)
+    keggmodule2extid.df[, 1] %<>%
+        gsub("[^:]+:", "", .) %>%
+        gsub(species, "", .) %>%
+        gsub("^_", "", .)
+    keggmodule2extid.df[, 2] %<>% gsub("[^:]+:", "", .)
 
     keggmodule2name.df <- kegg_list("module")
     # now module do not nedd sub 'md:'
     # keggmodule2name.df[,1] %<>% gsub("md:", "", .)
-    return(list(KEGGPATHID2EXTID=keggmodule2extid.df,
-                KEGGPATHID2NAME =keggmodule2name.df))
+    return(list(
+        KEGGPATHID2EXTID = keggmodule2extid.df,
+        KEGGPATHID2NAME = keggmodule2name.df
+    ))
 }
 
 
@@ -242,22 +269,27 @@ download.KEGG.Module <- function(species) {
 ##'\url{http://bioinformatics.oxfordjournals.org/content/abstract/29/14/1830.abstract}
 ##'PMID: 23740750
 ##' @noRd
-viewKEGG <- function(obj, pathwayID, foldChange,
-                       color.low="green",
-                       color.high="red",
-                       kegg.native=TRUE,
-                       out.suffix="clusterProfiler") {
-
-    if (!inherits(obj, "enrichResult"))
+viewKEGG <- function(
+    obj,
+    pathwayID,
+    foldChange,
+    color.low = "green",
+    color.high = "red",
+    kegg.native = TRUE,
+    out.suffix = "clusterProfiler"
+) {
+    if (!inherits(obj, "enrichResult")) {
         stop("only enrichResult object supported.")
-    if (obj@ontology != "KEGG")
+    }
+    if (obj@ontology != "KEGG") {
         stop("only KEGG supported.")
+    }
 
     print("viewKEGG is a wrapper function of pathview")
     citation("pathview")
 
     pkg <- "pathview"
-    suppressMessages(require(pkg, character.only=TRUE))
+    suppressMessages(require(pkg, character.only = TRUE))
     if (is.numeric(pathwayID)) {
         pathwayID <- as.data.frame(obj)[pathwayID, 1]
     }
@@ -266,22 +298,25 @@ viewKEGG <- function(obj, pathwayID, foldChange,
     }
     m.fc <- max(abs(foldChange))
     bins <- ceiling(m.fc) * 2
-    if (bins < 10)
+    if (bins < 10) {
         bins <- 10
-    pathview <- eval(parse(text=pkg))
+    }
+    pathview <- eval(parse(text = pkg))
     res <- lapply(pathwayID, function(pid) {
-        pathview(gene.data=foldChange,
-                 pathway.id = pid,
-                 species = "hsa",
-                 limit = list(gene=m.fc, cpd=1),
-                 bins = list(gene=bins, cpd=10),
-                 low = list(gene=color.low, cpd="blue"),
-                 high = list(gene=color.high, cpd="yellow"),
-                 kegg.native=kegg.native,
-                 out.suffix=out.suffix,
-                 new.signature=FALSE)
+        pathview(
+            gene.data = foldChange,
+            pathway.id = pid,
+            species = "hsa",
+            limit = list(gene = m.fc, cpd = 1),
+            bins = list(gene = bins, cpd = 10),
+            low = list(gene = color.low, cpd = "blue"),
+            high = list(gene = color.high, cpd = "yellow"),
+            kegg.native = kegg.native,
+            out.suffix = out.suffix,
+            new.signature = FALSE
+        )
     })
-    return (res)
+    return(res)
 }
 
 ##' @importFrom AnnotationDbi as.list
@@ -294,17 +329,19 @@ get_data_from_KEGG_db <- function(species) {
     idx <- grep(species, names(PATHID2EXTID))
     PATHID2EXTID <- PATHID2EXTID[idx]
     PATHID2EXTID.df <- stack(PATHID2EXTID)
-    PATHID2EXTID.df <- PATHID2EXTID.df[, c(2,1)]
+    PATHID2EXTID.df <- PATHID2EXTID.df[, c(2, 1)]
     PATHID2NAME <- as.list(get_KEGG_db("KEGGPATHID2NAME"))
-    PATHID2NAME.df <- data.frame(path=names(PATHID2NAME),
-                                 name=unlist(PATHID2NAME))
+    PATHID2NAME.df <- data.frame(
+        path = names(PATHID2NAME),
+        name = unlist(PATHID2NAME)
+    )
     build_Anno(PATHID2EXTID.df, PATHID2NAME.df)
 }
 
 get_KEGG_db <- function(kw) {
     annoDb <- "KEGG.db"
     suppressMessages(requireNamespace(annoDb))
-    eval(parse(text=paste0(annoDb, "::", kw)))
+    eval(parse(text = paste0(annoDb, "::", kw)))
 }
 
 organismMapper <- function(organism) {
@@ -353,7 +390,3 @@ organismMapper <- function(organism) {
     }
     return(species)
 }
-
-
-
-

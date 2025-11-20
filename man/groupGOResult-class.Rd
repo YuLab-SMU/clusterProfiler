@@ -29,8 +29,7 @@ specific GO level.
 }}
 
 \seealso{
-\code{\linkS4class{compareClusterResult}}
-  \code{\link{compareCluster}} \code{\link{groupGO}}
+[compareClusterResult], [compareCluster], [groupGO]
 }
 \author{
 Guangchuang Yu \url{https://yulab-smu.top}

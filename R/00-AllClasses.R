@@ -1,5 +1,3 @@
-
-
 ##' Class "groupGOResult"
 ##' This class represents the result of functional Profiles of a set of gene at
 ##' specific GO level.
@@ -18,13 +16,13 @@
 ##' @author Guangchuang Yu \url{https://yulab-smu.top}
 ##' @importMethodsFrom DOSE summary
 ##' @importFrom DOSE setReadable
-##' @seealso \code{\linkS4class{compareClusterResult}}
-##'   \code{\link{compareCluster}} \code{\link{groupGO}}
+##' @seealso [compareClusterResult], [compareCluster], [groupGO]
 ##' @keywords classes
-setClass("groupGOResult",
-         representation=representation(
-         level = "numeric"
-         ),
+setClass(
+  "groupGOResult",
+  representation = representation(
+    level = "numeric"
+  ),
 
-         contains = "enrichResult"
-         )
+  contains = "enrichResult"
+)

@@ -57,7 +57,7 @@ categories with FDR control.
 }
 }
 \seealso{
-\code{\link{enrichResult-class}}, \code{\link{compareCluster}}
+[enrichResult-class], [compareCluster]
 }
 \author{
 Guangchuang Yu \url{https://yulab-smu.top}

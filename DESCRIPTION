@@ -1,7 +1,7 @@
 Package: clusterProfiler
 Type: Package
 Title: A universal enrichment tool for interpreting omics data
-Version: 4.18.1
+Version: 4.18.2
 Authors@R: c(
     person(given = "Guangchuang", family = "Yu",        email = "guangchuangyu@gmail.com",   role  = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
     person(given = "Li-Gen",      family = "Wang",      email = "reeganwang020@gmail.com",   role  = "ctb"),
@@ -16,7 +16,7 @@ Description: This package supports functional characteristics of both coding and
     It provides a universal interface for gene functional annotation from a variety of sources and thus can be applied in diverse scenarios. 
     It provides a tidy interface to access, manipulate, and visualize enrichment results to help users achieve efficient data interpretation. 
     Datasets obtained from multiple treatments and time points can be analyzed and compared in a single run, easily revealing functional consensus 
-    and differences among distinct conditions.
+    and differences among distinct gene clusters.
 Depends:
     R (>= 4.2.0)
 Imports:
@@ -40,15 +40,13 @@ Imports:
     yulab.utils (>= 0.1.6)
 Suggests:
     AnnotationHub,
-    knitr,
+    BiocManager,
     jsonlite,
     readr,
-    rmarkdown,
     org.Hs.eg.db,
-    prettydoc,
-    BiocManager,
+    quarto,
     testthat
-VignetteBuilder: knitr
+VignetteBuilder: quarto
 ByteCompile: true
 License: Artistic-2.0
 URL: https://yulab-smu.top/contribution-knowledge-mining/
