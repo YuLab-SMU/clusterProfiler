@@ -1,6 +1,6 @@
 #' add KEGG pathway category information
 #'
-#' This function appends the KEGG pathway category information to KEGG enrichment result 
+#' This function appends the KEGG pathway category information to KEGG enrichment result
 #' (either output of 'enrichKEGG' or 'gseKEGG'
 #' @title append_kegg_category
 #' @param x KEGG enrichment result
@@ -41,7 +41,7 @@ append_kegg_category <- function(x) {
 #' @export
 #' @author Guangchuang Yu
 browseKEGG <- function(x, pathID) {
-    url <- paste0("https://www.kegg.jp/kegg-bin/show_pathway?", pathID, '/', x[pathID, "geneID"])
+    url <- paste0("https://www.kegg.jp/kegg-bin/show_pathway?", pathID, "/", x[pathID, "geneID"])
     browseURL(url)
     invisible(url)
 }
@@ -57,11 +57,11 @@ browseKEGG <- function(x, pathID) {
 #' @return data.frame
 #' @export
 #' @author Guangchuang Yu
-search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE, 
+search_kegg_organism <- function(str, by = "scientific_name", ignore.case = FALSE,
                                  use_internal_data = TRUE) {
     if (use_internal_data) {
         by <- match.arg(by, c("kegg_code", "scientific_name", "common_name"))
-        kegg_species <- kegg_species_data() 
+        kegg_species <- kegg_species_data()
         # Message <- paste("You are using the internal data. ",
         #               "If you want to use the latest data",
         #               "and your internet speed is fast enough, ",
@@ -71,7 +71,7 @@ search_kegg_organism <- function(str, by="scientific_name", ignore.case=FALSE,
         kegg_species <- get_kegg_species()
     }
     idx <- grep(str, kegg_species[, by], ignore.case = ignore.case)
-    kegg_species[idx,]
+    kegg_species[idx, ]
 }
 
 
@@ -90,10 +90,12 @@ get_cached_kegg_data <- function(type = "category") {
     type <- match.arg(type, c("category", "species"))
     basefile <- sprintf("kegg_%s", type)
     file <- sprintf("%s.rda", basefile)
-    urls <- c("https://yulab-smu.top/clusterProfiler",
-              "https://raw.githubusercontent.com/YuLab-SMU/clusterProfiler/gh-pages")
-                  
-    d <- download_yulab_file(file, urls, gzfile=FALSE, appname="clusterProfiler")
+    urls <- c(
+        "https://yulab-smu.top/clusterProfiler",
+        "https://raw.githubusercontent.com/YuLab-SMU/clusterProfiler/gh-pages"
+    )
+
+    d <- download_yulab_file(file, urls, gzfile = FALSE, appname = "clusterProfiler")
     load(d, envir = get_cache())
     get_cache_item(basefile)
 }
@@ -102,21 +104,23 @@ get_kegg_species <- function(save = FALSE) {
     url <- "https://rest.kegg.jp/list/organism"
     species <- read.table(url, fill = TRUE, sep = "\t", header = F, quote = "")
     species <- species[, -1]
-    scientific_name <- gsub(" \\(.*", "", species[,2])
-    common_name <- gsub(".*\\(", "", species[,2])
+    scientific_name <- gsub(" \\(.*", "", species[, 2])
+    common_name <- gsub(".*\\(", "", species[, 2])
     common_name <- gsub("\\)", "", common_name)
-    kegg_species <- data.frame(kegg_code = species[, 1], 
-                            scientific_name = scientific_name, 
-                            common_name = common_name)
-    
-    file <- 'kegg_species.rda'
-    if (dir.exists('data')) file <- paste0('data/', file) 
+    kegg_species <- data.frame(
+        kegg_code = species[, 1],
+        scientific_name = scientific_name,
+        common_name = common_name
+    )
+
+    file <- "kegg_species.rda"
+    if (dir.exists("data")) file <- paste0("data/", file)
     if (save) {
         message(sprintf("--> Number of species %s", nrow(kegg_species)))
         message(sprintf("--> Save to %s\n", file))
-        save(kegg_species, file=file)
+        save(kegg_species, file = file)
     }
-    invisible(kegg_species)                                
+    invisible(kegg_species)
 }
 
 
@@ -172,7 +176,7 @@ kegg_rest <- function(rest_url) {
 
     # f <- tempfile()
     # dl <- mydownload(rest_url, destfile = f)
-    # 
+    #
     # if (is.null(dl)) {
     #     message("fail to download KEGG data...")
     #     return(NULL)
@@ -181,9 +185,11 @@ kegg_rest <- function(rest_url) {
     # content <- readLines(f)
     content <- yread(rest_url)
 
-    content %<>% strsplit(., "\t") %>% do.call('rbind', .)
-    res <- data.frame(from=content[,1],
-                      to=content[,2])
+    content %<>% strsplit(., "\t") %>% do.call("rbind", .)
+    res <- data.frame(
+        from = content[, 1],
+        to = content[, 2]
+    )
     return(res)
 }
 
@@ -191,19 +197,19 @@ kegg_rest <- function(rest_url) {
 ## https://www.genome.jp/kegg/rest/keggapi.html
 ## kegg_link('hsa', 'pathway')
 kegg_link <- function(target_db, source_db) {
-    url <- paste0("https://rest.kegg.jp/link/", target_db, "/", source_db, collapse="")
+    url <- paste0("https://rest.kegg.jp/link/", target_db, "/", source_db, collapse = "")
     kegg_rest(url)
 }
 
 
 kegg_list <- function(db, species = NULL) {
     if (db == "pathway") {
-        url <- paste("https://rest.kegg.jp/list", db, species, sep="/")
+        url <- paste("https://rest.kegg.jp/list", db, species, sep = "/")
     } else {
         ## module do not need species
-        url <- paste("https://rest.kegg.jp/list", db, sep="/")
+        url <- paste("https://rest.kegg.jp/list", db, sep = "/")
     }
-    
+
     kegg_rest(url)
 }
 
@@ -213,6 +219,7 @@ kegg_list <- function(db, species = NULL) {
 #' @title ko2name
 #' @param ko ko ID
 #' @return data.frame
+#' @importFrom stats na.omit
 #' @export
 #' @author guangchuang yu
 ko2name <- function(ko) {
@@ -236,5 +243,3 @@ ko2name <- function(ko) {
     })
     do.call(rbind, res)
 }
-
-
