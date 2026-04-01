@@ -20,3 +20,4 @@ outdated
 inst/sticker
 local_test
 .trae
+.env

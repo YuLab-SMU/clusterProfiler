@@ -2,36 +2,40 @@
 % Please edit documentation in R/interpret.R
 \name{interpret_hierarchical}
 \alias{interpret_hierarchical}
-\title{interpret_hierarchical}
+\title{Interpret enrichment results using a hierarchical strategy}
 \usage{
 interpret_hierarchical(
   x_minor,
   x_major,
   mapping,
-  model = "deepseek-chat",
-  api_key = NULL,
-  task = "cell_type"
+  model = NULL,
+  task = "cell_type",
+  max_tokens = 8192,
+  temperature = 0.3
 )
 }
 \arguments{
-\item{x_minor}{Enrichment result for sub-clusters (e.g., compareClusterResult or list of enrichResult).}
+\item{x_minor}{Enrichment result for sub-clusters.}
 
 \item{x_major}{Enrichment result for major clusters.}
 
-\item{mapping}{A named vector mapping sub-cluster IDs (names in x_minor) to major cluster IDs (names in x_major).}
+\item{mapping}{A named vector mapping sub-cluster IDs to major cluster IDs.}
 
-\item{model}{LLM model.}
+\item{model}{Optional LLM model. When `NULL` (default), uses the aisdk
+package-wide default model configured via `aisdk::set_model()`. You can
+also supply a model ID in `provider:model` format or a `LanguageModelV1`
+object. Bare model names are supported with a warning.}
 
-\item{api_key}{API key.}
+\item{task}{Task type, default "cell_type".}
 
-\item{task}{Task type, default is "cell_type".}
+\item{max_tokens}{Maximum tokens. Default 8192.}
+
+\item{temperature}{Sampling temperature. Default 0.3.}
 }
 \value{
-A list of interpretation results.
+An `interpretation_list` object.
 }
 \description{
-Interpret enrichment results using a hierarchical strategy (Major -> Minor clusters)
-}
-\author{
-Guangchuang Yu
+First interprets major clusters to establish lineage context, then interprets
+sub-clusters with hierarchical constraints from the major cluster annotations.
 }

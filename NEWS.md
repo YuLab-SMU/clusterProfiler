@@ -13,6 +13,7 @@ TODO:
 
 # clusterProfiler 4.19.6
 
++ `interpret()`, `interpret_agent()`, and `interpret_hierarchical()` now use aisdk's global default model when `model = NULL`, so users can switch the package-wide default with `aisdk::set_model()` while still overriding per call with an explicit `model` argument (2026-03-31, Tue)
 + update `ko2name()` to robustly parse KO names via KEGG REST, support vector input with deduplication, and return NA when NAME is missing (2026-02-25, Wed)
 + bug fixed for `plot.interpret` (2026-02-05, Thu)
 

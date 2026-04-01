@@ -39,12 +39,13 @@ Imports:
     stats,
     tidyr,
     utils,
-    yulab.utils (>= 0.2.3)
+    yulab.utils (>= 0.2.3),
+    ggplot2,
+    aisdk
 Suggests:
     AnnotationHub,
     BiocManager,
     DOSE,
-    fanyi (>= 0.1.0),
     ggtangle,
     readr,
     org.Hs.eg.db,
@@ -60,3 +61,6 @@ biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,
     MultipleComparison, Pathways, Reactome, Visualization
 Encoding: UTF-8
 RoxygenNote: 7.3.3
+Remotes: 
+    YuLab-SMU/aisdk
+

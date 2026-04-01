@@ -2,50 +2,96 @@
 % Please edit documentation in R/interpret.R
 \name{interpret}
 \alias{interpret}
-\title{interpret}
+\title{Interpret Enrichment Results Using LLMs}
 \usage{
 interpret(
   x,
   context = NULL,
   n_pathways = 20,
-  model = "deepseek-chat",
-  api_key = NULL,
+  model = NULL,
   task = "interpretation",
   prior = NULL,
   add_ppi = FALSE,
-  gene_fold_change = NULL
+  gene_fold_change = NULL,
+  max_tokens = 8192,
+  temperature = 0.3,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{x}{An enrichment result object (e.g., `enrichResult` or `gseaResult`).}
+\item{x}{An enrichment result object (`enrichResult`, `gseaResult`,
+`compareClusterResult`, or a `data.frame` with pathway columns).}
 
-\item{context}{A string describing the experimental background (e.g., "scRNA-seq of mouse myocardial infarction at day 3").}
+\item{context}{A string describing the experimental background
+(e.g., "scRNA-seq of mouse myocardial infarction at day 3").}
 
-\item{n_pathways}{Number of top significant pathways to include in the analysis. Default is 20.}
+\item{n_pathways}{Number of top significant pathways to include. Default 20.}
 
-\item{model}{The LLM model to use. Default is "deepseek-chat". Supported models include "deepseek-chat", "glm-4", "qwen-turbo" etc.}
+\item{model}{Optional LLM model. When `NULL` (default), uses the aisdk
+package-wide default model configured via `aisdk::set_model()`.
+You can also supply a model ID in `provider:model` format
+(e.g., `"deepseek:deepseek-chat"`, `"gemini:gemini-2.5-flash"`) or a
+`LanguageModelV1` object. Bare model names are supported with a warning
+(e.g., `"deepseek-chat"`).}
 
-\item{api_key}{The API key for the LLM. If NULL, it tries to fetch from `getOption('yulab_translate')` based on the model.}
+\item{task}{Task type: "interpretation" (default), "cell_type"/"annotation",
+or "phenotype"/"phenotyping".}
 
-\item{task}{Task type, default is "interpretation". Other options include "cell_type"/"annotation" and "phenotype"/"phenotyping".}
+\item{prior}{Optional prior knowledge or preliminary annotation to guide the task.}
 
-\item{prior}{Optional prior knowledge (e.g., a biological hypothesis) to guide the task.}
+\item{add_ppi}{Logical, whether to query STRING PPI network data. Default FALSE.}
 
-\item{add_ppi}{Boolean, whether to use PPI network integration.}
+\item{gene_fold_change}{Named numeric vector of log fold changes for expression context.}
 
-\item{gene_fold_change}{Named vector of logFC for expression context.}
+\item{max_tokens}{Maximum tokens for the LLM response. Default 8192.
+Some models (especially reasoning models) may need much higher values
+(e.g., 16384 or more) to produce complete structured output.}
+
+\item{temperature}{Sampling temperature. Default 0.3.}
+
+\item{verbose}{Logical, whether to print debug messages showing raw API
+responses, token usage, and JSON parsing details. Default FALSE.
+Equivalent to setting `options(aisdk.debug = TRUE)` for the call.}
 }
 \value{
-A character string containing the LLM-generated interpretation.
+An `interpretation` object (list) with task-specific fields.
+  For "interpretation": overview, key_mechanisms, hypothesis, narrative, etc.
+  For "annotation": cell_type, confidence, reasoning, markers, etc.
+  For "phenotype": phenotype, confidence, reasoning, key_processes, etc.
 }
 \description{
-Interpret enrichment results using Large Language Models (LLM)
+Functions for interpreting functional enrichment analysis results using
+Large Language Models. Supports single-call interpretation, multi-agent
+deep analysis, and hierarchical cluster strategies.
+
+Built on top of aisdk's `generate_object()` for reliable structured output,
+and the Agent/Session system for multi-agent pipelines.
+
+Sends enrichment results along with optional experimental context to an LLM
+to generate a structured biological interpretation, hypothesis, and narrative
+suitable for a publication.
 }
 \details{
-This function sends the enrichment results (top significant pathways) along with 
-an optional experimental context to an LLM (e.g., DeepSeek) to generate 
-a biological interpretation, hypothesis, and narrative suitable for a paper.
+Uses `generate_object()` internally for reliable structured output with
+automatic JSON repair, eliminating manual parsing failures.
 }
-\author{
-Guangchuang Yu
+\examples{
+\dontrun{
+# Basic usage with a data frame
+df <- data.frame(
+  ID = c("GO:0006915", "GO:0008284"),
+  Description = c("apoptotic process", "positive regulation of proliferation"),
+  GeneRatio = c("10/100", "20/100"),
+  p.adjust = c(0.01, 0.02),
+  geneID = c("TP53/BAX", "MYC/CCND1/CDK4")
+)
+res <- interpret(df,
+  model = "deepseek:deepseek-chat",
+  context = "Cancer proliferation study"
+)
+# Reuse aisdk's global default model
+# aisdk::set_model("openai:gpt-4o-mini")
+# res <- interpret(df, context = "Cancer proliferation study")
+print(res)
+}
 }
