@@ -178,6 +178,10 @@ gson_GO_local <- function(data,
     warning(sprintf("%s GO term(s) are too new for current `GO.db` [source date: %s],\n  and are to be dropped. Consider to update `GO.db` if possible.",
                     n_na_ont,
                     go.db_source_date))
+    data <- data[!is.na(data[["ontology"]]), ]
+    if (nrow(data) == 0) {
+      stop("All GO terms were dropped because they are not found in the current GO.db.")
+    }
   }
 
   # Build ancestry map only for input GO IDs
