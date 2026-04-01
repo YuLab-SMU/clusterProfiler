@@ -16,7 +16,7 @@ update KEGG enrichment result with category information
 add KEGG pathway category information
 }
 \details{
-This function appends the KEGG pathway category information to KEGG enrichment result 
+This function appends the KEGG pathway category information to KEGG enrichment result
 (either output of 'enrichKEGG' or 'gseKEGG'
 }
 \author{
