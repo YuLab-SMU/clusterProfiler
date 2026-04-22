@@ -41,6 +41,8 @@ enrichGO <- function(
     readable = FALSE,
     pool = FALSE
 ) {
+    has_universe <- !missing(universe)
+
     if (keyType != "ENTREZID") {
         # This is to avoid Memory Boom for non-ENTREZID keyType
         # see https://github.com/YuLab-SMU/clusterProfiler/issues/805
@@ -52,15 +54,25 @@ enrichGO <- function(
         #
         # So we first map the input gene to ENTREZID, and then use ENTREZID to do the enrichment analysis.
         # After that, we map the result back to the original keyType.
-        
-        gene <- clusterProfiler::bitr(gene, fromType = keyType, toType = "ENTREZID", OrgDb = OrgDb)
-        if (is.null(gene)) {
+
+        gene <- map_to_entrezid(gene, fromType = keyType, OrgDb = OrgDb)
+        if (length(gene) == 0L) {
             message("--> No gene can be mapped....")
             return(NULL)
         }
-        
+
+        if (has_universe && !is.null(universe)) {
+            universe <- map_to_entrezid(universe, fromType = keyType, OrgDb = OrgDb)
+            if (length(universe) == 0L) {
+                message("--> No universe can be mapped....")
+                return(NULL)
+            }
+        } else {
+            universe <- NULL
+        }
+
         res <- enrichGO(
-            gene = gene$ENTREZID,
+            gene = gene,
             OrgDb = OrgDb,
             keyType = "ENTREZID",
             ont = ont,
@@ -160,6 +172,20 @@ enrichGO <- function(
         res <- add_GO_Ontology(res, GO_DATA)
     }
     return(res)
+}
+
+map_to_entrezid <- function(gene, fromType, OrgDb) {
+    gene <- unique(as.character(gene))
+    if (length(gene) == 0L) {
+        return(character(0))
+    }
+
+    mapped <- bitr(gene, fromType = fromType, toType = "ENTREZID", OrgDb = OrgDb)
+    if (is.null(mapped) || nrow(mapped) == 0L) {
+        return(character(0))
+    }
+
+    unique(as.character(mapped$ENTREZID))
 }
 
 #' @importFrom AnnotationDbi keys

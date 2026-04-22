@@ -11,6 +11,9 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
+# clusterProfiler 4.19.8
+
++ fix: map non-ENTREZID universe in enrichGO (2026-04-22, Wed)
 
 # clusterProfiler 4.19.7
 
