@@ -1,7 +1,3 @@
-# clusterProfiler 4.18.8
-
-+ Bioconductor RELEASE_3_23 (2026-04-29, Wed)
-
 
 <!--
 
@@ -14,6 +10,11 @@ TODO:
   - e.g. independent test of cancer sample 1 vs control 1 and cancer sample 2 vs control 2, then combine results
   - e.g. independent test for different omics data and then combine results
 -->
+
+
+# clusterProfiler 4.20.0
+
++ Bioconductor RELEASE_3_23 (2026-04-29, Wed)
 
 # clusterProfiler 4.19.8
 
