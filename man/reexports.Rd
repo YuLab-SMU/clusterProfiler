@@ -8,6 +8,8 @@
 \alias{geneInCategory}
 \alias{gsfilter}
 \alias{setReadable}
+\alias{bayes_enrich}
+\alias{bayes_summary}
 \alias{cnetplot}
 \alias{dotplot}
 \alias{emapplot}
@@ -39,16 +41,16 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{dplyr}{\code{\link[dplyr]{arrange}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr:context]{n}}, \code{\link[dplyr]{rename}}, \code{\link[dplyr]{select}}, \code{\link[dplyr]{slice}}, \code{\link[dplyr]{summarise}}}
+  \item{dplyr}{\code{\link[dplyr:arrange]{arrange()}}, \code{\link[dplyr:filter]{filter()}}, \code{\link[dplyr:group_by]{group_by()}}, \code{\link[dplyr:mutate]{mutate()}}, \code{\link[dplyr:n]{n()}}, \code{\link[dplyr:rename]{rename()}}, \code{\link[dplyr:select]{select()}}, \code{\link[dplyr:slice]{slice()}}, \code{\link[dplyr:summarise]{summarise()}}}
 
-  \item{enrichit}{\code{\link[enrichit]{geneID}}, \code{\link[enrichit]{geneInCategory}}, \code{\link[enrichit]{gsfilter}}, \code{\link[enrichit]{setReadable}}}
+  \item{enrichit}{\code{\link[enrichit:bayes_enrich]{bayes_enrich()}}, \code{\link[enrichit:bayes_summary]{bayes_summary()}}, \code{\link[enrichit:geneID]{geneID()}}, \code{\link[enrichit:geneInCategory]{geneInCategory()}}, \code{\link[enrichit:gsfilter]{gsfilter()}}, \code{\link[enrichit:setReadable]{setReadable()}}}
 
-  \item{enrichplot}{\code{\link[enrichplot:reexports]{cnetplot}}, \code{\link[enrichplot]{dotplot}}, \code{\link[enrichplot]{emapplot}}, \code{\link[enrichplot]{goplot}}, \code{\link[enrichplot]{gseaplot}}, \code{\link[enrichplot]{heatplot}}, \code{\link[enrichplot]{ridgeplot}}}
+  \item{enrichplot}{\code{\link[enrichplot:cnetplot]{cnetplot}}, \code{\link[enrichplot:dotplot]{dotplot()}}, \code{\link[enrichplot:emapplot]{emapplot()}}, \code{\link[enrichplot:goplot]{goplot()}}, \code{\link[enrichplot:gseaplot]{gseaplot()}}, \code{\link[enrichplot:heatplot]{heatplot()}}, \code{\link[enrichplot:ridgeplot]{ridgeplot()}}}
 
-  \item{GOSemSim}{\code{\link[GOSemSim]{buildGOmap}}, \code{\link[GOSemSim]{get_organism}}, \code{\link[GOSemSim]{read.blast2go}}, \code{\link[GOSemSim:read-gaf]{read.gaf}}}
+  \item{GOSemSim}{\code{\link[GOSemSim:buildGOmap]{buildGOmap()}}, \code{\link[GOSemSim:get_organism]{get_organism()}}, \code{\link[GOSemSim:read.blast2go]{read.blast2go()}}, \code{\link[GOSemSim:read.gaf]{read.gaf()}}}
 
-  \item{gson}{\code{\link[gson:read-gmt]{read.gmt}}, \code{\link[gson:read-gmt]{read.gmt.wp}}}
+  \item{gson}{\code{\link[gson:read.gmt]{read.gmt()}}, \code{\link[gson:read.gmt.wp]{read.gmt.wp()}}}
 
-  \item{magrittr}{\code{\link[magrittr:compound]{\%<>\%}}, \code{\link[magrittr:pipe]{\%>\%}}}
+  \item{magrittr}{\code{\link[magrittr:\%<>\%]{\%<>\%}}, \code{\link[magrittr:\%>\%]{\%>\%}}}
 }}
 

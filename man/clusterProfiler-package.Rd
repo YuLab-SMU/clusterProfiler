@@ -19,6 +19,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Guangchuang Yu \email{guangchuangyu@gmail.com} (\href{https://orcid.org/0000-0002-6485-8781}{ORCID}) [copyright holder]
 
+Authors:
+\itemize{
+  \item Guangchuang Yu \email{guangchuangyu@gmail.com} (\href{https://orcid.org/0000-0002-6485-8781}{ORCID}) [copyright holder]
+}
+
 Other contributors:
 \itemize{
   \item Li-Gen Wang \email{reeganwang020@gmail.com} [contributor]

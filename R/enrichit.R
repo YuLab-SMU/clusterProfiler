@@ -17,5 +17,11 @@ enrichit::gsfilter
 #' @export
 enrichit::setReadable
 
+#' @importFrom enrichit bayes_enrich
+#' @export
+enrichit::bayes_enrich
 
+#' @importFrom enrichit bayes_summary
+#' @export
+enrichit::bayes_summary
 

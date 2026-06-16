@@ -21,3 +21,5 @@ inst/sticker
 local_test
 .trae
 .env
+.codex
+local_test/

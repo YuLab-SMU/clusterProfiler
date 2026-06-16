@@ -11,6 +11,9 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
+# clusterProfiler 4.21.0.001
+
++ re-export `bayes_enrich()` and `bayes_summary()` from enrichit (>= 0.1.5) for Bayesian term selection and posterior-ranked summaries of ORA enrichment results (2026-06-16, Tue)
 
 # clusterProfiler 4.20.0
 

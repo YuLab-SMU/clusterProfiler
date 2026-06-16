@@ -39,10 +39,12 @@ a specific level.
 }
 \examples{
 
+\dontrun{
 	data(gcSample)
 	yy <- groupGO(gcSample[[1]], 'org.Hs.eg.db', ont="BP", level=2)
 	head(summary(yy))
 	#plot(yy)
+}
 
 }
 \seealso{

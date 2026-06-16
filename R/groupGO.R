@@ -20,10 +20,12 @@
 #' @author Guangchuang Yu \url{https://yulab-smu.top}
 #' @examples
 #'
+#' \dontrun{
 #' 	data(gcSample)
 #' 	yy <- groupGO(gcSample[[1]], 'org.Hs.eg.db', ont="BP", level=2)
 #' 	head(summary(yy))
 #' 	#plot(yy)
+#' }
 #'
 groupGO <- function(
     gene,

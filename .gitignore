@@ -14,3 +14,5 @@ __init__.pyc
 .vscode/
 .trae
 .env
+.codex/
+local_test/
