@@ -94,6 +94,7 @@ enricher <- function(gene,
 #' @param minPerm minimal number of permutations for adaptive method
 #' @param maxPerm maximal number of permutations for adaptive method
 #' @param pvalThreshold pvalue threshold for adaptive method
+#' @param eps boundary for calculating the p value in multilevel mode
 #' @param pvalueCutoff adjusted pvalue cutoff
 #' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 #' @param gson a GSON object, if not NULL, use it as annotation data. 
@@ -102,7 +103,7 @@ enricher <- function(gene,
 #' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
 #' Only used when gson is NULL.
 #' @param verbose logical
-#' @param ... other parameter
+#' @param ... other parameters passed to \code{enrichit::gsea_gson()}
 #' @return gseaResult object
 #' @author Guangchuang Yu \url{https://yulab-smu.top}
 #' @export
@@ -110,6 +111,7 @@ GSEA <- function(geneList,
                  exponent = 1,
                  minGSSize = 10,
                  maxGSSize = 500,
+                 eps = 1e-10,
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
                  gson  = NULL,
@@ -130,6 +132,7 @@ GSEA <- function(geneList,
                           exponent      = exponent,
                           minGSSize     = minGSSize,
                           maxGSSize     = maxGSSize,
+                          eps           = eps,
                           pvalueCutoff  = pvalueCutoff,
                           pAdjustMethod = pAdjustMethod,
                           verbose       = verbose,
@@ -139,7 +142,8 @@ GSEA <- function(geneList,
                           adaptive      = adaptive,
                           minPerm       = minPerm,
                           maxPerm       = maxPerm,
-                          pvalThreshold = pvalThreshold)
+                          pvalThreshold = pvalThreshold,
+                          ...)
         })
         
         class(res) <- "gseaResultList"
@@ -175,6 +179,7 @@ GSEA <- function(geneList,
                   exponent      = exponent,
                   minGSSize     = minGSSize,
                   maxGSSize     = maxGSSize,
+                  eps           = eps,
                   pvalueCutoff  = pvalueCutoff,
                   pAdjustMethod = pAdjustMethod,
                   verbose       = verbose,
@@ -184,7 +189,8 @@ GSEA <- function(geneList,
                   adaptive      = adaptive,
                   minPerm       = minPerm,
                   maxPerm       = maxPerm,
-                  pvalThreshold = pvalThreshold)
+                  pvalThreshold = pvalThreshold,
+                  ...)
     
 }
 

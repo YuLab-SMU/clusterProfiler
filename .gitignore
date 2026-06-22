@@ -16,3 +16,4 @@ __init__.pyc
 .env
 .codex/
 local_test/
+.dev

@@ -9,6 +9,7 @@ GSEA(
   exponent = 1,
   minGSSize = 10,
   maxGSSize = 500,
+  eps = 1e-10,
   pvalueCutoff = 0.05,
   pAdjustMethod = "BH",
   gson = NULL,
@@ -32,6 +33,8 @@ GSEA(
 \item{minGSSize}{minimal size of each geneSet for analyzing}
 
 \item{maxGSSize}{maximal size of genes annotated for testing}
+
+\item{eps}{boundary for calculating the p value in multilevel mode}
 
 \item{pvalueCutoff}{adjusted pvalue cutoff}
 
@@ -59,7 +62,7 @@ Only used when gson is NULL.}
 
 \item{pvalThreshold}{pvalue threshold for adaptive method}
 
-\item{...}{other parameter}
+\item{...}{other parameters passed to \code{enrichit::gsea_gson()}}
 }
 \value{
 gseaResult object

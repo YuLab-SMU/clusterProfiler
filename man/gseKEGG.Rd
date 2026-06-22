@@ -11,6 +11,7 @@ gseKEGG(
   exponent = 1,
   minGSSize = 10,
   maxGSSize = 500,
+  eps = 1e-10,
   pvalueCutoff = 0.05,
   pAdjustMethod = "BH",
   verbose = TRUE,
@@ -37,6 +38,8 @@ gseKEGG(
 
 \item{maxGSSize}{maximal size of genes annotated for testing}
 
+\item{eps}{boundary for calculating the p value in multilevel mode}
+
 \item{pvalueCutoff}{pvalue Cutoff}
 
 \item{pAdjustMethod}{pvalue adjustment method}
@@ -47,7 +50,7 @@ gseKEGG(
 
 \item{nPerm}{The number of permutations.}
 
-\item{method}{method of calculating the pvalue, one of "multilevel", "monte carlo" and "fgsea"}
+\item{method}{method of calculating the pvalue, one of "multilevel", "permute" and "sample"}
 
 \item{adaptive}{logical, whether to use adaptive method for calculating pvalue}
 
@@ -57,7 +60,7 @@ gseKEGG(
 
 \item{pvalThreshold}{pvalue threshold for adaptive method}
 
-\item{...}{other parameter}
+\item{...}{other parameters passed to \code{enrichit::gsea_gson()}}
 }
 \value{
 gseaResult object
