@@ -11,8 +11,10 @@ TODO:
   - e.g. independent test for different omics data and then combine results
 -->
 
-# clusterProfiler 4.21.0.002
+# clusterProfiler 4.21.0.003
 
++ `get_ppi_network` to download and cache the full STRING PPI network for a specific species (2026-06-23, Tue)
+  - the `getPPI` is now alias to `get_ppi`
 + fix GSEA wrappers to restore `eps`, forward extra arguments such as `sampleSize` to `enrichit::gsea_gson()`, and align the GSEA method documentation with the current enrichit interface (2026-06-22, Mon, #822)
 + re-export `bayes_enrich()` and `bayes_summary()` from enrichit (>= 0.1.5) for Bayesian term selection and posterior-ranked summaries of ORA enrichment results (2026-06-16, Tue)
 

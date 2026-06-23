@@ -2,9 +2,21 @@
 % Please edit documentation in R/ppi.R
 \name{getPPI}
 \alias{getPPI}
+\alias{get_ppi}
 \title{getPPI}
 \usage{
 getPPI(
+  x,
+  ID = 1,
+  taxID = "auto",
+  required_score = NULL,
+  network_type = "functional",
+  add_nodes = 0,
+  show_query_node_labels = 0,
+  output = "igraph"
+)
+
+get_ppi(
   x,
   ID = 1,
   taxID = "auto",

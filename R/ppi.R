@@ -168,3 +168,68 @@ getPPI <- function(
     )    
 }
 
+#' @rdname getPPI
+#' @export
+get_ppi <- getPPI
+
+
+#' get_ppi_network
+#' 
+#' Download and cache the full STRING PPI background network for a specific species.
+#' 
+#' @title get_ppi_network
+#' @param taxID NCBI taxon identifier (e.g., 9606 for Human).
+#' @param version STRING database version (default: "12.0").
+#' @param score_threshold threshold of significance to include a interaction (default: 400).
+#' @param output one of `data.frame` or `igraph`
+#' @return a `data.frame` or an `igraph` object containing the background PPI network.
+#' @importFrom yulab.utils user_dir
+#' @export
+get_ppi_network <- function(taxID = 9606, version = "12.0", score_threshold = 400, output = "data.frame") {
+    output <- match.arg(output, c("data.frame", "igraph"))
+    
+    # URL for full protein links
+    url <- sprintf("https://stringdb-downloads.org/download/protein.links.v%s/%s.protein.links.v%s.txt.gz",
+                   version, taxID, version)
+    
+    # Generate cache directory using yulab.utils
+    cache_dir <- yulab.utils::user_dir("clusterProfiler")
+    destfile <- file.path(cache_dir, basename(url))
+    
+    # Download if not cached
+    if (!file.exists(destfile)) {
+        message("Downloading full background PPI network from STRING...")
+        message("URL: ", url)
+        message("Destination: ", destfile)
+        # Use mydownload from yulab.utils
+        yulab.utils:::mydownload(url, destfile)
+    } else {
+        message("Using cached background PPI network: ", destfile)
+    }
+    
+    rlang::check_installed('vroom', 'for fast reading of large network files.')
+    
+    message("Reading network data...")
+    links <- vroom::vroom(destfile, show_col_types = FALSE)
+    
+    # Filter by score
+    if (!is.null(score_threshold)) {
+        links <- links[links$combined_score >= score_threshold, ]
+    }
+    
+    if (output == "data.frame") {
+        return(links)
+    }
+    
+    rlang::check_installed('igraph', 'for outputting igraph object.')
+    
+    node <- unique(c(links$protein1, links$protein2))
+    
+    igraph::graph_from_data_frame(
+        d = links[, c("protein1", "protein2", "combined_score")],
+        vertices = node,
+        directed = FALSE
+    )
+}
+
+
