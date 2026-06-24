@@ -33,13 +33,13 @@ Biocpkg <- function (pkg) {
 + It provides a universal interface for gene functional annotation from a variety of sources and thus can be applied in diverse scenarios. 
 + It provides a tidy interface to access, manipulate, and visualize enrichment results to help users achieve efficient data interpretation
 + Datasets obtained from multiple treatments and time points can be analyzed and compared in a single run, easily revealing functional consensus and differences among distinct conditions
++ It uses `enrichit` as the underlying engine for ORA, GSEA, and topology-aware enrichment analysis, while providing a high-level and user-friendly interface for biological interpretation
 
 
 For details, please visit:
 
 + <https://yulab-smu.top/contribution-knowledge-mining/>
 + <https://yulab-smu.top/biomedical-knowledge-mining-book/>
-
 
 <img src="graphic-abstract-The-Innovation-2021.jpg" width="890"/>
 

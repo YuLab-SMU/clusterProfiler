@@ -1,18 +1,8 @@
 
-<!--
+# clusterProfiler 4.21.0.004
 
-TODO:
-
-+ Uniprot to KO, <https://www.biostars.org/p/415837/>
-  - e.g. <https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+up:A0A059ZTB3>
-+ aggregate multiple p values
-  - <https://en.wikipedia.org/wiki/Fisher's_method>
-  - e.g. independent test of cancer sample 1 vs control 1 and cancer sample 2 vs control 2, then combine results
-  - e.g. independent test for different omics data and then combine results
--->
-
-# clusterProfiler 4.21.0.003
-
++ add `nseGO()`, `nseKEGG()`, `nseMKEGG()`, `nseWP()`, `mnseGO()`, `mnseKEGG()`, `mnseMKEGG()`, and `mnseWP()` as high-level topology-aware enrichment wrappers powered by `enrichit`, with metadata backfilling and lightweight wrapper tests (2026-06-24, Wed)
++ re-export `aggregate_omics()`, `aggregate_enrichment()`, `harmonize_ids()`, and `select_features_for_ora()` from enrichit for high-level multi-omics workflows (2026-06-24, Wed)
 + `get_ppi_network` to download and cache the full STRING PPI network for a specific species (2026-06-23, Tue)
   - the `getPPI` is now alias to `get_ppi`
 + fix GSEA wrappers to restore `eps`, forward extra arguments such as `sampleSize` to `enrichit::gsea_gson()`, and align the GSEA method documentation with the current enrichit interface (2026-06-22, Mon, #822)

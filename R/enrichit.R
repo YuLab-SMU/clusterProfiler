@@ -25,3 +25,18 @@ enrichit::bayes_enrich
 #' @export
 enrichit::bayes_summary
 
+#' @importFrom enrichit aggregate_enrichment
+#' @export
+enrichit::aggregate_enrichment
+
+#' @importFrom enrichit aggregate_omics
+#' @export
+enrichit::aggregate_omics
+
+#' @importFrom enrichit harmonize_ids
+#' @export
+enrichit::harmonize_ids
+
+#' @importFrom enrichit select_features_for_ora
+#' @export
+enrichit::select_features_for_ora

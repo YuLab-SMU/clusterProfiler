@@ -29,6 +29,9 @@ Status](http://www.bioconductor.org/shields/build/devel/bioc/clusterProfiler.svg
 - Datasets obtained from multiple treatments and time points can be
   analyzed and compared in a single run, easily revealing functional
   consensus and differences among distinct conditions
+- It uses `enrichit` as the underlying engine for ORA, GSEA, and
+  topology-aware enrichment analysis, while providing a high-level and
+  user-friendly interface for biological interpretation
 
 For details, please visit:
 

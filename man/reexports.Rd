@@ -10,6 +10,10 @@
 \alias{setReadable}
 \alias{bayes_enrich}
 \alias{bayes_summary}
+\alias{aggregate_enrichment}
+\alias{aggregate_omics}
+\alias{harmonize_ids}
+\alias{select_features_for_ora}
 \alias{cnetplot}
 \alias{dotplot}
 \alias{emapplot}
@@ -43,7 +47,7 @@ below to see their documentation.
 \describe{
   \item{dplyr}{\code{\link[dplyr:arrange]{arrange()}}, \code{\link[dplyr:filter]{filter()}}, \code{\link[dplyr:group_by]{group_by()}}, \code{\link[dplyr:mutate]{mutate()}}, \code{\link[dplyr:n]{n()}}, \code{\link[dplyr:rename]{rename()}}, \code{\link[dplyr:select]{select()}}, \code{\link[dplyr:slice]{slice()}}, \code{\link[dplyr:summarise]{summarise()}}}
 
-  \item{enrichit}{\code{\link[enrichit:bayes_enrich]{bayes_enrich()}}, \code{\link[enrichit:bayes_summary]{bayes_summary()}}, \code{\link[enrichit:geneID]{geneID()}}, \code{\link[enrichit:geneInCategory]{geneInCategory()}}, \code{\link[enrichit:gsfilter]{gsfilter()}}, \code{\link[enrichit:setReadable]{setReadable()}}}
+  \item{enrichit}{\code{\link[enrichit:aggregate_enrichment]{aggregate_enrichment()}}, \code{\link[enrichit:aggregate_omics]{aggregate_omics()}}, \code{\link[enrichit:bayes_enrich]{bayes_enrich()}}, \code{\link[enrichit:bayes_summary]{bayes_summary()}}, \code{\link[enrichit:geneID]{geneID()}}, \code{\link[enrichit:geneInCategory]{geneInCategory()}}, \code{\link[enrichit:gsfilter]{gsfilter()}}, \code{\link[enrichit:harmonize_ids]{harmonize_ids()}}, \code{\link[enrichit:select_features_for_ora]{select_features_for_ora()}}, \code{\link[enrichit:setReadable]{setReadable()}}}
 
   \item{enrichplot}{\code{\link[enrichplot:cnetplot]{cnetplot}}, \code{\link[enrichplot:dotplot]{dotplot()}}, \code{\link[enrichplot:emapplot]{emapplot()}}, \code{\link[enrichplot:goplot]{goplot()}}, \code{\link[enrichplot:gseaplot]{gseaplot()}}, \code{\link[enrichplot:heatplot]{heatplot()}}, \code{\link[enrichplot:ridgeplot]{ridgeplot()}}}
 

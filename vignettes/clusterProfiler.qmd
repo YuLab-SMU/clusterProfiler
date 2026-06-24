@@ -25,6 +25,7 @@ vignette: >
 
 + Over-Representation Analysis
 + Gene Set Enrichment Analysis
++ Topology-aware enrichment analysis
 + Biological theme comparison
 
 ## Supported ontologies/pathways
@@ -64,7 +65,7 @@ vignette: >
 # Vignette
 
 
-Please go to <https://yulab-smu.github.io/clusterProfiler-book/> for the full vignette.
+Please go to <https://yulab-smu.top/biomedical-knowledge-mining-book/> for the full vignette.
 
 
 # Citation
@@ -79,14 +80,12 @@ __*G Yu*__, LG Wang, Y Han, QY He. clusterProfiler: an R package for comparing b
 # Need helps?
 
 
-If you have questions/issues, please visit
-[clusterProfiler homepage](https://guangchuangyu.github.io/software/clusterProfiler/) first.
-Your problems are mostly documented. If you think you found a bug, please follow
-[the guide](https://guangchuangyu.github.io/2016/07/how-to-bug-author/) and
-provide a reproducible example to be posted
-on
-[github issue tracker](https://github.com/GuangchuangYu/clusterProfiler/issues).
-For questions, please post
+- If you have questions/issues, please visit
+[the online book](https://yulab-smu.top/biomedical-knowledge-mining-book/) first.
+Your problems are mostly documented. 
+- If you think you found a bug, please provide a reproducible example to be posted
+on [github issue tracker](https://github.com/GuangchuangYu/clusterProfiler/issues).
+- For questions, please post
 to [Bioconductor support site](https://support.bioconductor.org/) and tag your
 post with *clusterProfiler*.
 
