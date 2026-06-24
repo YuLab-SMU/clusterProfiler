@@ -9,9 +9,11 @@ bitr_kegg(geneID, fromType, toType, organism, drop = TRUE)
 \arguments{
 \item{geneID}{input gene id}
 
-\item{fromType}{input id type}
+\item{fromType}{input id type, one of "Path", "Module", "ncbi-proteinid",
+"ncbi-geneid", "uniprot", "kegg", and "ko"}
 
-\item{toType}{output id type}
+\item{toType}{output id type, one of "Path", "Module", "ncbi-proteinid",
+"ncbi-geneid", "uniprot", "kegg", and "ko"}
 
 \item{organism}{supported organism, can be search using search_kegg_organism function}
 
@@ -22,6 +24,12 @@ data.frame
 }
 \description{
 convert biological ID using KEGG API
+}
+\examples{
+\dontrun{
+  bitr_kegg(c("P31946", "P01308"), "uniprot", "ko", "hsa")
+  bitr_kegg(c("K04456", "K04526"), "ko", "uniprot", "hsa")
+}
 }
 \author{
 Guangchuang Yu

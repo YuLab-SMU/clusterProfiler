@@ -1,6 +1,7 @@
 
 # clusterProfiler 4.21.0.004
 
++ support `UniProt accession -> KO` conversion in `bitr_kegg()` via KEGG REST and export `gson_KO()` for KEGG Orthology workflows (2026-06-24, Wed)
 + add `nseGO()`, `nseKEGG()`, `nseMKEGG()`, `nseWP()`, `mnseGO()`, `mnseKEGG()`, `mnseMKEGG()`, and `mnseWP()` as high-level topology-aware enrichment wrappers powered by `enrichit`, with metadata backfilling and lightweight wrapper tests (2026-06-24, Wed)
 + re-export `aggregate_omics()`, `aggregate_enrichment()`, `harmonize_ids()`, and `select_features_for_ora()` from enrichit for high-level multi-omics workflows (2026-06-24, Wed)
 + `get_ppi_network` to download and cache the full STRING PPI network for a specific species (2026-06-23, Tue)

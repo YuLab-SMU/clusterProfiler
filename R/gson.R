@@ -4,7 +4,8 @@
 #' @title gson_KEGG
 #' @param species species
 #' @param KEGG_Type one of "KEGG" and "MKEGG"
-#' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'.
+#' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid', 'uniprot',
+#'   and 'ko'.
 #' @return a 'GSON' object
 #' @author Guangchuang Yu
 #' @importFrom gson gson
@@ -48,6 +49,11 @@ gson_cpd <- function() {
   )
 }
 
+#' Download KEGG Orthology annotation as a GSON object
+#'
+#' @title gson_KO
+#' @return a 'GSON' object
+#' @export
 # enrichKEGG(organism = 'ko') supports KO
 gson_KO <- function() {
   k1 <- kegg_rest("https://rest.kegg.jp/link/ko/pathway")

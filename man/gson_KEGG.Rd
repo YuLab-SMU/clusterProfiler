@@ -11,7 +11,8 @@ gson_KEGG(species, KEGG_Type = "KEGG", keyType = "kegg")
 
 \item{KEGG_Type}{one of "KEGG" and "MKEGG"}
 
-\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'.}
+\item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid', 'uniprot',
+and 'ko'.}
 }
 \value{
 a 'GSON' object

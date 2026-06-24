@@ -207,10 +207,16 @@ get_ppi_network <- function(taxID = 9606, version = "12.0", score_threshold = 40
         message("Using cached background PPI network: ", destfile)
     }
     
-    rlang::check_installed('vroom', 'for fast reading of large network files.')
-    
     message("Reading network data...")
-    links <- vroom::vroom(destfile, show_col_types = FALSE)
+    links <- utils::read.table(
+        gzfile(destfile, open = "rt"),
+        header = TRUE,
+        sep = "",
+        quote = "",
+        comment.char = "",
+        stringsAsFactors = FALSE,
+        check.names = FALSE
+    )
     
     # Filter by score
     if (!is.null(score_threshold)) {

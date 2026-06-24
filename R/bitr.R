@@ -63,15 +63,22 @@ bitr <- function(geneID, fromType, toType, OrgDb, drop=TRUE) {
 #'
 #' @title bitr_kegg
 #' @param geneID input gene id
-#' @param fromType input id type
-#' @param toType output id type
+#' @param fromType input id type, one of "Path", "Module", "ncbi-proteinid",
+#'   "ncbi-geneid", "uniprot", "kegg", and "ko"
+#' @param toType output id type, one of "Path", "Module", "ncbi-proteinid",
+#'   "ncbi-geneid", "uniprot", "kegg", and "ko"
 #' @param organism supported organism, can be search using search_kegg_organism function
 #' @param drop drop NA or not
 #' @return data.frame
+#' @examples
+#' \dontrun{
+#'   bitr_kegg(c("P31946", "P01308"), "uniprot", "ko", "hsa")
+#'   bitr_kegg(c("K04456", "K04526"), "ko", "uniprot", "hsa")
+#' }
 #' @export
 #' @author Guangchuang Yu
 bitr_kegg <- function(geneID, fromType, toType, organism, drop=TRUE) {
-    id_types <- c("Path", "Module", "ncbi-proteinid", "ncbi-geneid", "uniprot", "kegg")
+    id_types <- c("Path", "Module", "ncbi-proteinid", "ncbi-geneid", "uniprot", "kegg", "ko")
     fromType <- match.arg(fromType, id_types)
     toType <- match.arg(toType, id_types)
 
@@ -103,6 +110,10 @@ bitr_kegg <- function(geneID, fromType, toType, organism, drop=TRUE) {
 }
 
 KEGG_convert <- function(fromType, toType, species) {
+    if (fromType == "ko" || toType == "ko") {
+        return(KEGG_convert_ko(fromType, toType, species))
+    }
+
     if (fromType == "kegg" || toType != "kegg") {
         turl <- paste("https://rest.kegg.jp/conv", toType, species, sep='/')
         tidconv <- kegg_rest(turl)
@@ -132,6 +143,29 @@ KEGG_convert <- function(fromType, toType, species) {
     return(idconv)
 }
 
+KEGG_convert_ko <- function(fromType, toType, species) {
+    if (fromType == "kegg") {
+        idconv <- kegg_link("ko", species)
+    } else if (toType == "kegg") {
+        idconv <- kegg_link(species, "ko")
+    } else if (fromType == "ko") {
+        ko2gene <- KEGG_convert_ko("ko", "kegg", species)
+        gene2other <- KEGG_convert("kegg", toType, species)
+        idconv <- merge(ko2gene, gene2other, by.x = "to", by.y = "from")
+        idconv <- idconv[, c("from", "to.y")]
+    } else {
+        other2gene <- KEGG_convert(fromType, "kegg", species)
+        gene2ko <- KEGG_convert_ko("kegg", "ko", species)
+        idconv <- merge(other2gene, gene2ko, by.x = "to", by.y = "from")
+        idconv <- idconv[, c("from", "to.y")]
+    }
+
+    colnames(idconv) <- c("from", "to")
+    idconv[, 1] %<>% gsub("[^:]+:", "", .)
+    idconv[, 2] %<>% gsub("[^:]+:", "", .)
+    idconv
+}
+
 
 #' query all genes in a KEGG pathway or module
 #'
@@ -140,7 +174,8 @@ KEGG_convert <- function(fromType, toType, species) {
 #' @param keggID KEGG ID, path or module ID
 #' @param species species
 #' @param keggType one of 'Path' or 'Module'
-#' @param keyType KEGG gene type, one of "ncbi-proteinid", "ncbi-geneid", "uniprot", or "kegg"
+#' @param keyType KEGG gene type, one of "ncbi-proteinid", "ncbi-geneid",
+#'   "uniprot", "kegg", or "ko"
 #' @return extid vector
 #' @author guangchuang yu
 #' @noRd
