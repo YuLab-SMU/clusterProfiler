@@ -24,3 +24,5 @@ local_test
 .codex
 local_test/
 .dev
+CONTEXT.md
+
