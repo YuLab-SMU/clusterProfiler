@@ -26,3 +26,5 @@ local_test/
 .dev
 CONTEXT.md
 
+.scratch/
+CONTEXT.md

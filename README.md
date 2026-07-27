@@ -6,7 +6,7 @@
 state and is being actively
 developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![](https://img.shields.io/badge/release%20version-4.20.0-green.svg)](https://www.bioconductor.org/packages/clusterProfiler)
-[![](https://img.shields.io/badge/devel%20version-4.21.0.003-green.svg)](https://github.com/guangchuangyu/clusterProfiler)
+[![](https://img.shields.io/badge/devel%20version-4.21.1-green.svg)](https://github.com/guangchuangyu/clusterProfiler)
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
 
 [![platform](http://www.bioconductor.org/shields/availability/devel/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#archives)
@@ -15,7 +15,7 @@ Status](http://www.bioconductor.org/shields/build/devel/bioc/clusterProfiler.svg
 [![codecov](https://codecov.io/gh/GuangchuangYu/clusterProfiler/branch/master/graph/badge.svg)](https://codecov.io/gh/GuangchuangYu/clusterProfiler/)
 
 <!--
-[![Last-changedate](https://img.shields.io/badge/last%20change-2026--06--24-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2026--07--27-green.svg)](https://github.com/GuangchuangYu/clusterProfiler/commits/master)
 -->
 
 - [clusterProfiler](http://bioconductor.org/packages/clusterProfiler)

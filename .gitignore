@@ -17,3 +17,4 @@ __init__.pyc
 .codex/
 local_test/
 .dev
+.scratch/

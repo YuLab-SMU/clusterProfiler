@@ -5,6 +5,9 @@
 ### Mechanism Interpretation Tool
 A workflow that turns enrichment analysis outputs into progressively stronger biological explanations, starting with traceable mechanism summaries and evolving toward testable mechanism hypotheses.
 
+### User Scenario
+A real analysis situation that motivates the mechanism interpretation workflow, such as explaining differential-gene enrichment results, comparing enriched themes across gene clusters, or turning an existing enrichment table into a report-ready biological story.
+
 ### Mechanism Summary
 A structured, evidence-linked synthesis of enriched terms into higher-level biological themes. It explains what the enrichment results collectively suggest, without claiming causal proof.
 
@@ -40,3 +43,6 @@ A mechanism-level confidence assessment that may combine statistical support, ad
 
 ### Golden Case
 A curated real or realistic enrichment-analysis example with an expected biological interpretation. Golden cases are used to evaluate whether mechanism summaries and mechanism hypotheses are biologically useful, not just structurally valid.
+
+### Package Golden Case
+A golden case built from data shipped with clusterProfiler, such as `DE_GSE8057` or `gcSample`, so that user-facing workflows can be demonstrated and regression-tested without depending on external datasets.
