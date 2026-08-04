@@ -185,6 +185,15 @@ prepare_KEGG <- function(species, KEGG_Type = "KEGG", keyType = "kegg") {
     gson_KEGG(species, KEGG_Type, keyType)
 }
 
+##' strip KEGG pathway name suffix (e.g., " - Homo sapiens (human)")
+##'
+##' @param x character vector of pathway names
+##' @return character vector with species suffix removed
+##' @noRd
+strip_kegg_species_suffix <- function(x) {
+    sub("\\s-\\s[^-]+$", "", x)
+}
+
 download.KEGG.Path <- function(species) {
     keggpathid2extid.df <- kegg_link(species, "pathway")
     if (is.null(keggpathid2extid.df)) {
@@ -203,7 +212,7 @@ download.KEGG.Path <- function(species) {
     keggpathid2name.df <- kegg_list("pathway", species)
 
     # keggpathid2name.df[,2] <- sub("\\s-\\s[a-zA-Z ]+\\([a-zA-Z ]+\\)$", "", keggpathid2name.df[,2])
-    keggpathid2name.df[, 2] <- sub("\\s-\\s[^-]+$", "", keggpathid2name.df[, 2])
+    keggpathid2name.df[, 2] <- strip_kegg_species_suffix(keggpathid2name.df[, 2])
     # keggpathid2name.df[,1] %<>% gsub("path:map", species, .)
 
     ## if 'species="ko"', ko and map path are duplicated, only keep ko path.
@@ -407,6 +416,7 @@ get_data_from_KEGG_db <- function(species) {
     )
     
     gsid2name <- gsid2name[!is.na(gsid2name$name), ]
+    gsid2name$name <- strip_kegg_species_suffix(gsid2name$name)
     
     gson::gson(
         gsid2gene = gsid2gene,
