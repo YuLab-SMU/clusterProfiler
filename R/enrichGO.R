@@ -43,18 +43,23 @@ enrichGO <- function(
 ) {
     has_universe <- !missing(universe)
 
-    if (keyType != "ENTREZID") {
-        # This is to avoid Memory Boom for non-ENTREZID keyType
-        # see https://github.com/YuLab-SMU/clusterProfiler/issues/805
-        #
-        # If we use `get_GO_data` to build the GSON object for non-ENTREZID keyType,
-        # it will trigger `AnnotationDbi::mapIds` to map all GO terms to the specific keyType.
-        # This will be extremely slow and memory consuming if the keyType is ACCNUM,
-        # because one gene can have multiple ACCNUMs.
-        #
-        # So we first map the input gene to ENTREZID, and then use ENTREZID to do the enrichment analysis.
-        # After that, we map the result back to the original keyType.
+    # This is to avoid Memory Boom for non-ENTREZID keyType
+    # see https://github.com/YuLab-SMU/clusterProfiler/issues/805
+    #
+    # If we use `get_GO_data` to build the GSON object for non-ENTREZID keyType,
+    # it will trigger `AnnotationDbi::mapIds` to map all GO terms to the specific keyType.
+    # This will be extremely slow and memory consuming if the keyType is ACCNUM,
+    # because one gene can have multiple ACCNUMs.
+    #
+    # So if the OrgDb supports ENTREZID, we first map the input gene to ENTREZID,
+    # and then use ENTREZID to do the enrichment analysis.
+    # After that, we map the result back to the original keyType.
+    #
+    # If the OrgDb does NOT have ENTREZID (e.g., some custom OrgDb for non-model
+    # organisms), we skip this optimization and use the original keyType directly.
+    # see https://github.com/YuLab-SMU/clusterProfiler/issues/823
 
+    if (keyType != "ENTREZID" && "ENTREZID" %in% keytypes(yulab.utils::load_OrgDb(OrgDb))) {
         gene <- map_to_entrezid(gene, fromType = keyType, OrgDb = OrgDb)
         if (length(gene) == 0L) {
             message("--> No gene can be mapped....")
