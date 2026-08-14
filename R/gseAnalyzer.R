@@ -19,6 +19,11 @@
 #' @param pvalueCutoff pvalue Cutoff
 #' @param pAdjustMethod pvalue adjustment method
 #' @param verbose print message or not
+#' @param seed random seed for reproducibility, set to a number (or TRUE to use a
+#'   fixed default seed) to make the result reproducible, or FALSE (default) to draw
+#'   a random seed on each run, so results may vary between runs. The underlying
+#'   permutation engine uses its own RNG seeded with this value; see
+#'   \code{enrichit::gsea()} for details.
 #' @param ... other parameters passed to \code{enrichit::gsea_gson()}
 #' @importClassesFrom enrichit gseaResult
 #' @export
@@ -41,6 +46,7 @@ gseGO <- function(geneList,
                   minPerm       = 101,
                   maxPerm       = 1e5,
                   pvalThreshold = 0.1,
+                  seed          = FALSE,
                   ...) {
 
     ont %<>% toupper
@@ -63,6 +69,7 @@ gseGO <- function(geneList,
                           minPerm       = minPerm,
                           maxPerm       = maxPerm,
                           pvalThreshold = pvalThreshold,
+                          seed          = seed,
                           ...)
   
     
@@ -105,6 +112,11 @@ gseGO <- function(geneList,
 #' @param pvalueCutoff pvalue Cutoff
 #' @param pAdjustMethod pvalue adjustment method
 #' @param verbose print message or not
+#' @param seed random seed for reproducibility, set to a number (or TRUE to use a
+#'   fixed default seed) to make the result reproducible, or FALSE (default) to draw
+#'   a random seed on each run, so results may vary between runs. The underlying
+#'   permutation engine uses its own RNG seeded with this value; see
+#'   \code{enrichit::gsea()} for details.
 #' @param ... other parameters passed to \code{enrichit::gsea_gson()}
 #' @export
 #' @return gseaResult object
@@ -125,6 +137,7 @@ gseMKEGG <- function(geneList,
                      minPerm           = 101,
                      maxPerm           = 1e5,
                      pvalThreshold     = 0.1,
+                     seed              = FALSE,
                      ...) {
 
     species <- organismMapper(organism)
@@ -145,6 +158,7 @@ gseMKEGG <- function(geneList,
                           minPerm        = minPerm,
                           maxPerm        = maxPerm,
                           pvalThreshold  = pvalThreshold,
+                          seed           = seed,
                           ...)
    
 
@@ -187,6 +201,7 @@ gseKEGG <- function(geneList,
                     minPerm           = 101,
                     maxPerm           = 1e5,
                     pvalThreshold     = 0.1,
+                    seed              = FALSE,
                     ...) {
 
     if (inherits(organism, "character")) {           
@@ -226,6 +241,7 @@ gseKEGG <- function(geneList,
                           minPerm          = minPerm,
                           maxPerm          = maxPerm,
                           pvalThreshold    = pvalThreshold,
+                          seed             = seed,
                           ...)
     
 

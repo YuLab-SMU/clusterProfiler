@@ -22,6 +22,7 @@ gseGO(
   minPerm = 101,
   maxPerm = 1e+05,
   pvalThreshold = 0.1,
+  seed = FALSE,
   ...
 )
 }
@@ -47,6 +48,11 @@ gseGO(
 \item{pAdjustMethod}{pvalue adjustment method}
 
 \item{verbose}{print message or not}
+\item{seed}{random seed for reproducibility, set to a number (or TRUE to use a
+  fixed default seed) to make the result reproducible, or FALSE (default) to draw
+  a random seed on each run, so results may vary between runs. The underlying
+  permutation engine uses its own RNG seeded with this value; see
+  \code{enrichit::gsea()} for details.}
 
 \item{nPerm}{The number of permutations.}
 

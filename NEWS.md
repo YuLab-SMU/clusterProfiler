@@ -1,6 +1,8 @@
 
-# clusterProfiler 4.21.1.002
+# clusterProfiler 4.21.1.003
 
++ align GSEA significance filtering with the historical behavior of clusterProfiler <= 4.18.x: `pvalueCutoff` now requires both the raw p-value and the adjusted p-value to pass the cutoff, so significant-pathway counts from `GSEA()`/`gseGO()`/`gseKEGG()`/`gseMKEGG()` are again comparable with the DOSE/fgsea backend (2026-08-14, Thu)
++ restore the `seed` argument on `GSEA()`, `gseGO()`, `gseMKEGG()` and `gseKEGG()` and forward it to `enrichit::gsea_gson()`, so permutation-based GSEA results can be reproduced with a fixed seed (or `set.seed()` before the call); the argument had been dropped when the enrichit engine was introduced (2026-08-14, Thu)
 + fix `get_data_from_KEGG_db()` to strip species suffix from pathway names when `use_internal_data=TRUE`, matching the online path behaviour (2026-08-04, Tue, #783)
 + fix `enrichGO()` to check whether the OrgDb supports `ENTREZID` before attempting the ENTREZID-remapping optimisation; custom OrgDb packages without `ENTREZID` keytype (e.g., non-model organisms) now fall back to the original `get_GO_data` path instead of throwing an error (2026-08-04, Tue, #823)
 

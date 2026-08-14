@@ -95,7 +95,7 @@ enricher <- function(gene,
 #' @param maxPerm maximal number of permutations for adaptive method
 #' @param pvalThreshold pvalue threshold for adaptive method
 #' @param eps boundary for calculating the p value in multilevel mode
-#' @param pvalueCutoff adjusted pvalue cutoff
+#' @param pvalueCutoff p-value cutoff applied to both the raw p-value and the adjusted p-value (p.adjust), consistent with the historical clusterProfiler/DOSE behavior
 #' @param pAdjustMethod  one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"
 #' @param gson a GSON object, if not NULL, use it as annotation data. 
 #' @param TERM2GENE user input annotation of TERM TO GENE mapping, a data.frame of 2 column with term and gene.
@@ -103,6 +103,11 @@ enricher <- function(gene,
 #' @param TERM2NAME user input of TERM TO NAME mapping, a data.frame of 2 column with term and name.
 #' Only used when gson is NULL.
 #' @param verbose logical
+#' @param seed random seed for reproducibility, set to a number (or TRUE to use a
+#'   fixed default seed) to make the result reproducible, or FALSE (default) to draw
+#'   a random seed on each run, so results may vary between runs. The underlying
+#'   permutation engine uses its own RNG seeded with this value; see
+#'   \code{enrichit::gsea()} for details.
 #' @param ... other parameters passed to \code{enrichit::gsea_gson()}
 #' @return gseaResult object
 #' @author Guangchuang Yu \url{https://yulab-smu.top}
@@ -124,6 +129,7 @@ GSEA <- function(geneList,
                  minPerm = 101,
                  maxPerm = 1e5,
                  pvalThreshold = 0.1,
+                 seed = FALSE,
                  ...) {
 
     if (inherits(gson, 'GSONList')) {
@@ -143,6 +149,7 @@ GSEA <- function(geneList,
                           minPerm       = minPerm,
                           maxPerm       = maxPerm,
                           pvalThreshold = pvalThreshold,
+                          seed          = seed,
                           ...)
         })
         
@@ -190,6 +197,7 @@ GSEA <- function(geneList,
                   minPerm       = minPerm,
                   maxPerm       = maxPerm,
                   pvalThreshold = pvalThreshold,
+                  seed          = seed,
                   ...)
     
 }

@@ -8,6 +8,13 @@ test_that("GSEA wrappers expose eps with the enrichit default", {
     expect_equal(formals(clusterProfiler::gseKEGG)$eps, 1e-10)
 })
 
+test_that("GSEA wrappers expose a seed argument defaulting to FALSE", {
+    expect_equal(formals(clusterProfiler::GSEA)$seed, FALSE)
+    expect_equal(formals(clusterProfiler::gseGO)$seed, FALSE)
+    expect_equal(formals(clusterProfiler::gseMKEGG)$seed, FALSE)
+    expect_equal(formals(clusterProfiler::gseKEGG)$seed, FALSE)
+})
+
 test_that("GSEA forwards eps and extra enrichit arguments", {
     captured <- NULL
 
@@ -30,10 +37,12 @@ test_that("GSEA forwards eps and extra enrichit arguments", {
         TERM2GENE = term2gene,
         eps = 0,
         sampleSize = 201,
+        seed = 42,
         verbose = FALSE
     )
 
     expect_equal(captured$eps, 0)
     expect_equal(captured$sampleSize, 201)
+    expect_equal(captured$seed, 42)
     expect_s4_class(captured$gson, "GSON")
 })

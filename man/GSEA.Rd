@@ -22,6 +22,7 @@ GSEA(
   minPerm = 101,
   maxPerm = 1e+05,
   pvalThreshold = 0.1,
+  seed = FALSE,
   ...
 )
 }
@@ -36,7 +37,7 @@ GSEA(
 
 \item{eps}{boundary for calculating the p value in multilevel mode}
 
-\item{pvalueCutoff}{adjusted pvalue cutoff}
+\item{pvalueCutoff}{p-value cutoff applied to both the raw p-value and the adjusted p-value (p.adjust), consistent with the historical clusterProfiler/DOSE behavior}
 
 \item{pAdjustMethod}{one of "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"}
 
@@ -49,6 +50,11 @@ Only used when gson is NULL.}
 Only used when gson is NULL.}
 
 \item{verbose}{logical}
+\item{seed}{random seed for reproducibility, set to a number (or TRUE to use a
+  fixed default seed) to make the result reproducible, or FALSE (default) to draw
+  a random seed on each run, so results may vary between runs. The underlying
+  permutation engine uses its own RNG seeded with this value; see
+  \code{enrichit::gsea()} for details.}
 
 \item{nPerm}{The number of permutations.}
 
