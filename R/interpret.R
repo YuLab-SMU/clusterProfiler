@@ -684,12 +684,17 @@ interpret <- function(x,
 #'   audits the synthesized draft against the input evidence for grounding,
 #'   overclaiming, experimental-label fidelity, and **evidence sufficiency**
 #'   (whether the supplied evidence classes can support a claim as specific as
-#'   the draft makes). When `TRUE` (default), the result gains a `review` field
+#'   the draft makes). When `TRUE`, the result gains a `review` field
 #'   (verdict, grounding_score, evidence_sufficiency, supported_resolution,
 #'   abstain_recommended, issues, adjusted_confidence, warnings) and
 #'   `overview_original`; if the verdict is `"revise"`, `overview` is replaced
-#'   by the corrected version. Set `FALSE` for the original three-agent
-#'   behavior. Default TRUE.
+#'   by the corrected version. Default `FALSE`, which reproduces the released
+#'   three-agent behavior exactly: the audit is an addition a caller opts into,
+#'   and leaving it off keeps existing scripts measuring what they measured
+#'   before. Note that the audit roughly doubles wall-clock time per unit and
+#'   adds one model call, and that it is not infallible — on objects where the
+#'   Synthesizer returned nothing it has been observed to return `pass` with a
+#'   `High` grounding score.
 #' @param verbose Logical, whether to print debug messages. Default FALSE.
 #' @return An `interpretation` object with deep analysis fields plus
 #'   regulatory_drivers, refined_network, and network_evidence from the
@@ -716,7 +721,7 @@ interpret_agent <- function(x,
                             gene_fold_change = NULL,
                             max_tokens = 8192,
                             temperature = 0.3,
-                            review = TRUE,
+                            review = FALSE,
                             verbose = FALSE) {
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
 
