@@ -1308,6 +1308,25 @@ interpret_hierarchical <- function(x_minor,
     if (is.null(served)) served <- tryCatch(gen$raw_response$body$model, error = function(e) NULL)
     if (!is.character(served) || length(served) != 1L) served <- NA_character_
     status <- if (!is.null(error_message)) "call_failed" else if (!is.null(obj)) "ok" else "unparsed"
+    # Anthropic-format responses report CACHED prompt tokens separately from `prompt_tokens`, so a
+    # largely cached prompt can report `prompt_tokens = 2` while the model in fact read thousands.
+    # This project's own stamps show exactly that: cleaner calls at 2 against a synthesizer at 505
+    # on the same run. Capture the cache fields wherever the provider emits them, and leave them
+    # NA where it does not -- 0 would assert that no caching occurred, which is a different claim
+    # from not knowing whether it did.
+    .usage_field <- function(nm) {
+      v <- if (is.null(usage)) NULL else usage[[nm]]
+      if (is.null(v)) v <- tryCatch(gen$raw_response$usage[[nm]], error = function(e) NULL)
+      if (is.null(v)) v <- tryCatch(gen$raw_response$body$usage[[nm]], error = function(e) NULL)
+      if (is.null(v) || !is.numeric(v) || length(v) != 1L) NA_integer_ else as.integer(v)
+    }
+    cache_read_tok <- .usage_field("cache_read_input_tokens")
+    cache_creat_tok <- .usage_field("cache_creation_input_tokens")
+    prompt_tok <- usage$prompt_tokens %||% NA_integer_
+    # Effective input = everything the model read, cached or not. NA-safe on purpose: if no
+    # component is reported the total stays NA rather than collapsing to a confident 0.
+    .parts <- c(prompt_tok, cache_read_tok, cache_creat_tok)
+    prompt_tok_eff <- if (all(is.na(.parts))) NA_integer_ else as.integer(sum(.parts, na.rm = TRUE))
     collector$calls[[length(collector$calls) + 1L]] <- list(
       stage = stage,
       status = status,
@@ -1329,7 +1348,10 @@ interpret_hierarchical <- function(x_minor,
       max_tokens_applied = NA_real_,
       finish_reason = fin %||% NA_character_,
       response_chars = if (is.null(raw)) NA_integer_ else nchar(raw),
-      prompt_tokens = usage$prompt_tokens %||% NA_integer_,
+      prompt_tokens = prompt_tok,
+      cache_read_tokens = cache_read_tok,
+      cache_creation_tokens = cache_creat_tok,
+      prompt_tokens_effective = prompt_tok_eff,
       completion_tokens = usage$completion_tokens %||% NA_integer_,
       total_tokens = usage$total_tokens %||% NA_integer_,
       system_sha256 = .sha256(system),
