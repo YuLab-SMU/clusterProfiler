@@ -803,6 +803,15 @@ interpret_agent <- function(x,
             system = cleaner$system_prompt,
             temperature = temperature, max_tokens = max_tokens
           )
+          # A 200 that does not parse is a failure, not a result. generate_object() raises no
+          # condition in that case, so a bare `gen$object` hands NULL to the caller; every
+          # downstream is.list()/!is.null() guard then skips silently, and for the synthesizer
+          # the NULL reaches .postprocess_network(), where `class(res) <-` on NULL aborts the
+          # whole run with "attempt to set an attribute on NULL" (observed 2026-08-27, both
+          # review = TRUE arms of the A1 public-case ablation). Raising here routes the failure
+          # to the handler below, which warns and -- for the synthesizer -- returns a marked
+          # placeholder, so the call is reported rather than fatal.
+          .stop_if_unparsed(gen, "Cleaner")
           gen$object
         },
         error = function(e) {
@@ -855,6 +864,7 @@ interpret_agent <- function(x,
           system = detective$system_prompt,
           temperature = temperature, max_tokens = max_tokens
         )
+        .stop_if_unparsed(gen, "Detective")
         gen$object
       },
       error = function(e) {
@@ -898,6 +908,7 @@ interpret_agent <- function(x,
           system = synth_system,
           temperature = temperature, max_tokens = max_tokens
         )
+        .stop_if_unparsed(gen, "Synthesizer")
         gen$object
       },
       error = function(e) {
@@ -966,6 +977,7 @@ interpret_agent <- function(x,
             system = .reviewer_system_prompt(),
             temperature = temperature, max_tokens = max_tokens
           )
+          .stop_if_unparsed(gen, "Reviewer")
           gen$object
         },
         error = function(e) {
@@ -1586,7 +1598,33 @@ print.interpret_provenance <- function(x, ...) {
   )
 }
 
+#' Raise when a model call returned successfully but produced no parsable object.
+#'
+#' `generate_object()` signals nothing when the transport succeeds and the body fails to
+#' validate against the schema: it returns normally with `object = NULL` and the raw text
+#' intact. Every agent in `interpret_agent()` therefore has to decide for itself whether a
+#' missing object is "this agent had nothing to add" or "this call failed", and until
+#' 2026-08-27 all four treated it as the former. `finish_reason` is carried into the message
+#' because it is the one field that distinguishes a truncated response from a well-formed
+#' answer the schema rejected.
+#' @keywords internal
+.stop_if_unparsed <- function(gen, agent) {
+  if (!is.null(gen) && !is.null(gen$object)) return(invisible(TRUE))
+  fr <- tryCatch(gen$finish_reason, error = function(e) NULL) %||% "NA"
+  n  <- tryCatch(nchar(gen$raw_text %||% ""), error = function(e) 0L)
+  stop(sprintf("Agent %s returned no parsable object (finish_reason=%s, raw_text=%d chars)",
+               agent, fr, n), call. = FALSE)
+}
+
 .postprocess_network <- function(res) {
+  # Defence in depth for the failure above. `class(res) <- ...` on NULL raises "attempt to set
+  # an attribute on NULL" and aborts the entire run, so a cluster whose synthesizer produced
+  # nothing took the whole call down with it instead of being reported as an empty result.
+  # Every caller of this function is at the end of a pipeline that may legitimately have
+  # produced nothing; none of them should have to crash to say so.
+  if (is.null(res)) {
+    res <- list(overview = "No interpretation was produced for this unit.", confidence = "None")
+  }
   if (!is.list(res) || is.null(res$refined_network)) {
     class(res) <- union("interpretation", class(res))
     return(res)
