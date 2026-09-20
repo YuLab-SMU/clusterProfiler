@@ -13,7 +13,10 @@ interpret_agent(
   gene_fold_change = NULL,
   max_tokens = 8192,
   temperature = 0.3,
-  review = TRUE,
+  review = FALSE,
+  reduce_go = FALSE,
+  go_reduction_threshold = 0.7,
+  reasoning = NULL,
   verbose = FALSE
 )
 }
@@ -41,13 +44,34 @@ object. Bare model names are supported with a warning.}
 audits the synthesized draft against the input evidence. The audit covers
 grounding, experimental-label fidelity, overclaiming, and \strong{evidence
 sufficiency} -- whether the supplied evidence classes can support a claim as
-specific as the draft makes. When `TRUE` (default), the result gains a
+specific as the draft makes. When `TRUE`, the result gains a
 `review` field (verdict, grounding_score, evidence_sufficiency,
 supported_resolution, abstain_recommended, issues, adjusted_confidence,
 warnings) and `overview_original`; if the verdict is `"revise"`, `overview`
 is replaced by the corrected version, in which claims exceeding
-`supported_resolution` are downgraded to that resolution. Set `FALSE` for
-the original three-agent behavior. Default TRUE.}
+`supported_resolution` are downgraded to that resolution. Default `FALSE`,
+which reproduces the released three-agent behavior exactly: the audit is an
+addition a caller opts into, and leaving it off keeps existing scripts
+measuring what they measured before. Note that the audit roughly doubles
+wall-clock time per unit and adds one model call, and that it is not
+infallible -- on objects where the Synthesizer returned nothing it has been
+observed to return `pass` with a `High` grounding score.}
+
+\item{reduce_go}{Logical. Run \code{\link[=reduce_go_redundancy]{reduce_go_redundancy()}} on the object before
+building any prompt. Deterministic, GO-only, and makes no model call; a
+no-op on non-GO results. Default \code{FALSE}.}
+
+\item{go_reduction_threshold}{Wang semantic-similarity threshold passed to
+\code{\link[=reduce_go_redundancy]{reduce_go_redundancy()}} when \code{reduce_go = TRUE}. Default 0.7; 0.5 is the
+stricter setting for lists above ~400 terms.}
+
+\item{reasoning}{Optional reasoning/thinking configuration passed through to the
+provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL} the
+request is byte-identical to one made before this argument existed. Whatever is passed is
+recorded in the execution stamp as \code{reasoning_requested}, alongside
+\code{reasoning_evidence} -- whether the response actually carried a reasoning block. The two
+are separate because a gateway can accept the parameter and drop it, and the caller can only
+observe the second.}
 
 \item{verbose}{Logical, whether to print debug messages. Default FALSE.}
 }

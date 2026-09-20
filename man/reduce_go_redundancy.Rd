@@ -44,4 +44,3 @@ message(sprintf("Reduced from \%d to \%d terms",
   attr(ego_reduced, "rrvgo_reduced_n")))
 }
 }
-\keyword{internal}

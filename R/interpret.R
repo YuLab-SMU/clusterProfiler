@@ -508,6 +508,7 @@ interpret <- function(x,
                       temperature = 0.3,
                       reduce_go = FALSE,
                       go_reduction_threshold = 0.7,
+                      reasoning = NULL,
                       verbose = FALSE) {
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
 
@@ -587,6 +588,7 @@ interpret <- function(x,
       has_prior = !is.null(current_prior),
       max_tokens = max_tokens,
       temperature = temperature,
+      reasoning = reasoning,
       collector = .prov,
       stage = paste0("interpret:", name)
     )
@@ -695,6 +697,19 @@ interpret <- function(x,
 #'   adds one model call, and that it is not infallible — on objects where the
 #'   Synthesizer returned nothing it has been observed to return `pass` with a
 #'   `High` grounding score.
+#' @param reduce_go Logical. Run [reduce_go_redundancy()] on the object before
+#'   building any prompt. Deterministic, GO-only, and makes no model call; a
+#'   no-op on non-GO results. Default `FALSE`.
+#' @param go_reduction_threshold Wang semantic-similarity threshold passed to
+#'   [reduce_go_redundancy()] when `reduce_go = TRUE`. Default 0.7; 0.5 is the
+#'   stricter setting for lists above ~400 terms.
+#' @param reasoning Optional reasoning/thinking configuration passed through to the
+#'   provider, e.g. `list(type = "enabled", budget_tokens = 4096)`. Left `NULL` the
+#'   request is byte-identical to one made before this argument existed. Whatever is
+#'   passed is recorded in the execution stamp as `reasoning_requested`, alongside
+#'   `reasoning_evidence` -- whether the response actually carried a reasoning block.
+#'   The two are separate because a gateway can accept the parameter and drop it, and
+#'   the caller can only observe the second.
 #' @param verbose Logical, whether to print debug messages. Default FALSE.
 #' @return An `interpretation` object with deep analysis fields plus
 #'   regulatory_drivers, refined_network, and network_evidence from the
@@ -722,6 +737,9 @@ interpret_agent <- function(x,
                             max_tokens = 8192,
                             temperature = 0.3,
                             review = FALSE,
+                            reduce_go = FALSE,
+                            go_reduction_threshold = 0.7,
+                            reasoning = NULL,
                             verbose = FALSE) {
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
 
@@ -729,6 +747,21 @@ interpret_agent <- function(x,
   if (isTRUE(verbose)) {
     options(aisdk.debug = TRUE)
     on.exit(options(aisdk.debug = old_debug), add = TRUE)
+  }
+
+  # Same deterministic reduction stage interpret() runs, on the same terms: before any model
+  # call, GO-only, and a no-op on anything else. Kept as an explicit opt-in rather than a
+  # default so that existing agent scripts keep measuring what they measured before.
+  if (isTRUE(reduce_go) && is(x, "enrichResult")) {
+    x <- reduce_go_redundancy(x, threshold = go_reduction_threshold)
+    if (isTRUE(attr(x, "rrvgo_reduced"))) {
+      message(sprintf(
+        "Applied GO redundancy reduction: %d -> %d GO terms (%.1f%% reduction)",
+        attr(x, "rrvgo_original_n"),
+        attr(x, "rrvgo_reduced_n"),
+        100 * (attr(x, "rrvgo_original_n") - attr(x, "rrvgo_reduced_n")) / attr(x, "rrvgo_original_n")
+      ))
+    }
   }
 
   model <- .normalize_interpret_model(model)
@@ -802,6 +835,7 @@ interpret_agent <- function(x,
       cleaner_res <- tryCatch(
         {
           gen <- .gen_object_stamped(
+            reasoning = reasoning,
             collector = .prov, stage = "cleaner",
             model = model, prompt = cleaner_prompt,
             schema = .cleaner_schema(), schema_name = "cleaner_result",
@@ -863,6 +897,7 @@ interpret_agent <- function(x,
     detective_res <- tryCatch(
       {
         gen <- .gen_object_stamped(
+          reasoning = reasoning,
           collector = .prov, stage = "detective",
           model = model, prompt = detective_prompt,
           schema = .detective_schema(), schema_name = "detective_result",
@@ -907,6 +942,7 @@ interpret_agent <- function(x,
     final_res <- tryCatch(
       {
         gen <- .gen_object_stamped(
+          reasoning = reasoning,
           collector = .prov, stage = "synthesizer",
           model = model, prompt = synthesizer_prompt,
           schema = .interpretation_schema(), schema_name = "synthesis_result",
@@ -976,6 +1012,7 @@ interpret_agent <- function(x,
       review_res <- tryCatch(
         {
           gen <- .gen_object_stamped(
+            reasoning = reasoning,
             collector = .prov, stage = "reviewer",
             model = model, prompt = reviewer_prompt,
             schema = .reviewer_schema(), schema_name = "reviewer_result",
@@ -1279,6 +1316,53 @@ interpret_hierarchical <- function(x_minor,
   .sha256(bits)
 }
 
+#' What evidence is there that the model actually reasoned?
+#'
+#' Two wire formats put it in two places, and both are checked. The Anthropic format emits a
+#' `thinking` content block; the OpenAI format reports `usage.completion_tokens_details.
+#' reasoning_tokens` and may return `message$reasoning_content`. Returns NA when there is no
+#' response to inspect.
+#'
+#' The distinction matters in practice: on one relay we measured, a `thinking` request is
+#' accepted and silently discarded -- 0 blocks over 11 calls, no change in output length --
+#' while on another an explicit `reasoning_effort` produces a monotone, countable
+#' `reasoning_tokens`. A FALSE here therefore means "no reasoning came back", which is not
+#' the same claim as "the model did not reason": a relay can strip the evidence.
+#' @keywords internal
+.reasoning_evidence <- function(gen) {
+  if (is.null(gen)) return(NA)
+  tryCatch({
+    # aisdk's GenerateResult exposes `object`, `usage`, `raw_text`, `finish_reason` and no
+    # raw_response, so the provider payload is only reachable through `usage`. An earlier
+    # version of this function read gen$raw_response$... and therefore returned NA on every
+    # call, including calls that did reason -- the field looked implemented and measured
+    # nothing. It is checked here against a live response rather than against the API docs.
+    u <- tryCatch(gen$usage, error = function(e) NULL)
+    if (is.null(u)) return(NA)
+    rt <- u$completion_tokens_details$reasoning_tokens
+    if (!is.null(rt) && is.numeric(rt) && length(rt) == 1L && !is.na(rt)) return(rt > 0)
+    # Anthropic-format responses report thinking as content blocks rather than in usage; where
+    # aisdk surfaces them they appear here, and where it does not this stays NA rather than
+    # asserting that no reasoning occurred.
+    body <- tryCatch(gen$object$content, error = function(e) NULL)
+    if (!is.null(body)) {
+      types <- vapply(body, function(b) as.character(b$type %||% ""), character(1))
+      return(any(types %in% c("thinking", "redacted_thinking", "reasoning")))
+    }
+    NA
+  }, error = function(e) NA)
+}
+
+#' Reasoning tokens the provider reports, where it reports any.
+#' @keywords internal
+.reasoning_tokens <- function(gen) {
+  if (is.null(gen)) return(NA_integer_)
+  tryCatch({
+    rt <- gen$usage$completion_tokens_details$reasoning_tokens
+    if (is.null(rt) || !is.numeric(rt) || length(rt) != 1L) NA_integer_ else as.integer(rt)
+  }, error = function(e) NA_integer_)
+}
+
 #' @keywords internal
 .prov_new <- function() {
   e <- new.env(parent = emptyenv())
@@ -1291,7 +1375,7 @@ interpret_hierarchical <- function(x_minor,
 #' @keywords internal
 .prov_record <- function(collector, stage, model, system, prompt, schema_name,
                          temperature, max_tokens, gen = NULL, t0 = NULL,
-                         error_message = NULL) {
+                         error_message = NULL, reasoning = NULL) {
   if (is.null(collector)) return(invisible(NULL))
   tryCatch({
     id <- .model_identity(model)
@@ -1346,6 +1430,17 @@ interpret_hierarchical <- function(x_minor,
       # the request was honoured.
       temperature_applied = NA_real_,
       max_tokens_applied = NA_real_,
+      # Reasoning effort is a decoding parameter like the others and belongs in the stamp for
+      # the same reason: it changes what the model does, and a gateway may accept the request
+      # and drop it. `reasoning_requested` is what we asked for. `reasoning_evidence` is the
+      # only thing a client can observe about what happened -- whether the response actually
+      # carried a reasoning/thinking block. On relays that strip those blocks this stays
+      # FALSE even when reasoning ran, so it is evidence of reasoning, never proof of its
+      # absence, and it is named to say so.
+      reasoning_requested = if (is.null(reasoning)) NA_character_
+                            else paste(utils::capture.output(str(reasoning)), collapse = " "),
+      reasoning_evidence = .reasoning_evidence(gen),
+      reasoning_tokens = .reasoning_tokens(gen),
       finish_reason = fin %||% NA_character_,
       response_chars = if (is.null(raw)) NA_integer_ else nchar(raw),
       prompt_tokens = prompt_tok,
@@ -1470,23 +1565,28 @@ print.interpret_provenance <- function(x, ...) {
 
 #' @keywords internal
 .gen_object_stamped <- function(collector, stage, model, prompt, schema, schema_name,
-                                system, temperature, max_tokens) {
+                                system, temperature, max_tokens, reasoning = NULL) {
   t0 <- Sys.time()
   # Capture through the tryCatch return value rather than by assignment from inside it.
   # `gen <<- ...` here would be a bug: `<<-` starts its search in the PARENT environment, so
   # it skips the local binding, silently creates a global, and leaves this function returning
   # NULL on every call -- which reaches the caller as a model that produced nothing.
   cap <- tryCatch(
-    list(gen = generate_object(model = model, prompt = prompt, schema = schema,
-                               schema_name = schema_name, system = system,
-                               temperature = temperature, max_tokens = max_tokens),
+    list(gen = do.call(generate_object, c(
+           list(model = model, prompt = prompt, schema = schema,
+                schema_name = schema_name, system = system,
+                temperature = temperature, max_tokens = max_tokens),
+           # Passed through only when the caller asked for it, so a run that does not set
+           # `reasoning` sends exactly the request shape it sent before this argument existed.
+           if (is.null(reasoning)) list() else list(reasoning = reasoning))),
          err = NULL),
     error = function(e) list(gen = NULL, err = conditionMessage(e))
   )
   gen <- cap$gen
   err <- cap$err
   .prov_record(collector, stage, model, system, prompt, schema_name,
-               temperature, max_tokens, gen = gen, t0 = t0, error_message = err)
+               temperature, max_tokens, gen = gen, t0 = t0, error_message = err,
+               reasoning = reasoning)
   # Re-raise so each call site keeps the error handling it already had; the stamp is
   # recorded first, so a failed call is still visible in provenance().
   if (!is.null(err)) stop(err, call. = FALSE)
@@ -1496,7 +1596,7 @@ print.interpret_provenance <- function(x, ...) {
 .call_generate_object <- function(model, task, cluster_id, user_prompt,
                                   has_prior = FALSE, max_tokens = 8192,
                                   temperature = 0.3, collector = NULL,
-                                  stage = "interpret") {
+                                  stage = "interpret", reasoning = NULL) {
   if (task %in% c("annotation", "cell_type")) {
     sys <- .annotation_system_prompt(cluster_id, has_prior)
     schema <- if (has_prior) .annotation_refinement_schema() else .annotation_schema()
@@ -1534,6 +1634,7 @@ print.interpret_provenance <- function(x, ...) {
   result <- tryCatch(
     {
       gen <- .gen_object_stamped(
+        reasoning = reasoning,
         collector = collector, stage = stage,
         model = model, prompt = user_prompt, schema = schema,
         schema_name = schema_name, system = sys,
@@ -1868,7 +1969,7 @@ print.interpretation_list <- function(x, ...) {
 #' @return A reduced enrichResult object with redundant terms removed. The object
 #'   carries attributes recording the reduction: `rrvgo_reduced`, `rrvgo_original_n`,
 #'   `rrvgo_reduced_n`, `rrvgo_threshold`, `rrvgo_method`.
-#' @keywords internal
+#' @export
 #' @examples
 #' \dontrun{
 #' ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
