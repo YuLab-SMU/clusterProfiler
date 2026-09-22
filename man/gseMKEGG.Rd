@@ -28,7 +28,9 @@ gseMKEGG(
 \arguments{
 \item{geneList}{order ranked geneList}
 
-\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'}
+\item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html';
+alternatively a \code{GSON} object (e.g. from \code{gson_KEGG()}) holding the
+annotation, which allows the analysis to run without contacting KEGG}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 

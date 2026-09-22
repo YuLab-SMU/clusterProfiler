@@ -97,7 +97,9 @@ gseGO <- function(geneList,
 #'
 #' @title gseMKEGG
 #' @param geneList order ranked geneList
-#' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
+#' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html';
+#'   alternatively a `GSON` object (e.g. from `gson_KEGG()`) holding the annotation, which
+#'   allows the analysis to run without contacting KEGG
 #' @param keyType one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'
 #' @param exponent weight of each step
 #' @param minGSSize minimal size of each geneSet for analyzing
@@ -140,9 +142,17 @@ gseMKEGG <- function(geneList,
                      seed              = FALSE,
                      ...) {
 
-    species <- organismMapper(organism)
-    KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)
-    
+    if (inherits(organism, "GSON")) {
+        KEGG_DATA <- organism
+        species <- KEGG_DATA@species
+        keyType <- KEGG_DATA@keytype
+    } else if (inherits(organism, "character")) {
+        species <- organismMapper(organism)
+        KEGG_DATA <- prepare_KEGG(species, "MKEGG", keyType)
+    } else {
+        stop("organism should be a species name or a GSON object")
+    }
+
     res <-  enrichit::gsea_gson(geneList       = geneList,
                           exponent       = exponent,
                           minGSSize      = minGSSize,
@@ -168,7 +178,9 @@ gseMKEGG <- function(geneList,
 
     res@organism <- species
     res@setType <- "MKEGG"
-    res@keytype <- "UNKNOWN"
+    ## a GSON knows its own keytype; a species name does not, and reporting
+    ## "UNKNOWN" there is what this function has always done
+    res@keytype <- if (inherits(organism, "GSON")) keyType else "UNKNOWN"
 
     res <- append_kegg_category(res)
     return(res)

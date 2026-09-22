@@ -5,7 +5,9 @@
 #'
 #' @rdname enrichKEGG
 #' @param gene a vector of entrez gene id.
-#' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html'
+#' @param organism supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html';
+#'   alternatively a `GSON` object (e.g. from `gson_KEGG()`) holding the annotation, which
+#'   allows the analysis to run without contacting KEGG
 #' @param keyType one of "kegg", 'ncbi-geneid', 'ncbi-proteinid' and 'uniprot'
 #' @param minGSSize minimal size of genes annotated by Ontology term for testing.
 #' @param maxGSSize maximal size of genes annotated for testing
