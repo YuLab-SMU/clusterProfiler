@@ -58,6 +58,20 @@ compareCluster <- function(
     source_from = NULL,
     ...
 ) {
+    ## compareCluster() wraps every per-cluster call in suppressMessages(), which
+    ## silently swallows the "universe is not in character and will be ignored"
+    ## message that enrichGO()/enricher() raise. A numeric universe therefore
+    ## appeared to be accepted while having no effect, so warn once here (#654).
+    dots <- list(...)
+    if (!is.null(dots$universe) && !is.character(dots$universe)) {
+        warning(
+            "`universe` is not in character and will be ignored by the ",
+            "underlying enrichment function; please supply a character vector ",
+            "of gene IDs, e.g. `universe = as.character(universe)`.",
+            call. = FALSE
+        )
+    }
+
     if (is.character(fun)) {
         if (
             fun %in%
