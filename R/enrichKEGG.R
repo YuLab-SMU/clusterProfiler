@@ -194,22 +194,59 @@ strip_kegg_species_suffix <- function(x) {
     sub("\\s-\\s[^-]+$", "", x)
 }
 
+## TRUE when a downloaded KEGG table is missing or carries no rows.
+##
+## @param x value returned by kegg_link()/kegg_list()
+## @return logical
+## @noRd
+download_empty_kegg_data <- function(x) {
+    is.null(x) || !is.data.frame(x) || nrow(x) == 0
+}
+
+## Message for a failed/empty KEGG download.
+## @noRd
+kegg_download_failure_message <- function(species) {
+    paste(
+        sprintf("Failed to download KEGG data for species '%s'.", species),
+        "The KEGG response may be empty or its format may have changed.",
+        "The 'species' should be one of organisms listed in",
+        "'https://www.genome.jp/kegg/catalog/org_list.html'.",
+        "Please check your network connection and update the package.",
+        "You can also build a local KEGG database with 'createKEGGdb()'",
+        "and supply it via the 'KEGG.db' argument."
+    )
+}
+
+## Message for a non-empty ID table that shares no pathway ID with the name table.
+## @noRd
+kegg_empty_intersection_message <- function(species) {
+    paste(
+        sprintf(
+            "No KEGG pathway annotation could be assembled for species '%s':",
+            species
+        ),
+        "the downloaded gene/pathway table shares no ID with the pathway-name table.",
+        "This usually means the KEGG response format has changed or the 'species'",
+        "name is wrong, so the ID/name formats no longer match.",
+        "Please check your network connection and update the package.",
+        "Alternatively, build a local KEGG database with 'createKEGGdb()'",
+        "and supply it via the 'KEGG.db' argument."
+    )
+}
+
 download.KEGG.Path <- function(species) {
     keggpathid2extid.df <- kegg_link(species, "pathway")
-    if (is.null(keggpathid2extid.df)) {
-        message <- paste(
-            "Failed to download KEGG data.",
-            "Wrong 'species' or the network is unreachable.",
-            "The 'species' should be one of organisms listed in",
-            "'https://www.genome.jp/kegg/catalog/org_list.html'"
-        )
-        stop(message)
+    if (download_empty_kegg_data(keggpathid2extid.df)) {
+        stop(kegg_download_failure_message(species), call. = FALSE)
     }
 
     keggpathid2extid.df[, 1] %<>% gsub("[^:]+:", "", .)
     keggpathid2extid.df[, 2] %<>% gsub("[^:]+:", "", .)
 
     keggpathid2name.df <- kegg_list("pathway", species)
+    if (download_empty_kegg_data(keggpathid2name.df)) {
+        stop(kegg_download_failure_message(species), call. = FALSE)
+    }
 
     # keggpathid2name.df[,2] <- sub("\\s-\\s[a-zA-Z ]+\\([a-zA-Z ]+\\)$", "", keggpathid2name.df[,2])
     keggpathid2name.df[, 2] <- strip_kegg_species_suffix(keggpathid2name.df[, 2])
@@ -224,6 +261,10 @@ download.KEGG.Path <- function(species) {
         keggpathid2extid.df[, 1] %in% keggpathid2name.df[, 1],
     ]
 
+    if (download_empty_kegg_data(keggpathid2extid.df)) {
+        stop(kegg_empty_intersection_message(species), call. = FALSE)
+    }
+
     return(list(
         KEGGPATHID2EXTID = keggpathid2extid.df,
         KEGGPATHID2NAME = keggpathid2name.df
@@ -232,14 +273,8 @@ download.KEGG.Path <- function(species) {
 
 download.KEGG.Module <- function(species) {
     keggmodule2extid.df <- kegg_link(species, "module")
-    if (is.null(keggmodule2extid.df)) {
-        message <- paste(
-            "Failed to download KEGG data.",
-            "Wrong 'species' or the network is unreachable.",
-            "The 'species' should be one of organisms listed in",
-            "'https://www.genome.jp/kegg/catalog/org_list.html'"
-        )
-        stop(message)
+    if (download_empty_kegg_data(keggmodule2extid.df)) {
+        stop(kegg_download_failure_message(species), call. = FALSE)
     }
 
     keggmodule2extid.df[, 1] %<>%

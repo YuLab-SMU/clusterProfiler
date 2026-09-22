@@ -28,7 +28,7 @@ gson_KEGG <- function(species, KEGG_Type="KEGG", keyType="kegg") {
 
 
 gson_cpd <- function() {
-  k1 <- kegg_rest("https://rest.kegg.jp/link/cpd/pathway")
+  k1 <- kegg_rest("https://rest.kegg.jp/link/compound/pathway")
   k1[, 1]  <- gsub("[^:]+:", "", k1[, 1])
   k1[, 2]  <-  gsub("[^:]+:", "",  k1[, 2])
   k1 <- k1[grep("map", k1[, 1]),]

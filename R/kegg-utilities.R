@@ -170,20 +170,77 @@ get_kegg_species <- function(save = FALSE) {
 ##     }))
 ## }
 
+#' Diagnose a failed KEGG REST download
+#'
+#' Probes the HTTP status with a HEAD request (no response body is downloaded)
+#' so that a network failure can be told apart from an HTTP error. Only called
+#' after a download has already failed, so the normal path costs no extra
+#' request.
+#'
+#' @param rest_url the URL that failed
+#' @param reason the underlying error message
+#' @noRd
+kegg_rest_failure_message <- function(rest_url, reason) {
+    status <- tryCatch(
+        httr::status_code(httr::HEAD(rest_url, httr::timeout(15))),
+        error = function(e) NA_integer_
+    )
+
+    if (is.na(status)) {
+        return(paste0(
+            "Failed to reach the KEGG REST API at '", rest_url, "'. ",
+            "The network is unreachable (connection failed, timed out or DNS ",
+            "lookup failed). Please check your network connection and try ",
+            "again later, or build a local KEGG database with 'createKEGGdb()'. ",
+            "(", reason, ")"
+        ))
+    }
+
+    if (status >= 400) {
+        return(paste0(
+            "Failed to download KEGG annotation from '", rest_url,
+            "': the request returned HTTP status ", status, ". ",
+            "The KEGG REST API may have changed or is temporarily unavailable. ",
+            "Please check your network connection and update clusterProfiler, ",
+            "or build a local KEGG database with 'createKEGGdb()'. ",
+            "(", reason, ")"
+        ))
+    }
+
+    ## the server answered, yet the download did not complete: usually a
+    ## timeout or an interrupted connection on a large response.
+    paste0(
+        "Failed to download KEGG annotation from '", rest_url,
+        "': the server responded with HTTP status ", status,
+        " but the download did not complete. This is usually a network ",
+        "timeout or an interrupted connection; please try again later. ",
+        "(", reason, ")"
+    )
+}
+
 #' @importFrom yulab.utils yread
 kegg_rest <- function(rest_url) {
     message('Reading KEGG annotation online: "', rest_url, '"...')
 
-    # f <- tempfile()
-    # dl <- mydownload(rest_url, destfile = f)
-    #
-    # if (is.null(dl)) {
-    #     message("fail to download KEGG data...")
-    #     return(NULL)
-    # }
+    ## yread() (readLines) reports HTTP and network failures obscurely, and may
+    ## return an empty vector for an error response, which used to surface much
+    ## later as a misleading "No gene can be mapped". Fail here instead, and
+    ## say which of the two happened.
+    content <- tryCatch(
+        yread(rest_url),
+        error = function(e) {
+            stop(kegg_rest_failure_message(rest_url, conditionMessage(e)),
+                 call. = FALSE)
+        }
+    )
 
-    # content <- readLines(f)
-    content <- yread(rest_url)
+    content <- content[!grepl("^[[:space:]]*$", content)]
+    if (length(content) == 0) {
+        stop("Failed to download KEGG annotation from '", rest_url,
+             "': the response was empty. The requested data may not exist ",
+             "in KEGG or the KEGG REST API is temporarily unavailable.",
+             call. = FALSE)
+    }
 
     content %<>% strsplit(., "\t") %>% do.call("rbind", .)
     res <- data.frame(
