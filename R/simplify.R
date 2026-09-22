@@ -45,10 +45,21 @@ setMethod("simplify", signature(x="enrichResult"),
 #' @author Gwang-Jin Kim and Guangchuang Yu
 setMethod("simplify", signature(x="gseaResult"),
           function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData=NULL) {
-            if (!x@setType %in% c("BP", "MF", "CC", "GOALL"))
-              stop("simplify only applied to output from gseGO and enrichGO...")
+            ontology <- x@setType
+            if (!ontology %in% c("BP", "MF", "CC", "GOALL")) {
+                ## `simplify()` removes redundancy using GO semantic similarity, so
+                ## it must know which ontology the terms belong to. A GSEA run over
+                ## a GO gene-set collection (MSigDB C5, a gson GO file, ...) stores
+                ## the collection name in @setType instead of an ontology, so derive
+                ## it from the GO IDs themselves before giving up (#753).
+                ontology <- infer_go_ontology(as.data.frame(x)$ID)
+            }
+            if (!ontology %in% c("BP", "MF", "CC", "GOALL")) {
+                stop("simplify only applied to output from gseGO and enrichGO, ",
+                     "or to a GSEA result whose gene sets are GO terms...")
+            }
             res <- as.data.frame(x)
-            if (x@setType == "GOALL") {
+            if (ontology == "GOALL") {
                 x@result <- simplify_ALL(res = res, cutoff = cutoff, by = by,
                                 select_fun = select_fun, measure = measure,
                                 semData = semData)
@@ -56,12 +67,41 @@ setMethod("simplify", signature(x="gseaResult"),
                 x@result <- simplify_internal(res = res, cutoff = cutoff,
                                 by = by, select_fun = select_fun, 
                                 measure = measure,
-                                ontology = x@setType, 
+                                ontology = ontology, 
                                 semData = semData)
               }
             return(x)
           }
 )
+
+#' Infer the GO ontology of a set of gene-set IDs
+#'
+#' Returns "BP", "CC" or "MF" when every ID is a GO term belonging to a single
+#' ontology, "GOALL" when the GO terms span several ontologies, and the empty
+#' string when the IDs are not GO terms (so the caller can keep its own error).
+#'
+#' @param ids character vector of gene-set IDs
+#' @return a single string
+#' @noRd
+infer_go_ontology <- function(ids) {
+    ids <- unique(as.character(ids))
+    ids <- ids[!is.na(ids)]
+    if (!length(ids) || !all(grepl("^GO:[0-9]{7}$", ids))) {
+        return("")
+    }
+    if (!requireNamespace("GO.db", quietly = TRUE)) {
+        return("")
+    }
+    ont <- AnnotationDbi::Ontology(GO.db::GOTERM)[ids]
+    ont <- unique(as.character(ont[!is.na(ont)]))
+    if (length(ont) == 1) {
+        return(ont)
+    }
+    if (length(ont) > 1) {
+        return("GOALL")
+    }
+    ""
+}
 
 #' @importFrom GOSemSim mgoSim
 #' @importFrom GOSemSim godata

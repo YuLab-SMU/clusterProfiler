@@ -1,6 +1,7 @@
 
 # clusterProfiler 4.21.2
 
++ `simplify()` now also works on a `gseaResult` whose gene sets are GO terms but whose `@setType` holds a collection name rather than an ontology (MSigDB C5, a gson GO file, a `TERM2GENE` built from GO annotations): the ontology is inferred from the GO IDs, and results spanning several ontologies are simplified as `GOALL`. Non-GO gene sets are still rejected, with a clearer message (2026-09-22, Tue, #753)
 + `compareCluster()` now warns when a non-character `universe` is supplied: it wraps each per-cluster call in `suppressMessages()`, which used to swallow the underlying enrichment function's "`universe` is not in character and will be ignored" message, so a numeric universe appeared to be accepted while having no effect (2026-09-22, Tue, #654)
 + `gsePC()` and `gseWP()` now expose an `eps` argument and forward it to `GSEA()` (and on to `enrichit::gsea_gson()`), matching `GSEA()`, `gseGO()`, `gseKEGG()` and `gseMKEGG()` (2026-09-22, Tue)
 + fix `gson_cpd()` to use the `compound` KEGG REST endpoint; `enrichKEGG(organism = 'cpd')` had been failing since KEGG retired `/link/cpd/pathway`, which now returns HTTP 400 (2026-09-22, Tue, #828)
