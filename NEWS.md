@@ -1,6 +1,7 @@
 
 # clusterProfiler 4.21.2
 
++ `gsePC()` and `gseWP()` now expose an `eps` argument and forward it to `GSEA()` (and on to `enrichit::gsea_gson()`), matching `GSEA()`, `gseGO()`, `gseKEGG()` and `gseMKEGG()` (2026-09-22, Tue)
 + fix `gson_cpd()` to use the `compound` KEGG REST endpoint; `enrichKEGG(organism = 'cpd')` had been failing since KEGG retired `/link/cpd/pathway`, which now returns HTTP 400 (2026-09-22, Tue, #828)
 + `kegg_rest()` now reports a failed download where it happens, telling an unreachable network apart from an HTTP error status and from an empty response; previously these surfaced much later as an obscure error (2026-09-22, Tue)
 + `download.KEGG.Path()` and `download.KEGG.Module()` now stop with an actionable message when the downloaded annotation is empty, or when the gene/pathway table shares no ID with the pathway-name table, instead of returning an empty annotation that downstream surfaced as a misleading `"No gene can be mapped"`; this replaces an `is.null()` guard that could never fire (2026-09-22, Tue, #146, #378, #561, #646)

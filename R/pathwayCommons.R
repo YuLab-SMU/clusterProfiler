@@ -35,17 +35,18 @@ enrichPC <- function(gene, ...) {
 #' @param geneList a ranked gene list
 ## @param source Data source of Pathway Commons, e.g., 'reactome', 'kegg', 'pathbank', 'netpath', 'panther', etc.
 ## @param keyType specify the type of input 'gene' (one of 'hgnc' or 'uniprot')
+#' @param eps boundary for calculating the p value in multilevel mode
 #' @param ... additional parameters, see also the parameters supported by the GSEA() function
 #' @importFrom rlang check_installed
 #' @return A \code{gseaResult} instance
 #' @export
-gsePC <- function(geneList, ...) {
+gsePC <- function(geneList, eps = 1e-10, ...) {
     # keyType <- match.arg(keyType, c("hgnc", "uniprot"))
     # source <- match.arg(source, get_pc_source())
 
     # pcdata <- get_pc_data(source, keyType, output = 'gson')
     pcdata <- get_pc_data(output = 'gson')
-    res <- GSEA(geneList, gson = pcdata, ...)
+    res <- GSEA(geneList, gson = pcdata, eps = eps, ...)
 
     if (is.null(res)) {
         return(res)

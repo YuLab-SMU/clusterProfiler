@@ -4,10 +4,12 @@
 \alias{gsePC}
 \title{gsePC}
 \usage{
-gsePC(geneList, ...)
+gsePC(geneList, eps = 1e-10, ...)
 }
 \arguments{
 \item{geneList}{a ranked gene list}
+
+\item{eps}{boundary for calculating the p value in multilevel mode}
 
 \item{...}{additional parameters, see also the parameters supported by the GSEA() function}
 }

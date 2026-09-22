@@ -30,15 +30,17 @@ enrichWP <- function(gene, organism, ...) {
 #' @title gseWP
 #' @param geneList ranked gene list
 #' @param organism supported organisms, which can be accessed via the get_wp_organisms() function
+#' @param eps boundary for calculating the p value in multilevel mode
 #' @param ... additional parameters, see also the parameters supported by the GSEA() function
 #' @return A \code{gseaResult} instance
 #' @export
 #' @author Guangchuang Yu 
-gseWP <- function(geneList, organism, ...) {
+gseWP <- function(geneList, organism, eps = 1e-10, ...) {
     wpdata <- prepare_WP_data(organism)
     res <- GSEA(geneList,
                 TERM2GENE = wpdata$WPID2GENE,
                 TERM2NAME = wpdata$WPID2NAME,
+                eps = eps,
                 ...)
 
     if (is.null(res)) return(res)

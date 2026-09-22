@@ -4,12 +4,14 @@
 \alias{gseWP}
 \title{gseWP}
 \usage{
-gseWP(geneList, organism, ...)
+gseWP(geneList, organism, eps = 1e-10, ...)
 }
 \arguments{
 \item{geneList}{ranked gene list}
 
 \item{organism}{supported organisms, which can be accessed via the get_wp_organisms() function}
+
+\item{eps}{boundary for calculating the p value in multilevel mode}
 
 \item{...}{additional parameters, see also the parameters supported by the GSEA() function}
 }
