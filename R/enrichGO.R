@@ -193,6 +193,36 @@ map_to_entrezid <- function(gene, fromType, OrgDb) {
     unique(as.character(mapped$ENTREZID))
 }
 
+#' Can the cached GO annotation serve this request?
+#'
+#' Compares a requested `(OrgDb organism, ont, keytype)` against what is already
+#' in the package's GO data environment.
+#'
+#' Every comparison goes through `isTRUE()`: `get_organism()` returns `NA` for an
+#' OrgDb it cannot identify — an AnnotationHub OrgDb, for instance — and a bare
+#' `if (NA && ...)` aborts the whole call with the unhelpful
+#' "missing value where TRUE/FALSE needed" (#232). Treating an unidentifiable
+#' organism as "not cached" is the correct fallback: the annotation is rebuilt.
+#'
+#' @param GO_Env the package GO data environment
+#' @param org organism of the requested OrgDb, possibly NA
+#' @param ont requested ontology
+#' @param keytype requested keytype
+#' @return TRUE when the cache can be reused
+#' @noRd
+go_cache_usable <- function(GO_Env, org, ont, keytype) {
+    for (what in c("organism", "keytype", "ont", "goAnno")) {
+        if (!exists(what, envir = GO_Env, inherits = FALSE)) {
+            return(FALSE)
+        }
+    }
+
+    isTRUE(org == get("organism", envir = GO_Env)) &&
+        isTRUE(keytype == get("keytype", envir = GO_Env)) &&
+        (isTRUE(ont == get("ont", envir = GO_Env)) ||
+            isTRUE(get("ont", envir = GO_Env) == "ALL"))
+}
+
 #' @importFrom AnnotationDbi keys
 #' @importFrom AnnotationDbi keytypes
 #' @importFrom AnnotationDbi toTable
@@ -201,24 +231,8 @@ get_GO_data <- function(OrgDb, ont, keytype) {
     GO_Env <- get_GO_Env()
     use_cached <- FALSE
 
-    ont2 <- NULL
-    if (exists("ont", envir = GO_Env, inherits = FALSE)) {
-        ont2 <- get("ont", envir = GO_Env)
-    }
-
-    if (exists("organism", envir = GO_Env, inherits = FALSE) &&
-        exists("keytype", envir = GO_Env, inherits = FALSE) &&
-        !is.null(ont2)) {
-        
-        org <- get("organism", envir = GO_Env)
-        kt <- get("keytype", envir = GO_Env)
-
-        if (org == get_organism(OrgDb) &&
-            keytype == kt &&
-            (ont == ont2 || ont2 == "ALL") &&
-            exists("goAnno", envir = GO_Env, inherits = FALSE)) {
-            use_cached <- TRUE
-        }
+    if (go_cache_usable(GO_Env, get_organism(OrgDb), ont, keytype)) {
+        use_cached <- TRUE
     }
 
     if (use_cached) {

@@ -70,3 +70,35 @@ test_that("non-ENTREZID universe is converted together with gene", {
         tolerance = 1e-12
     )
 })
+
+test_that("the GO cache is not reused for an unidentifiable OrgDb (#232)", {
+    mk_env <- function(organism = "Homo sapiens", keytype = "ENTREZID",
+                       ont = "BP", goAnno = TRUE) {
+        e <- new.env()
+        assign("organism", organism, envir = e)
+        assign("keytype", keytype, envir = e)
+        assign("ont", ont, envir = e)
+        if (goAnno) assign("goAnno", data.frame(a = 1), envir = e)
+        e
+    }
+
+    # a matching request can reuse the cache
+    expect_true(go_cache_usable(mk_env(), "Homo sapiens", "BP", "ENTREZID"))
+    # an ont = "ALL" cache serves a single-ontology request
+    expect_true(go_cache_usable(mk_env(ont = "ALL"), "Homo sapiens", "BP", "ENTREZID"))
+
+    # get_organism() returns NA for an OrgDb it cannot identify (an
+    # AnnotationHub OrgDb, say); that used to abort with
+    # "missing value where TRUE/FALSE needed"
+    expect_false(go_cache_usable(mk_env(), NA_character_, "BP", "ENTREZID"))
+    expect_false(go_cache_usable(mk_env(), "Homo sapiens", "BP", NA_character_))
+
+    # nothing cached yet
+    expect_false(go_cache_usable(new.env(), "Homo sapiens", "BP", "ENTREZID"))
+    expect_false(go_cache_usable(mk_env(goAnno = FALSE), "Homo sapiens", "BP", "ENTREZID"))
+
+    # a different request must not be served from the cache
+    expect_false(go_cache_usable(mk_env(), "Mus musculus", "BP", "ENTREZID"))
+    expect_false(go_cache_usable(mk_env(ont = "MF"), "Homo sapiens", "BP", "ENTREZID"))
+    expect_false(go_cache_usable(mk_env(), "Homo sapiens", "BP", "SYMBOL"))
+})
