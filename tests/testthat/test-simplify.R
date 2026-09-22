@@ -64,3 +64,44 @@ test_that("simplify() still refuses non-GO gene sets with a clear error (#753)",
 
   expect_error(simplify(x, cutoff = 0.7), "gene sets are GO terms")
 })
+
+test_that("simplify() works on an enricher() result over a GO collection (#369)", {
+  skip_if_not_installed("GO.db")
+  skip_if_not_installed("org.Hs.eg.db")
+
+  odb <- getExportedValue("org.Hs.eg.db", "org.Hs.eg.db")
+  keys_all <- head(AnnotationDbi::keys(odb, "ENTREZID"), 1200)
+  go2gene <- suppressMessages(
+    AnnotationDbi::select(odb, keys = keys_all, columns = "GO", keytype = "ENTREZID")
+  )
+  go2gene <- stats::na.omit(go2gene)
+  ont <- AnnotationDbi::Ontology(GO.db::GOTERM)[go2gene$GO]
+  bp <- go2gene[!is.na(ont) & ont == "BP", c("GO", "ENTREZID")]
+  skip_if(nrow(bp) < 20, "not enough GO annotations available")
+
+  # a subset of the annotated genes, so that some terms are enriched at all
+  set.seed(1)
+  gene <- sample(unique(bp$ENTREZID), min(150, length(unique(bp$ENTREZID))))
+  res <- enricher(gene, TERM2GENE = bp, pvalueCutoff = 1, minGSSize = 5)
+  skip_if(is.null(res) || nrow(as.data.frame(res)) == 0, "enricher returned no result")
+
+  # @ontology is not a GO ontology here, yet simplify() must work without the
+  # user assigning the slot by hand
+  expect_false(res@ontology %in% c("BP", "MF", "CC", "GOALL"))
+
+  y <- simplify(res, cutoff = 0.7, measure = "Wang")
+  expect_s4_class(y, "enrichResult")
+  expect_true(nrow(as.data.frame(y)) <= nrow(as.data.frame(res)))
+})
+
+test_that("simplify() still refuses a non-GO enricher() result (#369)", {
+  # gene list covers only part of each set, so terms are tested and returned
+  t2g <- data.frame(term = rep(paste0("set", 1:5), each = 40),
+                    gene = paste0("g", 1:200))
+  gene <- paste0("g", 1:60)
+  res <- enricher(gene, TERM2GENE = t2g, pvalueCutoff = 1, minGSSize = 2,
+                  universe = paste0("g", 1:400))
+  skip_if(is.null(res) || nrow(as.data.frame(res)) == 0, "enricher returned no result")
+
+  expect_error(simplify(res, cutoff = 0.7), "gene sets are GO terms")
+})

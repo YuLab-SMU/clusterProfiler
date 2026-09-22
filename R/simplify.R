@@ -19,10 +19,19 @@
 #' @author Guangchuang Yu
 setMethod("simplify", signature(x="enrichResult"),
           function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData = NULL) {
-              if (!x@ontology %in% c("BP", "MF", "CC", "GOALL"))
-                  stop("simplify only applied to output from gsegO and enrichGO...")
+              ontology <- x@ontology
+              if (!ontology %in% c("BP", "MF", "CC", "GOALL")) {
+                  ## `enricher()` (and other ORA entry points) may be run over a GO
+                  ## gene-set collection without recording an ontology in @ontology.
+                  ## Derive it from the GO IDs, so users no longer have to assign
+                  ## the slot by hand (#369, #753).
+                  ontology <- infer_go_ontology(as.data.frame(x)$ID)
+              }
+              if (!ontology %in% c("BP", "MF", "CC", "GOALL"))
+                  stop("simplify only applied to output from gseGO and enrichGO, ",
+                       "or to a result whose gene sets are GO terms...")
               res <- as.data.frame(x)
-              if (x@ontology == "GOALL") {
+              if (ontology == "GOALL") {
                   x@result <- simplify_ALL(res = res, cutoff = cutoff, by = by,
                       select_fun = select_fun, measure = measure,
                       semData = semData)
@@ -30,7 +39,7 @@ setMethod("simplify", signature(x="enrichResult"),
                   x@result <- simplify_internal(res = res, cutoff = cutoff,
                                     by = by, select_fun = select_fun, 
                                     measure = measure,
-                                    ontology = x@ontology, 
+                                    ontology = ontology, 
                                     semData = semData)                      
               }
               return(x)
