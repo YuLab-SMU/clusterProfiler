@@ -12,6 +12,15 @@
 #' @param maxGSSize maximal size of genes annotated for testing
 #' @param readable whether mapping gene ID to gene Name
 #' @param pool If ont='ALL', whether pool 3 GO sub-ontologies
+#' @param evidence optional character vector of GO evidence codes to keep (for
+#'   example `c("IDA", "IPI", "IMP")`, or `"IEA"` for electronic annotations
+#'   only). When supplied, annotations carrying any other evidence code are
+#'   dropped before the analysis — useful to avoid circular reasoning (dropping
+#'   `IEP` when the gene sets come from co-expression clustering) or to keep only
+#'   manually reviewed annotations (dropping `IEA`). Because the annotation
+#'   changes, so does the background, so the resulting terms are not simply a
+#'   subset of the unfiltered run. Filtered runs are not cached, so they rebuild
+#'   the annotation each time. `NULL` (default) uses every annotation.
 #' @return An \code{enrichResult} instance.
 #' @importClassesFrom enrichit enrichResult
 #' @importFrom enrichit setReadable
@@ -39,7 +48,8 @@ enrichGO <- function(
     minGSSize = 10,
     maxGSSize = 500,
     readable = FALSE,
-    pool = FALSE
+    pool = FALSE,
+    evidence = NULL
 ) {
     has_universe <- !missing(universe)
 
@@ -88,7 +98,8 @@ enrichGO <- function(
             minGSSize = minGSSize,
             maxGSSize = maxGSSize,
             readable = readable,
-            pool = pool
+            pool = pool,
+            evidence = evidence
         )
         
         if (is.null(res)) {
@@ -110,7 +121,7 @@ enrichGO <- function(
 
     ont %<>% toupper
     ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
-    GO_DATA <- get_GO_data(OrgDb, ont, keyType)
+    GO_DATA <- get_GO_data(OrgDb, ont, keyType, evidence = evidence)
 
     if (missing(universe)) {
         universe <- NULL
@@ -128,7 +139,8 @@ enrichGO <- function(
                 universe,
                 qvalueCutoff,
                 minGSSize,
-                maxGSSize
+                maxGSSize,
+                evidence = evidence
             ))
         })
 
@@ -223,15 +235,68 @@ go_cache_usable <- function(GO_Env, org, ont, keytype) {
             isTRUE(get("ont", envir = GO_Env) == "ALL"))
 }
 
+#' Build a gene-to-GO annotation table restricted to given evidence codes
+#'
+#' Enrichment normally uses every annotation in the OrgDb, including
+#' electronically inferred ones. Restricting the annotation by evidence code is
+#' a methodological choice — for example dropping `IEP` when the gene sets came
+#' from co-expression clustering, to avoid reasoning in a circle, or dropping
+#' `IEA` to keep only manually reviewed annotations (#160).
+#'
+#' Note the consequence: genes whose annotations are all filtered away leave the
+#' background as well, so the universe becomes "genes with at least one
+#' annotation carrying an allowed evidence code". That is usually what is wanted,
+#' but it does change the p-values beyond simply removing terms.
+#'
+#' @param OrgDb a loaded OrgDb object
+#' @param keytype gene id type to report
+#' @param evidence character vector of evidence codes to keep
+#' @return a data.frame with the gene id, `GOALL` and `ONTOLOGYALL`
+#' @importFrom AnnotationDbi keys
+#' @importFrom AnnotationDbi select
+#' @noRd
+go_annotation_by_evidence <- function(OrgDb, keytype, evidence) {
+    evidence <- unique(as.character(evidence))
+    if (!length(evidence)) {
+        stop("`evidence` must contain at least one evidence code")
+    }
+
+    genes <- AnnotationDbi::keys(OrgDb, keytype = keytype)
+    anno <- suppressMessages(
+        AnnotationDbi::select(
+            OrgDb,
+            keys = genes,
+            columns = c("GOALL", "EVIDENCEALL", "ONTOLOGYALL"),
+            keytype = keytype
+        )
+    )
+
+    anno <- anno[!is.na(anno$GOALL) & !is.na(anno$EVIDENCEALL), , drop = FALSE]
+    anno <- anno[anno$EVIDENCEALL %in% evidence, , drop = FALSE]
+
+    if (nrow(anno) == 0) {
+        stop("no GO annotation left after keeping evidence code(s): ",
+             paste(evidence, collapse = ", "),
+             "; check `AnnotationDbi::columns(OrgDb)` for the codes available")
+    }
+
+    unique(anno[, c(keytype, "GOALL", "ONTOLOGYALL")])
+}
+
 #' @importFrom AnnotationDbi keys
 #' @importFrom AnnotationDbi keytypes
 #' @importFrom AnnotationDbi toTable
 #' @importFrom GO.db GOTERM
-get_GO_data <- function(OrgDb, ont, keytype) {
+get_GO_data <- function(OrgDb, ont, keytype, evidence = NULL) {
     GO_Env <- get_GO_Env()
     use_cached <- FALSE
 
-    if (go_cache_usable(GO_Env, get_organism(OrgDb), ont, keytype)) {
+    ## An evidence-filtered annotation is deliberately never cached: the cache is
+    ## keyed by (organism, ont, keytype) only, so storing a filtered annotation
+    ## under that key — or serving the unfiltered one for a filtered request —
+    ## would quietly answer with the wrong annotation.
+    if (is.null(evidence) &&
+        go_cache_usable(GO_Env, get_organism(OrgDb), ont, keytype)) {
         use_cached <- TRUE
     }
 
@@ -244,6 +309,7 @@ get_GO_data <- function(OrgDb, ont, keytype) {
             stop("keytype is not supported...")
         }
 
+        if (is.null(evidence)) {
         goterms <- AnnotationDbi::Ontology(GO.db::GOTERM)
         if (ont != "ALL") {
             goterms <- goterms[goterms == ont]
@@ -266,6 +332,9 @@ get_GO_data <- function(OrgDb, ont, keytype) {
         assign("keytype", keytype, envir = GO_Env)
         assign("ont", ont, envir = GO_Env)
         assign("organism", get_organism(OrgDb), envir = GO_Env)
+        } else {
+            goAnno <- go_annotation_by_evidence(OrgDb, keytype, evidence)
+        }
     }
 
     # Filter if needed (if cached was ALL but we want specific)

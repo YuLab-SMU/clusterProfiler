@@ -102,3 +102,33 @@ test_that("the GO cache is not reused for an unidentifiable OrgDb (#232)", {
     expect_false(go_cache_usable(mk_env(ont = "MF"), "Homo sapiens", "BP", "ENTREZID"))
     expect_false(go_cache_usable(mk_env(), "Homo sapiens", "BP", "SYMBOL"))
 })
+
+test_that("enrichGO() can restrict the annotation by evidence code (#160)", {
+    skip_if_not_installed("org.Hs.eg.db")
+    skip_if_not_installed("GO.db")
+    skip_if_not_installed("AnnotationDbi")
+
+    odb <- getExportedValue("org.Hs.eg.db", "org.Hs.eg.db")
+    gene <- head(AnnotationDbi::keys(odb, "ENTREZID"), 150)
+    run <- function(...) {
+        enrichGO(gene, OrgDb = "org.Hs.eg.db", ont = "BP",
+                 pvalueCutoff = 0.9, qvalueCutoff = 0.9, ...)
+    }
+
+    full <- run()
+    expect_s4_class(full, "enrichResult")
+
+    # keeping only non-electronic annotations changes the annotation, and so the
+    # result; it is not merely a subset of the unfiltered terms
+    filt <- run(evidence = c("IDA", "IPI", "IMP", "IGI", "IEP", "TAS", "EXP",
+                             "HDA", "HEP", "HMP", "HTP", "IBA", "IC"))
+    expect_s4_class(filt, "enrichResult")
+    expect_true(nrow(as.data.frame(filt)) > 0)
+    expect_false(identical(as.data.frame(full), as.data.frame(filt)))
+
+    # an evidence code the OrgDb does not use leaves nothing, and says so
+    expect_error(run(evidence = "NOT_AN_EVIDENCE_CODE"), "no GO annotation left")
+
+    # a filtered run must not poison the cached, unfiltered path
+    expect_identical(as.data.frame(full), as.data.frame(run()))
+})
