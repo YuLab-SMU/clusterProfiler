@@ -1,6 +1,7 @@
 
 # clusterProfiler 4.21.2
 
++ `add_go_level()` appends a `level` column giving the GO level of every enriched term (1 = the ontology root), so results can be kept to a band of levels with e.g. `subset(res, level >= 3 & level <= 6)`; the level is taken from the ontology the term itself belongs to, so `ont = "ALL"` and `compareCluster()` results are labelled term by term (2026-09-22, Tue, #793)
 + `simplify()` now infers the ontology from the GO IDs when the result object does not carry one, instead of refusing: this covers a `gseaResult` whose `@setType` holds a collection name rather than an ontology (MSigDB C5, a gson GO file, a `TERM2GENE` built from GO annotations) as well as an `enrichResult` from `enricher()`, which previously required assigning `x@ontology` by hand; results spanning several ontologies are simplified as `GOALL`, and non-GO gene sets are still rejected with a message that says so (2026-09-22, Tue, #753, #369)
 + `compareCluster()` now warns when a non-character `universe` is supplied: it wraps each per-cluster call in `suppressMessages()`, which used to swallow the underlying enrichment function's "`universe` is not in character and will be ignored" message, so a numeric universe appeared to be accepted while having no effect (2026-09-22, Tue, #654)
 + `gsePC()` and `gseWP()` now expose an `eps` argument and forward it to `GSEA()` (and on to `enrichit::gsea_gson()`), matching `GSEA()`, `gseGO()`, `gseKEGG()` and `gseMKEGG()` (2026-09-22, Tue)

@@ -105,6 +105,32 @@ keepGOterm <- function(x, term) {
 #' @author Guangchuang Yu \url{https://yulab-smu.top}
 #' @noRd
 getGOLevel <- function(ont, level) {
+    lv <- go_level_map(ont)
+    names(lv)[lv %in% level]
+}
+
+#' Map every GO term to its level in the ontology
+#'
+#' Level 1 is the ontology root (`GO:0008150` / `GO:0005575` / `GO:0003674`),
+#' level 2 its direct children, and so on, following the `*CHILDREN` graph in
+#' GO.db. This is the definition `getGOLevel()` uses to pick the terms at a
+#' requested level, and `add_go_level()` uses it to label enrichment results.
+#'
+#' The returned vector is named by GO ID and may contain an ID more than once:
+#' GO is a DAG, so a term can be reachable at several depths and appears in each
+#' frontier it belongs to. Callers that want one level per term should keep the
+#' first occurrence, which is the shallowest.
+#'
+#' @param ont Ontology, one of "BP", "CC" or "MF"
+#' @param max_level deepest level to walk
+#' @return a named integer vector
+#' @importFrom GO.db GOBPCHILDREN
+#' @importFrom GO.db GOCCCHILDREN
+#' @importFrom GO.db GOMFCHILDREN
+#' @importFrom stats setNames
+#' @importMethodsFrom AnnotationDbi mget
+#' @noRd
+go_level_map <- function(ont, max_level = 30L) {
     switch(ont,
            MF = {
                topNode <- "GO:0003674"
@@ -117,27 +143,76 @@ getGOLevel <- function(ont, level) {
            CC = {
                topNode <- "GO:0005575"
                Children <- GOCCCHILDREN
-           }
+           },
+           stop("ontology should be one of 'MF', 'CC' or 'BP'")
            )
 
-    max_level <- max(level)
-    if (any(level == 1)) {
-        all_nodes <- topNode
-    } else {
-        all_nodes <- c()
+    ids <- topNode
+    levels <- 1L
+    Node <- topNode
+    for (i in seq_len(max_level - 1)) {
+        Node <- mget(Node, Children, ifnotfound = NA)
+        Node <- unique(as.vector(unlist(Node)))
+        Node <- Node[!is.na(Node)]
+        if (length(Node) == 0) {
+            break
+        }
+        ids <- c(ids, Node)
+        levels <- c(levels, rep(i + 1L, length(Node)))
+    }
+    setNames(levels, ids)
+}
+
+#' Add the GO level of each enriched term
+#'
+#' `enrichGO()`/`gseGO()` results carry the term, its ontology and its
+#' statistics, but not how deep the term sits in the GO hierarchy. This appends
+#' that as a `level` column (1 = ontology root), which makes it easy to keep a
+#' band of levels by filtering, e.g. `subset(res, level >= 3 & level <= 6)`.
+#'
+#' The level is taken from the ontology the term itself belongs to, so an
+#' `ont = "ALL"` (or `compareCluster()`) result is labelled correctly term by
+#' term. Terms that GO.db does not recognise get `NA`.
+#'
+#' @param x an `enrichResult`, `gseaResult` or `compareClusterResult` from a GO
+#'   enrichment analysis
+#' @return `x` with a `level` column appended to its result table
+#' @export
+#' @author Guangchuang Yu \url{https://yulab-smu.top}
+#' @examples
+#' \dontrun{
+#' x <- enrichGO(gene, OrgDb = "org.Hs.eg.db", ont = "BP")
+#' x <- add_go_level(x)
+#' subset(x, level >= 3 & level <= 6)
+#' }
+add_go_level <- function(x) {
+    df <- as.data.frame(x)
+    if (!"ID" %in% names(df)) {
+        stop("the result table has no 'ID' column")
+    }
+    if (!requireNamespace("GO.db", quietly = TRUE)) {
+        stop("GO.db is required to determine GO levels")
     }
 
-    Node <- topNode
-    for (i in seq_len(max_level-1)) {
-        Node <- mget(Node, Children, ifnotfound=NA)
-        Node <- unique(unlist(Node))
-        Node <- as.vector(Node)
-        Node <- Node[!is.na(Node)]
-        if ((i+1) %in% level) {
-            all_nodes <- c(all_nodes, Node)
+    ids <- as.character(df$ID)
+    ont_of <- AnnotationDbi::Ontology(GO.db::GOTERM)[ids]
+    level <- rep(NA_integer_, length(ids))
+
+    for (ont in unique(ont_of[!is.na(ont_of)])) {
+        if (!ont %in% c("BP", "CC", "MF")) {
+            next
         }
+        ## keep the shallowest level per term: GO is a DAG, so a term can be
+        ## reached at more than one depth
+        lv <- go_level_map(ont)
+        lv <- lv[!duplicated(names(lv))]
+        idx <- which(!is.na(ont_of) & ont_of == ont)
+        level[idx] <- unname(lv[ids[idx]])
     }
-    return(all_nodes)
+
+    df$level <- level
+    x@result <- df
+    return(x)
 }
 
 
