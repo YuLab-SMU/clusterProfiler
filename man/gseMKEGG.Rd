@@ -29,8 +29,8 @@ gseMKEGG(
 \item{geneList}{order ranked geneList}
 
 \item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html';
-alternatively a \code{GSON} object (e.g. from \code{gson_KEGG()}) holding the
-annotation, which allows the analysis to run without contacting KEGG}
+alternatively a `GSON` object (e.g. from `gson_KEGG()`) holding the annotation, which
+allows the analysis to run without contacting KEGG}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncib-proteinid' and 'uniprot'}
 
@@ -47,11 +47,6 @@ annotation, which allows the analysis to run without contacting KEGG}
 \item{pAdjustMethod}{pvalue adjustment method}
 
 \item{verbose}{print message or not}
-\item{seed}{random seed for reproducibility, set to a number (or TRUE to use a
-  fixed default seed) to make the result reproducible, or FALSE (default) to draw
-  a random seed on each run, so results may vary between runs. The underlying
-  permutation engine uses its own RNG seeded with this value; see
-  \code{enrichit::gsea()} for details.}
 
 \item{nPerm}{The number of permutations.}
 
@@ -64,6 +59,12 @@ annotation, which allows the analysis to run without contacting KEGG}
 \item{maxPerm}{maximal number of permutations for adaptive method}
 
 \item{pvalThreshold}{pvalue threshold for adaptive method}
+
+\item{seed}{random seed for reproducibility, set to a number (or TRUE to use a
+fixed default seed) to make the result reproducible, or FALSE (default) to draw
+a random seed on each run, so results may vary between runs. The underlying
+permutation engine uses its own RNG seeded with this value; see
+\code{enrichit::gsea()} for details.}
 
 \item{...}{other parameters passed to \code{enrichit::gsea_gson()}}
 }

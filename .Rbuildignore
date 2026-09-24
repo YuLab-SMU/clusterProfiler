@@ -29,3 +29,4 @@ CONTEXT.md
 .scratch/
 CONTEXT.md
 ^nsea_go_demo$
+reasonix.toml

@@ -135,100 +135,134 @@ importClassesFrom(enrichit,gseaResult)
 importClassesFrom(enrichit,mnseaResult)
 importClassesFrom(enrichit,nseaResult)
 importClassesFrom(methods,data.frame)
-importFrom(AnnotationDbi,Ontology)
-importFrom(AnnotationDbi,keys)
-importFrom(AnnotationDbi,keytypes)
-importFrom(AnnotationDbi,toTable)
-importFrom(GO.db,GOBPCHILDREN)
-importFrom(GO.db,GOCCCHILDREN)
-importFrom(GO.db,GOMFCHILDREN)
-importFrom(GO.db,GOTERM)
-importFrom(GOSemSim,buildGOmap)
-importFrom(GOSemSim,get_organism)
-importFrom(GOSemSim,godata)
-importFrom(GOSemSim,mgoSim)
-importFrom(GOSemSim,read.blast2go)
-importFrom(GOSemSim,read.gaf)
-importFrom(aisdk,Agent)
-importFrom(aisdk,ChatSession)
-importFrom(aisdk,generate_object)
-importFrom(aisdk,z_array)
-importFrom(aisdk,z_enum)
-importFrom(aisdk,z_object)
-importFrom(aisdk,z_string)
-importFrom(dplyr,arrange)
-importFrom(dplyr,filter)
-importFrom(dplyr,group_by)
-importFrom(dplyr,mutate)
-importFrom(dplyr,n)
-importFrom(dplyr,rename)
-importFrom(dplyr,select)
-importFrom(dplyr,slice)
-importFrom(dplyr,summarise)
-importFrom(enrichit,aggregate_enrichment)
-importFrom(enrichit,aggregate_omics)
-importFrom(enrichit,bayes_enrich)
-importFrom(enrichit,bayes_summary)
-importFrom(enrichit,geneID)
-importFrom(enrichit,geneInCategory)
-importFrom(enrichit,gsfilter)
-importFrom(enrichit,harmonize_ids)
-importFrom(enrichit,select_features_for_ora)
-importFrom(enrichit,setReadable)
-importFrom(enrichplot,cnetplot)
-importFrom(enrichplot,dotplot)
-importFrom(enrichplot,emapplot)
-importFrom(enrichplot,goplot)
-importFrom(enrichplot,gseaplot)
-importFrom(enrichplot,heatplot)
-importFrom(enrichplot,ridgeplot)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,geom_label)
-importFrom(ggplot2,geom_point)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,ggtitle)
-importFrom(ggplot2,scale_color_manual)
-importFrom(ggplot2,theme_void)
-importFrom(gson,gson)
-importFrom(gson,read.gmt)
-importFrom(gson,read.gmt.wp)
-importFrom(magrittr,"%<>%")
-importFrom(magrittr,"%>%")
-importFrom(methods,is)
-importFrom(methods,new)
-importFrom(plyr,dlply)
-importFrom(plyr,ldply)
-importFrom(plyr,llply)
+importFrom(AnnotationDbi,
+  Ontology,
+  keys,
+  keytypes,
+  toTable
+)
+importFrom(GO.db,
+  GOBPCHILDREN,
+  GOCCCHILDREN,
+  GOMFCHILDREN,
+  GOTERM
+)
+importFrom(GOSemSim,
+  buildGOmap,
+  get_organism,
+  godata,
+  mgoSim,
+  read.blast2go,
+  read.gaf
+)
+importFrom(aisdk,
+  Agent,
+  ChatSession,
+  generate_object,
+  z_array,
+  z_enum,
+  z_object,
+  z_string
+)
+importFrom(dplyr,
+  arrange,
+  filter,
+  group_by,
+  mutate,
+  n,
+  rename,
+  select,
+  slice,
+  summarise
+)
+importFrom(enrichit,
+  aggregate_enrichment,
+  aggregate_omics,
+  bayes_enrich,
+  bayes_summary,
+  geneID,
+  geneInCategory,
+  gsfilter,
+  harmonize_ids,
+  select_features_for_ora,
+  setReadable
+)
+importFrom(enrichplot,
+  cnetplot,
+  dotplot,
+  emapplot,
+  goplot,
+  gseaplot,
+  heatplot,
+  ridgeplot
+)
+importFrom(ggplot2,
+  aes,
+  geom_label,
+  geom_point,
+  ggplot,
+  ggtitle,
+  scale_color_manual,
+  theme_void
+)
+importFrom(gson,
+  gson,
+  read.gmt,
+  read.gmt.wp
+)
+importFrom(magrittr,
+  "%<>%",
+  "%>%"
+)
+importFrom(methods,
+  is,
+  new
+)
+importFrom(plyr,
+  dlply,
+  ldply,
+  llply
+)
 importFrom(qvalue,qvalue)
-importFrom(rlang,"%||%")
-importFrom(rlang,.data)
-importFrom(rlang,check_installed)
-importFrom(rlang,quos)
-importFrom(rlang,sym)
-importFrom(stats,formula)
-importFrom(stats,na.omit)
-importFrom(stats,setNames)
-importFrom(tidyr,gather)
-importFrom(tidyr,separate)
-importFrom(utils,browseURL)
-importFrom(utils,citation)
-importFrom(utils,head)
-importFrom(utils,installed.packages)
-importFrom(utils,modifyList)
-importFrom(utils,packageDescription)
-importFrom(utils,read.table)
-importFrom(utils,stack)
-importFrom(utils,str)
-importFrom(utils,tail)
-importFrom(yulab.utils,download_yulab_file)
-importFrom(yulab.utils,get_cache)
-importFrom(yulab.utils,get_cache_item)
-importFrom(yulab.utils,get_fun_from_pkg)
-importFrom(yulab.utils,is.installed)
-importFrom(yulab.utils,load_OrgDb)
-importFrom(yulab.utils,user_dir)
-importFrom(yulab.utils,yread)
-importFrom(yulab.utils,yread_tsv)
+importFrom(rlang,
+  "%||%",
+  .data,
+  check_installed,
+  quos,
+  sym
+)
+importFrom(stats,
+  formula,
+  na.omit,
+  setNames
+)
+importFrom(tidyr,
+  gather,
+  separate
+)
+importFrom(utils,
+  browseURL,
+  citation,
+  head,
+  installed.packages,
+  modifyList,
+  packageDescription,
+  read.table,
+  stack,
+  str,
+  tail
+)
+importFrom(yulab.utils,
+  download_yulab_file,
+  get_cache,
+  get_cache_item,
+  get_fun_from_pkg,
+  is.installed,
+  load_OrgDb,
+  user_dir,
+  yread,
+  yread_tsv
+)
 importMethodsFrom(AnnotationDbi,mappedkeys)
 importMethodsFrom(AnnotationDbi,mget)
 importMethodsFrom(enrichit,show)

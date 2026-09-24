@@ -22,8 +22,8 @@ enrichMKEGG(
 \item{gene}{a vector of entrez gene id.}
 
 \item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html';
-alternatively a \code{GSON} object (e.g. from \code{gson_KEGG()}) holding the
-annotation, which allows the analysis to run without contacting KEGG}
+alternatively a `GSON` object (e.g. from `gson_KEGG()`) holding the annotation, which
+allows the analysis to run without contacting KEGG}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncbi-proteinid' and 'uniprot'}
 
@@ -43,7 +43,7 @@ annotation, which allows the analysis to run without contacting KEGG}
 A \code{enrichResult} instance.
 }
 \description{
-KEGG Module Enrichment Analysis of a gene set.
-Given a vector of genes, this function will return the enrichment KEGG Module
-categories with FDR control.
+As with \code{enrichKEGG()}, \code{organism} may be a species code or a
+\code{GSON} object, so module enrichment can be run against a locally built
+annotation (see \code{gson_KEGG()}) when KEGG is unreachable.
 }

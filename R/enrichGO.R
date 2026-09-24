@@ -253,7 +253,6 @@ go_cache_usable <- function(GO_Env, org, ont, keytype) {
 #' @param evidence character vector of evidence codes to keep
 #' @return a data.frame with the gene id, `GOALL` and `ONTOLOGYALL`
 #' @importFrom AnnotationDbi keys
-#' @importFrom AnnotationDbi select
 #' @noRd
 go_annotation_by_evidence <- function(OrgDb, keytype, evidence) {
     evidence <- unique(as.character(evidence))

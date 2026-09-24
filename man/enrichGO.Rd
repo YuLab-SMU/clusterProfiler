@@ -48,14 +48,14 @@ enrichGO(
 \item{pool}{If ont='ALL', whether pool 3 GO sub-ontologies}
 
 \item{evidence}{optional character vector of GO evidence codes to keep (for
-example \code{c("IDA", "IPI", "IMP")}, or \code{"IEA"} for electronic
-annotations only). When supplied, annotations carrying any other evidence code
-are dropped before the analysis - useful to avoid circular reasoning (dropping
-\code{IEP} when the gene sets come from co-expression clustering) or to keep only
-manually reviewed annotations (dropping \code{IEA}). Because the annotation
-changes, so does the background, so the resulting terms are not simply a subset of
-the unfiltered run. Filtered runs are not cached, so they rebuild the annotation
-each time. \code{NULL} (default) uses every annotation.}
+example `c("IDA", "IPI", "IMP")`, or `"IEA"` for electronic annotations
+only). When supplied, annotations carrying any other evidence code are
+dropped before the analysis — useful to avoid circular reasoning (dropping
+`IEP` when the gene sets come from co-expression clustering) or to keep only
+manually reviewed annotations (dropping `IEA`). Because the annotation
+changes, so does the background, so the resulting terms are not simply a
+subset of the unfiltered run. Filtered runs are not cached, so they rebuild
+the annotation each time. `NULL` (default) uses every annotation.}
 }
 \value{
 An \code{enrichResult} instance.

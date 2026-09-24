@@ -23,8 +23,8 @@ enrichKEGG(
 \item{gene}{a vector of entrez gene id.}
 
 \item{organism}{supported organism listed in 'https://www.genome.jp/kegg/catalog/org_list.html';
-alternatively a \code{GSON} object (e.g. from \code{gson_KEGG()}) holding the
-annotation, which allows the analysis to run without contacting KEGG}
+alternatively a `GSON` object (e.g. from `gson_KEGG()`) holding the annotation, which
+allows the analysis to run without contacting KEGG}
 
 \item{keyType}{one of "kegg", 'ncbi-geneid', 'ncbi-proteinid' and 'uniprot'}
 
