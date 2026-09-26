@@ -12,7 +12,7 @@ Biocpkg <- yulab.utils::Biocpkg
 
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 `r badge_bioc_release("clusterProfiler", "green")`
-`r badge_devel("guangchuangyu/clusterProfiler", "green")`
+`r badge_devel("YuLab-SMU/clusterProfiler", "green")`
 [![Bioc](http://www.bioconductor.org/shields/years-in-bioc/clusterProfiler.svg)](https://www.bioconductor.org/packages/devel/bioc/html/clusterProfiler.html#since)
 
 
@@ -39,12 +39,35 @@ For details, please visit:
 + <https://yulab-smu.top/contribution-knowledge-mining/>
 + <https://yulab-smu.top/biomedical-knowledge-mining-book/>
 
+## :arrow_double_down: Installation
+
+Get the released version from Bioconductor:
+
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("clusterProfiler")
+```
+
+Or install the development version from GitHub:
+
+```r
+if (!requireNamespace("remotes", quietly = TRUE))
+    install.packages("remotes")
+remotes::install_github("YuLab-SMU/clusterProfiler")
+```
+
 
 ## :writing_hand: Authors
 
 Guangchuang YU  <https://yulab-smu.top>
 
 School of Basic Medical Sciences, Southern Medical University
+
+## :sparkling_heart: Contributing
+
+We welcome any contributions! By participating in this project you agree to
+abide by the terms outlined in the [Contributor Code of Conduct](CONDUCT.md).
 
 
 <img src="graphic-abstract-The-Innovation-2021.jpg" width="890"/>
