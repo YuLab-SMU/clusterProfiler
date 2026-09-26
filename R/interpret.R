@@ -469,6 +469,11 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   Default FALSE.
 #' @param go_reduction_threshold Semantic similarity threshold (0-1).
 #'   Higher values = more aggressive reduction. Default 0.7.
+#' @param reasoning Optional reasoning/thinking configuration passed through to the
+#'   provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL}
+#'   the request is byte-identical to one made before this argument existed. Whatever is
+#'   passed is recorded in the execution stamp as \code{reasoning_requested}, alongside
+#'   \code{reasoning_evidence} -- whether the response actually carried a reasoning block.
 #' @param verbose Logical, whether to print debug messages showing raw API
 #'   responses, token usage, and JSON parsing details. Default FALSE.
 #'   Equivalent to setting `options(aisdk.debug = TRUE)` for the call.
@@ -694,11 +699,12 @@ interpret <- function(x,
 #'   (verdict, grounding_score, evidence_sufficiency, supported_resolution,
 #'   abstain_recommended, issues, adjusted_confidence, warnings) and
 #'   `overview_original`; if the verdict is `"revise"`, `overview` is replaced
-#'   by the corrected version. Default `FALSE`, which reproduces the released
+#'   by the corrected version, in which claims exceeding `supported_resolution`
+#'   are downgraded to that resolution. Default `FALSE`, which reproduces the released
 #'   three-agent behavior exactly: the audit is an addition a caller opts into,
 #'   and leaving it off keeps existing scripts measuring what they measured
 #'   before. Note that the audit roughly doubles wall-clock time per unit and
-#'   adds one model call, and that it is not infallible — on objects where the
+#'   adds one model call, and that it is not infallible -- on objects where the
 #'   Synthesizer returned nothing it has been observed to return `pass` with a
 #'   `High` grounding score.
 #' @param reduce_go Logical. Run [reduce_go_redundancy()] on the object before
@@ -723,6 +729,7 @@ interpret <- function(x,
 #'   evidence is real but which resolves to a more specific entity than that
 #'   evidence can single out, with `supported_resolution` giving the claim the
 #'   evidence does support.
+#' @md
 #' @export
 #' @examples
 #' \dontrun{
@@ -1354,7 +1361,7 @@ interpret_hierarchical <- function(x_minor,
 #' while on another an explicit `reasoning_effort` produces a monotone, countable
 #' `reasoning_tokens`. A FALSE here therefore means "no reasoning came back", which is not
 #' the same claim as "the model did not reason": a relay can strip the evidence.
-#' @keywords internal
+#' @noRd
 .reasoning_evidence <- function(gen) {
   if (is.null(gen)) return(NA)
   tryCatch({
@@ -1380,7 +1387,7 @@ interpret_hierarchical <- function(x_minor,
 }
 
 #' Reasoning tokens the provider reports, where it reports any.
-#' @keywords internal
+#' @noRd
 .reasoning_tokens <- function(gen) {
   if (is.null(gen)) return(NA_integer_)
   tryCatch({
@@ -1398,7 +1405,7 @@ interpret_hierarchical <- function(x_minor,
 }
 
 #' Record one model call. Never throws: provenance must not be able to break a run.
-#' @keywords internal
+#' @noRd
 .prov_record <- function(collector, stage, model, system, prompt, schema_name,
                          temperature, max_tokens, gen = NULL, t0 = NULL,
                          error_message = NULL, reasoning = NULL) {
@@ -1539,6 +1546,7 @@ interpret_hierarchical <- function(x_minor,
 #' @param symbols Optional character vector of valid gene symbols (alternative to `OrgDb`).
 #' @param fields Record fields to scan.
 #' @return A data.frame with columns `cluster`, `field`, `gene` and `status`.
+#' @md
 #' @export
 evidence_status <- function(x, enrichment, OrgDb = NULL, symbols = NULL,
                             fields = c("overview", "key_mechanisms", "regulatory_drivers", "crosstalk",
@@ -1594,6 +1602,7 @@ evidence_status <- function(x, enrichment, OrgDb = NULL, symbols = NULL,
 #'
 #' @param x An `interpretation`, `interpretation_list` or agent result.
 #' @return An `interpret_provenance` list, or `NULL` if the object carries no stamp.
+#' @md
 #' @export
 provenance <- function(x) {
   p <- attr(x, "provenance")
@@ -1632,7 +1641,7 @@ print.interpret_provenance <- function(x, ...) {
 }
 
 #' Digest of the whole evidence set handed to one entry-point call.
-#' @keywords internal
+#' @noRd
 .evidence_digest_all <- function(x, res_list) {
   bits <- character(0)
   for (nm in names(res_list)) {
@@ -1834,7 +1843,7 @@ print.interpret_provenance <- function(x, ...) {
 #' 2026-08-27 all four treated it as the former. `finish_reason` is carried into the message
 #' because it is the one field that distinguishes a truncated response from a well-formed
 #' answer the schema rejected.
-#' @keywords internal
+#' @noRd
 .stop_if_unparsed <- function(gen, agent) {
   if (!is.null(gen) && !is.null(gen$object)) return(invisible(TRUE))
   fr <- tryCatch(gen$finish_reason, error = function(e) NULL) %||% "NA"
@@ -2057,6 +2066,7 @@ print.interpretation_list <- function(x, ...) {
 #' @return A reduced enrichResult object with redundant terms removed. The object
 #'   carries attributes recording the reduction: `rrvgo_reduced`, `rrvgo_original_n`,
 #'   `rrvgo_reduced_n`, `rrvgo_threshold`, `rrvgo_method`.
+#' @md
 #' @export
 #' @examples
 #' \dontrun{

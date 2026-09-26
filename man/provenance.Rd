@@ -7,10 +7,10 @@
 provenance(x)
 }
 \arguments{
-\item{x}{An `interpretation`, `interpretation_list` or agent result.}
+\item{x}{An \code{interpretation}, \code{interpretation_list} or agent result.}
 }
 \value{
-An `interpret_provenance` list, or `NULL` if the object carries no stamp.
+An \code{interpret_provenance} list, or \code{NULL} if the object carries no stamp.
 }
 \description{
 Returns the execution record attached to a result of \code{\link[=interpret]{interpret()}},

@@ -27,9 +27,9 @@ interpret_agent(
 
 \item{n_pathways}{Number of top pathways to consider initially. Default 50.}
 
-\item{model}{Optional LLM model. When `NULL` (default), uses the aisdk
-package-wide default model configured via `aisdk::set_model()`. You can
-also supply a model ID in `provider:model` format or a `LanguageModelV1`
+\item{model}{Optional LLM model. When \code{NULL} (default), uses the aisdk
+package-wide default model configured via \code{aisdk::set_model()}. You can
+also supply a model ID in \code{provider:model} format or a \code{LanguageModelV1}
 object. Bare model names are supported with a warning.}
 
 \item{add_ppi}{Logical, whether to query PPI data. Default FALSE.}
@@ -41,21 +41,21 @@ object. Bare model names are supported with a warning.}
 \item{temperature}{Sampling temperature. Default 0.3.}
 
 \item{review}{Logical, whether to run a final Reviewer agent (Agent 4) that
-audits the synthesized draft against the input evidence. The audit covers
-grounding, experimental-label fidelity, overclaiming, and \strong{evidence
-sufficiency} -- whether the supplied evidence classes can support a claim as
-specific as the draft makes. When `TRUE`, the result gains a
-`review` field (verdict, grounding_score, evidence_sufficiency,
-supported_resolution, abstain_recommended, issues, adjusted_confidence,
-warnings) and `overview_original`; if the verdict is `"revise"`, `overview`
-is replaced by the corrected version, in which claims exceeding
-`supported_resolution` are downgraded to that resolution. Default `FALSE`,
-which reproduces the released three-agent behavior exactly: the audit is an
-addition a caller opts into, and leaving it off keeps existing scripts
-measuring what they measured before. Note that the audit roughly doubles
-wall-clock time per unit and adds one model call, and that it is not
-infallible -- on objects where the Synthesizer returned nothing it has been
-observed to return `pass` with a `High` grounding score.}
+audits the synthesized draft against the input evidence for grounding,
+overclaiming, experimental-label fidelity, and \strong{evidence sufficiency}
+(whether the supplied evidence classes can support a claim as specific as
+the draft makes). When \code{TRUE}, the result gains a \code{review} field
+(verdict, grounding_score, evidence_sufficiency, supported_resolution,
+abstain_recommended, issues, adjusted_confidence, warnings) and
+\code{overview_original}; if the verdict is \code{"revise"}, \code{overview} is replaced
+by the corrected version, in which claims exceeding \code{supported_resolution}
+are downgraded to that resolution. Default \code{FALSE}, which reproduces the released
+three-agent behavior exactly: the audit is an addition a caller opts into,
+and leaving it off keeps existing scripts measuring what they measured
+before. Note that the audit roughly doubles wall-clock time per unit and
+adds one model call, and that it is not infallible -- on objects where the
+Synthesizer returned nothing it has been observed to return \code{pass} with a
+\code{High} grounding score.}
 
 \item{reduce_go}{Logical. Run \code{\link[=reduce_go_redundancy]{reduce_go_redundancy()}} on the object before
 building any prompt. Deterministic, GO-only, and makes no model call; a
@@ -67,44 +67,37 @@ stricter setting for lists above ~400 terms.}
 
 \item{reasoning}{Optional reasoning/thinking configuration passed through to the
 provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL} the
-request is byte-identical to one made before this argument existed. Whatever is passed is
-recorded in the execution stamp as \code{reasoning_requested}, alongside
-\code{reasoning_evidence} -- whether the response actually carried a reasoning block. The two
-are separate because a gateway can accept the parameter and drop it, and the caller can only
-observe the second.}
+request is byte-identical to one made before this argument existed. Whatever is
+passed is recorded in the execution stamp as \code{reasoning_requested}, alongside
+\code{reasoning_evidence} -- whether the response actually carried a reasoning block.
+The two are separate because a gateway can accept the parameter and drop it, and
+the caller can only observe the second.}
 
 \item{verbose}{Logical, whether to print debug messages. Default FALSE.}
 }
 \value{
-An `interpretation` object with deep analysis fields plus
-  regulatory_drivers, refined_network, and network_evidence from the
-  detective agent. When `review = TRUE`, also includes `review` and
-  `overview_original`.
+An \code{interpretation} object with deep analysis fields plus
+regulatory_drivers, refined_network, and network_evidence from the
+detective agent. When \code{review = TRUE}, also includes \code{review} and
+\code{overview_original}. The \code{review} field reports grounding separately from
+resolution: \code{abstain_recommended = "yes"} flags a draft whose cited
+evidence is real but which resolves to a more specific entity than that
+evidence can single out, with \code{supported_resolution} giving the claim the
+evidence does support.
 }
 \description{
 Employs specialized AI agents in sequence for rigorous interpretation:
 \enumerate{
-  \item Agent Cleaner: Filters noise and selects relevant pathways.
-  \item Agent Detective: Identifies key regulators and functional modules.
-  \item Agent Synthesizer: Produces a coherent biological narrative.
-  \item Agent Reviewer (optional, \code{review = TRUE}): Audits the draft for
-    grounding, experimental-label fidelity, overclaiming, and evidence
-    sufficiency; flags issues, reports the finest resolution the evidence
-    supports, and returns a corrected overview.
+\item Agent Cleaner: Filters noise and selects relevant pathways.
+\item Agent Detective: Identifies key regulators and functional modules.
+\item Agent Synthesizer: Produces a coherent biological narrative.
+\item Agent Reviewer (optional, \code{review = TRUE}): Audits the draft for
+grounding, overclaiming, and experimental-label fidelity; flags issues and
+returns a corrected overview.
 }
 }
 \details{
 Uses aisdk's Agent and Session system for shared context across agents.
-
-The Reviewer's sufficiency check is deliberately independent of its grounding
-check. A draft can cite only genes and terms that are genuinely present in the
-evidence and still resolve far beyond what that evidence can single out --
-for example, naming one subunit as the perturbed gene when the enrichment only
-establishes that the complex it belongs to is affected. Declaring low
-confidence alongside such a claim does not resolve the problem, because a
-reader acts on the named entity rather than on the confidence label. In that
-situation the Reviewer sets \code{abstain_recommended = "yes"} and states the
-supported claim instead.
 }
 \examples{
 \dontrun{
@@ -113,10 +106,5 @@ res <- interpret_agent(df,
   context = "scRNA-seq of mouse MI day 3"
 )
 print(res)
-
-# Inspect the audit, including the resolution the evidence supports
-res$review$evidence_sufficiency
-res$review$supported_resolution
-res$review$abstain_recommended
 }
 }

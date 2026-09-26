@@ -4,7 +4,12 @@
 \alias{reduce_go_redundancy}
 \title{Reduce GO term redundancy by semantic similarity}
 \usage{
-reduce_go_redundancy(enrich_result, threshold = 0.7, orgdb = NULL, method = "Wang")
+reduce_go_redundancy(
+  enrich_result,
+  threshold = 0.7,
+  orgdb = NULL,
+  method = "Wang"
+)
 }
 \arguments{
 \item{enrich_result}{An enrichResult object from enrichGO()}
@@ -22,8 +27,8 @@ but require \code{godata(computeIC = TRUE)} and are substantially slower.}
 }
 \value{
 A reduced enrichResult object with redundant terms removed. The object
-  carries attributes recording the reduction: `rrvgo_reduced`, `rrvgo_original_n`,
-  `rrvgo_reduced_n`, `rrvgo_threshold`, `rrvgo_method`.
+carries attributes recording the reduction: \code{rrvgo_reduced}, \code{rrvgo_original_n},
+\code{rrvgo_reduced_n}, \code{rrvgo_threshold}, \code{rrvgo_method}.
 }
 \description{
 Applies semantic similarity-based clustering to remove redundant GO terms
@@ -32,7 +37,7 @@ multi-agent interpretation layer by reducing input noise and token count.
 }
 \details{
 Implemented directly on GOSemSim, which is already an Imports dependency.
-The \code{rrvgo_*} attribute names are kept for backwards compatibility with
+The \verb{rrvgo_*} attribute names are kept for backwards compatibility with
 existing ablation outputs and predate the switch away from rrvgo.
 }
 \examples{

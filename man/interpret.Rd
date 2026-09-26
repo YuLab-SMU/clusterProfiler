@@ -60,12 +60,10 @@ Default FALSE.}
 Higher values = more aggressive reduction. Default 0.7.}
 
 \item{reasoning}{Optional reasoning/thinking configuration passed through to the
-provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL} the
-request is byte-identical to one made before this argument existed. Whatever is passed is
-recorded in the execution stamp as \code{reasoning_requested}, alongside
-\code{reasoning_evidence} -- whether the response actually carried a reasoning block. The two
-are separate because a gateway can accept the parameter and drop it, and the caller can only
-observe the second.}
+provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL}
+the request is byte-identical to one made before this argument existed. Whatever is
+passed is recorded in the execution stamp as \code{reasoning_requested}, alongside
+\code{reasoning_evidence} -- whether the response actually carried a reasoning block.}
 
 \item{verbose}{Logical, whether to print debug messages showing raw API
 responses, token usage, and JSON parsing details. Default FALSE.
