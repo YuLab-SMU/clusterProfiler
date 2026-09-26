@@ -248,13 +248,16 @@ process_enrichment_input <- function(x, n_pathways) {
     utils::head(df, n)
   }
 
+  # The input gene slots hold the IDs the enrichment was run on (often ENTREZID), while the
+  # term table of a readable object holds symbols. Return symbols so the marker list the
+  # model reads is gene names rather than bare numeric IDs.
   get_genes <- function(obj, cluster = NULL) {
     if (inherits(obj, "enrichResult")) {
-      return(obj@gene)
+      return(.ids_to_symbols(obj@gene, obj))
     } else if (inherits(obj, "compareClusterResult")) {
       if (!is.null(cluster) && !is.null(obj@geneClusters)) {
         if (cluster %in% names(obj@geneClusters)) {
-          return(obj@geneClusters[[cluster]])
+          return(.ids_to_symbols(obj@geneClusters[[cluster]], obj))
         }
       }
     }
@@ -533,6 +536,7 @@ interpret <- function(x,
 
   model <- .normalize_interpret_model(model)
   res_list <- process_enrichment_input(x, n_pathways)
+  gene_fold_change <- .fc_to_symbols(gene_fold_change, x)
 
   .prov <- .prov_new()
 
@@ -766,6 +770,7 @@ interpret_agent <- function(x,
 
   model <- .normalize_interpret_model(model)
   res_list <- process_enrichment_input(x, n_pathways)
+  gene_fold_change <- .fc_to_symbols(gene_fold_change, x)
 
   .prov <- .prov_new()
 
@@ -1175,6 +1180,27 @@ interpret_hierarchical <- function(x_minor,
   )
 }
 
+# Map input gene IDs to symbols using the object's own gene2Symbol table (filled by
+# setReadable / readable = TRUE). IDs without a mapping are kept unchanged, so objects that
+# were never made readable, or were built on symbols, pass through untouched.
+.ids_to_symbols <- function(ids, obj) {
+  if (length(ids) == 0) return(ids)
+  map <- tryCatch(obj@gene2Symbol, error = function(e) NULL)
+  if (length(map) == 0 || is.null(names(map))) return(ids)
+  sym <- unname(map[as.character(ids)])
+  ifelse(is.na(sym) | !nzchar(sym), ids, sym)
+}
+
+# gene_fold_change is documented as keyed by the IDs used in the enrichment; rename it to
+# symbols with the same table so it can be matched against the symbol-keyed term table.
+.fc_to_symbols <- function(gene_fold_change, obj) {
+  if (is.null(gene_fold_change) || is.null(names(gene_fold_change))) return(gene_fold_change)
+  if (!inherits(obj, c("enrichResult", "compareClusterResult", "gseaResult"))) return(gene_fold_change)
+  new <- .ids_to_symbols(names(gene_fold_change), obj)
+  out <- gene_fold_change; names(out) <- new
+  out[!duplicated(names(out))]
+}
+
 .get_top_genes_text <- function(genes, gene_fold_change) {
   if (is.null(genes) || length(genes) == 0) {
     return(NULL)
@@ -1489,6 +1515,68 @@ interpret_hierarchical <- function(x_minor,
   ), extra)
   class(prov) <- c("interpret_provenance", "list")
   prov
+}
+
+# Upper-case words and abbreviations that are also official gene symbols but, in an
+# interpretation, are almost never used as genes.
+.evidence_stop <- c("SET", "MAX", "CAT", "REST", "IMPACT", "CAMP", "MET", "ACE", "CLOCK", "SHE",
+                    "NOT", "AND", "FOR", "GO", "BP", "CC", "MF", "DNA", "RNA", "ATP", "PPI", "TF")
+
+#' Evidence status of every gene named in an interpretation
+#'
+#' Deterministically classifies each gene symbol that an interpretation names as
+#' `observed` (a member gene of the enrichment result it was given) or `out_of_evidence`
+#' (a valid symbol that is not). No model is called. Use it to label hypotheses from
+#' [interpret_agent()] as inferred rather than observed: unlike a second model, this check
+#' is exact and cannot also mark grounded genes as uncertain.
+#'
+#' @param x An `interpretation` or `interpretation_list` returned by [interpret()],
+#'   [interpret_agent()] or [interpret_hierarchical()].
+#' @param enrichment The `enrichResult`, `compareClusterResult`, `gseaResult` or data.frame
+#'   the interpretation was produced from (readable, so that member genes are symbols).
+#' @param OrgDb Optional `OrgDb` used to recognise out-of-evidence symbols. Without it, only
+#'   tokens that look like gene symbols and appear in `symbols` are considered.
+#' @param symbols Optional character vector of valid gene symbols (alternative to `OrgDb`).
+#' @param fields Record fields to scan.
+#' @return A data.frame with columns `cluster`, `field`, `gene` and `status`.
+#' @export
+evidence_status <- function(x, enrichment, OrgDb = NULL, symbols = NULL,
+                            fields = c("overview", "key_mechanisms", "regulatory_drivers", "crosstalk",
+                                       "hypothesis", "narrative", "reasoning", "network_evidence")) {
+  df <- if (is.data.frame(enrichment)) enrichment else as.data.frame(enrichment)
+  gcol <- intersect(c("geneID", "core_enrichment"), names(df))[1]
+  if (is.na(gcol)) rlang::abort("`enrichment` has no geneID or core_enrichment column.")
+  ev_of <- function(d) unique(toupper(unlist(strsplit(as.character(d[[gcol]]), "/"))))
+  if (is.null(symbols) && !is.null(OrgDb)) {
+    symbols <- AnnotationDbi::keys(OrgDb, keytype = "SYMBOL")
+  }
+  vocab <- if (is.null(symbols)) NULL else toupper(symbols)
+  recs <- if (inherits(x, "interpretation_list")) unclass(x) else list(Default = x)
+  out <- lapply(names(recs), function(cl) {
+    r <- recs[[cl]]
+    d <- if ("Cluster" %in% names(df) && cl %in% df$Cluster) df[df$Cluster == cl, , drop = FALSE] else df
+    ev <- ev_of(d)
+    rows <- lapply(intersect(fields, names(r)), function(f) {
+      txt <- paste(unlist(r[[f]]), collapse = " ")
+      # Human-style symbols are written in capitals; accept those against the evidence or the
+      # vocabulary. Mouse-style Title-case tokens are accepted only when they are evidence genes,
+      # so ordinary capitalised words are never counted.
+      caps <- unique(unlist(regmatches(txt, gregexpr("\\b[A-Z][A-Z0-9-]{1,11}\\b", txt))))
+      # "AURKB-BIRC5" names two genes; keep the hyphenated form (HLA-DRA, NKX2-1) and its parts
+      caps <- unique(c(caps, unlist(strsplit(caps[grepl("-", caps)], "-"))))
+      caps <- setdiff(caps, .evidence_stop)
+      title <- unique(toupper(unlist(regmatches(txt, gregexpr("\\b[A-Z][a-z0-9]{1,9}\\b", txt)))))
+      tok <- unique(c(caps[caps %in% ev | (!is.null(vocab) & caps %in% vocab)], title[title %in% ev]))
+      if (!length(tok)) return(NULL)
+      data.frame(cluster = cl, field = f, gene = tok,
+                 status = ifelse(tok %in% ev, "observed", "out_of_evidence"), stringsAsFactors = FALSE)
+    })
+    do.call(rbind, rows)
+  })
+  res <- do.call(rbind, out)
+  if (is.null(res)) res <- data.frame(cluster = character(), field = character(), gene = character(), status = character())
+  rownames(res) <- NULL
+  res
 }
 
 #' Execution provenance of an interpretation
@@ -2012,8 +2100,18 @@ reduce_go_redundancy <- function(enrich_result,
     return(enrich_result)
   }
 
-  n_original <- nrow(enrich_result@result)
-  go_ids <- enrich_result@result$ID
+  # Reduce only the terms that pass the object's own cutoffs -- the ones a reader (and
+  # interpret()) actually sees. An enrichResult keeps every tested term in @result; running
+  # the O(n^2) similarity over thousands of non-significant rows was slow and pointless.
+  # Rows that do not pass the cutoffs are left in @result unchanged.
+  sig_ids <- tryCatch(as.data.frame(enrich_result)$ID, error = function(e) enrich_result@result$ID)
+  if (length(sig_ids) == 0) {
+    warning("No term passes the result's cutoffs; skipping GO reduction.")
+    return(enrich_result)
+  }
+  sig_rows <- match(sig_ids, enrich_result@result$ID)
+  n_original <- length(sig_ids)
+  go_ids <- sig_ids
 
   if (is.null(orgdb)) {
     organism <- tryCatch(enrich_result@organism, error = function(e) "")
@@ -2038,28 +2136,19 @@ reduce_go_redundancy <- function(enrich_result,
     need_ic <- !identical(method, "Wang")
     semdata <- GOSemSim::godata(orgdb, ont = ontology, computeIC = need_ic)
 
-    # Pairwise similarity. O(n^2): fine for the tens-of-terms lists this is meant for,
-    # and the reason the step is optional rather than always-on.
+    # Pairwise similarity in one vectorised call (termSim), instead of one goSim() call per
+    # pair. Terms GOSemSim cannot score get similarity 0, i.e. they are never merged.
     n <- length(go_ids)
-    sim <- matrix(0, nrow = n, ncol = n, dimnames = list(go_ids, go_ids))
-    for (i in seq_len(n)) {
-      sim[i, i] <- 1
-      if (i < n) {
-        for (j in (i + 1):n) {
-          s <- tryCatch(GOSemSim::goSim(go_ids[i], go_ids[j], semData = semdata,
-                                        measure = method),
-                        error = function(e) 0)
-          if (is.na(s)) s <- 0
-          sim[i, j] <- sim[j, i] <- s
-        }
-      }
-    }
+    sim <- GOSemSim::termSim(go_ids, go_ids, semData = semdata, method = method)
+    sim <- sim[go_ids, go_ids, drop = FALSE]
+    sim[is.na(sim)] <- 0
+    diag(sim) <- 1
 
     # Greedy representative selection: repeatedly take the most significant remaining term
     # and drop everything above `threshold` similarity to it. The representative is chosen
     # by adjusted p-value, so the surviving list is the significant one, not an arbitrary
     # member of each cluster.
-    padj <- enrich_result@result$p.adjust
+    padj <- enrich_result@result$p.adjust[sig_rows]
     keep <- integer(0)
     remaining <- seq_len(n)
     while (length(remaining) > 0) {
@@ -2067,11 +2156,11 @@ reduce_go_redundancy <- function(enrich_result,
       keep <- c(keep, best)
       remaining <- remaining[!(sim[best, remaining] > threshold)]
     }
-    keep <- sort(keep)
+    drop_rows <- sig_rows[setdiff(seq_len(n), keep)]
 
     reduced <- enrich_result
-    reduced@result <- enrich_result@result[keep, , drop = FALSE]
-    n_reduced <- nrow(reduced@result)
+    reduced@result <- if (length(drop_rows)) enrich_result@result[-drop_rows, , drop = FALSE] else enrich_result@result
+    n_reduced <- length(keep)
     message(sprintf("GO reduction complete: %d -> %d terms (%.1f%% reduction)",
                     n_original, n_reduced, 100 * (n_original - n_reduced) / n_original))
 
