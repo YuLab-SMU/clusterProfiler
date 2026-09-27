@@ -7,17 +7,19 @@
 interpret_agent(
   x,
   context = NULL,
-  n_pathways = 50,
+  n_pathways = NULL,
   model = NULL,
   add_ppi = FALSE,
   gene_fold_change = NULL,
   max_tokens = 8192,
   temperature = 0.3,
   review = FALSE,
-  reduce_go = FALSE,
-  go_reduction_threshold = 0.7,
+  reduce = TRUE,
+  reduce_threshold = NULL,
   reasoning = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  reduce_go = NULL,
+  go_reduction_threshold = NULL
 )
 }
 \arguments{
@@ -25,7 +27,9 @@ interpret_agent(
 
 \item{context}{A string describing the experimental background.}
 
-\item{n_pathways}{Number of top pathways to consider initially. Default 50.}
+\item{n_pathways}{Maximum number of terms (per cluster) the Cleaner starts from, taken in
+order of adjusted p-value after reduction. \code{NULL} (default) uses every term that passes
+the object's cutoffs; with \code{reduce = TRUE} that is one representative per theme.}
 
 \item{model}{Optional LLM model. When \code{NULL} (default), uses the aisdk
 package-wide default model configured via \code{aisdk::set_model()}. You can
@@ -57,13 +61,12 @@ adds one model call, and that it is not infallible -- on objects where the
 Synthesizer returned nothing it has been observed to return \code{pass} with a
 \code{High} grounding score.}
 
-\item{reduce_go}{Logical. Run \code{\link[=reduce_go_redundancy]{reduce_go_redundancy()}} on the object before
-building any prompt. Deterministic, GO-only, and makes no model call; a
-no-op on non-GO results. Default \code{FALSE}.}
+\item{reduce}{Logical. Run \code{\link[=reduce_redundancy]{reduce_redundancy()}} before building any prompt, as
+\code{\link[=interpret]{interpret()}} does: Wang similarity for GO results, Jaccard overlap of member genes
+for other gene-set collections. Deterministic and makes no model call. Default \code{TRUE}.}
 
-\item{go_reduction_threshold}{Wang semantic-similarity threshold passed to
-\code{\link[=reduce_go_redundancy]{reduce_go_redundancy()}} when \code{reduce_go = TRUE}. Default 0.7; 0.5 is the
-stricter setting for lists above ~400 terms.}
+\item{reduce_threshold}{Similarity threshold passed to \code{\link[=reduce_redundancy]{reduce_redundancy()}}. \code{NULL}
+(default) uses its default of 0.5.}
 
 \item{reasoning}{Optional reasoning/thinking configuration passed through to the
 provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL} the
@@ -74,6 +77,9 @@ The two are separate because a gateway can accept the parameter and drop it, and
 the caller can only observe the second.}
 
 \item{verbose}{Logical, whether to print debug messages. Default FALSE.}
+
+\item{reduce_go, go_reduction_threshold}{Earlier names of \code{reduce} and \code{reduce_threshold},
+still accepted; a call that passes \code{reduce_go} keeps its earlier default threshold of 0.7.}
 }
 \value{
 An \code{interpretation} object with deep analysis fields plus

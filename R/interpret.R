@@ -240,12 +240,13 @@ process_enrichment_input <- function(x, n_pathways) {
     if (nrow(df) == 0) {
       return(df)
     }
+    if ("ID" %in% names(df)) df <- df[!is.na(df$ID), , drop = FALSE]
     if ("p.adjust" %in% names(df)) {
       df <- df[order(df$p.adjust), ]
     } else if ("pvalue" %in% names(df)) {
       df <- df[order(df$pvalue), ]
     }
-    utils::head(df, n)
+    if (is.null(n) || !is.finite(n)) df else utils::head(df, n)
   }
 
   # The input gene slots hold the IDs the enrichment was run on (often ENTREZID), while the
@@ -340,7 +341,9 @@ process_enrichment_input <- function(x, n_pathways) {
 # ============================================================================
 
 .format_pathway_text <- function(df) {
-  cols <- intersect(c("ID", "Description", "GeneRatio", "NES", "p.adjust", "pvalue", "geneID"), names(df))
+  # A gseaResult reports its member genes (the leading edge) as core_enrichment, not geneID;
+  # without it the model saw GSEA terms with no genes at all.
+  cols <- intersect(c("ID", "Description", "GeneRatio", "NES", "p.adjust", "pvalue", "geneID", "core_enrichment"), names(df))
   paste(
     apply(df[, cols, drop = FALSE], 1, function(row) {
       paste(names(row), row, sep = ": ", collapse = ", ")
@@ -448,7 +451,9 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   `compareClusterResult`, or a `data.frame` with pathway columns).
 #' @param context A string describing the experimental background
 #'   (e.g., "scRNA-seq of mouse myocardial infarction at day 3").
-#' @param n_pathways Number of top significant pathways to include. Default 20.
+#' @param n_pathways Maximum number of terms (per cluster) sent to the model, taken in order
+#'   of adjusted p-value after reduction. `NULL` (default) sends every term that passes the
+#'   object's cutoffs; with `reduce = TRUE` that is one representative per theme.
 #' @param model Optional LLM model. When `NULL` (default), uses the aisdk
 #'   package-wide default model configured via `aisdk::set_model()`.
 #'   You can also supply a model ID in `provider:model` format
@@ -464,11 +469,12 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   Some models (especially reasoning models) may need much higher values
 #'   (e.g., 16384 or more) to produce complete structured output.
 #' @param temperature Sampling temperature. Default 0.3.
-#' @param reduce_go Logical, whether to apply semantic-similarity GO term redundancy
-#'   reduction before interpretation. Only applies to GO enrichment results.
-#'   Default FALSE.
-#' @param go_reduction_threshold Semantic similarity threshold (0-1).
-#'   Higher values = more aggressive reduction. Default 0.7.
+#' @param reduce Logical. Run [reduce_redundancy()] before building the prompt, so every
+#'   significant theme reaches the model once: Wang similarity for GO results, Jaccard
+#'   overlap of member genes for KEGG and other gene-set collections. Default `TRUE`; a
+#'   no-op for data frames and lists.
+#' @param reduce_threshold Similarity threshold passed to [reduce_redundancy()]. `NULL`
+#'   (default) uses its default of 0.5.
 #' @param reasoning Optional reasoning/thinking configuration passed through to the
 #'   provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL}
 #'   the request is byte-identical to one made before this argument existed. Whatever is
@@ -477,6 +483,8 @@ process_enrichment_input <- function(x, n_pathways) {
 #' @param verbose Logical, whether to print debug messages showing raw API
 #'   responses, token usage, and JSON parsing details. Default FALSE.
 #'   Equivalent to setting `options(aisdk.debug = TRUE)` for the call.
+#' @param reduce_go,go_reduction_threshold Earlier names of `reduce` and `reduce_threshold`,
+#'   still accepted; a call that passes `reduce_go` keeps its earlier default threshold of 0.7.
 #' @return An `interpretation` object (list) with task-specific fields.
 #'   For "interpretation": overview, key_mechanisms, hypothesis, narrative, etc.
 #'   For "annotation": cell_type, confidence, reasoning, markers, etc.
@@ -496,9 +504,11 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   model = "deepseek:deepseek-chat",
 #'   context = "Cancer proliferation study"
 #' )
-#' # With GO redundancy reduction
+#' # Every significant GO term, one representative per theme (the default)
 #' ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
-#' res <- interpret(ego, reduce_go = TRUE, go_reduction_threshold = 0.7)
+#' res <- interpret(ego)
+#' # The earlier behaviour: the 20 most significant terms, unreduced
+#' res <- interpret(ego, n_pathways = 20, reduce = FALSE)
 #' # Reuse aisdk's global default model
 #' # aisdk::set_model("openai:gpt-4o-mini")
 #' # res <- interpret(df, context = "Cancer proliferation study")
@@ -506,7 +516,7 @@ process_enrichment_input <- function(x, n_pathways) {
 #' }
 interpret <- function(x,
                       context = NULL,
-                      n_pathways = 20,
+                      n_pathways = NULL,
                       model = NULL,
                       task = "interpretation",
                       prior = NULL,
@@ -514,10 +524,12 @@ interpret <- function(x,
                       gene_fold_change = NULL,
                       max_tokens = 8192,
                       temperature = 0.3,
-                      reduce_go = FALSE,
-                      go_reduction_threshold = 0.7,
+                      reduce = TRUE,
+                      reduce_threshold = NULL,
                       reasoning = NULL,
-                      verbose = FALSE) {
+                      verbose = FALSE,
+                      reduce_go = NULL,
+                      go_reduction_threshold = NULL) {
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
 
   old_debug <- getOption("aisdk.debug", FALSE)
@@ -526,18 +538,8 @@ interpret <- function(x,
     on.exit(options(aisdk.debug = old_debug), add = TRUE)
   }
 
-  # Apply rrvgo reduction if requested and input is enrichResult
-  if (isTRUE(reduce_go) && is(x, "enrichResult")) {
-    x <- reduce_go_redundancy(x, threshold = go_reduction_threshold)
-    if (isTRUE(attr(x, "rrvgo_reduced"))) {
-      message(sprintf(
-        "Applied rrvgo reduction: %d -> %d GO terms (%.1f%% reduction)",
-        attr(x, "rrvgo_original_n"),
-        attr(x, "rrvgo_reduced_n"),
-        100 * (attr(x, "rrvgo_original_n") - attr(x, "rrvgo_reduced_n")) / attr(x, "rrvgo_original_n")
-      ))
-    }
-  }
+  # Deterministic reduction before any prompt is built (see reduce_redundancy()).
+  x <- .reduce_for_prompt(x, reduce, reduce_threshold, reduce_go, go_reduction_threshold)
 
   model <- .normalize_interpret_model(model)
   res_list <- process_enrichment_input(x, n_pathways)
@@ -558,9 +560,9 @@ interpret <- function(x,
   .ev_sha <- .evidence_digest_all(x, res_list)
 
   results <- lapply(names(res_list), function(name) {
-    message(sprintf("Interpreting cluster: %s", name))
     item <- res_list[[name]]
     df <- item$df
+    message(sprintf("Interpreting cluster: %s (%d terms)", name, nrow(df)))
     genes <- item$genes
 
     top_genes_text <- .get_top_genes_text(genes, gene_fold_change)
@@ -682,7 +684,9 @@ interpret <- function(x,
 #'
 #' @param x An enrichment result object.
 #' @param context A string describing the experimental background.
-#' @param n_pathways Number of top pathways to consider initially. Default 50.
+#' @param n_pathways Maximum number of terms (per cluster) the Cleaner starts from, taken in
+#'   order of adjusted p-value after reduction. `NULL` (default) uses every term that passes
+#'   the object's cutoffs; with `reduce = TRUE` that is one representative per theme.
 #' @param model Optional LLM model. When `NULL` (default), uses the aisdk
 #'   package-wide default model configured via `aisdk::set_model()`. You can
 #'   also supply a model ID in `provider:model` format or a `LanguageModelV1`
@@ -707,12 +711,11 @@ interpret <- function(x,
 #'   adds one model call, and that it is not infallible -- on objects where the
 #'   Synthesizer returned nothing it has been observed to return `pass` with a
 #'   `High` grounding score.
-#' @param reduce_go Logical. Run [reduce_go_redundancy()] on the object before
-#'   building any prompt. Deterministic, GO-only, and makes no model call; a
-#'   no-op on non-GO results. Default `FALSE`.
-#' @param go_reduction_threshold Wang semantic-similarity threshold passed to
-#'   [reduce_go_redundancy()] when `reduce_go = TRUE`. Default 0.7; 0.5 is the
-#'   stricter setting for lists above ~400 terms.
+#' @param reduce Logical. Run [reduce_redundancy()] before building any prompt, as
+#'   [interpret()] does: Wang similarity for GO results, Jaccard overlap of member genes
+#'   for other gene-set collections. Deterministic and makes no model call. Default `TRUE`.
+#' @param reduce_threshold Similarity threshold passed to [reduce_redundancy()]. `NULL`
+#'   (default) uses its default of 0.5.
 #' @param reasoning Optional reasoning/thinking configuration passed through to the
 #'   provider, e.g. `list(type = "enabled", budget_tokens = 4096)`. Left `NULL` the
 #'   request is byte-identical to one made before this argument existed. Whatever is
@@ -721,6 +724,8 @@ interpret <- function(x,
 #'   The two are separate because a gateway can accept the parameter and drop it, and
 #'   the caller can only observe the second.
 #' @param verbose Logical, whether to print debug messages. Default FALSE.
+#' @param reduce_go,go_reduction_threshold Earlier names of `reduce` and `reduce_threshold`,
+#'   still accepted; a call that passes `reduce_go` keeps its earlier default threshold of 0.7.
 #' @return An `interpretation` object with deep analysis fields plus
 #'   regulatory_drivers, refined_network, and network_evidence from the
 #'   detective agent. When `review = TRUE`, also includes `review` and
@@ -741,17 +746,19 @@ interpret <- function(x,
 #' }
 interpret_agent <- function(x,
                             context = NULL,
-                            n_pathways = 50,
+                            n_pathways = NULL,
                             model = NULL,
                             add_ppi = FALSE,
                             gene_fold_change = NULL,
                             max_tokens = 8192,
                             temperature = 0.3,
                             review = FALSE,
-                            reduce_go = FALSE,
-                            go_reduction_threshold = 0.7,
+                            reduce = TRUE,
+                            reduce_threshold = NULL,
                             reasoning = NULL,
-                            verbose = FALSE) {
+                            verbose = FALSE,
+                            reduce_go = NULL,
+                            go_reduction_threshold = NULL) {
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
 
   old_debug <- getOption("aisdk.debug", FALSE)
@@ -760,20 +767,8 @@ interpret_agent <- function(x,
     on.exit(options(aisdk.debug = old_debug), add = TRUE)
   }
 
-  # Same deterministic reduction stage interpret() runs, on the same terms: before any model
-  # call, GO-only, and a no-op on anything else. Kept as an explicit opt-in rather than a
-  # default so that existing agent scripts keep measuring what they measured before.
-  if (isTRUE(reduce_go) && is(x, "enrichResult")) {
-    x <- reduce_go_redundancy(x, threshold = go_reduction_threshold)
-    if (isTRUE(attr(x, "rrvgo_reduced"))) {
-      message(sprintf(
-        "Applied GO redundancy reduction: %d -> %d GO terms (%.1f%% reduction)",
-        attr(x, "rrvgo_original_n"),
-        attr(x, "rrvgo_reduced_n"),
-        100 * (attr(x, "rrvgo_original_n") - attr(x, "rrvgo_reduced_n")) / attr(x, "rrvgo_original_n")
-      ))
-    }
-  }
+  # The same deterministic reduction interpret() runs, before any model call.
+  x <- .reduce_for_prompt(x, reduce, reduce_threshold, reduce_go, go_reduction_threshold)
 
   model <- .normalize_interpret_model(model)
   res_list <- process_enrichment_input(x, n_pathways)
@@ -1083,6 +1078,8 @@ interpret_agent <- function(x,
 #' @param task Task type, default "cell_type".
 #' @param max_tokens Maximum tokens. Default 8192.
 #' @param temperature Sampling temperature. Default 0.3.
+#' @param n_pathways,reduce,reduce_threshold Passed to both levels, as in \code{interpret()}:
+#'   by default every significant term, one representative per theme.
 #' @return An `interpretation_list` object.
 #' @export
 interpret_hierarchical <- function(x_minor,
@@ -1091,18 +1088,23 @@ interpret_hierarchical <- function(x_minor,
                                    model = NULL,
                                    task = "cell_type",
                                    max_tokens = 8192,
-                                   temperature = 0.3) {
+                                   temperature = 0.3,
+                                   n_pathways = NULL,
+                                   reduce = TRUE,
+                                   reduce_threshold = NULL) {
   model <- .normalize_interpret_model(model)
 
   message("Step 1: Interpreting Major Clusters to establish lineage context...")
   res_major <- interpret(
     x_major,
     context = NULL, model = model, task = "cell_type",
-    max_tokens = max_tokens, temperature = temperature
+    max_tokens = max_tokens, temperature = temperature,
+    n_pathways = n_pathways, reduce = reduce, reduce_threshold = reduce_threshold
   )
 
   message("Step 2: Interpreting Sub-clusters using hierarchical constraints...")
-  res_list_minor <- process_enrichment_input(x_minor, n_pathways = 20)
+  x_minor <- .reduce_for_prompt(x_minor, reduce, reduce_threshold)
+  res_list_minor <- process_enrichment_input(x_minor, n_pathways = n_pathways)
 
   results <- lapply(names(res_list_minor), function(name) {
     specific_context <- NULL
@@ -2041,8 +2043,168 @@ print.interpretation_list <- function(x, ...) {
 }
 
 # ============================================================================
-# rrvgo Integration: Optional GO Term Redundancy Reduction
+# Redundancy reduction before interpretation
 # ============================================================================
+
+#' Reduce redundant terms in an enrichment result before interpretation
+#'
+#' Keeps one representative for each group of near-duplicate significant terms, so that
+#' every significant theme of a long result can be shown to the model without repeating
+#' its near-synonyms. GO results are grouped by Wang semantic similarity over the GO DAG
+#' (GOSemSim); every other gene-set collection (KEGG, Reactome, WikiPathways, MSigDB,
+#' custom `TERM2GENE`) by the Jaccard overlap of the member genes the result reports
+#' (`geneID`, or `core_enrichment` for GSEA). Groups are formed greedily in order of
+#' adjusted p-value: the most significant remaining term is kept and every remaining term
+#' more similar to it than `threshold` is dropped. Only terms that pass the object's
+#' cutoffs are considered; a `compareClusterResult` is reduced within each cluster, and a
+#' GO result spanning several ontologies within each ontology. Deterministic, and makes no
+#' model call. [interpret()] and [interpret_agent()] call it by default (`reduce = TRUE`).
+#'
+#' @param x An `enrichResult`, `gseaResult` or `compareClusterResult`.
+#' @param threshold Similarity above which a term joins the group of a more significant
+#'   term. `NULL` (default) uses 0.5 for both measures.
+#' @param method `"auto"` (default) uses `"Wang"` when every term is a GO term and
+#'   `"jaccard"` otherwise; either can be forced. Wang on non-GO terms falls back to Jaccard.
+#' @param semData Optional `GOSemSimDATA` for the Wang measure; built with
+#'   `GOSemSim::godata(ont = )` when `NULL`. Wang reads only the GO DAG, so no OrgDb is needed.
+#' @return `x` with the redundant significant terms removed. Attributes record the step:
+#'   `reduced`, `n_original`, `n_reduced`, `reduction_method` and `reduction_threshold`,
+#'   and the legacy `rrvgo_*` names read by earlier analysis scripts.
+#' @md
+#' @export
+#' @examples
+#' \dontrun{
+#' ego <- enrichGO(gene = genes, OrgDb = org.Hs.eg.db, ont = "BP")
+#' reduce_redundancy(ego)                 # Wang, 0.5
+#' kk <- enrichKEGG(gene = genes, organism = "hsa")
+#' reduce_redundancy(kk)                  # Jaccard on member genes, 0.5
+#' }
+reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "jaccard"), semData = NULL) {
+  method <- match.arg(method)
+  if (!inherits(x, c("enrichResult", "gseaResult", "compareClusterResult"))) {
+    message("Input is not an enrichResult, gseaResult or compareClusterResult; skipping reduction.")
+    return(x)
+  }
+  df <- as.data.frame(x)
+  # rows without an ID (all-NA padding some result tables carry) are not terms; left in place
+  df <- df[!is.na(df$ID), , drop = FALSE]
+  if (nrow(df) < 2) return(x)
+  threshold <- threshold %||% 0.5
+  gcol <- intersect(c("geneID", "core_enrichment"), names(df))[1]
+  is_go <- all(grepl("^GO:[0-9]{7}$", df$ID))
+  if (method == "auto") method <- if (is_go) "Wang" else "jaccard"
+  if (method == "Wang" && !is_go) {
+    warning("Wang similarity needs GO terms; using Jaccard overlap of member genes instead.")
+    method <- "jaccard"
+  }
+  if (method == "jaccard" && is.na(gcol)) {
+    warning("No geneID or core_enrichment column to compare; skipping reduction.")
+    return(x)
+  }
+  ont <- if (method == "Wang") .go_ontology_per_term(x, df) else rep("", nrow(df))
+  if (method == "Wang" && any(!ont %in% c("BP", "MF", "CC"))) {
+    warning("The GO ontology of some terms could not be determined; using Jaccard overlap of member genes instead.")
+    method <- "jaccard"; ont <- rep("", nrow(df))
+  }
+  cl <- if ("Cluster" %in% names(df)) as.character(df$Cluster) else rep("", nrow(df))
+  groups <- split(seq_len(nrow(df)), paste(cl, ont, sep = "\r"))
+
+  sem <- list()
+  keep <- logical(nrow(df))
+  for (idx in groups) {
+    if (length(idx) == 1) { keep[idx] <- TRUE; next }
+    sim <- if (method == "Wang") {
+      o <- ont[idx[1]]
+      if (is.null(sem[[o]])) {
+        sem[[o]] <- if (!is.null(semData) && identical(semData@ont, o)) semData else GOSemSim::godata(ont = o)
+      }
+      ids <- df$ID[idx]
+      s <- GOSemSim::termSim(ids, ids, semData = sem[[o]], method = "Wang")
+      s <- s[ids, ids, drop = FALSE]; s[is.na(s)] <- 0; diag(s) <- 1; s
+    } else {
+      .jaccard_matrix(strsplit(as.character(df[[gcol]][idx]), "/", fixed = TRUE))
+    }
+    keep[idx[.greedy_representatives(sim, df$p.adjust[idx], threshold)]] <- TRUE
+  }
+
+  dropped <- paste(cl, df$ID, sep = "\r")[!keep]
+  if (inherits(x, "compareClusterResult")) {
+    r <- x@compareClusterResult
+    x@compareClusterResult <- r[!paste(as.character(r$Cluster), r$ID, sep = "\r") %in% dropped, , drop = FALSE]
+  } else {
+    x@result <- x@result[!paste("", x@result$ID, sep = "\r") %in% dropped, , drop = FALSE]
+  }
+  n0 <- nrow(df); n1 <- sum(keep)
+  message(sprintf("Reduced redundant terms (%s > %.2f): %d -> %d significant terms",
+                  if (method == "Wang") "Wang" else "Jaccard", threshold, n0, n1))
+  attr(x, "reduced") <- TRUE
+  attr(x, "n_original") <- n0
+  attr(x, "n_reduced") <- n1
+  attr(x, "reduction_method") <- method
+  attr(x, "reduction_threshold") <- threshold
+  # names read by the earlier ablation scorers
+  attr(x, "rrvgo_reduced") <- TRUE
+  attr(x, "rrvgo_original_n") <- n0
+  attr(x, "rrvgo_reduced_n") <- n1
+  attr(x, "rrvgo_threshold") <- threshold
+  attr(x, "rrvgo_method") <- method
+  x
+}
+
+# Greedy representative selection shared by the reduction functions: repeatedly keep the
+# most significant remaining term and drop every remaining term above `threshold` similarity
+# to it. Returns the kept positions, most significant first. The kept term is removed
+# explicitly: with a threshold of 1 or more its self-similarity never exceeds the threshold,
+# and relying on that comparison would loop forever.
+.greedy_representatives <- function(sim, padj, threshold) {
+  keep <- integer(0)
+  remaining <- seq_along(padj)
+  while (length(remaining) > 0) {
+    best <- remaining[which.min(padj[remaining])]
+    keep <- c(keep, best)
+    remaining <- setdiff(remaining[!(sim[best, remaining] > threshold)], best)
+  }
+  keep
+}
+
+.jaccard_matrix <- function(sets) {
+  n <- length(sets)
+  m <- diag(1, n)
+  if (n < 2) return(m)
+  for (i in seq_len(n - 1)) for (j in (i + 1):n) {
+    u <- length(union(sets[[i]], sets[[j]]))
+    m[i, j] <- m[j, i] <- if (u == 0) 0 else length(intersect(sets[[i]], sets[[j]])) / u
+  }
+  m
+}
+
+# The GO ontology of each significant term: the ONTOLOGY column of an ont = "ALL" result,
+# else the object's own record (@ontology, @setType), else looked up in GO.db.
+.go_ontology_per_term <- function(x, df) {
+  if ("ONTOLOGY" %in% names(df)) return(as.character(df$ONTOLOGY))
+  slot_ont <- tryCatch(if (inherits(x, "gseaResult")) x@setType else x@ontology, error = function(e) "")
+  if (length(slot_ont) == 1 && slot_ont %in% c("BP", "MF", "CC")) return(rep(slot_ont, nrow(df)))
+  all_ont <- infer_go_ontology(df$ID)
+  if (all_ont %in% c("BP", "MF", "CC")) return(rep(all_ont, nrow(df)))
+  vapply(df$ID, infer_go_ontology, character(1), USE.NAMES = FALSE)
+}
+
+# The reduction step as the entry points run it. `reduce_go` / `go_reduction_threshold` are
+# the earlier names of `reduce` / `reduce_threshold`; when a caller still passes `reduce_go`,
+# its old default threshold (0.7) is kept so a rerun of an existing script reduces as before.
+.reduce_for_prompt <- function(x, reduce = TRUE, threshold = NULL, reduce_go = NULL, go_reduction_threshold = NULL) {
+  if (!is.null(reduce_go)) {
+    reduce <- reduce_go
+    threshold <- go_reduction_threshold %||% threshold %||% 0.7
+  } else if (!is.null(go_reduction_threshold)) {
+    threshold <- go_reduction_threshold
+  }
+  if (!isTRUE(reduce) || !inherits(x, c("enrichResult", "gseaResult", "compareClusterResult"))) return(x)
+  tryCatch(reduce_redundancy(x, threshold = threshold), error = function(e) {
+    warning(sprintf("Redundancy reduction failed (%s); interpreting the unreduced result.", conditionMessage(e)))
+    x
+  })
+}
 
 #' Reduce GO term redundancy by semantic similarity
 #'
@@ -2159,13 +2321,7 @@ reduce_go_redundancy <- function(enrich_result,
     # by adjusted p-value, so the surviving list is the significant one, not an arbitrary
     # member of each cluster.
     padj <- enrich_result@result$p.adjust[sig_rows]
-    keep <- integer(0)
-    remaining <- seq_len(n)
-    while (length(remaining) > 0) {
-      best <- remaining[which.min(padj[remaining])]
-      keep <- c(keep, best)
-      remaining <- remaining[!(sim[best, remaining] > threshold)]
-    }
+    keep <- .greedy_representatives(sim, padj, threshold)
     drop_rows <- sig_rows[setdiff(seq_len(n), keep)]
 
     reduced <- enrich_result

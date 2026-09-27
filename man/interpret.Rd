@@ -7,7 +7,7 @@
 interpret(
   x,
   context = NULL,
-  n_pathways = 20,
+  n_pathways = NULL,
   model = NULL,
   task = "interpretation",
   prior = NULL,
@@ -15,10 +15,12 @@ interpret(
   gene_fold_change = NULL,
   max_tokens = 8192,
   temperature = 0.3,
-  reduce_go = FALSE,
-  go_reduction_threshold = 0.7,
+  reduce = TRUE,
+  reduce_threshold = NULL,
   reasoning = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  reduce_go = NULL,
+  go_reduction_threshold = NULL
 )
 }
 \arguments{
@@ -28,7 +30,9 @@ interpret(
 \item{context}{A string describing the experimental background
 (e.g., "scRNA-seq of mouse myocardial infarction at day 3").}
 
-\item{n_pathways}{Number of top significant pathways to include. Default 20.}
+\item{n_pathways}{Maximum number of terms (per cluster) sent to the model, taken in order
+of adjusted p-value after reduction. `NULL` (default) sends every term that passes the
+object's cutoffs; with `reduce = TRUE` that is one representative per theme.}
 
 \item{model}{Optional LLM model. When `NULL` (default), uses the aisdk
 package-wide default model configured via `aisdk::set_model()`.
@@ -52,12 +56,13 @@ Some models (especially reasoning models) may need much higher values
 
 \item{temperature}{Sampling temperature. Default 0.3.}
 
-\item{reduce_go}{Logical, whether to apply semantic-similarity GO term redundancy
-reduction before interpretation. Only applies to GO enrichment results.
-Default FALSE.}
+\item{reduce}{Logical. Run [reduce_redundancy()] before building the prompt, so every
+significant theme reaches the model once: Wang similarity for GO results, Jaccard
+overlap of member genes for KEGG and other gene-set collections. Default `TRUE`; a
+no-op for data frames and lists.}
 
-\item{go_reduction_threshold}{Semantic similarity threshold (0-1).
-Higher values = more aggressive reduction. Default 0.7.}
+\item{reduce_threshold}{Similarity threshold passed to [reduce_redundancy()]. `NULL`
+(default) uses its default of 0.5.}
 
 \item{reasoning}{Optional reasoning/thinking configuration passed through to the
 provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL}
@@ -68,6 +73,9 @@ passed is recorded in the execution stamp as \code{reasoning_requested}, alongsi
 \item{verbose}{Logical, whether to print debug messages showing raw API
 responses, token usage, and JSON parsing details. Default FALSE.
 Equivalent to setting `options(aisdk.debug = TRUE)` for the call.}
+
+\item{reduce_go, go_reduction_threshold}{Earlier names of `reduce` and `reduce_threshold`,
+still accepted; a call that passes `reduce_go` keeps its earlier default threshold of 0.7.}
 }
 \value{
 An `interpretation` object (list) with task-specific fields.
@@ -105,9 +113,11 @@ res <- interpret(df,
   model = "deepseek:deepseek-chat",
   context = "Cancer proliferation study"
 )
-# With GO redundancy reduction
+# Every significant GO term, one representative per theme (the default)
 ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
-res <- interpret(ego, reduce_go = TRUE, go_reduction_threshold = 0.7)
+res <- interpret(ego)
+# The earlier behaviour: the 20 most significant terms, unreduced
+res <- interpret(ego, n_pathways = 20, reduce = FALSE)
 # Reuse aisdk's global default model
 # aisdk::set_model("openai:gpt-4o-mini")
 # res <- interpret(df, context = "Cancer proliferation study")

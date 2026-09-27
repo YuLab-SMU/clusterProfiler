@@ -11,7 +11,10 @@ interpret_hierarchical(
   model = NULL,
   task = "cell_type",
   max_tokens = 8192,
-  temperature = 0.3
+  temperature = 0.3,
+  n_pathways = NULL,
+  reduce = TRUE,
+  reduce_threshold = NULL
 )
 }
 \arguments{
@@ -31,6 +34,9 @@ object. Bare model names are supported with a warning.}
 \item{max_tokens}{Maximum tokens. Default 8192.}
 
 \item{temperature}{Sampling temperature. Default 0.3.}
+
+\item{n_pathways, reduce, reduce_threshold}{Passed to both levels, as in \code{interpret()}:
+by default every significant term, one representative per theme.}
 }
 \value{
 An `interpretation_list` object.
