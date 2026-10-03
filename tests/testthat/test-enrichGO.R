@@ -46,6 +46,7 @@ test_that("non-ENTREZID universe is converted together with gene", {
         minGSSize = 1
     )
     expect_s4_class(accnum_res, "enrichResult")
+    expect_identical(accnum_res@keytype, "ACCNUM")
 
     entrez_res <- enrichGO(
         entrez_gene,
@@ -131,4 +132,46 @@ test_that("enrichGO() can restrict the annotation by evidence code (#160)", {
 
     # a filtered run must not poison the cached, unfiltered path
     expect_identical(as.data.frame(full), as.data.frame(run()))
+})
+
+test_that("hybrid annotation keeps unmapped input IDs in the result object", {
+    skip_if_not_installed("org.Hs.eg.db")
+
+    res <- enrichGO(
+        c("TP53", "FAKE_GENE_X"),
+        OrgDb = "org.Hs.eg.db",
+        keyType = "SYMBOL",
+        ont = "BP",
+        universe = c("TP53", "BRCA1", "EGFR"),
+        pvalueCutoff = 1,
+        qvalueCutoff = 1,
+        minGSSize = 1
+    )
+
+    expect_s4_class(res, "enrichResult")
+    expect_identical(res@keytype, "SYMBOL")
+    expect_true("FAKE_GENE_X" %in% res@gene)
+    expect_false(any(grepl("^(E:|N:)", as.character(res@result$geneID))))
+})
+
+test_that("hybrid annotation reports an implicit annotated universe", {
+    skip_if_not_installed("org.Hs.eg.db")
+
+    res <- expect_message(
+        suppressWarnings(enrichGO(
+            c("TP53", "FAKE_GENE_X"),
+            OrgDb = "org.Hs.eg.db",
+            keyType = "SYMBOL",
+            ont = "BP",
+            pvalueCutoff = 1,
+            qvalueCutoff = 1,
+            minGSSize = 1
+        )),
+        "No universe supplied; using"
+    )
+
+    expect_s4_class(res, "enrichResult")
+    expect_identical(res@keytype, "SYMBOL")
+    expect_true(length(res@universe) > 0)
+    expect_false(any(grepl("^(E:|N:)", as.character(res@result$geneID))))
 })

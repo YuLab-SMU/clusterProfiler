@@ -52,6 +52,7 @@ enrichGO <- function(
     evidence = NULL
 ) {
     has_universe <- !missing(universe)
+    universe_value <- if (has_universe) universe else NULL
 
     # This is to avoid Memory Boom for non-ENTREZID keyType
     # see https://github.com/YuLab-SMU/clusterProfiler/issues/805
@@ -69,53 +70,181 @@ enrichGO <- function(
     # organisms), we skip this optimization and use the original keyType directly.
     # see https://github.com/YuLab-SMU/clusterProfiler/issues/823
 
-    if (keyType != "ENTREZID" && "ENTREZID" %in% keytypes(yulab.utils::load_OrgDb(OrgDb))) {
-        gene <- map_to_entrezid(gene, fromType = keyType, OrgDb = OrgDb)
-        if (length(gene) == 0L) {
-            message("--> No gene can be mapped....")
-            return(NULL)
+    ont <- toupper(ont)
+    ont <- match.arg(ont, c("BP", "MF", "CC", "ALL"))
+
+    if (keyType != "ENTREZID" &&
+        "ENTREZID" %in% keytypes(yulab.utils::load_OrgDb(OrgDb))) {
+        OrgDb <- yulab.utils::load_OrgDb(OrgDb)
+        gene_ids <- unique(as.character(gene))
+        gene_map <- map_keytype_to_entrez(gene_ids, keyType, OrgDb)
+        gene_complete <- all(gene_ids %in% gene_map$source)
+
+        universe_map <- NULL
+        universe_complete <- TRUE
+        if (has_universe && !is.null(universe)) {
+            universe_ids <- unique(as.character(universe))
+            universe_map <- map_keytype_to_entrez(universe_ids, keyType, OrgDb)
+            universe_complete <- all(universe_ids %in% universe_map$source)
         }
 
-        if (has_universe && !is.null(universe)) {
-            universe <- map_to_entrezid(universe, fromType = keyType, OrgDb = OrgDb)
-            if (length(universe) == 0L) {
-                message("--> No universe can be mapped....")
+        # Keep the #805 fast path whenever every requested ID maps.  The
+        # hybrid path below is only needed when a source ID has no ENTREZID.
+        if (gene_complete && universe_complete) {
+            gene_entrez <- unique(gene_map$entrez[gene_map$source %in% gene_ids])
+            if (!length(gene_entrez)) {
+                message("--> No gene can be mapped....")
                 return(NULL)
             }
-        } else {
-            universe <- NULL
+
+            universe_entrez <- NULL
+            if (has_universe && !is.null(universe)) {
+                universe_entrez <- unique(
+                    universe_map$entrez[universe_map$source %in% universe_ids]
+                )
+                if (!length(universe_entrez)) {
+                    message("--> No universe can be mapped....")
+                    return(NULL)
+                }
+            }
+
+            res <- enrichGO(
+                gene = gene_entrez,
+                OrgDb = OrgDb,
+                keyType = "ENTREZID",
+                ont = ont,
+                pvalueCutoff = pvalueCutoff,
+                pAdjustMethod = pAdjustMethod,
+                universe = universe_entrez,
+                qvalueCutoff = qvalueCutoff,
+                minGSSize = minGSSize,
+                maxGSSize = maxGSSize,
+                readable = readable,
+                pool = pool,
+                evidence = evidence
+            )
+
+            if (is.null(res)) {
+                return(NULL)
+            }
+
+            # setReadable() writes @keytype itself.  Restore the user's
+            # original key type after the conversion (#829).
+            if (readable) {
+                res <- setReadable(res, OrgDb, keyType = "ENTREZID")
+            } else {
+                res <- setReadable(
+                    res,
+                    OrgDb,
+                    keyType = "ENTREZID",
+                    toType = keyType
+                )
+                res@readable <- FALSE
+            }
+            res@keytype <- keyType
+            res <- restore_entrez_result_ids(
+                res,
+                OrgDb = OrgDb,
+                keyType = keyType,
+                original_gene = gene_ids,
+                original_universe = if (has_universe) universe_ids else NULL
+            )
+            return(res)
         }
 
-        res <- enrichGO(
-            gene = gene,
+        # At least one source ID cannot be represented by ENTREZID.  Use one
+        # unified GSON containing the Entrez annotation plus direct native
+        # annotations for the source-only IDs, rather than rebuilding the full
+        # native GO -> keyType table (which is the memory-heavy #805 path).
+        if (ont == "ALL" && !pool) {
+            lres <- lapply(c("BP", "CC", "MF"), function(one_ont) {
+                suppressMessages(enrichGO(
+                    gene = gene,
+                    OrgDb = OrgDb,
+                    keyType = keyType,
+                    ont = one_ont,
+                    pvalueCutoff = pvalueCutoff,
+                    pAdjustMethod = pAdjustMethod,
+                    universe = universe_value,
+                    qvalueCutoff = qvalueCutoff,
+                    minGSSize = minGSSize,
+                    maxGSSize = maxGSSize,
+                    readable = readable,
+                    pool = TRUE,
+                    evidence = evidence
+                ))
+            })
+            lres <- lres[!vapply(lres, is.null, logical(1))]
+            if (!length(lres)) {
+                return(NULL)
+            }
+            df <- do.call("rbind", lapply(lres, as.data.frame))
+            geneSets <- lres[[1]]@geneSets
+            if (length(lres) > 1) {
+                for (i in 2:length(lres)) {
+                    geneSets <- append(geneSets, lres[[i]]@geneSets)
+                }
+            }
+            res <- lres[[1]]
+            res@result <- df
+            res@geneSets <- geneSets
+            return(res)
+        }
+
+        hybrid <- build_hybrid_go_data(
             OrgDb = OrgDb,
-            keyType = "ENTREZID",
             ont = ont,
+            keyType = keyType,
+            gene = gene_ids,
+            universe = if (has_universe) universe else NULL,
+            evidence = evidence
+        )
+
+        gene_internal <- hybrid_ids_for_input(gene_ids, hybrid$mapping, keyType)
+        universe_internal <- NULL
+        if (has_universe && !is.null(universe)) {
+            universe_internal <- hybrid_ids_for_input(
+                unique(as.character(universe)), hybrid$mapping, keyType
+            )
+        } else {
+            universe_internal <- unique(hybrid$gson@gsid2gene$gene)
+            message(
+                "--> No universe supplied; using ",
+                length(universe_internal),
+                " genes with ", ont,
+                " annotations as the background (hybrid Entrez/native annotation)."
+            )
+        }
+
+        res <- enrichit::ora_gson(
+            gene_internal,
             pvalueCutoff = pvalueCutoff,
             pAdjustMethod = pAdjustMethod,
-            universe = universe,
+            universe = universe_internal,
             qvalueCutoff = qvalueCutoff,
             minGSSize = minGSSize,
             maxGSSize = maxGSSize,
-            readable = readable,
-            pool = pool,
-            evidence = evidence
+            gson = hybrid$gson
         )
-        
         if (is.null(res)) {
             return(NULL)
         }
-        
+
+        res@organism <- get_organism(OrgDb)
+        res@ontology <- ont
         res@keytype <- keyType
-        
-        # map geneID back to original keyType
-        if (readable) {
-            res <- setReadable(res, OrgDb, keyType = "ENTREZID")
-        } else {
-            res <- setReadable(res, OrgDb, keyType = "ENTREZID", toType = keyType)
-            res@readable <- FALSE
+        res <- restore_hybrid_result(
+            res,
+            OrgDb = OrgDb,
+            keyType = keyType,
+            mapping = hybrid$mapping,
+            readable = readable,
+            original_gene = gene_ids,
+            original_universe = if (has_universe) universe else NULL
+        )
+        if (ont == "ALL") {
+            res <- add_GO_Ontology(res, hybrid$gson)
         }
-        
         return(res)
     }
 
@@ -191,18 +320,304 @@ enrichGO <- function(
     return(res)
 }
 
-map_to_entrezid <- function(gene, fromType, OrgDb) {
-    gene <- unique(as.character(gene))
-    if (length(gene) == 0L) {
-        return(character(0))
+map_keytype_to_entrez <- function(ids, fromType, OrgDb, chunk_size = 50000L) {
+    ids <- unique(as.character(ids))
+    ids <- ids[!is.na(ids)]
+    if (!length(ids)) {
+        return(data.frame(source = character(), entrez = character(),
+                          stringsAsFactors = FALSE))
     }
 
-    mapped <- bitr(gene, fromType = fromType, toType = "ENTREZID", OrgDb = OrgDb)
-    if (is.null(mapped) || nrow(mapped) == 0L) {
-        return(character(0))
+    chunks <- split(ids, ceiling(seq_along(ids) / chunk_size))
+    mapped <- lapply(chunks, function(chunk) {
+        x <- suppressWarnings(suppressMessages(
+            AnnotationDbi::select(
+                OrgDb,
+                keys = chunk,
+                keytype = fromType,
+                columns = "ENTREZID"
+            )
+        ))
+        if (!nrow(x) || !fromType %in% names(x) || !"ENTREZID" %in% names(x)) {
+            return(NULL)
+        }
+        x <- x[, c(fromType, "ENTREZID"), drop = FALSE]
+        colnames(x) <- c("source", "entrez")
+        x
+    })
+    mapped <- mapped[!vapply(mapped, is.null, logical(1))]
+    if (!length(mapped)) {
+        return(data.frame(source = character(), entrez = character(),
+                          stringsAsFactors = FALSE))
     }
 
-    unique(as.character(mapped$ENTREZID))
+    mapped <- unique(do.call(rbind, mapped))
+    mapped <- mapped[!is.na(mapped$source) & !is.na(mapped$entrez), , drop = FALSE]
+    mapped$source <- as.character(mapped$source)
+    mapped$entrez <- as.character(mapped$entrez)
+    mapped
+}
+
+hybrid_ids_for_input <- function(ids, mapping, keyType) {
+    ids <- unique(as.character(ids))
+    if (!length(ids)) {
+        return(character())
+    }
+
+    out <- lapply(ids, function(id) {
+        entrez <- unique(mapping$entrez[mapping$source == id])
+        if (length(entrez)) {
+            paste0("E:", entrez)
+        } else {
+            paste0("N:", keyType, ":", id)
+        }
+    })
+    unique(unlist(out, use.names = FALSE))
+}
+
+build_hybrid_go_data <- function(OrgDb, ont, keyType, gene, universe = NULL,
+                                 evidence = NULL) {
+    OrgDb <- yulab.utils::load_OrgDb(OrgDb)
+    has_universe <- !is.null(universe)
+    source_ids <- if (has_universe) {
+        unique(c(as.character(gene), as.character(universe)))
+    } else {
+        AnnotationDbi::keys(OrgDb, keytype = keyType)
+    }
+
+    mapping <- map_keytype_to_entrez(source_ids, keyType, OrgDb)
+    native_ids <- setdiff(source_ids, unique(mapping$source))
+
+    entrez_gson <- get_GO_data(
+        OrgDb,
+        ont = ont,
+        keytype = "ENTREZID",
+        evidence = evidence
+    )
+    entrez_anno <- unique(entrez_gson@gsid2gene[, c("gsid", "gene"), drop = FALSE])
+    entrez_anno$gene <- paste0("E:", as.character(entrez_anno$gene))
+
+    native_anno <- data.frame(
+        gsid = character(),
+        gene = character(),
+        stringsAsFactors = FALSE
+    )
+    if (length(native_ids)) {
+        columns <- c("GOALL", "ONTOLOGYALL")
+        if (!is.null(evidence)) {
+            columns <- c(columns, "EVIDENCEALL")
+        }
+        native <- tryCatch(
+            suppressWarnings(suppressMessages(
+                AnnotationDbi::select(
+                    OrgDb,
+                    keys = native_ids,
+                    keytype = keyType,
+                    columns = columns
+                )
+            )),
+            error = function(e) data.frame()
+        )
+        if (nrow(native)) {
+            native <- native[!is.na(native$GOALL) &
+                             !is.na(native$ONTOLOGYALL), , drop = FALSE]
+            if (ont != "ALL") {
+                native <- native[native$ONTOLOGYALL == ont, , drop = FALSE]
+            }
+            if (!is.null(evidence) && "EVIDENCEALL" %in% names(native)) {
+                native <- native[native$EVIDENCEALL %in% evidence, , drop = FALSE]
+            }
+            if (nrow(native)) {
+                native_anno <- unique(data.frame(
+                    gsid = as.character(native$GOALL),
+                    gene = paste0("N:", keyType, ":",
+                                  as.character(native[[keyType]])),
+                    stringsAsFactors = FALSE
+                ))
+            }
+        }
+    }
+
+    gsid2gene <- unique(rbind(entrez_anno, native_anno))
+    if (!nrow(gsid2gene)) {
+        stop("No GO annotation is available for the requested hybrid key space.")
+    }
+
+    gsid2name <- entrez_gson@gsid2name
+    if (!is.null(gsid2name)) {
+        gsid2name <- gsid2name[
+            gsid2name$gsid %in% unique(gsid2gene$gsid),
+            , drop = FALSE
+        ]
+    }
+
+    hybrid_gson <- gson::gson(
+        gsid2gene = gsid2gene,
+        gsid2name = gsid2name,
+        species = entrez_gson@species,
+        gsname = entrez_gson@gsname,
+        version = entrez_gson@version,
+        accessed_date = entrez_gson@accessed_date,
+        keytype = keyType
+    )
+
+    list(gson = hybrid_gson, mapping = mapping)
+}
+
+hybrid_source_labels <- function(ids, mapping, keyType) {
+    ids <- as.character(ids)
+    labels <- ids
+    native <- startsWith(ids, paste0("N:", keyType, ":"))
+    labels[native] <- sub(paste0("^N:", keyType, ":"), "", ids[native])
+
+    entrez <- startsWith(ids, "E:")
+    if (any(entrez)) {
+        e <- sub("^E:", "", ids[entrez])
+        reverse <- mapping$source[match(e, mapping$entrez)]
+        reverse[is.na(reverse)] <- e[is.na(reverse)]
+        labels[entrez] <- reverse
+    }
+    names(labels) <- ids
+    labels
+}
+
+hybrid_symbol_labels <- function(ids, source_labels, mapping, OrgDb, keyType) {
+    symbols <- source_labels[ids]
+    entrez <- startsWith(ids, "E:")
+    native <- startsWith(ids, paste0("N:", keyType, ":"))
+
+    if (any(native)) {
+        native_ids <- source_labels[ids[native]]
+        native_names <- tryCatch(
+            enrichit::EXTID2NAME(OrgDb, native_ids, keyType, "SYMBOL"),
+            error = function(e) setNames(native_ids, native_ids)
+        )
+        symbols[native] <- unname(native_names[native_ids])
+    }
+
+    if (any(entrez)) {
+        e <- sub("^E:", "", ids[entrez])
+        mapped_source <- mapping$source[match(e, mapping$entrez)]
+        have_source <- !is.na(mapped_source)
+        if (any(have_source)) {
+            source_names <- tryCatch(
+                enrichit::EXTID2NAME(
+                    OrgDb,
+                    mapped_source[have_source],
+                    keyType,
+                    "SYMBOL"
+                ),
+                error = function(e) setNames(
+                    mapped_source[have_source],
+                    mapped_source[have_source]
+                )
+            )
+            symbols[which(entrez)[have_source]] <-
+                unname(source_names[mapped_source[have_source]])
+        }
+        if (any(!have_source)) {
+            entrez_names <- tryCatch(
+                enrichit::EXTID2NAME(
+                    OrgDb,
+                    e[!have_source],
+                    "ENTREZID",
+                    "SYMBOL"
+                ),
+                error = function(err) setNames(e[!have_source], e[!have_source])
+            )
+            symbols[which(entrez)[!have_source]] <-
+                unname(entrez_names[e[!have_source]])
+        }
+    }
+    names(symbols) <- ids
+    symbols
+}
+
+restore_entrez_result_ids <- function(x, OrgDb, keyType, original_gene,
+                                      original_universe = NULL) {
+    internal <- unique(unlist(x@geneSets, use.names = FALSE))
+    internal <- as.character(internal[!is.na(internal)])
+    source_labels <- if (length(internal)) {
+        names_map <- tryCatch(
+            enrichit::EXTID2NAME(OrgDb, internal, "ENTREZID", keyType),
+            error = function(e) setNames(internal, internal)
+        )
+        setNames(unname(names_map), internal)
+    } else {
+        character()
+    }
+
+    x@geneSets <- lapply(x@geneSets, function(ids) {
+        unique(unname(source_labels[as.character(ids)]))
+    })
+    result_gene_ids <- unique(unlist(strsplit(
+        as.character(x@result$geneID), "/", fixed = TRUE
+    )))
+    x@gene <- unique(c(
+        as.character(original_gene),
+        unlist(x@geneSets, use.names = FALSE),
+        result_gene_ids
+    ))
+
+    if (!is.null(original_universe)) {
+        x@universe <- unique(as.character(original_universe))
+    } else if (length(x@universe)) {
+        universe_ids <- as.character(x@universe)
+        universe_map <- tryCatch(
+            enrichit::EXTID2NAME(
+                OrgDb,
+                universe_ids,
+                "ENTREZID",
+                keyType
+            ),
+            error = function(e) setNames(universe_ids, universe_ids)
+        )
+        x@universe <- unique(unname(universe_map))
+    }
+    x@keytype <- keyType
+    x
+}
+restore_hybrid_result <- function(x, OrgDb, keyType, mapping, readable,
+                                  original_gene, original_universe = NULL) {
+    internal <- unique(c(
+        as.character(x@gene),
+        as.character(x@universe),
+        unlist(x@geneSets, use.names = FALSE)
+    ))
+    internal <- internal[!is.na(internal)]
+    source_labels <- hybrid_source_labels(internal, mapping, keyType)
+    symbol_labels <- hybrid_symbol_labels(
+        internal, source_labels, mapping, OrgDb, keyType
+    )
+
+    gc <- geneInCategory(x)
+    if (length(gc)) {
+        values <- if (readable || keyType == "SYMBOL") {
+            symbol_labels
+        } else {
+            source_labels
+        }
+        x@result$geneID <- vapply(gc, function(ids) {
+            paste0(unique(unname(values[as.character(ids)])), collapse = "/")
+        }, character(1))
+    }
+
+    x@geneSets <- lapply(x@geneSets, function(ids) {
+        unique(unname(source_labels[as.character(ids)]))
+    })
+    result_gene_ids <- unique(unlist(strsplit(
+        as.character(x@result$geneID), "/", fixed = TRUE
+    )))
+    x@gene <- unique(c(
+        unname(source_labels[as.character(x@gene)]),
+        unlist(x@geneSets, use.names = FALSE),
+        result_gene_ids
+    ))
+    x@universe <- unique(unname(source_labels[as.character(x@universe)]))
+    x@gene2Symbol <- symbol_labels
+    x@keytype <- keyType
+    x@readable <- isTRUE(readable) || keyType == "SYMBOL"
+    x
 }
 
 #' Can the cached GO annotation serve this request?

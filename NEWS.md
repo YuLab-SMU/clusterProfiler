@@ -1,4 +1,9 @@
 
+# clusterProfiler 4.21.3
+
++ fix `enrichGO()` with a non-`ENTREZID` `keyType` when some source IDs cannot be mapped to Entrez: the memory-saving Entrez annotation remains the fast path, while unmapped source IDs are added through direct native-key annotations and analyzed in one hybrid GSON; when `universe` is omitted, the effective annotated hybrid background is constructed and reported by message instead of silently dropping IDs (#829, 2026-10-03, Sat)
++ restore the original source `keyType` consistently after the Entrez optimization and readable conversion, including result metadata and projected gene-set memberships (#829, 2026-10-03, Sat)
+
 # clusterProfiler 4.21.2
 
 + `enrichMKEGG()` and `gseMKEGG()` accept a `GSON` object for `organism`, as `enrichKEGG()`/`gseKEGG()` already did, so KEGG **module** enrichment can run against a locally built annotation (`gson_KEGG()`) when KEGG is unreachable; they also now stop with "organism should be a species name or a GSON object" instead of an unrelated error from the organism mapper. The `organism` documentation for the KEGG functions now mentions the GSON option at all (2026-09-22, Tue, #623)
