@@ -87,3 +87,21 @@ test_that("all-NA padding rows neither reach the prompt nor change the similarit
   expect_identical(attr(red, "n_original"), 4L)
   expect_identical(attr(red, "reduction_method"), "jaccard")
 })
+
+test_that("an Entrez-keyed result with no symbol table reaches the prompt as gene symbols", {
+  skip_if_not_installed("org.Hs.eg.db")
+  rfp <- getFromNamespace(".readable_for_prompt", "clusterProfiler")
+  df <- data.frame(ID = "GO:0007049", Description = "cell cycle", setSize = 3L, enrichmentScore = 0.8,
+                   NES = 2.1, pvalue = 0.001, p.adjust = 0.01, qvalue = 0.01, rank = 1L,
+                   leading_edge = "tags=100%", core_enrichment = "7157/4609/595", stringsAsFactors = FALSE)
+  rownames(df) <- df$ID
+  gl <- sort(c(`7157` = 3, `4609` = 2, `595` = 1, `1019` = -1), decreasing = TRUE)
+  x <- new("gseaResult", result = df, organism = "Homo sapiens", setType = "BP", geneSets = list(),
+           geneList = gl, keytype = "ENTREZID", permScores = matrix(), params = list(), readable = FALSE)
+  y <- rfp(x)
+  expect_true(y@readable)
+  expect_setequal(strsplit(as.data.frame(y)$core_enrichment, "/")[[1]], c("TP53", "MYC", "CCND1"))
+  # an object whose organism has no known OrgDb is left alone
+  x@organism <- "Danio rerio"
+  expect_false(rfp(x)@readable)
+})

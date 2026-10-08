@@ -9,7 +9,6 @@ interpret_hierarchical(
   x_major,
   mapping,
   model = NULL,
-  task = "cell_type",
   max_tokens = 8192,
   temperature = 0.3,
   n_pathways = NULL,
@@ -29,8 +28,6 @@ package-wide default model configured via `aisdk::set_model()`. You can
 also supply a model ID in `provider:model` format or a `LanguageModelV1`
 object. Bare model names are supported with a warning.}
 
-\item{task}{Task type, default "cell_type".}
-
 \item{max_tokens}{Maximum tokens. Default 8192.}
 
 \item{temperature}{Sampling temperature. Default 0.3.}
@@ -39,7 +36,8 @@ object. Bare model names are supported with a warning.}
 by default every significant term, one representative per theme.}
 }
 \value{
-An `interpretation_list` object.
+An `interpretation_list` object with a cell-type label (`cell_type`, `confidence`,
+  `reasoning`, `markers`) per sub-cluster.
 }
 \description{
 First interprets major clusters to establish lineage context, then interprets

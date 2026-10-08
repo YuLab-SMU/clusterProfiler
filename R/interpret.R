@@ -71,53 +71,27 @@ NULL
   )
 }
 
-.annotation_refinement_schema <- function() {
-  z_object(
-    cell_type = z_string("The final identified cell type label (refined or corrected)"),
-    refinement_status = z_enum(
-      c("Confirmed", "Refined", "Corrected"),
-      description = "Whether the preliminary annotation was confirmed, refined, or corrected"
-    ),
-    confidence = z_enum(c("High", "Medium", "Low"), description = "Confidence level"),
-    reasoning = z_string(
-      "Why you confirmed, refined, or corrected the label, citing specific evidence"
-    ),
-    regulatory_drivers = z_string("Key TFs or master regulators"),
-    markers = z_array(z_string(), description = "Supporting markers or pathways"),
-    refined_network = z_array(
-      z_object(
-        source = z_string("Source gene or protein"),
-        target = z_string("Target gene or protein"),
-        interaction = z_string("Type of interaction"),
-        reason = z_string("Why this edge is relevant")
-      ),
-      description = "Core regulatory network edges"
-    ),
-    network_evidence = z_string("Protein complexes or signaling modules supporting the conclusion")
+# Synthesizer output of interpret_agent(): the interpretation fields plus a direct answer to the
+# question the context poses and, when other tools' results were supplied as `prior`, a verdict on
+# them. Kept separate from .interpretation_schema() so interpret() returns exactly what it did.
+.synthesis_schema <- function(has_prior = FALSE) {
+  base <- .interpretation_schema()
+  extra <- list(
+    conclusion = z_string(paste(
+      "The single most direct answer to the question the context poses (for example a cell type,",
+      "a regulator, or a disrupted complex), in a few words. 'None' if the context poses no such question."
+    ))
   )
-}
-
-.phenotype_schema <- function() {
-  z_object(
-    phenotype = z_string("A concise label for the biological phenotype or state"),
-    confidence = z_enum(c("High", "Medium", "Low"), description = "Confidence level"),
-    reasoning = z_string("How the enriched terms support this phenotype"),
-    regulatory_drivers = z_string("Key TFs or master regulators that drive this phenotype"),
-    key_processes = z_array(
-      z_string(),
-      description = "Key pathways or terms that define this phenotype"
-    ),
-    refined_network = z_array(
-      z_object(
-        source = z_string("Source gene or protein"),
-        target = z_string("Target gene or protein"),
-        interaction = z_string("Type of interaction"),
-        reason = z_string("Why this edge is relevant")
-      ),
-      description = "Core regulatory network edges"
-    ),
-    network_evidence = z_string("Protein complexes or signaling modules supporting the conclusion")
-  )
+  if (has_prior) {
+    extra$prior_verdict <- z_enum(
+      c("Confirmed", "Refined", "Corrected", "Not assessable"),
+      description = "Whether the enrichment and gene evidence confirms, refines or corrects the results supplied by other tools"
+    )
+    extra$prior_rationale <- z_string(
+      "Why the other tools' results were confirmed, refined or corrected, citing pathways or genes from the input"
+    )
+  }
+  do.call(z_object, c(base$properties, extra))
 }
 
 .cleaner_schema <- function() {
@@ -332,7 +306,13 @@ process_enrichment_input <- function(x, n_pathways) {
       })
       paste(edges_text, collapse = "\n")
     },
-    error = function(e) NULL
+    # A failed STRING query used to return NULL silently, so a call with add_ppi = TRUE ran without any
+    # network and nothing said so (observed 2026-09-30: an unreadable CA bundle made every query fail).
+    error = function(e) {
+      rlang::warn(paste0("add_ppi = TRUE, but the STRING query failed; interpreting without PPI evidence. ",
+                         conditionMessage(e)))
+      NULL
+    }
   )
 }
 
@@ -389,7 +369,7 @@ process_enrichment_input <- function(x, n_pathways) {
   )
 }
 
-.annotation_system_prompt <- function(cluster_id, has_prior = FALSE) {
+.annotation_system_prompt <- function(cluster_id) {
   base <- paste0(
     "You are an expert cell biologist analyzing cluster ", cluster_id,
     " from a single-cell RNA-seq experiment.\n\n",
@@ -411,27 +391,7 @@ process_enrichment_input <- function(x, n_pathways) {
     "- NO HALLUCINATION: Do not invent markers or pathways not present in the input.\n",
     "- CITATION REQUIRED: Every conclusion must cite specific pathways or markers from the data."
   )
-  if (has_prior) {
-    paste0(base, "\n\nTask: Validate and refine the preliminary annotation based on the enrichment and marker evidence.")
-  } else {
-    paste0(base, "\n\nTask: Identify the cell type of this cluster based on the enrichment results and marker genes.")
-  }
-}
-
-.phenotype_system_prompt <- function(group_id) {
-  paste0(
-    "You are an expert biologist characterizing the biological phenotype of group ", group_id, ".\n\n",
-    "Use the following logic:\n",
-    "1. Source Deconvolution: Separate observed processes (Pathways) from drivers (TFs).\n",
-    "2. Synthesize enriched terms to identify the dominant biological theme.\n",
-    "3. Be specific about direction or nature of the state ",
-    "(e.g., 'M1 Macrophage Polarization' over 'Immune response').\n",
-    "4. Assign a concise Phenotype Label.\n",
-    "5. Network Analysis: Use PPI data to identify functional modules and key drivers.\n\n",
-    "GROUNDING INSTRUCTION:\n",
-    "- Every phenotype claim must be supported by evidence.\n",
-    "- List the specific pathways or TFs that define this phenotype."
-  )
+  paste0(base, "\n\nTask: Identify the cell type of this cluster based on the enrichment results and marker genes.")
 }
 
 # ============================================================================
@@ -453,16 +413,15 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   (e.g., "scRNA-seq of mouse myocardial infarction at day 3").
 #' @param n_pathways Maximum number of terms (per cluster) sent to the model, taken in order
 #'   of adjusted p-value after reduction. `NULL` (default) sends every term that passes the
-#'   object's cutoffs; with `reduce = TRUE` that is one representative per theme.
+#'   object's cutoffs; with `reduce = TRUE` that is one representative per theme. On five
+#'   public lists a cap below the number of representatives named fewer themes of the full
+#'   result; set a cap (for example 20) for very long lists or models with a short context.
 #' @param model Optional LLM model. When `NULL` (default), uses the aisdk
 #'   package-wide default model configured via `aisdk::set_model()`.
 #'   You can also supply a model ID in `provider:model` format
 #'   (e.g., `"deepseek:deepseek-chat"`, `"gemini:gemini-2.5-flash"`) or a
 #'   `LanguageModelV1` object. Bare model names are supported with a warning
 #'   (e.g., `"deepseek-chat"`).
-#' @param task Task type: "interpretation" (default), "cell_type"/"annotation",
-#'   or "phenotype"/"phenotyping".
-#' @param prior Optional prior knowledge or preliminary annotation to guide the task.
 #' @param add_ppi Logical, whether to query STRING PPI network data. Default FALSE.
 #' @param gene_fold_change Named numeric vector of log fold changes for expression context.
 #' @param max_tokens Maximum tokens for the LLM response. Default 8192.
@@ -485,10 +444,12 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   Equivalent to setting `options(aisdk.debug = TRUE)` for the call.
 #' @param reduce_go,go_reduction_threshold Earlier names of `reduce` and `reduce_threshold`,
 #'   still accepted; a call that passes `reduce_go` keeps its earlier default threshold of 0.7.
-#' @return An `interpretation` object (list) with task-specific fields.
-#'   For "interpretation": overview, key_mechanisms, hypothesis, narrative, etc.
-#'   For "annotation": cell_type, confidence, reasoning, markers, etc.
-#'   For "phenotype": phenotype, confidence, reasoning, key_processes, etc.
+#' @return An `interpretation` object (list): overview, regulatory_drivers, key_mechanisms,
+#'   crosstalk, hypothesis, narrative, refined_network and network_evidence. `interpret()`
+#'   interprets the enrichment result and nothing else; to combine it with the results of
+#'   other tools (a SingleR label, a TF-activity ranking, a complex enrichment) and reach a
+#'   conclusion, use [interpret_agent()] with `prior`.
+#' @md
 #' @export
 #' @examples
 #' \dontrun{
@@ -504,9 +465,11 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   model = "deepseek:deepseek-chat",
 #'   context = "Cancer proliferation study"
 #' )
-#' # Every significant GO term, one representative per theme (the default)
+#' # Every significant term, one representative per theme (the default)
 #' ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
 #' res <- interpret(ego)
+#' # The 20 most significant themes only, for a short context
+#' res <- interpret(ego, n_pathways = 20)
 #' # The earlier behaviour: the 20 most significant terms, unreduced
 #' res <- interpret(ego, n_pathways = 20, reduce = FALSE)
 #' # Reuse aisdk's global default model
@@ -518,8 +481,6 @@ interpret <- function(x,
                       context = NULL,
                       n_pathways = NULL,
                       model = NULL,
-                      task = "interpretation",
-                      prior = NULL,
                       add_ppi = FALSE,
                       gene_fold_change = NULL,
                       max_tokens = 8192,
@@ -531,6 +492,33 @@ interpret <- function(x,
                       reduce_go = NULL,
                       go_reduction_threshold = NULL) {
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
+  .interpret_run(
+    x, context = context, n_pathways = n_pathways, model = model, task = "interpretation",
+    add_ppi = add_ppi, gene_fold_change = gene_fold_change, max_tokens = max_tokens,
+    temperature = temperature, reduce = reduce, reduce_threshold = reduce_threshold,
+    reasoning = reasoning, verbose = verbose, reduce_go = reduce_go,
+    go_reduction_threshold = go_reduction_threshold
+  )
+}
+
+# One structured call per unit. `task = "cell_type"` is kept internal for interpret_hierarchical(),
+# whose Major -> Minor constraint needs a cell-type label at the major level; interpret() itself
+# always runs the interpretation schema.
+.interpret_run <- function(x,
+                           context = NULL,
+                           n_pathways = NULL,
+                           model = NULL,
+                           task = "interpretation",
+                           add_ppi = FALSE,
+                           gene_fold_change = NULL,
+                           max_tokens = 8192,
+                           temperature = 0.3,
+                           reduce = TRUE,
+                           reduce_threshold = NULL,
+                           reasoning = NULL,
+                           verbose = FALSE,
+                           reduce_go = NULL,
+                           go_reduction_threshold = NULL) {
 
   old_debug <- getOption("aisdk.debug", FALSE)
   if (isTRUE(verbose)) {
@@ -540,6 +528,7 @@ interpret <- function(x,
 
   # Deterministic reduction before any prompt is built (see reduce_redundancy()).
   x <- .reduce_for_prompt(x, reduce, reduce_threshold, reduce_go, go_reduction_threshold)
+  x <- .readable_for_prompt(x)
 
   model <- .normalize_interpret_model(model)
   res_list <- process_enrichment_input(x, n_pathways)
@@ -579,7 +568,6 @@ interpret <- function(x,
 
     pathway_text <- if (nrow(df) > 0) .format_pathway_text(df) else "No significant enriched pathways found."
 
-    current_prior <- .resolve_prior(prior, name)
     ppi_text <- .get_ppi_if_requested(add_ppi, df, genes, x)
     fc_text <- .get_fc_text(gene_fold_change, df, genes)
 
@@ -587,16 +575,11 @@ interpret <- function(x,
       pathway_text, context, ppi_text, fc_text, top_genes_text
     )
 
-    if (!is.null(current_prior) && nzchar(current_prior)) {
-      user_prompt <- paste0(user_prompt, "\n\nPreliminary Annotation:\n", current_prior)
-    }
-
     res <- .call_generate_object(
       model = model,
       task = task,
       cluster_id = name,
       user_prompt = user_prompt,
-      has_prior = !is.null(current_prior),
       max_tokens = max_tokens,
       temperature = temperature,
       reasoning = reasoning,
@@ -670,7 +653,9 @@ interpret <- function(x,
 
 #' Interpret enrichment results using a multi-agent pipeline (Deep Mode)
 #'
-#' Employs specialized AI agents in sequence for rigorous interpretation:
+#' Employs specialized AI agents in sequence for rigorous interpretation, and is the entry
+#' point that combines the enrichment evidence with the results of other tools (`prior`)
+#' into a conclusion:
 #' \enumerate{
 #'   \item Agent Cleaner: Filters noise and selects relevant pathways.
 #'   \item Agent Detective: Identifies key regulators and functional modules.
@@ -683,7 +668,16 @@ interpret <- function(x,
 #' Uses aisdk's Agent and Session system for shared context across agents.
 #'
 #' @param x An enrichment result object.
-#' @param context A string describing the experimental background.
+#' @param context A string describing the experimental background. State the question the
+#'   analysis should answer here (for example "which cell type is this cluster?"); the answer
+#'   is returned as `conclusion`.
+#' @param prior Optional results of other tools to be checked against the enrichment
+#'   evidence, as text: a SingleR or scGPT label, a ranked list of transcription factors from
+#'   a regulon analysis, the protein complexes enriched in the gene list, and so on. A single
+#'   string applies to every cluster; a named character vector or list supplies one entry
+#'   per cluster. The Detective and the Synthesizer see it as a claim to check, not as
+#'   evidence, and the result gains `prior_verdict` (Confirmed, Refined, Corrected or Not
+#'   assessable) and `prior_rationale`.
 #' @param n_pathways Maximum number of terms (per cluster) the Cleaner starts from, taken in
 #'   order of adjusted p-value after reduction. `NULL` (default) uses every term that passes
 #'   the object's cutoffs; with `reduce = TRUE` that is one representative per theme.
@@ -692,7 +686,8 @@ interpret <- function(x,
 #'   also supply a model ID in `provider:model` format or a `LanguageModelV1`
 #'   object. Bare model names are supported with a warning.
 #' @param add_ppi Logical, whether to query PPI data. Default FALSE.
-#' @param gene_fold_change Named numeric vector of log fold changes.
+#' @param gene_fold_change Named numeric vector of log fold changes. When supplied, the most
+#'   up-regulated genes are also listed to the Detective and the Synthesizer as marker genes.
 #' @param max_tokens Maximum tokens per agent call. Default 8192.
 #' @param temperature Sampling temperature. Default 0.3.
 #' @param review Logical, whether to run a final Reviewer agent (Agent 4) that
@@ -726,9 +721,10 @@ interpret <- function(x,
 #' @param verbose Logical, whether to print debug messages. Default FALSE.
 #' @param reduce_go,go_reduction_threshold Earlier names of `reduce` and `reduce_threshold`,
 #'   still accepted; a call that passes `reduce_go` keeps its earlier default threshold of 0.7.
-#' @return An `interpretation` object with deep analysis fields plus
-#'   regulatory_drivers, refined_network, and network_evidence from the
-#'   detective agent. When `review = TRUE`, also includes `review` and
+#' @return An `interpretation` object with deep analysis fields, `conclusion` (the answer to
+#'   the question the context poses), plus regulatory_drivers, refined_network, and
+#'   network_evidence from the detective agent. When `prior` is supplied, also
+#'   `prior_verdict` and `prior_rationale`. When `review = TRUE`, also includes `review` and
 #'   `overview_original`. The `review` field reports grounding separately from
 #'   resolution: `abstain_recommended = "yes"` flags a draft whose cited
 #'   evidence is real but which resolves to a more specific entity than that
@@ -743,9 +739,16 @@ interpret <- function(x,
 #'   context = "scRNA-seq of mouse MI day 3"
 #' )
 #' print(res)
+#' # Check another tool's answer against the enrichment evidence
+#' res <- interpret_agent(ego_cluster3,
+#'   context = "PBMC scRNA-seq; which cell type is cluster 3?",
+#'   gene_fold_change = fc3, prior = "SingleR (HPCA): T_cell:CD4+_Naive"
+#' )
+#' res$conclusion; res$prior_verdict
 #' }
 interpret_agent <- function(x,
                             context = NULL,
+                            prior = NULL,
                             n_pathways = NULL,
                             model = NULL,
                             add_ppi = FALSE,
@@ -769,6 +772,7 @@ interpret_agent <- function(x,
 
   # The same deterministic reduction interpret() runs, before any model call.
   x <- .reduce_for_prompt(x, reduce, reduce_threshold, reduce_go, go_reduction_threshold)
+  x <- .readable_for_prompt(x)
 
   model <- .normalize_interpret_model(model)
   res_list <- process_enrichment_input(x, n_pathways)
@@ -813,6 +817,15 @@ interpret_agent <- function(x,
 
     ppi_text <- .get_ppi_if_requested(add_ppi, df, original_genes, x, fallback_mode)
     fc_text <- .get_fc_text(gene_fold_change, df, original_genes, fallback_mode)
+    marker_text <- if (!is.null(gene_fold_change)) .get_top_genes_text(original_genes, gene_fold_change) else NULL
+    current_prior <- .resolve_prior(prior, name)
+    if (!is.null(current_prior)) current_prior <- paste(unlist(current_prior), collapse = "\n")
+    has_prior <- !is.null(current_prior) && nzchar(current_prior)
+    prior_text <- if (has_prior) {
+      paste0("\n\nResults of other tools (claims to check against the evidence above, not evidence):\n", current_prior)
+    } else {
+      ""
+    }
 
     session <- ChatSession$new(model = model)
 
@@ -898,7 +911,9 @@ interpret_agent <- function(x,
       if (fallback_mode) "WARNING: No significant enriched pathways found. Analyzing RAW GENE LISTS.\n\n" else "",
       "Filtered Pathways:\n", cleaned_pathways,
       if (!is.null(ppi_text)) paste0("\n\nPPI Network Evidence:\n", ppi_text) else "",
-      if (!is.null(fc_text)) paste0("\n\nGene Fold Changes:\n", fc_text) else ""
+      if (!is.null(fc_text)) paste0("\n\nGene Fold Changes:\n", fc_text) else "",
+      if (!is.null(marker_text)) paste0("\n\nTop Marker Genes (highest fold change):\n", marker_text) else "",
+      prior_text
     )
 
     detective_res <- tryCatch(
@@ -933,7 +948,9 @@ interpret_agent <- function(x,
       if (fallback_mode) "WARNING: No significant enriched pathways found. Interpret with caution.\n\n" else "",
       "Data Sources:\n",
       "1. Relevant Pathways:\n", cleaned_pathways, "\n\n",
-      "2. Detective's Report (Drivers & Modules):\n", detective_text
+      "2. Detective's Report (Drivers & Modules):\n", detective_text,
+      if (!is.null(marker_text)) paste0("\n\n3. Top Marker Genes (highest fold change):\n", marker_text) else "",
+      prior_text
     )
 
     synth_system <- paste0(
@@ -943,7 +960,14 @@ interpret_agent <- function(x,
       "1. Write a comprehensive Overview.\n",
       "2. Explain Key Mechanisms, linking Regulators -> Modules -> Pathways.\n",
       "3. Formulate a Hypothesis.\n",
-      "4. Draft a Narrative paragraph for a paper."
+      "4. Draft a Narrative paragraph for a paper.\n",
+      "5. Conclusion: answer the question the context poses in a few words, from the evidence.",
+      if (has_prior) paste0(
+        "\n6. Other tools' results were supplied. Judge them against the pathways, the Detective's ",
+        "report and the marker genes: Confirmed if the evidence supports them as given, Refined if ",
+        "it supports a more specific or partly different answer, Corrected if it contradicts them, ",
+        "Not assessable if the evidence cannot decide. Your conclusion follows the evidence, not the tools."
+      ) else ""
     )
 
     final_res <- tryCatch(
@@ -952,7 +976,7 @@ interpret_agent <- function(x,
           reasoning = reasoning,
           collector = .prov, stage = "synthesizer",
           model = model, prompt = synthesizer_prompt,
-          schema = .interpretation_schema(), schema_name = "synthesis_result",
+          schema = .synthesis_schema(has_prior), schema_name = "synthesis_result",
           system = synth_system,
           temperature = temperature, max_tokens = max_tokens
         )
@@ -1050,7 +1074,7 @@ interpret_agent <- function(x,
   results <- Filter(Negate(is.null), results)
   names(results) <- vapply(results, function(r) r$cluster %||% "Unknown", character(1))
   .p <- .prov_finalize(.prov, "interpret_agent", .ev_sha,
-                       extra = list(review_enabled = isTRUE(review)))
+                       extra = list(review_enabled = isTRUE(review), prior_supplied = !is.null(prior)))
 
   if (length(results) == 1 && names(results)[1] == "Default") {
     return(.attach_provenance(results[[1]], .p))
@@ -1075,18 +1099,17 @@ interpret_agent <- function(x,
 #'   package-wide default model configured via `aisdk::set_model()`. You can
 #'   also supply a model ID in `provider:model` format or a `LanguageModelV1`
 #'   object. Bare model names are supported with a warning.
-#' @param task Task type, default "cell_type".
 #' @param max_tokens Maximum tokens. Default 8192.
 #' @param temperature Sampling temperature. Default 0.3.
 #' @param n_pathways,reduce,reduce_threshold Passed to both levels, as in \code{interpret()}:
 #'   by default every significant term, one representative per theme.
-#' @return An `interpretation_list` object.
+#' @return An `interpretation_list` object with a cell-type label (`cell_type`, `confidence`,
+#'   `reasoning`, `markers`) per sub-cluster.
 #' @export
 interpret_hierarchical <- function(x_minor,
                                    x_major,
                                    mapping,
                                    model = NULL,
-                                   task = "cell_type",
                                    max_tokens = 8192,
                                    temperature = 0.3,
                                    n_pathways = NULL,
@@ -1095,7 +1118,7 @@ interpret_hierarchical <- function(x_minor,
   model <- .normalize_interpret_model(model)
 
   message("Step 1: Interpreting Major Clusters to establish lineage context...")
-  res_major <- interpret(
+  res_major <- .interpret_run(
     x_major,
     context = NULL, model = model, task = "cell_type",
     max_tokens = max_tokens, temperature = temperature,
@@ -1104,6 +1127,7 @@ interpret_hierarchical <- function(x_minor,
 
   message("Step 2: Interpreting Sub-clusters using hierarchical constraints...")
   x_minor <- .reduce_for_prompt(x_minor, reduce, reduce_threshold)
+  x_minor <- .readable_for_prompt(x_minor)
   res_list_minor <- process_enrichment_input(x_minor, n_pathways = n_pathways)
 
   results <- lapply(names(res_list_minor), function(name) {
@@ -1124,10 +1148,10 @@ interpret_hierarchical <- function(x_minor,
       rlang::warn(paste("No major lineage context found for sub-cluster:", name))
     }
 
-    res <- interpret(
+    res <- .interpret_run(
       res_list_minor[[name]],
       context = specific_context, model = model,
-      task = task, max_tokens = max_tokens, temperature = temperature
+      task = "cell_type", max_tokens = max_tokens, temperature = temperature
     )
     if (is.list(res)) res$cluster <- name
     res
@@ -1198,6 +1222,26 @@ interpret_hierarchical <- function(x_minor,
   if (length(map) == 0 || is.null(names(map))) return(ids)
   sym <- unname(map[as.character(ids)])
   ifelse(is.na(sym) | !nzchar(sym), ids, sym)
+}
+
+# Objects built on Entrez IDs without a symbol table -- gseGO() on the DOSE geneList, the vignette
+# path, is one -- carry numbers in geneID / core_enrichment, and a model cannot read a number as a
+# gene. For the prompt such an object is made readable through the OrgDb of its organism when that
+# package is installed; anything else passes through unchanged.
+.readable_for_prompt <- function(x) {
+  if (!inherits(x, c("enrichResult", "gseaResult", "compareClusterResult"))) return(x)
+  if (isTRUE(tryCatch(x@readable, error = function(e) FALSE))) return(x)
+  if (!identical(toupper(tryCatch(x@keytype, error = function(e) "")), "ENTREZID")) return(x)
+  org <- tryCatch(x@organism, error = function(e) "")
+  orgdb <- if (grepl("sapiens|human|^hsa$", org, ignore.case = TRUE)) {
+    "org.Hs.eg.db"
+  } else if (grepl("musculus|mouse|^mmu$", org, ignore.case = TRUE)) {
+    "org.Mm.eg.db"
+  } else {
+    NA_character_
+  }
+  if (is.na(orgdb) || !requireNamespace(orgdb, quietly = TRUE)) return(x)
+  tryCatch(setReadable(x, OrgDb = orgdb, keyType = "ENTREZID"), error = function(e) x)
 }
 
 # gene_fold_change is documented as keyed by the IDs used in the enrichment; rename it to
@@ -1693,17 +1737,13 @@ print.interpret_provenance <- function(x, ...) {
 }
 
 .call_generate_object <- function(model, task, cluster_id, user_prompt,
-                                  has_prior = FALSE, max_tokens = 8192,
+                                  max_tokens = 8192,
                                   temperature = 0.3, collector = NULL,
                                   stage = "interpret", reasoning = NULL) {
-  if (task %in% c("annotation", "cell_type")) {
-    sys <- .annotation_system_prompt(cluster_id, has_prior)
-    schema <- if (has_prior) .annotation_refinement_schema() else .annotation_schema()
+  if (identical(task, "cell_type")) {
+    sys <- .annotation_system_prompt(cluster_id)
+    schema <- .annotation_schema()
     schema_name <- "annotation_result"
-  } else if (task %in% c("phenotype", "phenotyping")) {
-    sys <- .phenotype_system_prompt(cluster_id)
-    schema <- .phenotype_schema()
-    schema_name <- "phenotype_result"
   } else {
     sys <- .interpretation_system_prompt()
     schema <- .interpretation_schema()
@@ -1920,7 +1960,6 @@ print.interpretation <- function(x, ...) {
     cat("## Cell Type Annotation\n\n")
     if (!is.null(x$cluster)) cat(sprintf("### Cluster: %s\n\n", x$cluster))
     cat(sprintf("**Cell Type:** %s\n", x$cell_type))
-    if (!is.null(x$refinement_status)) cat(sprintf("**Status:** %s\n", x$refinement_status))
     cat(sprintf("**Confidence:** %s\n", x$confidence))
     cat("\n**Reasoning:**\n", x$reasoning, "\n")
     if (!is.null(x$markers)) {
@@ -1931,22 +1970,17 @@ print.interpretation <- function(x, ...) {
     return(invisible(x))
   }
 
-  if (!is.null(x$phenotype)) {
-    cat("## Phenotype Characterization\n\n")
-    if (!is.null(x$cluster)) cat(sprintf("### Group/Cluster: %s\n\n", x$cluster))
-    cat(sprintf("**Phenotype:** %s\n", x$phenotype))
-    cat(sprintf("**Confidence:** %s\n", x$confidence))
-    cat("\n**Reasoning:**\n", x$reasoning, "\n")
-    if (!is.null(x$key_processes)) {
-      cat("\n**Key Processes:**\n")
-      cat(paste("-", unlist(x$key_processes), collapse = "\n"), "\n")
-    }
-    cat("\n")
-    return(invisible(x))
-  }
-
   cat("## Interpretation Result\n\n")
   if (!is.null(x$cluster)) cat(sprintf("### Cluster: %s\n\n", x$cluster))
+
+  if (!is.null(x$conclusion) && nzchar(x$conclusion) && !identical(x$conclusion, "None")) {
+    cat(sprintf("**Conclusion:** %s\n", x$conclusion))
+    if (!is.null(x$prior_verdict)) {
+      cat(sprintf("**Other tools' result:** %s\n", x$prior_verdict))
+      if (!is.null(x$prior_rationale)) cat(x$prior_rationale, "\n")
+    }
+    cat("\n")
+  }
 
   if (!is.null(x$overview)) {
     cat("### 1. Overview\n")
@@ -2034,7 +2068,7 @@ print.interpretation <- function(x, ...) {
 #' @method print interpretation_list
 #' @export
 print.interpretation_list <- function(x, ...) {
-  cat("# Enrichment Interpretation / Annotation Report\n\n")
+  cat("# Enrichment Interpretation Report\n\n")
   for (i in seq_along(x)) {
     print(x[[i]])
     cat("---\n\n")

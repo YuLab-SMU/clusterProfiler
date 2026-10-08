@@ -7,6 +7,7 @@
 interpret_agent(
   x,
   context = NULL,
+  prior = NULL,
   n_pathways = NULL,
   model = NULL,
   add_ppi = FALSE,
@@ -25,7 +26,17 @@ interpret_agent(
 \arguments{
 \item{x}{An enrichment result object.}
 
-\item{context}{A string describing the experimental background.}
+\item{context}{A string describing the experimental background. State the question the
+analysis should answer here (for example "which cell type is this cluster?"); the answer
+is returned as \code{conclusion}.}
+
+\item{prior}{Optional results of other tools to be checked against the enrichment
+evidence, as text: a SingleR or scGPT label, a ranked list of transcription factors from
+a regulon analysis, the protein complexes enriched in the gene list, and so on. A single
+string applies to every cluster; a named character vector or list supplies one entry
+per cluster. The Detective and the Synthesizer see it as a claim to check, not as
+evidence, and the result gains \code{prior_verdict} (Confirmed, Refined, Corrected or Not
+assessable) and \code{prior_rationale}.}
 
 \item{n_pathways}{Maximum number of terms (per cluster) the Cleaner starts from, taken in
 order of adjusted p-value after reduction. \code{NULL} (default) uses every term that passes
@@ -38,7 +49,8 @@ object. Bare model names are supported with a warning.}
 
 \item{add_ppi}{Logical, whether to query PPI data. Default FALSE.}
 
-\item{gene_fold_change}{Named numeric vector of log fold changes.}
+\item{gene_fold_change}{Named numeric vector of log fold changes. When supplied, the most
+up-regulated genes are also listed to the Detective and the Synthesizer as marker genes.}
 
 \item{max_tokens}{Maximum tokens per agent call. Default 8192.}
 
@@ -82,9 +94,10 @@ the caller can only observe the second.}
 still accepted; a call that passes \code{reduce_go} keeps its earlier default threshold of 0.7.}
 }
 \value{
-An \code{interpretation} object with deep analysis fields plus
-regulatory_drivers, refined_network, and network_evidence from the
-detective agent. When \code{review = TRUE}, also includes \code{review} and
+An \code{interpretation} object with deep analysis fields, \code{conclusion} (the answer to
+the question the context poses), plus regulatory_drivers, refined_network, and
+network_evidence from the detective agent. When \code{prior} is supplied, also
+\code{prior_verdict} and \code{prior_rationale}. When \code{review = TRUE}, also includes \code{review} and
 \code{overview_original}. The \code{review} field reports grounding separately from
 resolution: \code{abstain_recommended = "yes"} flags a draft whose cited
 evidence is real but which resolves to a more specific entity than that
@@ -92,7 +105,9 @@ evidence can single out, with \code{supported_resolution} giving the claim the
 evidence does support.
 }
 \description{
-Employs specialized AI agents in sequence for rigorous interpretation:
+Employs specialized AI agents in sequence for rigorous interpretation, and is the entry
+point that combines the enrichment evidence with the results of other tools (\code{prior})
+into a conclusion:
 \enumerate{
 \item Agent Cleaner: Filters noise and selects relevant pathways.
 \item Agent Detective: Identifies key regulators and functional modules.
@@ -112,5 +127,11 @@ res <- interpret_agent(df,
   context = "scRNA-seq of mouse MI day 3"
 )
 print(res)
+# Check another tool's answer against the enrichment evidence
+res <- interpret_agent(ego_cluster3,
+  context = "PBMC scRNA-seq; which cell type is cluster 3?",
+  gene_fold_change = fc3, prior = "SingleR (HPCA): T_cell:CD4+_Naive"
+)
+res$conclusion; res$prior_verdict
 }
 }
