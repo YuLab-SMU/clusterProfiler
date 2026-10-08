@@ -1,6 +1,7 @@
 
 # clusterProfiler 4.21.3
 
++ `read.gmt.pc()` now reads the fields of a Pathway Commons gene set description by their labels rather than by splitting the string at every `"; "`. A pathway name that holds a semicolon, such as `Phospholipase C-mediated cascade; FGFR2`, is no longer cut short and its `datasource`, `organism` and `idtype` stay in their own columns; previously the extra pieces were merged into the last field, so the fields were shifted one to the left and nothing said so. A description that declares fewer fields than expected returns `NA` for the missing one instead of failing the whole read, and `enrichPC()` and `gsePC()` take the species from the first gene set that declares an organism (#789, 2026-10-08, Thu)
 + fix `enrichGO()` with a non-`ENTREZID` `keyType` when some source IDs cannot be mapped to Entrez: the memory-saving Entrez annotation remains the fast path, while unmapped source IDs are added through direct native-key annotations and analyzed in one hybrid GSON; when `universe` is omitted, the effective annotated hybrid background is constructed and reported by message instead of silently dropping IDs (#829, 2026-10-03, Sat)
 + restore the original source `keyType` consistently after the Entrez optimization and readable conversion, including result metadata and projected gene-set memberships (#829, 2026-10-03, Sat)
 

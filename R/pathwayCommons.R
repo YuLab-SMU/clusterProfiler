@@ -97,32 +97,42 @@ get_pc_gmtfile <- function() {
 # }
 
 read.gmt.pc_internal <- function(gmtfile) {
-    # x <- readLines(gmtfile)
-
     check_installed(
         'readr',
         'for `read.gmt.pc_internal()`, which is an internal function.'
     )
 
     x <- yread(gmtfile, readr::read_lines)
-
     y <- strsplit(x, "\t")
-    id <- vapply(y, `[`, 1, FUN.VALUE = character(1))
-    pcid <- sub(".*/", "", id)
 
-    url <- sub(pcid[1], "", id[1]) # can be used to restored the url for web browse.
+    url <- vapply(y, `[`, 1, FUN.VALUE = character(1))
+    description <- vapply(y, `[`, 2, FUN.VALUE = character(1))
+    ## a blank line holds no gene set at all, and must not carry a negative count
+    ngene <- pmax(vapply(y, length, FUN.VALUE = integer(1)) - 2L, 0L)
 
-    nn <- vapply(y, `[`, 2, FUN.VALUE = character(1))
-    names(y) <- sprintf("id: %s; %s", pcid, nn)
+    data.frame(
+        id = rep(sub(".*/", "", url), ngene),
+        description = rep(description, ngene),
+        gene = unlist(lapply(y, `[`, -c(1:2)), use.names = FALSE),
+        stringsAsFactors = FALSE
+    )
+}
 
-    y <- lapply(y, "[", -c(1:2))
+#' The labelled fields of a Pathway Commons gene set description, which reads
+#' `name: ...; datasource: ...; organism: ...; idtype: ...`
+#'
+#' @noRd
+pc_field <- function(description, key) {
+    label <- regexpr(paste0("(^|; )", key, ": "), description)
+    value <- sub(";.*$", "", substring(description, label + attr(label, "match.length")))
+    ifelse(label > 0, value, NA_character_)
+}
 
-    ont2gene <- stack(y)
-    ont2gene <- ont2gene[, c("ind", "values")]
-    colnames(ont2gene) <- c("term", "gene")
-    return(ont2gene)
-    # res <- list(ont2gene = ont2gene, pcid = pcid, url = url)
-    # return(res)
+#' @noRd
+pc_name <- function(description) {
+    ## only the name can hold "; " itself, so it ends at a known label, not at the first semicolon
+    name <- sub("^name: ", "", description)
+    sub("; (datasource|organism|idtype): .*", "", name)
 }
 
 #' Parse gmt file from Pathway Common
@@ -132,29 +142,29 @@ read.gmt.pc_internal <- function(gmtfile) {
 #' @param gmtfile A gmt file
 #' @param output one of 'data.frame' or 'GSON'
 #' @return A data.frame or A GSON object depends on the value of 'output'
-#' @importFrom rlang .data
-#' @importFrom tidyr separate
 #' @export
 read.gmt.pc <- function(gmtfile, output = "data.frame") {
     output <- match.arg(output, c("data.frame", "gson", "GSON"))
 
     pcdata <- read.gmt.pc_internal(gmtfile)
-    # x <- tidyr::separate(pcdata, .data$term, c("id", "name","datasource","organism","idtype"), "; ")
-    x <- tidyr::separate_wider_delim(
-        pcdata,
-        cols = "term",
-        names = c("id", "name", "datasource", "organism", "idtype"),
-        delim = "; ",
-        too_many = "merge"
+    x <- data.frame(
+        id = pcdata$id,
+        name = pc_name(pcdata$description),
+        datasource = pc_field(pcdata$description, "datasource"),
+        organism = pc_field(pcdata$description, "organism"),
+        idtype = pc_field(pcdata$description, "idtype"),
+        gene = pcdata$gene,
+        stringsAsFactors = FALSE
     )
-    x <- lapply(x, function(col) sub("\\w+:\\s*", "", col)) |> as.data.frame()
+
     if (output == "data.frame") {
         return(x)
     }
 
     gsid2gene <- data.frame(gsid = x$id, gene = x$gene)
     gsid2name <- unique(data.frame(gsid = x$id, name = x$name))
-    organism <- taxID2name(x$organism[1])
+    taxid <- x$organism[!is.na(x$organism)]
+    organism <- if (length(taxid) > 0) taxID2name(taxid[1]) else NA_character_
     gson(
         gsid2gene = gsid2gene,
         gsid2name = gsid2name,

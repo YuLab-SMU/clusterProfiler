@@ -236,10 +236,7 @@ importFrom(stats,
   na.omit,
   setNames
 )
-importFrom(tidyr,
-  gather,
-  separate
-)
+importFrom(tidyr,gather)
 importFrom(utils,
   browseURL,
   citation,
