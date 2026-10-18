@@ -378,6 +378,16 @@ hybrid_ids_for_input <- function(ids, mapping, keyType) {
 build_hybrid_go_data <- function(OrgDb, ont, keyType, gene, universe = NULL,
                                  evidence = NULL) {
     OrgDb <- yulab.utils::load_OrgDb(OrgDb)
+    org <- get_organism(OrgDb)
+    ## Cache only the universe-free, unfiltered build: with a universe the
+    ## source ids include the gene list and change per call, and an
+    ## evidence-filtered annotation must never share a cache slot with the
+    ## unfiltered one (same rule as get_GO_data()).
+    cacheable <- is.null(universe) && is.null(evidence)
+    GO_Env <- get_GO_Env()
+    if (cacheable && hybrid_cache_usable(GO_Env, org, ont, keyType)) {
+        return(get("hybrid_go", envir = GO_Env))
+    }
     has_universe <- !is.null(universe)
     source_ids <- if (has_universe) {
         unique(c(as.character(gene), as.character(universe)))
@@ -461,7 +471,14 @@ build_hybrid_go_data <- function(OrgDb, ont, keyType, gene, universe = NULL,
         keytype = keyType
     )
 
-    list(gson = hybrid_gson, mapping = mapping)
+    result <- list(gson = hybrid_gson, mapping = mapping)
+    if (cacheable) {
+        assign("hybrid_go", result, envir = GO_Env)
+        assign("hybrid_organism", org, envir = GO_Env)
+        assign("hybrid_keytype", keyType, envir = GO_Env)
+        assign("hybrid_ont", ont, envir = GO_Env)
+    }
+    result
 }
 
 hybrid_source_labels <- function(ids, mapping, keyType) {
@@ -648,6 +665,37 @@ go_cache_usable <- function(GO_Env, org, ont, keytype) {
         isTRUE(keytype == get("keytype", envir = GO_Env)) &&
         (isTRUE(ont == get("ont", envir = GO_Env)) ||
             isTRUE(get("ont", envir = GO_Env) == "ALL"))
+}
+
+#' Can a cached hybrid GO data object be reused?
+#'
+#' `build_hybrid_go_data()` maps every OrgDb key to Entrez and merges the
+#' Entrez and native (unmapped) annotations. When no `universe` is supplied the
+#' input is `AnnotationDbi::keys(OrgDb, keytype)` -- independent of the gene
+#' list -- so the result depends only on (organism, ont, keytype). Without this
+#' cache the whole build is repeated once per cluster: 7.7 s per call on human
+#' GO BP (PBMC 10k, 2026-10-18), with `restore_hybrid_result()` adding another
+#' 7.2 s.
+#'
+#' Deliberately stricter than `go_cache_usable()`: the ontology must match
+#' exactly. The Entrez annotation cache may hold `ont = "ALL"` and be filtered
+#' afterwards, but the hybrid object is already built and has no later filter.
+#'
+#' @param GO_Env the package GO data environment
+#' @param org organism of the requested OrgDb, possibly NA
+#' @param ont requested ontology
+#' @param keytype requested keytype
+#' @return TRUE when the cache can be reused
+#' @noRd
+hybrid_cache_usable <- function(GO_Env, org, ont, keytype) {
+    for (what in c("hybrid_go", "hybrid_organism", "hybrid_keytype", "hybrid_ont")) {
+        if (!exists(what, envir = GO_Env, inherits = FALSE)) {
+            return(FALSE)
+        }
+    }
+    isTRUE(org == get("hybrid_organism", envir = GO_Env)) &&
+        isTRUE(keytype == get("hybrid_keytype", envir = GO_Env)) &&
+        isTRUE(ont == get("hybrid_ont", envir = GO_Env))
 }
 
 #' Build a gene-to-GO annotation table restricted to given evidence codes

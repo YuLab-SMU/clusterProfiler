@@ -175,3 +175,85 @@ test_that("hybrid annotation reports an implicit annotated universe", {
     expect_true(length(res@universe) > 0)
     expect_false(any(grepl("^(E:|N:)", as.character(res@result$geneID))))
 })
+
+## -- hybrid GO data cache ---------------------------------------------------
+## build_hybrid_go_data() maps every OrgDb key to Entrez and merges the native
+## annotations. With no universe the input is all keys, so the result depends
+## only on (organism, ont, keytype) -- but compareCluster() calls enrichGO once
+## per cluster and used to rebuild it every time (7.7 s build + 7.2 s restore
+## per cluster on human GO BP, PBMC 10k, 2026-10-18). These tests pin that the
+## cache is reused for the universe-free path and never poisoned by a
+## universe-scoped or evidence-filtered run.
+
+test_that("hybrid_cache_usable requires an exact ontology match", {
+    env <- new.env(parent = emptyenv())
+    expect_false(clusterProfiler:::hybrid_cache_usable(env, "Homo sapiens", "BP", "SYMBOL"))
+    env$hybrid_go <- list()
+    env$hybrid_organism <- "Homo sapiens"
+    env$hybrid_keytype <- "SYMBOL"
+    env$hybrid_ont <- "BP"
+    expect_true(clusterProfiler:::hybrid_cache_usable(env, "Homo sapiens", "BP", "SYMBOL"))
+    expect_false(clusterProfiler:::hybrid_cache_usable(env, "Homo sapiens", "MF", "SYMBOL"))
+    expect_false(clusterProfiler:::hybrid_cache_usable(env, "Homo sapiens", "BP", "ENTREZID"))
+    expect_false(clusterProfiler:::hybrid_cache_usable(env, "Mus musculus", "BP", "SYMBOL"))
+})
+
+test_that("hybrid path never triggers when every input ID maps", {
+    skip_if_not_installed("org.Hs.eg.db")
+
+    env <- clusterProfiler:::get_GO_Env()
+    for (what in c("hybrid_go", "hybrid_organism", "hybrid_keytype", "hybrid_ont")) {
+        if (exists(what, envir = env, inherits = FALSE)) {
+            rm(list = what, envir = env)
+        }
+    }
+    ## All three symbols map, so enrichGO must take the #805 fast path
+    ## (map to ENTREZID once, run the Entrez analysis) and must NOT build the
+    ## hybrid annotation at all -- no native IDs, no hybrid data, no hybrid
+    ## cache write.
+    res <- suppressWarnings(suppressMessages(enrichGO(
+        c("TP53", "BRCA1", "EGFR"), OrgDb = "org.Hs.eg.db", keyType = "SYMBOL",
+        ont = "BP", pvalueCutoff = 1, qvalueCutoff = 1, minGSSize = 1
+    )))
+    expect_s4_class(res, "enrichResult")
+    expect_false(exists("hybrid_go", envir = env, inherits = FALSE))
+    expect_identical(res@keytype, "SYMBOL")
+})
+
+test_that("hybrid GO data is built once and reused only for mixed IDs", {
+    skip_if_not_installed("org.Hs.eg.db")
+
+    env <- clusterProfiler:::get_GO_Env()
+    for (what in c("hybrid_go", "hybrid_organism", "hybrid_keytype", "hybrid_ont")) {
+        if (exists(what, envir = env, inherits = FALSE)) {
+            rm(list = what, envir = env)
+        }
+    }
+    ## One ID that cannot be mapped to Entrez: this is the only case the hybrid
+    ## annotation exists for, and the case where the cache is allowed to act.
+    mixed <- c("TP53", "BRCA1", "EGFR", "FAKE_GENE_X")
+    run <- function(...) suppressWarnings(suppressMessages(enrichGO(
+        mixed, OrgDb = "org.Hs.eg.db", keyType = "SYMBOL",
+        ont = "BP", pvalueCutoff = 1, qvalueCutoff = 1, minGSSize = 1, ...
+    )))
+
+    first <- run()
+    expect_true(exists("hybrid_go", envir = env, inherits = FALSE))
+    cached <- get("hybrid_go", envir = env)
+
+    second <- run()
+    expect_identical(get("hybrid_go", envir = env), cached)
+    expect_equal(as.data.frame(first)$ID, as.data.frame(second)$ID)
+    expect_equal(as.data.frame(first)$pvalue, as.data.frame(second)$pvalue)
+
+    ## A universe-scoped run builds from gene + universe: it must not replace
+    ## the shared cache with a gene-specific object.
+    universe_run <- run(universe = c("TP53", "BRCA1"))
+    expect_s4_class(universe_run, "enrichResult")
+    expect_identical(get("hybrid_go", envir = env), cached)
+
+    ## An evidence-filtered annotation must not poison the unfiltered cache.
+    evidence_run <- run(evidence = "IEA")
+    expect_s4_class(evidence_run, "enrichResult")
+    expect_identical(get("hybrid_go", envir = env), cached)
+})
