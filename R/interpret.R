@@ -338,9 +338,9 @@ process_enrichment_input <- function(x, n_pathways) {
   if (!is.null(context) && nzchar(context)) {
     parts <- c(parts, paste0("Experimental Context:\n", context))
   }
-  parts <- c(parts, paste0("Top Enriched Terms:\n", pathway_text))
+  parts <- c(parts, paste0("Enriched Terms:\n", pathway_text))
   if (!is.null(top_genes) && nzchar(top_genes)) {
-    parts <- c(parts, paste0("Top Marker Genes (Highest Fold Change):\n", top_genes))
+    parts <- c(parts, paste0("Input Genes (most up-regulated first when fold changes are supplied):\n", top_genes))
   }
   if (!is.null(ppi_network)) {
     parts <- c(parts, paste0("PPI Network (Edge List from STRING):\n", ppi_network))
@@ -415,7 +415,8 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   of adjusted p-value after reduction. `NULL` (default) sends every term that passes the
 #'   object's cutoffs; with `reduce = TRUE` that is one representative per theme. On five
 #'   public lists a cap below the number of representatives named fewer themes of the full
-#'   result; set a cap (for example 20) for very long lists or models with a short context.
+#'   result; for a model with a short context, lower `reduce_threshold` (for example 0.3)
+#'   before setting a cap.
 #' @param model Optional LLM model. When `NULL` (default), uses the aisdk
 #'   package-wide default model configured via `aisdk::set_model()`.
 #'   You can also supply a model ID in `provider:model` format
@@ -468,10 +469,8 @@ process_enrichment_input <- function(x, n_pathways) {
 #' # Every significant term, one representative per theme (the default)
 #' ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
 #' res <- interpret(ego)
-#' # The 20 most significant themes only, for a short context
-#' res <- interpret(ego, n_pathways = 20)
-#' # The earlier behaviour: the 20 most significant terms, unreduced
-#' res <- interpret(ego, n_pathways = 20, reduce = FALSE)
+#' # A shorter prompt for a model with a short context: merge more terms per theme
+#' res <- interpret(ego, reduce_threshold = 0.3)
 #' # Reuse aisdk's global default model
 #' # aisdk::set_model("openai:gpt-4o-mini")
 #' # res <- interpret(df, context = "Cancer proliferation study")
@@ -686,8 +685,8 @@ interpret <- function(x,
 #'   also supply a model ID in `provider:model` format or a `LanguageModelV1`
 #'   object. Bare model names are supported with a warning.
 #' @param add_ppi Logical, whether to query PPI data. Default FALSE.
-#' @param gene_fold_change Named numeric vector of log fold changes. When supplied, the most
-#'   up-regulated genes are also listed to the Detective and the Synthesizer as marker genes.
+#' @param gene_fold_change Named numeric vector of log fold changes. When supplied, every
+#'   input gene is also listed to the Detective and the Synthesizer, most up-regulated first.
 #' @param max_tokens Maximum tokens per agent call. Default 8192.
 #' @param temperature Sampling temperature. Default 0.3.
 #' @param review Logical, whether to run a final Reviewer agent (Agent 4) that
@@ -806,7 +805,7 @@ interpret_agent <- function(x,
         ))
         pathway_text <- paste(
           "No significant pathways enriched.",
-          "Top Genes:", paste(utils::head(original_genes, 50), collapse = ", ")
+          "Input Genes:", paste(original_genes, collapse = ", ")
         )
       } else {
         return(NULL)
@@ -912,7 +911,7 @@ interpret_agent <- function(x,
       "Filtered Pathways:\n", cleaned_pathways,
       if (!is.null(ppi_text)) paste0("\n\nPPI Network Evidence:\n", ppi_text) else "",
       if (!is.null(fc_text)) paste0("\n\nGene Fold Changes:\n", fc_text) else "",
-      if (!is.null(marker_text)) paste0("\n\nTop Marker Genes (highest fold change):\n", marker_text) else "",
+      if (!is.null(marker_text)) paste0("\n\nInput Genes (most up-regulated first):\n", marker_text) else "",
       prior_text
     )
 
@@ -949,7 +948,7 @@ interpret_agent <- function(x,
       "Data Sources:\n",
       "1. Relevant Pathways:\n", cleaned_pathways, "\n\n",
       "2. Detective's Report (Drivers & Modules):\n", detective_text,
-      if (!is.null(marker_text)) paste0("\n\n3. Top Marker Genes (highest fold change):\n", marker_text) else "",
+      if (!is.null(marker_text)) paste0("\n\n3. Input Genes (most up-regulated first):\n", marker_text) else "",
       prior_text
     )
 
@@ -1254,19 +1253,21 @@ interpret_hierarchical <- function(x_minor,
   out[!duplicated(names(out))]
 }
 
+# Every input gene is listed (previously the first 20): with fold changes, the genes that have
+# one come first, most up-regulated first, then the rest in input order.
 .get_top_genes_text <- function(genes, gene_fold_change) {
-  if (is.null(genes) || length(genes) == 0) {
+  genes <- unique(genes[!is.na(genes) & nzchar(genes)])
+  if (length(genes) == 0) {
     return(NULL)
   }
   if (!is.null(gene_fold_change)) {
     common <- intersect(genes, names(gene_fold_change))
     if (length(common) > 0) {
       fc <- gene_fold_change[common]
-      top_up <- utils::head(names(fc[order(fc, decreasing = TRUE)]), 20)
-      return(paste(top_up, collapse = ", "))
+      genes <- c(names(fc[order(fc, decreasing = TRUE)]), setdiff(genes, common))
     }
   }
-  paste(utils::head(genes, 20), collapse = ", ")
+  paste(genes, collapse = ", ")
 }
 
 .resolve_prior <- function(prior, name) {
@@ -1302,7 +1303,8 @@ interpret_hierarchical <- function(x_minor,
   if (fallback_mode) {
     all_genes <- genes
   } else {
-    all_genes <- unique(unlist(strsplit(as.character(df$geneID), "/")))
+    gene_col <- intersect(c("geneID", "core_enrichment"), names(df))
+    all_genes <- unique(unlist(strsplit(as.character(unlist(df[gene_col])), "/")))
     if (length(all_genes) == 0 && !is.null(genes)) all_genes <- genes
   }
   common_genes <- intersect(all_genes, names(gene_fold_change))
@@ -1311,8 +1313,7 @@ interpret_hierarchical <- function(x_minor,
   }
   fc_subset <- gene_fold_change[common_genes]
   fc_subset <- fc_subset[order(abs(fc_subset), decreasing = TRUE)]
-  top_fc <- utils::head(fc_subset, 20)
-  paste(names(top_fc), round(top_fc, 2), sep = ":", collapse = ", ")
+  paste(names(fc_subset), round(fc_subset, 2), sep = ":", collapse = ", ")
 }
 
 # ============================================================================

@@ -32,7 +32,8 @@ interpret(
 of adjusted p-value after reduction. \code{NULL} (default) sends every term that passes the
 object's cutoffs; with \code{reduce = TRUE} that is one representative per theme. On five
 public lists a cap below the number of representatives named fewer themes of the full
-result; set a cap (for example 20) for very long lists or models with a short context.}
+result; for a model with a short context, lower \code{reduce_threshold} (for example 0.3)
+before setting a cap.}
 
 \item{model}{Optional LLM model. When \code{NULL} (default), uses the aisdk
 package-wide default model configured via \code{aisdk::set_model()}.
@@ -112,10 +113,8 @@ res <- interpret(df,
 # Every significant term, one representative per theme (the default)
 ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
 res <- interpret(ego)
-# The 20 most significant themes only, for a short context
-res <- interpret(ego, n_pathways = 20)
-# The earlier behaviour: the 20 most significant terms, unreduced
-res <- interpret(ego, n_pathways = 20, reduce = FALSE)
+# A shorter prompt for a model with a short context: merge more terms per theme
+res <- interpret(ego, reduce_threshold = 0.3)
 # Reuse aisdk's global default model
 # aisdk::set_model("openai:gpt-4o-mini")
 # res <- interpret(df, context = "Cancer proliferation study")

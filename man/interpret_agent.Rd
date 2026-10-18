@@ -49,8 +49,8 @@ object. Bare model names are supported with a warning.}
 
 \item{add_ppi}{Logical, whether to query PPI data. Default FALSE.}
 
-\item{gene_fold_change}{Named numeric vector of log fold changes. When supplied, the most
-up-regulated genes are also listed to the Detective and the Synthesizer as marker genes.}
+\item{gene_fold_change}{Named numeric vector of log fold changes. When supplied, every
+input gene is also listed to the Detective and the Synthesizer, most up-regulated first.}
 
 \item{max_tokens}{Maximum tokens per agent call. Default 8192.}
 
