@@ -364,8 +364,14 @@ hybrid_ids_for_input <- function(ids, mapping, keyType) {
         return(character())
     }
 
+    ## One split, then a named lookup. Comparing `mapping$source == id` per id
+    ## is linear in the whole mapping for every input id; on a 20k-row mapping
+    ## and ~600 ids per cluster that comparison alone was 7.8 s across 13
+    ## clusters (2026-10-18). A source id may map to several Entrez ids, so the
+    ## lookup keeps every match, in mapping order, as before.
+    by_source <- split(mapping$entrez, mapping$source)
     out <- lapply(ids, function(id) {
-        entrez <- unique(mapping$entrez[mapping$source == id])
+        entrez <- unique(by_source[[id]])
         if (length(entrez)) {
             paste0("E:", entrez)
         } else {

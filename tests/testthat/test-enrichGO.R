@@ -285,3 +285,18 @@ test_that("map_gene_set_labels matches the per-set loop exactly", {
     expect_identical(empty$sets, list())
     expect_identical(empty$gene_id, character())
 })
+
+test_that("hybrid_ids_for_input keeps every Entrez match and marks unmapped ids", {
+    mapping <- data.frame(
+        source = c("A", "A", "B", "C"),
+        entrez = c("1", "2", "3", "4"),
+        stringsAsFactors = FALSE
+    )
+    got <- clusterProfiler:::hybrid_ids_for_input(c("A", "B", "Z"), mapping, "SYMBOL")
+    expect_equal(got, c("E:1", "E:2", "E:3", "N:SYMBOL:Z"))
+    ## Duplicated input ids are collapsed, and an empty input stays empty.
+    expect_equal(clusterProfiler:::hybrid_ids_for_input(c("A", "A"), mapping, "SYMBOL"),
+                 c("E:1", "E:2"))
+    expect_identical(clusterProfiler:::hybrid_ids_for_input(character(), mapping, "SYMBOL"),
+                     character())
+})
