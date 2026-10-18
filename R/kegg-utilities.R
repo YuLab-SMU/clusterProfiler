@@ -101,14 +101,20 @@ get_cached_kegg_data <- function(type = "category") {
 }
 
 get_kegg_species <- function(save = FALSE) {
-    url <- "https://rest.kegg.jp/list/organism"
+    ## KEGG retired the 'organism' special database name (it now answers
+    ## HTTP 400); '/list/genome' returns the same organisms as
+    ## '<T number>\t<code>; <scientific name> (<common name>)'.
+    url <- "https://rest.kegg.jp/list/genome"
     species <- read.table(url, fill = TRUE, sep = "\t", header = F, quote = "")
-    species <- species[, -1]
-    scientific_name <- gsub(" \\(.*", "", species[, 2])
-    common_name <- gsub(".*\\(", "", species[, 2])
-    common_name <- gsub("\\)", "", common_name)
+    entry <- trimws(sub("^[^;]*;", "", species[, 2]))
+    common_name <- sub(".*\\(", "", entry)
+    common_name <- sub("\\)", "", common_name)
+    scientific_name <- sub(" \\(.*", "", entry)
+    ## most organisms have no common name in KEGG; use the scientific name
+    ## so that the column is never empty, as '/list/organism' did.
+    common_name[!grepl("\\(", entry)] <- scientific_name[!grepl("\\(", entry)]
     kegg_species <- data.frame(
-        kegg_code = species[, 1],
+        kegg_code = trimws(sub(";.*", "", species[, 2])),
         scientific_name = scientific_name,
         common_name = common_name
     )

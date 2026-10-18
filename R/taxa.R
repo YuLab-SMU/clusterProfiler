@@ -1,11 +1,16 @@
 
 kegg_taxa <- function(append = TRUE) {
-    kegg_species_url <- "https://rest.kegg.jp/list/organism"
+    ## KEGG retired the 'organism' special database name (it now answers
+    ## HTTP 400); '/list/genome' returns the same organisms as
+    ## '<T number>\t<code>; <scientific name> (<common name>)'.
+    kegg_species_url <- "https://rest.kegg.jp/list/genome"
     # Read the files with caching
     kegg_species <- yread_tsv(kegg_species_url, params = list(header = FALSE))
 
-    sn <- sub("\\s\\(.*$", "", kegg_species[,3])
-    kegg.code = kegg_species[,2]
+    ## col 1 is the T number, col 2 is '<code>; <name>'
+    entry <- trimws(sub("^[^;]*;", "", kegg_species[, 2]))
+    sn <- sub("\\s\\(.*$", "", entry)
+    kegg.code = trimws(sub(";.*", "", kegg_species[, 2]))
 
     if (append) {
         kegg_taxa <- readRDS(system.file("extdata/kegg_taxa.rds", package="clusterProfiler"))
@@ -116,9 +121,9 @@ getTaxID <- function(species) {
     ## e.g. hsa Homo Sapiens 9606
     ##
     ## use this function (will call `getTaxaInfo`) to prepare the cached data
-    ## species list from https://rest.kegg.jp/list/organism
-    ## extract species from the third column
-    ## use second column as kegg.code 
+    ## species list from https://rest.kegg.jp/list/genome
+    ## extract species from the name part of the second column
+    ## use the KEGG organism code in front of it
     # tryCatch(utils::data(list='kegg_taxa', package='clusterProfiler'))
     # kegg_taxa <- get("kegg_taxa")
     kegg_taxa <- readRDS(system.file("extdata/kegg_taxa.rds", package="clusterProfiler"))
