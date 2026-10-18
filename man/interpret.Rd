@@ -11,6 +11,7 @@ interpret(
   model = NULL,
   add_ppi = FALSE,
   gene_fold_change = NULL,
+  gene_stats = NULL,
   max_tokens = 8192,
   temperature = 0.3,
   reduce = TRUE,
@@ -44,7 +45,19 @@ You can also supply a model ID in \code{provider:model} format
 
 \item{add_ppi}{Logical, whether to query STRING PPI network data. Default FALSE.}
 
-\item{gene_fold_change}{Named numeric vector of log fold changes for expression context.}
+\item{gene_fold_change}{Named numeric vector of log fold changes for expression context.
+For a \code{gseaResult} left \code{NULL}, the ranked list the GSEA was run on (\code{x@geneList}) is
+used, so the leading-edge genes reach the model with their values.}
+
+\item{gene_stats}{Optional data frame of per-gene statistics from the differential
+analysis behind \code{x} (a limma \code{topTable()}, DESeq2 \code{results()}, edgeR \code{topTags()} or
+Seurat \code{FindMarkers()} table). Recognised columns: the gene (\code{gene}, \code{SYMBOL}, \code{symbol},
+\code{gene_symbol}, \code{ENTREZID}, \code{ID}, or the row names), the log fold change (\code{log2FC},
+\code{logFC}, \code{log2FoldChange}, \code{avg_log2FC}) and the adjusted p-value (\code{padj}, \code{adj.P.Val},
+\code{FDR}, \code{p_val_adj}, \code{p.adjust}). When supplied, the genes of the enriched terms are listed
+with log fold change and FDR, and the most significant up- and down-regulated genes are
+added, so that the genes the model names are read from the data rather than from the term
+names. It also supplies \code{gene_fold_change} when that is \code{NULL}.}
 
 \item{max_tokens}{Maximum tokens for the LLM response. Default 8192.
 Some models (especially reasoning models) may need much higher values

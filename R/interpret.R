@@ -333,7 +333,8 @@ process_enrichment_input <- function(x, n_pathways) {
 }
 
 .build_data_sections <- function(pathway_text, context = NULL, ppi_network = NULL,
-                                 fold_change = NULL, top_genes = NULL) {
+                                 fold_change = NULL, top_genes = NULL,
+                                 fold_change_label = NULL, gene_stats = NULL) {
   parts <- character(0)
   if (!is.null(context) && nzchar(context)) {
     parts <- c(parts, paste0("Experimental Context:\n", context))
@@ -346,7 +347,10 @@ process_enrichment_input <- function(x, n_pathways) {
     parts <- c(parts, paste0("PPI Network (Edge List from STRING):\n", ppi_network))
   }
   if (!is.null(fold_change)) {
-    parts <- c(parts, paste0("Top Regulated Genes (Log2 Fold Change):\n", fold_change))
+    parts <- c(parts, paste0(fold_change_label %||% "Top Regulated Genes (Log2 Fold Change)", ":\n", fold_change))
+  }
+  if (!is.null(gene_stats) && nzchar(gene_stats)) {
+    parts <- c(parts, paste0("Gene-Level Statistics:\n", gene_stats))
   }
   paste(parts, collapse = "\n\n")
 }
@@ -425,6 +429,17 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   (e.g., `"deepseek-chat"`).
 #' @param add_ppi Logical, whether to query STRING PPI network data. Default FALSE.
 #' @param gene_fold_change Named numeric vector of log fold changes for expression context.
+#'   For a `gseaResult` left `NULL`, the ranked list the GSEA was run on (`x@geneList`) is
+#'   used, so the leading-edge genes reach the model with their values.
+#' @param gene_stats Optional data frame of per-gene statistics from the differential
+#'   analysis behind `x` (a limma `topTable()`, DESeq2 `results()`, edgeR `topTags()` or
+#'   Seurat `FindMarkers()` table). Recognised columns: the gene (`gene`, `SYMBOL`, `symbol`,
+#'   `gene_symbol`, `ENTREZID`, `ID`, or the row names), the log fold change (`log2FC`,
+#'   `logFC`, `log2FoldChange`, `avg_log2FC`) and the adjusted p-value (`padj`, `adj.P.Val`,
+#'   `FDR`, `p_val_adj`, `p.adjust`). When supplied, the genes of the enriched terms are listed
+#'   with log fold change and FDR, and the most significant up- and down-regulated genes are
+#'   added, so that the genes the model names are read from the data rather than from the term
+#'   names. It also supplies `gene_fold_change` when that is `NULL`.
 #' @param max_tokens Maximum tokens for the LLM response. Default 8192.
 #'   Some models (especially reasoning models) may need much higher values
 #'   (e.g., 16384 or more) to produce complete structured output.
@@ -482,6 +497,7 @@ interpret <- function(x,
                       model = NULL,
                       add_ppi = FALSE,
                       gene_fold_change = NULL,
+                      gene_stats = NULL,
                       max_tokens = 8192,
                       temperature = 0.3,
                       reduce = TRUE,
@@ -493,7 +509,7 @@ interpret <- function(x,
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
   .interpret_run(
     x, context = context, n_pathways = n_pathways, model = model, task = "interpretation",
-    add_ppi = add_ppi, gene_fold_change = gene_fold_change, max_tokens = max_tokens,
+    add_ppi = add_ppi, gene_fold_change = gene_fold_change, gene_stats = gene_stats, max_tokens = max_tokens,
     temperature = temperature, reduce = reduce, reduce_threshold = reduce_threshold,
     reasoning = reasoning, verbose = verbose, reduce_go = reduce_go,
     go_reduction_threshold = go_reduction_threshold
@@ -510,6 +526,7 @@ interpret <- function(x,
                            task = "interpretation",
                            add_ppi = FALSE,
                            gene_fold_change = NULL,
+                           gene_stats = NULL,
                            max_tokens = 8192,
                            temperature = 0.3,
                            reduce = TRUE,
@@ -532,6 +549,21 @@ interpret <- function(x,
   model <- .normalize_interpret_model(model)
   res_list <- process_enrichment_input(x, n_pathways)
   gene_fold_change <- .fc_to_symbols(gene_fold_change, x)
+  gene_stats <- .gene_stats_table(gene_stats, x)
+  fc_label <- NULL
+  gene_padj <- NULL
+  if (!is.null(gene_stats)) {
+    if (is.null(gene_fold_change)) gene_fold_change <- stats::setNames(gene_stats$log2FC, gene_stats$gene)
+    gene_padj <- stats::setNames(gene_stats$padj, gene_stats$gene)
+    fc_label <- "Genes of the Enriched Terms (log2 fold change, FDR)"
+  } else if (is.null(gene_fold_change) && inherits(x, "gseaResult") && length(x@geneList) > 0) {
+    # A gseaResult holds the ranked list it was run on, but no input-gene slot: without this the
+    # model read leading-edge gene names with no value, and had to guess each gene's direction
+    # from the sign of the term's NES.
+    gene_fold_change <- .fc_to_symbols(x@geneList, x)
+    fc_label <- "Genes of the Enriched Terms (the ranking statistic the GSEA was run on)"
+  }
+  gene_stats_text <- .gene_stats_text(gene_stats)
 
   .prov <- .prov_new()
 
@@ -568,10 +600,11 @@ interpret <- function(x,
     pathway_text <- if (nrow(df) > 0) .format_pathway_text(df) else "No significant enriched pathways found."
 
     ppi_text <- .get_ppi_if_requested(add_ppi, df, genes, x)
-    fc_text <- .get_fc_text(gene_fold_change, df, genes)
+    fc_text <- .get_fc_text(gene_fold_change, df, genes, padj = gene_padj)
 
     user_prompt <- .build_data_sections(
-      pathway_text, context, ppi_text, fc_text, top_genes_text
+      pathway_text, context, ppi_text, fc_text, top_genes_text,
+      fold_change_label = fc_label, gene_stats = gene_stats_text
     )
 
     res <- .call_generate_object(
@@ -1296,7 +1329,7 @@ interpret_hierarchical <- function(x_minor,
   if (length(all_genes) > 0) .get_ppi_context_text(all_genes, x) else NULL
 }
 
-.get_fc_text <- function(gene_fold_change, df, genes, fallback_mode = FALSE) {
+.get_fc_text <- function(gene_fold_change, df, genes, fallback_mode = FALSE, padj = NULL) {
   if (is.null(gene_fold_change)) {
     return(NULL)
   }
@@ -1313,7 +1346,66 @@ interpret_hierarchical <- function(x_minor,
   }
   fc_subset <- gene_fold_change[common_genes]
   fc_subset <- fc_subset[order(abs(fc_subset), decreasing = TRUE)]
+  if (!is.null(padj)) {
+    q <- unname(padj[names(fc_subset)])
+    return(paste(sprintf("%s:%s%s", names(fc_subset), round(fc_subset, 2),
+                         ifelse(is.na(q), "", sprintf(" (FDR %.1e)", q))), collapse = ", "))
+  }
   paste(names(fc_subset), round(fc_subset, 2), sep = ":", collapse = ", ")
+}
+
+# Per-gene statistics of the differential analysis behind an enrichment result, normalised to
+# gene (symbol where the object can map it), log2FC and padj; one row per gene, the most
+# significant kept when a gene appears twice.
+.gene_stats_table <- function(gene_stats, obj = NULL) {
+  if (is.null(gene_stats)) return(NULL)
+  if (!is.data.frame(gene_stats)) rlang::abort("`gene_stats` must be a data frame of per-gene statistics.")
+  pick <- function(cands) {
+    hit <- intersect(cands, names(gene_stats))
+    if (length(hit)) gene_stats[[hit[1]]] else NULL
+  }
+  gene <- pick(c("gene", "SYMBOL", "symbol", "gene_symbol", "ENTREZID", "ID")) %||% rownames(gene_stats)
+  fc <- pick(c("log2FC", "logFC", "log2FoldChange", "avg_log2FC"))
+  if (is.null(fc)) {
+    rlang::abort("`gene_stats` needs a log fold change column: log2FC, logFC, log2FoldChange or avg_log2FC.")
+  }
+  padj <- pick(c("padj", "adj.P.Val", "FDR", "p_val_adj", "p.adjust"))
+  gene <- as.character(gene)
+  if (!is.null(obj)) gene <- .ids_to_symbols(gene, obj)
+  out <- data.frame(gene = gene, log2FC = as.numeric(fc),
+                    padj = if (is.null(padj)) NA_real_ else as.numeric(padj), stringsAsFactors = FALSE)
+  out <- out[!is.na(out$gene) & nzchar(out$gene) & is.finite(out$log2FC), , drop = FALSE]
+  out <- out[order(out$padj, -abs(out$log2FC), na.last = TRUE), , drop = FALSE]
+  out <- out[!duplicated(out$gene), , drop = FALSE]
+  if (nrow(out) == 0) rlang::abort("`gene_stats` has no gene with a finite log fold change.")
+  rownames(out) <- NULL
+  out
+}
+
+# Summary of the per-gene statistics for the prompt: how many genes changed at FDR < 0.05, and
+# the most significant up- and down-regulated genes (ranked by FDR, then |log2FC|; by |log2FC|
+# alone when no FDR is given).
+.gene_stats_text <- function(st, n = 50) {
+  if (is.null(st)) return(NULL)
+  has_q <- any(!is.na(st$padj))
+  sig <- has_q & !is.na(st$padj) & st$padj < 0.05
+  fmt <- function(d) {
+    if (!nrow(d)) return("(none)")
+    paste(sprintf("%s: log2FC %.2f%s", d$gene, d$log2FC,
+                  ifelse(is.na(d$padj), "", sprintf(", FDR %.1e", d$padj))), collapse = "\n")
+  }
+  side <- function(up) {
+    d <- st[if (up) st$log2FC > 0 else st$log2FC < 0, , drop = FALSE]
+    d <- if (has_q) d[order(d$padj, -abs(d$log2FC), na.last = TRUE), , drop = FALSE] else d[order(-abs(d$log2FC)), , drop = FALSE]
+    utils::head(d, n)
+  }
+  paste0(
+    nrow(st), " genes measured",
+    if (has_q) sprintf("; %d up-regulated and %d down-regulated at FDR < 0.05", sum(sig & st$log2FC > 0), sum(sig & st$log2FC < 0)) else "",
+    ". When naming genes, state the direction observed here", if (has_q) " and prefer genes significant at FDR < 0.05" else "", ".\n\n",
+    "Most significant up-regulated genes (up to ", n, "):\n", fmt(side(TRUE)), "\n\n",
+    "Most significant down-regulated genes (up to ", n, "):\n", fmt(side(FALSE))
+  )
 }
 
 # ============================================================================
