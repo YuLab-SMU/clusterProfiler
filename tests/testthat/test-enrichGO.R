@@ -257,3 +257,31 @@ test_that("hybrid GO data is built once and reused only for mixed IDs", {
     expect_s4_class(evidence_run, "enrichResult")
     expect_identical(get("hybrid_go", envir = env), cached)
 })
+
+## -- vectorized gene-set label mapping --------------------------------------
+## restore_hybrid_result() and restore_entrez_result_ids() used to map each
+## gene set separately; on a BP result that is ~5,900 sets / 390k ID slots and
+## measured 7.5 s per call (13 clusters: ~55 s of unname/index work). The
+## vectorized helper must be byte-identical, including names and empty sets.
+test_that("map_gene_set_labels matches the per-set loop exactly", {
+    ids_list <- list(
+        g1 = c("a", "b", "c"),
+        g2 = character(),
+        g3 = c("b", "d"),
+        g4 = "e",
+        g5 = c("a", "a")
+    )
+    labels <- stats::setNames(c("A", "B", "C", "D", "E"), c("a", "b", "c", "d", "e"))
+    old_sets <- lapply(ids_list, function(ids) unique(unname(labels[as.character(ids)])))
+    old_gene_id <- vapply(ids_list, function(ids) {
+        paste0(unique(unname(labels[as.character(ids)])), collapse = "/")
+    }, character(1))
+    got <- clusterProfiler:::map_gene_set_labels(ids_list, labels)
+    expect_identical(got$sets, old_sets)
+    expect_identical(got$gene_id, old_gene_id)
+
+    ## No gene sets at all must not produce a broken structure.
+    empty <- clusterProfiler:::map_gene_set_labels(list(), labels)
+    expect_identical(empty$sets, list())
+    expect_identical(empty$gene_id, character())
+})
