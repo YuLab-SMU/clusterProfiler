@@ -1,13 +1,12 @@
 Package: clusterProfiler
 Type: Package
 Title: A Universal Enrichment Tool for Interpreting Omics Data
-Version: 4.21.3
+Version: 4.21.4
 Authors@R: c(
     person(given = "Guangchuang", family = "Yu",        email = "guangchuangyu@gmail.com",   role  = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
     person(given = "Li-Gen",      family = "Wang",      email = "reeganwang020@gmail.com",   role  = "ctb"),
-    person(given = "Xiao",        family = "Luo",       email = "l77880853349@163.com",      role  = "ctb"),
-    person(given = "Meijun",      family = "Chen",      email = "mjchen1996@outlook.com",    role  = "ctb"),
     person(given = "Giovanni",    family = "Dall'Olio", email = "giovanni.dallolio@upf.edu", role = "ctb"),
+    person(given = "Qianwen",     family = "Wang",      email = "treywea@gmail.com",         role = "ctb"),
     person(given = "Wanqian",     family = "Wei",       email = "altair_wei@outlook.com",    role = "ctb"),
     person(given = "Chun-Hui",    family = "Gao",       email = "gaospecial@gmail.com",      role = "ctb", comment = c(ORCID = "0000-0002-1445-7939"))
 	)
@@ -62,4 +61,4 @@ Packaged: NA
 biocViews: Annotation, Clustering, GeneSetEnrichment, GO, KEGG,
     MultipleComparison, Pathways, Reactome, Visualization
 Encoding: UTF-8
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

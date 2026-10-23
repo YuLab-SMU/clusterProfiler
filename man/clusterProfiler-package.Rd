@@ -27,9 +27,8 @@ Authors:
 Other contributors:
 \itemize{
   \item Li-Gen Wang \email{reeganwang020@gmail.com} [contributor]
-  \item Xiao Luo \email{l77880853349@163.com} [contributor]
-  \item Meijun Chen \email{mjchen1996@outlook.com} [contributor]
   \item Giovanni Dall'Olio \email{giovanni.dallolio@upf.edu} [contributor]
+  \item Qianwen Wang \email{treywea@gmail.com} [contributor]
   \item Wanqian Wei \email{altair_wei@outlook.com} [contributor]
   \item Chun-Hui Gao \email{gaospecial@gmail.com} (\href{https://orcid.org/0000-0002-1445-7939}{ORCID}) [contributor]
 }
