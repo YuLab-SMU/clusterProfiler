@@ -7,48 +7,114 @@
 interpret_agent(
   x,
   context = NULL,
-  n_pathways = 50,
+  prior = NULL,
+  n_pathways = NULL,
   model = NULL,
   add_ppi = FALSE,
   gene_fold_change = NULL,
   max_tokens = 8192,
   temperature = 0.3,
-  verbose = FALSE
+  review = FALSE,
+  reduce = TRUE,
+  reduce_threshold = NULL,
+  reasoning = NULL,
+  verbose = FALSE,
+  reduce_go = NULL,
+  go_reduction_threshold = NULL
 )
 }
 \arguments{
 \item{x}{An enrichment result object.}
 
-\item{context}{A string describing the experimental background.}
+\item{context}{A string describing the experimental background. State the question the
+analysis should answer here (for example "which cell type is this cluster?"); the answer
+is returned as \code{conclusion}.}
 
-\item{n_pathways}{Number of top pathways to consider initially. Default 50.}
+\item{prior}{Optional results of other tools to be checked against the enrichment
+evidence, as text: a SingleR or scGPT label, a ranked list of transcription factors from
+a regulon analysis, the protein complexes enriched in the gene list, and so on. A single
+string applies to every cluster; a named character vector or list supplies one entry
+per cluster. The Detective and the Synthesizer see it as a claim to check, not as
+evidence, and the result gains \code{prior_verdict} (Confirmed, Refined, Corrected or Not
+assessable) and \code{prior_rationale}.}
 
-\item{model}{Optional LLM model. When `NULL` (default), uses the aisdk
-package-wide default model configured via `aisdk::set_model()`. You can
-also supply a model ID in `provider:model` format or a `LanguageModelV1`
+\item{n_pathways}{Maximum number of terms (per cluster) the Cleaner starts from, taken in
+order of adjusted p-value after reduction. \code{NULL} (default) uses every term that passes
+the object's cutoffs; with \code{reduce = TRUE} that is one representative per theme.}
+
+\item{model}{Optional LLM model. When \code{NULL} (default), uses the aisdk
+package-wide default model configured via \code{aisdk::set_model()}. You can
+also supply a model ID in \code{provider:model} format or a \code{LanguageModelV1}
 object. Bare model names are supported with a warning.}
 
 \item{add_ppi}{Logical, whether to query PPI data. Default FALSE.}
 
-\item{gene_fold_change}{Named numeric vector of log fold changes.}
+\item{gene_fold_change}{Named numeric vector of log fold changes. When supplied, every
+input gene is also listed to the Detective and the Synthesizer, most up-regulated first.}
 
 \item{max_tokens}{Maximum tokens per agent call. Default 8192.}
 
 \item{temperature}{Sampling temperature. Default 0.3.}
 
+\item{review}{Logical, whether to run a final Reviewer agent (Agent 4) that
+audits the synthesized draft against the input evidence for grounding,
+overclaiming, experimental-label fidelity, and \strong{evidence sufficiency}
+(whether the supplied evidence classes can support a claim as specific as
+the draft makes). When \code{TRUE}, the result gains a \code{review} field
+(verdict, grounding_score, evidence_sufficiency, supported_resolution,
+abstain_recommended, issues, adjusted_confidence, warnings) and
+\code{overview_original}; if the verdict is \code{"revise"}, \code{overview} is replaced
+by the corrected version, in which claims exceeding \code{supported_resolution}
+are downgraded to that resolution. Default \code{FALSE}, which reproduces the released
+three-agent behavior exactly: the audit is an addition a caller opts into,
+and leaving it off keeps existing scripts measuring what they measured
+before. Note that the audit roughly doubles wall-clock time per unit and
+adds one model call, and that it is not infallible -- on objects where the
+Synthesizer returned nothing it has been observed to return \code{pass} with a
+\code{High} grounding score.}
+
+\item{reduce}{Logical. Run \code{\link[=reduce_redundancy]{reduce_redundancy()}} before building any prompt, as
+\code{\link[=interpret]{interpret()}} does: Wang similarity for GO results, Jaccard overlap of member genes
+for other gene-set collections. Deterministic and makes no model call. Default \code{TRUE}.}
+
+\item{reduce_threshold}{Similarity threshold passed to \code{\link[=reduce_redundancy]{reduce_redundancy()}}. \code{NULL}
+(default) uses its default of 0.5.}
+
+\item{reasoning}{Optional reasoning/thinking configuration passed through to the
+provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL} the
+request is byte-identical to one made before this argument existed. Whatever is
+passed is recorded in the execution stamp as \code{reasoning_requested}, alongside
+\code{reasoning_evidence} -- whether the response actually carried a reasoning block.
+The two are separate because a gateway can accept the parameter and drop it, and
+the caller can only observe the second.}
+
 \item{verbose}{Logical, whether to print debug messages. Default FALSE.}
+
+\item{reduce_go, go_reduction_threshold}{Earlier names of \code{reduce} and \code{reduce_threshold},
+still accepted; a call that passes \code{reduce_go} keeps its earlier default threshold of 0.7.}
 }
 \value{
-An `interpretation` object with deep analysis fields plus
-  regulatory_drivers, refined_network, and network_evidence from the
-  detective agent.
+An \code{interpretation} object with deep analysis fields, \code{conclusion} (the answer to
+the question the context poses), plus regulatory_drivers, refined_network, and
+network_evidence from the detective agent. When \code{prior} is supplied, also
+\code{prior_verdict} and \code{prior_rationale}. When \code{review = TRUE}, also includes \code{review} and
+\code{overview_original}. The \code{review} field reports grounding separately from
+resolution: \code{abstain_recommended = "yes"} flags a draft whose cited
+evidence is real but which resolves to a more specific entity than that
+evidence can single out, with \code{supported_resolution} giving the claim the
+evidence does support.
 }
 \description{
-Employs three specialized AI agents in sequence for rigorous interpretation:
+Employs specialized AI agents in sequence for rigorous interpretation, and is the entry
+point that combines the enrichment evidence with the results of other tools (\code{prior})
+into a conclusion:
 \enumerate{
-  \item Agent Cleaner: Filters noise and selects relevant pathways.
-  \item Agent Detective: Identifies key regulators and functional modules.
-  \item Agent Synthesizer: Produces a coherent biological narrative.
+\item Agent Cleaner: Filters noise and selects relevant pathways.
+\item Agent Detective: Identifies key regulators and functional modules.
+\item Agent Synthesizer: Produces a coherent biological narrative.
+\item Agent Reviewer (optional, \code{review = TRUE}): Audits the draft for
+grounding, overclaiming, and experimental-label fidelity; flags issues and
+returns a corrected overview.
 }
 }
 \details{
@@ -61,5 +127,11 @@ res <- interpret_agent(df,
   context = "scRNA-seq of mouse MI day 3"
 )
 print(res)
+# Check another tool's answer against the enrichment evidence
+res <- interpret_agent(ego_cluster3,
+  context = "PBMC scRNA-seq; which cell type is cluster 3?",
+  gene_fold_change = fc3, prior = "SingleR (HPCA): T_cell:CD4+_Naive"
+)
+res$conclusion; res$prior_verdict
 }
 }

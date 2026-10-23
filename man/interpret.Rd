@@ -7,41 +7,57 @@
 interpret(
   x,
   context = NULL,
-  n_pathways = 20,
+  n_pathways = NULL,
   model = NULL,
-  task = "interpretation",
-  prior = NULL,
   add_ppi = FALSE,
   gene_fold_change = NULL,
+  gene_stats = NULL,
   max_tokens = 8192,
   temperature = 0.3,
-  verbose = FALSE
+  reduce = TRUE,
+  reduce_threshold = NULL,
+  reasoning = NULL,
+  verbose = FALSE,
+  reduce_go = NULL,
+  go_reduction_threshold = NULL
 )
 }
 \arguments{
-\item{x}{An enrichment result object (`enrichResult`, `gseaResult`,
-`compareClusterResult`, or a `data.frame` with pathway columns).}
+\item{x}{An enrichment result object (\code{enrichResult}, \code{gseaResult},
+\code{compareClusterResult}, or a \code{data.frame} with pathway columns).}
 
 \item{context}{A string describing the experimental background
 (e.g., "scRNA-seq of mouse myocardial infarction at day 3").}
 
-\item{n_pathways}{Number of top significant pathways to include. Default 20.}
+\item{n_pathways}{Maximum number of terms (per cluster) sent to the model, taken in order
+of adjusted p-value after reduction. \code{NULL} (default) sends every term that passes the
+object's cutoffs; with \code{reduce = TRUE} that is one representative per theme. On five
+public lists a cap below the number of representatives named fewer themes of the full
+result; for a model with a short context, lower \code{reduce_threshold} (for example 0.3)
+before setting a cap.}
 
-\item{model}{Optional LLM model. When `NULL` (default), uses the aisdk
-package-wide default model configured via `aisdk::set_model()`.
-You can also supply a model ID in `provider:model` format
-(e.g., `"deepseek:deepseek-chat"`, `"gemini:gemini-2.5-flash"`) or a
-`LanguageModelV1` object. Bare model names are supported with a warning
-(e.g., `"deepseek-chat"`).}
-
-\item{task}{Task type: "interpretation" (default), "cell_type"/"annotation",
-or "phenotype"/"phenotyping".}
-
-\item{prior}{Optional prior knowledge or preliminary annotation to guide the task.}
+\item{model}{Optional LLM model. When \code{NULL} (default), uses the aisdk
+package-wide default model configured via \code{aisdk::set_model()}.
+You can also supply a model ID in \code{provider:model} format
+(e.g., \code{"deepseek:deepseek-chat"}, \code{"gemini:gemini-2.5-flash"}) or a
+\code{LanguageModelV1} object. Bare model names are supported with a warning
+(e.g., \code{"deepseek-chat"}).}
 
 \item{add_ppi}{Logical, whether to query STRING PPI network data. Default FALSE.}
 
-\item{gene_fold_change}{Named numeric vector of log fold changes for expression context.}
+\item{gene_fold_change}{Named numeric vector of log fold changes for expression context.
+For a \code{gseaResult} left \code{NULL}, the ranked list the GSEA was run on (\code{x@geneList}) is
+used, so the leading-edge genes reach the model with their values.}
+
+\item{gene_stats}{Optional data frame of per-gene statistics from the differential
+analysis behind \code{x} (a limma \code{topTable()}, DESeq2 \code{results()}, edgeR \code{topTags()} or
+Seurat \code{FindMarkers()} table). Recognised columns: the gene (\code{gene}, \code{SYMBOL}, \code{symbol},
+\code{gene_symbol}, \code{ENTREZID}, \code{ID}, or the row names), the log fold change (\code{log2FC},
+\code{logFC}, \code{log2FoldChange}, \code{avg_log2FC}) and the adjusted p-value (\code{padj}, \code{adj.P.Val},
+\code{FDR}, \code{p_val_adj}, \code{p.adjust}). When supplied, the genes of the enriched terms are listed
+with log fold change and FDR, and the most significant up- and down-regulated genes are
+added, so that the genes the model names are read from the data rather than from the term
+names. It also supplies \code{gene_fold_change} when that is \code{NULL}.}
 
 \item{max_tokens}{Maximum tokens for the LLM response. Default 8192.
 Some models (especially reasoning models) may need much higher values
@@ -49,15 +65,33 @@ Some models (especially reasoning models) may need much higher values
 
 \item{temperature}{Sampling temperature. Default 0.3.}
 
+\item{reduce}{Logical. Run \code{\link[=reduce_redundancy]{reduce_redundancy()}} before building the prompt, so every
+significant theme reaches the model once: Wang similarity for GO results, Jaccard
+overlap of member genes for KEGG and other gene-set collections. Default \code{TRUE}; a
+no-op for data frames and lists.}
+
+\item{reduce_threshold}{Similarity threshold passed to \code{\link[=reduce_redundancy]{reduce_redundancy()}}. \code{NULL}
+(default) uses its default of 0.5.}
+
+\item{reasoning}{Optional reasoning/thinking configuration passed through to the
+provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL}
+the request is byte-identical to one made before this argument existed. Whatever is
+passed is recorded in the execution stamp as \code{reasoning_requested}, alongside
+\code{reasoning_evidence} -- whether the response actually carried a reasoning block.}
+
 \item{verbose}{Logical, whether to print debug messages showing raw API
 responses, token usage, and JSON parsing details. Default FALSE.
-Equivalent to setting `options(aisdk.debug = TRUE)` for the call.}
+Equivalent to setting \code{options(aisdk.debug = TRUE)} for the call.}
+
+\item{reduce_go, go_reduction_threshold}{Earlier names of \code{reduce} and \code{reduce_threshold},
+still accepted; a call that passes \code{reduce_go} keeps its earlier default threshold of 0.7.}
 }
 \value{
-An `interpretation` object (list) with task-specific fields.
-  For "interpretation": overview, key_mechanisms, hypothesis, narrative, etc.
-  For "annotation": cell_type, confidence, reasoning, markers, etc.
-  For "phenotype": phenotype, confidence, reasoning, key_processes, etc.
+An \code{interpretation} object (list): overview, regulatory_drivers, key_mechanisms,
+crosstalk, hypothesis, narrative, refined_network and network_evidence. \code{interpret()}
+interprets the enrichment result and nothing else; to combine it with the results of
+other tools (a SingleR label, a TF-activity ranking, a complex enrichment) and reach a
+conclusion, use \code{\link[=interpret_agent]{interpret_agent()}} with \code{prior}.
 }
 \description{
 Functions for interpreting functional enrichment analysis results using
@@ -72,7 +106,7 @@ to generate a structured biological interpretation, hypothesis, and narrative
 suitable for a publication.
 }
 \details{
-Uses `generate_object()` internally for reliable structured output with
+Uses \code{generate_object()} internally for reliable structured output with
 automatic JSON repair, eliminating manual parsing failures.
 }
 \examples{
@@ -89,6 +123,11 @@ res <- interpret(df,
   model = "deepseek:deepseek-chat",
   context = "Cancer proliferation study"
 )
+# Every significant term, one representative per theme (the default)
+ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
+res <- interpret(ego)
+# A shorter prompt for a model with a short context: merge more terms per theme
+res <- interpret(ego, reduce_threshold = 0.3)
 # Reuse aisdk's global default model
 # aisdk::set_model("openai:gpt-4o-mini")
 # res <- interpret(df, context = "Cancer proliferation study")
