@@ -1562,3 +1562,80 @@ test_that("no family label ever claims to be measured", {
     real_family <- fam & !grepl("FUSION|UNIPROT|_SMN", regs)
     expect_equal(sum(real_family & kind == "measured"), 0L)
 })
+
+## ---- failure recording: an empty answer is not a failed one ---------------
+
+test_that("a failed source is recorded, not reported as an empty one", {
+    ## The four bugs this package shipped and then fixed shared one shape: a
+    ## failure was caught and turned into a default that read as an answer.
+    c1 <- mechanism_failure_collector()
+    expect_equal(nrow(c1$all()), 0)
+    expect_s3_class(c1$all(), "mechanismFailures")
+
+    c1$add(source = "gpsadb", stage = "query", message = "at most 500 genes")
+    expect_equal(nrow(c1$all()), 1)
+    expect_equal(c1$all()$source, "gpsadb")
+    expect_false(c1$all()$fatal)
+})
+
+test_that("every source failing aborts instead of reporting an absence", {
+    c1 <- mechanism_failure_collector()
+    c1$add(source = "perturbagen", stage = "query", message = "unreachable")
+    ## Every consulted source failed: an empty bundle would say "the data says
+    ## no" when the truth is "the data was never obtained".
+    expect_error(mechanism_abort_if_all_failed(c1, "perturbagen"),
+                 "Every evidence source failed")
+
+    ## One of two failing is a degraded answer, not a dead end.
+    expect_error(mechanism_abort_if_all_failed(c1, c("perturbagen", "tf")), NA)
+    ## Nothing failed is not an error either.
+    expect_error(mechanism_abort_if_all_failed(mechanism_failure_collector(), "tf"), NA)
+})
+
+test_that("the bundle carries failures where print() can show them", {
+    skip_if_not_installed("gson")
+    use_fixture_cache()
+    genes <- c(paste0("g", 1:8), "gX")
+    ev <- suppressWarnings(evidence(genes, upstream = "tf",
+                                    universe = c(genes, paste0("u", 1:5))))
+    expect_true("failures" %in% names(ev$diagnostics))
+    expect_equal(nrow(ev$diagnostics$failures), 0)
+    ## A clean run says nothing about failures.
+    expect_false(grepl("FAILED", paste(utils::capture.output(print(ev)), collapse = "\n")))
+})
+
+## ---- similarity and biotrigger -------------------------------------------
+
+test_that("a short list is refused before the round trip", {
+    ## GPSAdb rejects lists of 200 or fewer genes; the client check turns that
+    ## into a message that says what to do instead of a server error.
+    skip_if_not_installed("gpsadb")
+    expect_error(evidence_similarity(c("TP53", "MYC"), limit = 5),
+                 "more than 200")
+})
+
+test_that("a similarity ranking is a table of datasets, not of verdicts", {
+    ## "This knockdown looks like your list" is a statement about an
+    ## experiment. It must not enter $regulators, where a row reads as a
+    ## mechanism claim about a regulator.
+    e <- mechanism_empty_similarity()
+    expect_true(all(c("dataset", "perturbed_gene", "score") %in% names(e)))
+    expect_false("verdict" %in% names(e))
+    expect_equal(nrow(e), 0)
+})
+
+test_that("a biotrigger hit is graded B, not C", {
+    ## It is a measurement (the factor was perturbed), but the evidence is the
+    ## overlap of two signatures, which is weaker than a direct assay.
+    skip_if_not_installed("gpsadb")
+    e <- mechanism_empty_biotrigger()
+    expect_true(all(c("regulator", "level", "evidence_kind") %in% names(e)))
+    expect_equal(nrow(e), 0)
+})
+
+test_that("a fold-change vector must be named to be matched to genes", {
+    skip_if_not_installed("gpsadb")
+    expect_error(
+        evidence_similarity(paste0("G", 1:250), log2fc = rnorm(250)),
+        "named vector")
+})

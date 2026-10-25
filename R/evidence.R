@@ -115,6 +115,10 @@ evidence <- function(genes,
         ))
     }
 
+    ## Every source consulted below records its failures here, so an answer
+    ## that could not be obtained is never reported as an answer that was empty.
+    failures <- mechanism_failure_collector()
+
     collection_sources <- intersect(upstream, c("tf", "mirna", "cellstate", "tissue"))
     sets <- lapply(collection_sources, mechanism_sets, species = design$species)
     names(sets) <- collection_sources
@@ -165,12 +169,25 @@ evidence <- function(genes,
                                   "considered")
             ),
             error = function(e) {
-                rlang::warn(paste0("Perturbation evidence unavailable: ",
-                                   conditionMessage(e)))
+                failures$add(source = "perturbagen", stage = "query",
+                             message = conditionMessage(e))
                 mechanism_empty_perturbation()
             }
         )
+        if (nrow(failures$all())) {
+            ## Say it loudly: the perturbation channel is the only one that can
+            ## reach level A, so losing it changes what the run can conclude.
+            rlang::warn(paste0(
+                "Perturbation evidence could not be obtained: ",
+                paste(unique(failures$all()$message), collapse = "; "),
+                ". The bundle records this in $diagnostics$failures."))
+        }
     }
+
+    ## Nothing worked. An empty bundle here would report `absent` for every
+    ## entity, which reads as a negative result when the truth is that no source
+    ## answered.
+    mechanism_abort_if_all_failed(failures, collection_sources)
 
     ## The canonical shape, whatever came out of rbind: `direction` belongs to
     ## the contract even when no measured row is present to populate it.
@@ -186,7 +203,11 @@ evidence <- function(genes,
             evidence_ppi(genes, species = mechanism_taxid(design$species)),
             error = function(e) e
         )
-        if (inherits(ev, "error")) mechanism_empty_ppi() else ev
+        if (inherits(ev, "error")) {
+            failures$add(source = "ppi", stage = "network",
+                         message = conditionMessage(ev))
+            mechanism_empty_ppi()
+        } else ev
     } else {
         NULL
     }
@@ -206,7 +227,12 @@ evidence <- function(genes,
         )),
         regulators  = regulators,
         xref        = mechanism_xref(),
-        diagnostics = mechanism_diagnostics(regulators, names(sets), genes, sets, design, universe),
+        diagnostics = c(
+            mechanism_diagnostics(regulators, names(sets), genes, sets, design, universe),
+            ## Anything that could not be obtained, so a caller can tell an
+            ## empty answer from an answer that was never received.
+            list(failures = failures$all())
+        ),
         provenance  = list(
             ## One entry per collection: they normally agree, but nothing
             ## stops a caller from mixing releases, and a scalar here would
@@ -273,6 +299,16 @@ print.evidenceBundle <- function(x, ...) {
     ## p-value, so the tested count is the informative denominator.
     cat("  regulators:   ", nrow(shown), " shown of ", noted, " tested, ",
         sum(shown$named), " naming a factor\n", sep = "")
+
+    ## A source that failed is not a source that found nothing.
+    fails <- x$diagnostics$failures
+    if (!is.null(fails) && nrow(fails)) {
+        cat("  FAILED:       ", nrow(fails), " source(s) could not be consulted\n", sep = "")
+        for (i in seq_len(nrow(fails))) {
+            cat("     ", fails$source[i], " [", fails$stage[i], "]: ",
+                substr(fails$message[i], 1, 60), "\n", sep = "")
+        }
+    }
 
     ## How much of the measured channel had data to answer with. Three hits out
     ## of three hundred candidates is not the same claim as three out of three,
