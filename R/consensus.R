@@ -222,6 +222,10 @@ consensus_findings <- function(cv) {
 #' mechanism_writable(c("supported", "single_source", "untested"),
 #'                    c("B", "C", NA), c("FOXO3", "MIR23C", "NFE2L2"))
 #' @export
+#' @param family Logical vector from `consensus()`, TRUE where the label names
+#'   a protein family or a complex rather than one gene. Such a label is a real
+#'   answer, so it gets its own sentence: the collection names the group, not one
+#'   gene, and no perturbation dataset can exist for it.
 mechanism_writable <- function(verdict, level, regulator, sources = NULL,
                               family = NULL) {
     vapply(seq_along(verdict), function(i) {

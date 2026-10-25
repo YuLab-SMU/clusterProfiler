@@ -17,6 +17,11 @@ mechanism_writable(verdict, level, regulator, sources = NULL, family = NULL)
 A measured perturbation is graded A whether it hit a regulator or a
 downstream effector, so the sentence for a single-source A finding depends
 on whether a target-set collection also names the gene as a regulator.}
+
+\item{family}{Logical vector from `consensus()`, TRUE where the label names
+a protein family or a complex rather than one gene. Such a label is a real
+answer, so it gets its own sentence: the collection names the group, not one
+gene, and no perturbation dataset can exist for it.}
 }
 \value{
 A character vector of sentences.
