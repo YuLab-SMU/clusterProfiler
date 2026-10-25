@@ -52,7 +52,7 @@ mechanism_sets <- function(source = c("tf", "mirna", "perturbagen", "cellstate",
 
     spec <- mechanism_set_files[[source]]
     file <- sub("<release>", release, spec$file, fixed = TRUE)
-    cache_dir <- cache_dir %||% yulab.utils::user_dir("clusterProfiler")
+    cache_dir <- mechanism_cache_root(cache_dir)
     path <- file.path(cache_dir, file)
 
     accessed <- mechanism_fetch_gmt(path, release, cache_dir)
@@ -112,6 +112,17 @@ mechanism_gmt_url <- function(file, release) {
 ## The release check matters: reusing a cached file after `release` changes
 ## would run the analysis against a collection the caller did not ask for,
 ## and the only symptom would be numbers that drift between sessions.
+## The directory GMT files live in, resolved once.
+##
+## A test that wants to check against the real MSigDB download has to ask for
+## the same place `mechanism_sets()` reads from; hard-coding a path worked only
+## while the test was run from one particular working directory, which is not
+## how R CMD check runs.
+mechanism_cache_root <- function(cache_dir = NULL) {
+    cache_dir %||% getOption("clusterProfiler_cache_dir") %||%
+        yulab.utils::user_dir("clusterProfiler")
+}
+
 mechanism_fetch_gmt <- function(path, release, cache_dir) {
     meta <- paste0(path, ".meta")
 

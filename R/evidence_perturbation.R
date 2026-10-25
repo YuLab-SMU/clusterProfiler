@@ -250,9 +250,16 @@ mechanism_lapply <- function(x, fun) {
         return(lapply(x, fun))
     }
     workers <- min(workers, length(x))
+    ## Some hosts forbid forking -- R CMD check does, and so do sandboxes. The
+    ## parallel form is a speed-up, so an environment that refuses it gets the
+    ## serial answer rather than an error.
+    ##
     ## mc.preschedule = FALSE spreads uneven requests rather than pinning a
     ## whole chunk to one child that happens to get the slow ones.
-    parallel::mclapply(x, fun, mc.cores = workers, mc.preschedule = FALSE)
+    tryCatch(
+        parallel::mclapply(x, fun, mc.cores = workers, mc.preschedule = FALSE),
+        error = function(e) lapply(x, fun)
+    )
 }
 
 ## One dataset's description, or blanks when it cannot be fetched.

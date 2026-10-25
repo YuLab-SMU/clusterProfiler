@@ -1224,12 +1224,32 @@ test_that("max_turns counts questions, not transcript rows", {
     class(b) <- c("evidenceBundle", "list")
 
     d <- interpret_dialogue(b, max_turns = 2L)
+    ## A stub session: the subject is how the budget is counted, not what a
+    ## model answers, and R CMD check has no API key.
+    ## A stub session: the subject is how the budget is counted, not what a
+    ## model answers, and R CMD check has no API key. It must not close over
+    ## `d`, or it reports a stale history.
+    d$session <- list(
+        send = function(prompt) {
+            structure(list(text = paste("reply to", prompt)),
+                      class = c("GenerateResult", "R6"))
+        },
+        append_message = function(...) NULL,
+        ## Always one behind the transcript, which is what a real session looks
+        ## like just before a reply is recorded.
+        get_history = function() rep("x", 2L)
+    )
     ## Two assertions must not consume the question budget.
     d <- say(d, "first note")
     d <- say(d, "second note")
     expect_equal(.nrow0(d$transcript), 2)
-    ## The limit is still two questions, so a first ask is allowed.
-    expect_error(ask(d, "q1"), NA)
+    ## The limit is still two questions, so a first ask is allowed. The result
+    ## has to be assigned back -- R copies on assignment, and a discarded return
+    ## value leaves the caller's object untouched, which is what a previous
+    ## version of this test wrongly expected.
+    expect_error(d <- ask(d, "q1"), NA)
+    expect_equal(.nrow0(d$transcript), 4)
+    expect_equal(sum(d$transcript$kind == "question"), 1L)
 })
 
 test_that("a dialogue does not carry a copy of the whole bundle", {
@@ -1518,12 +1538,18 @@ test_that("a hyphen symbol written with an underscore is not a family label", {
 test_that("no family label ever claims to be measured", {
     ## A family arrives from a motif collection; a measurement of a family
     ## cannot exist because there is no single gene to perturb.
+    ##
+    ## This one runs against the real MSigDB download when it is present, so the
+    ## assertion covers the whole collection rather than a fixture. It is not
+    ## present under R CMD check -- the cache lives outside the package -- so the
+    ## test skips rather than failing on a missing file.
+    cache <- mechanism_cache_root()
+    gmt <- file.path(cache, "c3.tft.v2026.2.Hs.symbols.gmt")
+    skip_if_not(file.exists(gmt), "no MSigDB cache available")
+
     ## The MSigDB download has no trailing newline, so readLines() warns about
     ## an incomplete final line. The warning says nothing about this test.
-    L <- suppressWarnings(readLines(
-        file.path("../biomedical-knowledge-mining-book/cache",
-                  "c3.tft.v2026.2.Hs.symbols.gmt")))
-    skip_if_not(length(L), "no GMT cache")
+    L <- suppressWarnings(readLines(gmt))
     terms <- unique(vapply(strsplit(L[nzchar(L)], "\t", fixed = TRUE), `[`, "", 1))
     ## enricher() is not called here, but reading the cache into a table can
     ## still raise the qvalue notice; the test is about labels, not estimates.
