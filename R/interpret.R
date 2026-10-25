@@ -542,6 +542,23 @@ interpret <- function(x,
     on.exit(options(aisdk.debug = old_debug), add = TRUE)
   }
 
+  # An evidenceBundle is reduced to the entities its own evidence supports
+  # before anything else runs, and becomes a named list of per-collection data
+  # frames -- the shape process_enrichment_input() already handles. Every other
+  # input type takes the existing path unchanged.
+  bundle <- NULL
+  if (inherits(x, "evidenceBundle")) {
+    bundle <- x
+    x <- .process_evidence_input(x, n_pathways)
+    if (is.null(x)) {
+      rlang::abort(c(
+        "No entity in this evidenceBundle carries level A or B with a supported verdict.",
+        i = "Nothing may be asserted about a mechanism, so there is nothing to interpret.",
+        i = "Inspect `consensus(x)` and `x$diagnostics` to see what was tested."
+      ))
+    }
+  }
+
   # Deterministic reduction before any prompt is built (see reduce_redundancy()).
   x <- .reduce_for_prompt(x, reduce, reduce_threshold, reduce_go, go_reduction_threshold)
   x <- .readable_for_prompt(x)
@@ -627,10 +644,10 @@ interpret <- function(x,
   .p <- .prov_finalize(.prov, "interpret", .ev_sha)
 
   if (length(results) == 1 && names(results)[1] == "Default") {
-    return(.attach_provenance(results[[1]], .p))
+    return(.attach_evidence(.attach_provenance(results[[1]], .p), bundle))
   }
   class(results) <- c("interpretation_list", "list")
-  .attach_provenance(results, .p)
+  .attach_evidence(.attach_provenance(results, .p), bundle)
 }
 
 # ============================================================================
@@ -2470,3 +2487,18 @@ reduce_go_redundancy <- function(enrich_result,
   out
 }
 
+## Record what the narrative was allowed to see, and what it named anyway.
+##
+## The two are kept on the result rather than printed, so a reader can check a
+## published sentence against the evidence that admitted it.
+.attach_evidence <- function(res, bundle) {
+  if (is.null(bundle)) return(res)
+  res$evidence_admitted <- evidence_admitted(bundle)
+  res$evidence_excluded <- evidence_excluded(bundle)
+  res$unsupported_claims <- if (inherits(res, "interpretation_list")) {
+    lapply(res, unsupported_claims, x = bundle)
+  } else {
+    unsupported_claims(res, bundle)
+  }
+  res
+}

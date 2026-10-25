@@ -38,20 +38,24 @@ Imports:
     plyr,
     qvalue,
     rlang,
+    parallel,
     stats,
     tidyr,
     utils,
     yulab.utils (>= 0.2.3)
 Suggests:
     AnnotationHub,
+    aisdk.mcp,
     BiocManager,
     digest,
     DOSE,
     ggtangle,
-    readr,
+    gpsadb,
     org.Hs.eg.db,
     quarto,
-    testthat
+    readr,
+    testthat,
+    withr
 VignetteBuilder: quarto
 ByteCompile: true
 License: Artistic-2.0

@@ -1,0 +1,626 @@
+#' Grade upstream evidence for a gene list
+#'
+#' Turn a gene list into a table of candidate mechanisms, each carrying an
+#' evidence level that says how strongly it may be stated. This is the
+#' mechanism-exit counterpart of a pathway enrichment: the collections tested
+#' name *upstream participants* (transcription factors, microRNAs, ...) instead
+#' of biological processes, so an enriched set answers "what could have
+#' produced these genes" rather than "what do these genes do".
+#'
+#' Each requested collection is tested separately against the same gene list,
+#' and each is corrected within itself. Pooling them would let a large
+#' collection dilute a small one: C3:TFT holds about 1100 sets and C3:MIR about
+#' 2600, with different target definitions, so their p-values are not on one
+#' scale. `$regulators` therefore carries `padj_within_source`, never a single
+#' shared `padj`.
+#'
+#' Every returned collection must be graded the same way: an over-represented
+#' target set is evidence that the regulator's *fingerprint* sits in the list,
+#' not evidence that the regulator caused it. `$regulators$level` says how far
+#' a claim may go, and `$diagnostics` says how much of the list the collection
+#' could speak about at all.
+#'
+#' @param genes Gene symbols. A character vector, an `enrichResult` (its
+#'   `geneID` column is expanded), or a `data.frame` with a column named by
+#'   `design$gene_col`.
+#' @param design A list describing the experiment; see Details.
+#' @param upstream Collections to test: `"tf"`, `"mirna"`, `"perturbagen"`,
+#'   `"cellstate"` or `"tissue"`. Defaults to `"tf"` alone. `"mirna"` is
+#'   off by default for a measured reason: its sets are predicted seed matches,
+#'   so an enrichment describes which genes carry the motif rather than which
+#'   microRNA is active. Measured on the airway list, 7 miRNAs were
+#'   significant among the UP-regulated genes and 0 among the down ones -- the
+#'   opposite of what a repressor predicts -- so the direction that would make
+#'   the finding interpretable is absent. Ask for it explicitly when the
+#'   question is about UTR composition.
+#' @param universe Background genes. `NULL` uses every symbol in `org.Hs.eg.db`.
+#' @param network Whether to query STRING for interaction evidence. Off by
+#'   default because it needs the network; see [evidence_ppi()] for the grading.
+#' @param minGSSize Minimum gene-set size. The default is 5, not `enricher()`'s
+#'   10, so that small motif sets are tested; `maxGSSize` is `Inf` because the
+#'   largest GTRD target sets carry more than a thousand genes and the default
+#'   upper bound of 500 would drop exactly the broad regulators that matter.
+#' @param maxGSSize Maximum gene-set size.
+#' @param print_pvalue,print_qvalue Cutoffs used by the print method only. They
+#'   do not filter the result: `$regulators` always holds every tested set, so
+#'   that a set filtered out for display can still be distinguished from a set
+#'   that was never tested.
+#' @return An `evidenceBundle`: a list with `input`, `sets`, one element per
+#'   tested collection (`tf`, `mirna`), `regulators`, `xref`, `diagnostics` and
+#'   `provenance`.
+#'
+#'   `diagnostics` reports counts whose denominators differ and must not be
+#'   conflated: `n_input` is the number of genes handed in; `n_tested` is how
+#'   many of those could enter the test at all -- inputs present in the universe
+#'   and in some set, which is the `DESize` that `enrichR`'s `GeneRatio` divides
+#'   by; `n_sig_covered` is how many are covered by a *significant* regulator;
+#'   `uncovered_sig` is `n_input - n_sig_covered`. `coverage_tested` is
+#'   `n_tested / n_input`, not the larger ratio an "appears in any set" count
+#'   would give.
+#' @details `design` accepts `contrast`, `system`, `species`, `treatment`
+#'   (`"none"` by default), `gene`, `direction`, `gene_col` and
+#'   `coverage_floor`. `treatment` decides whether perturbation evidence (level
+#'   A) is reachable; it is never inferred from free text. `background` names
+#'   entities that belong to the setting rather than to the findings -- the
+#'   receptor a drug acts through, a known positive control -- so that
+#'   `unsupported_claims` does not report them as unevidenced. `coverage_floor` is
+#'   `NULL` by default: a collection is only declared `untested` as a whole when
+#'   the caller states a floor.
+#' @seealso [mechanism_sets()] for the collections, [mechanism_xref()] for the
+#'   level rules.
+#' @examples
+#' \dontrun{
+#' ev <- evidence(c("HIF1A", "PGK1", "CA9", "BNIP3", "SLC2A1", "LDHA"))
+#' ev$regulators
+#' }
+#' @export
+evidence <- function(genes,
+                     design       = list(),
+                     upstream     = "tf",
+                     universe     = NULL,
+                     network      = FALSE,
+                     minGSSize    = 5,
+                     maxGSSize    = Inf,
+                     print_pvalue = 1,
+                     print_qvalue = 1) {
+    upstream <- unique(upstream)
+    if (!length(upstream)) {
+        rlang::abort(c(
+            "`upstream` must name at least one collection.",
+            i = "Try `upstream = c(\"tf\", \"mirna\")`, the default."
+        ))
+    }
+    ## "perturbagen" is measurement rather than a collection: it comes from
+    ## GPSAdb over MCP and carries its own level rather than being graded by
+    ## mechanism_xref().
+    supported <- c("tf", "mirna", "perturbagen", "cellstate", "tissue")
+    if (length(setdiff(upstream, supported))) {
+        rlang::abort(c(
+            paste0("Unknown `upstream`: ",
+                   paste(setdiff(upstream, supported), collapse = ", "), "."),
+            i = paste0("This release supports: ", paste(supported, collapse = ", "), ".")
+        ))
+    }
+
+    design <- mechanism_design(design)
+    genes <- mechanism_genes(genes, design)
+    universe <- mechanism_universe(universe, genes, design)
+
+    needed <- setdiff(genes, universe)
+    if (length(needed)) {
+        rlang::warn(paste0(
+            length(needed), " input gene(s) are outside `universe` and cannot be tested: ",
+            paste(utils::head(needed, 5), collapse = ", "),
+            if (length(needed) > 5) ", ..." else ""
+        ))
+    }
+
+    collection_sources <- intersect(upstream, c("tf", "mirna", "cellstate", "tissue"))
+    sets <- lapply(collection_sources, mechanism_sets, species = design$species)
+    names(sets) <- collection_sources
+
+    results <- lapply(collection_sources, function(src) {
+        enricher(
+            genes,
+            universe     = universe,
+            gson         = sets[[src]],
+            minGSSize    = minGSSize,
+            maxGSSize    = maxGSSize,
+            ## Correction is applied to the whole collection; the print cutoffs
+            ## are applied later, on the returned table, so that "not shown"
+            ## never becomes "not tested".
+            pvalueCutoff = 1,
+            qvalueCutoff = 1
+        )
+    })
+    names(results) <- collection_sources
+
+    regulators <- do.call(rbind, lapply(collection_sources, function(src) {
+        mechanism_regulator_table(results[[src]], sets[[src]], src, genes,
+                                   species = design$species)
+    }))
+    ## No collection source leaves rbind() of nothing as NULL; the rest of the
+    ## function treats `regulators` as a data.frame, so give it the empty one.
+    if (is.null(regulators)) regulators <- mechanism_empty_regulators()
+    measured <- NULL
+    if ("perturbagen" %in% upstream) {
+        if (identical(design$treatment, "none")) {
+            rlang::warn(paste0(
+                "`upstream` includes \"perturbagen\" but `design$treatment` is \"none\". ",
+                "Every perturbation dataset will be queried and graded A, although ",
+                "the design does not state a treatment; set it, e.g. ",
+                "design = list(treatment = \"knockdown\"), so the grade matches the study."
+            ))
+        }
+        ## Perturbation is asked about the regulators the collections already
+        ## nominated, not about a sample of the gene list: whether a candidate
+        ## was ever knocked down is a well-posed question, while which genes
+        ## happen to have datasets is a property of the database.
+        measured <- tryCatch(
+            evidence_perturbation(
+                genes,
+                method     = mechanism_treatment_method(design),
+                candidates = mechanism_perturb_candidates(regulators),
+                considered = attr(mechanism_perturb_candidates(regulators),
+                                  "considered")
+            ),
+            error = function(e) {
+                rlang::warn(paste0("Perturbation evidence unavailable: ",
+                                   conditionMessage(e)))
+                mechanism_empty_perturbation()
+            }
+        )
+    }
+
+    ## The canonical shape, whatever came out of rbind: `direction` belongs to
+    ## the contract even when no measured row is present to populate it.
+    regulators <- mechanism_pad_columns(regulators)
+    if (!is.null(measured) && nrow(measured)) {
+        regulators <- rbind(mechanism_pad_columns(regulators), measured[, names(mechanism_pad_columns(regulators)), drop = FALSE])
+    }
+
+    ## Network evidence is graded separately: no STRING channel measures a
+    ## perturbation, so an edge can reach B and never A.
+    ppi <- if (isTRUE(network)) {
+        ev <- tryCatch(
+            evidence_ppi(genes, species = mechanism_taxid(design$species)),
+            error = function(e) e
+        )
+        if (inherits(ev, "error")) mechanism_empty_ppi() else ev
+    } else {
+        NULL
+    }
+
+    out <- list(
+        input = list(
+            genes     = genes,
+            universe  = universe,
+            design    = design,
+            namespace = "SYMBOL"
+        ),
+        sets = lapply(sets, function(g) list(
+            gsname   = g@gsname,
+            version  = g@version,
+            n_sets   = length(g@gsid2name$gsid),
+            keytype  = g@keytype
+        )),
+        regulators  = regulators,
+        xref        = mechanism_xref(),
+        diagnostics = mechanism_diagnostics(regulators, names(sets), genes, sets, design, universe),
+        provenance  = list(
+            ## One entry per collection: they normally agree, but nothing
+            ## stops a caller from mixing releases, and a scalar here would
+            ## silently report only the first.
+            ## No collection at all is legal -- a caller may ask for
+            ## perturbation evidence alone -- so these must survive an empty
+            ## `sets` list instead of calling vapply() on nothing.
+            release       = if (length(sets)) vapply(sets, function(g) g@version, "") else character(0),
+            release_consistent = length(unique(if (length(sets)) {
+                vapply(sets, function(g) g@version, "")
+            } else character(0))) <= 1L,
+            accessed_date = unique(if (length(sets)) {
+                vapply(sets, function(g) g@accessed_date, "")
+            } else character(0)),
+            upstream      = upstream,
+            minGSSize     = minGSSize,
+            maxGSSize     = maxGSSize,
+            print_pvalue  = print_pvalue,
+            print_qvalue  = print_qvalue,
+            package       = "clusterProfiler",
+            package_version = as.character(utils::packageVersion("clusterProfiler")),
+            called_at     = as.character(Sys.time())
+        )
+    )
+    for (src in collection_sources) out[[src]] <- results[[src]]
+    if (!is.null(measured)) out$perturbagen <- measured
+    if (!is.null(ppi)) out$ppi <- ppi
+
+    ## The class must exist before the writable table is built: it defers to
+    ## consensus(), which refuses anything that is not an evidenceBundle.
+    class(out) <- c("evidenceBundle", "list")
+    out$writable <- .evidence_writable_table(out)
+    out
+}
+
+#' Print an evidence bundle
+#'
+#' Show the input size, the collections used and the most significant
+#' regulators, one row per regulator with its evidence level. The cutoffs come
+#' from `print_pvalue` / `print_qvalue` recorded when the bundle was built;
+#' they affect this display only, never the table stored in `x$regulators`.
+#'
+#' @param x An `evidenceBundle` from [evidence()].
+#' @param ... Ignored.
+#' @return `x`, invisibly.
+#' @export
+print.evidenceBundle <- function(x, ...) {
+    d <- x$diagnostics$counts
+    cat("<evidenceBundle>\n")
+    ## n_input is the same for every source row; [1] collapses that repetition.
+    ## With no collection source -- perturbation evidence only -- there is no
+    ## row, so fall back to the input itself.
+    n_in <- if (!is.null(d) && nrow(d)) d$n_input[1] else length(x$input$genes)
+    cat("  input genes:  ", n_in, "  universe: ", length(x$input$universe), "\n")
+    rel <- unique(x$provenance$release)
+    rel <- if (length(rel)) paste0(" (", paste(rel, collapse = ", "), ")") else ""
+    cat("  collections:  ", paste(x$provenance$upstream, collapse = ", "), rel, "\n", sep = "")
+
+    r <- x$regulators
+    noted <- sum(!is.na(r$padj_within_source))
+    shown <- r[!is.na(r$padj_within_source) &
+                   r$padj_within_source <= (x$provenance$print_pvalue %||% 1), , drop = FALSE]
+    ## "N of N" said nothing: only sets that were actually tested carry a
+    ## p-value, so the tested count is the informative denominator.
+    cat("  regulators:   ", nrow(shown), " shown of ", noted, " tested, ",
+        sum(shown$named), " naming a factor\n", sep = "")
+
+    ## How much of the measured channel had data to answer with. Three hits out
+    ## of three hundred candidates is not the same claim as three out of three,
+    ## and nothing else in this output would tell the two apart.
+    if (!is.null(x$perturbagen)) {
+        q <- attr(x$perturbagen, "queried")
+        cons <- attr(x$perturbagen, "considered")
+        if (!is.null(q) && !is.na(q)) {
+            cat("  measured:     ", nrow(x$perturbagen),
+                " dataset(s) for ", q, " of ", cons,
+                " candidate regulator(s) queried\n", sep = "")
+        }
+    }
+
+    if (nrow(shown)) {
+        shown <- shown[order(shown$padj_within_source), , drop = FALSE]
+        shown <- utils::head(shown, 10)
+        print(
+            data.frame(
+                regulator = shown$regulator,
+                source    = shown$source,
+                level     = shown$level,
+                named     = shown$named,
+                padj      = signif(shown$padj_within_source, 3),
+                Count     = shown$Count,
+                setSize   = shown$setSize,
+                stringsAsFactors = FALSE
+            ),
+            row.names = FALSE
+        )
+    }
+    invisible(x)
+}
+
+## design: fill the defaults once, so every later step sees the same shape.
+mechanism_design <- function(design) {
+    defaults <- list(
+        contrast       = NULL,
+        system         = NULL,
+        species        = "Homo sapiens",
+        treatment      = "none",
+        gene           = NULL,
+        direction      = NULL,
+        gene_col       = "gene",
+        coverage_floor = NULL,
+        ## Entities that belong to the experimental setting rather than to the
+        ## findings, e.g. the receptor a treatment acts through.
+        background     = character(0)
+    )
+    unknown <- setdiff(names(design), names(defaults))
+    if (length(unknown)) {
+        rlang::warn(paste0("Ignoring unknown `design` field(s): ",
+                           paste(unknown, collapse = ", ")))
+    }
+    utils::modifyList(defaults, design[intersect(names(design), names(defaults))])
+}
+
+mechanism_genes <- function(genes, design) {
+    genes <- if (inherits(genes, "enrichResult")) {
+        unique(unlist(strsplit(as.character(genes$geneID), "/")))
+    } else if (is.data.frame(genes)) {
+        col <- design$gene_col
+        if (!col %in% names(genes)) {
+            rlang::abort(c(
+                paste0("`genes` has no column \"", col, "\"."),
+                i = "Set `design$gene_col` to the column holding the gene symbols."
+            ))
+        }
+        as.character(genes[[col]])
+    } else {
+        as.character(genes)
+    }
+    genes <- unique(genes[!is.na(genes) & nzchar(genes)])
+    if (!length(genes)) rlang::abort("`genes` is empty after removing NA and blank entries.")
+    genes
+}
+
+## The universe is returned as given (or as every symbol in org.Hs.eg.db).
+##
+## It is deliberately NOT unioned with `genes`: adding an input gene that the
+## caller excluded from the background would enlarge the denominator of the
+## hypergeometric test, which is the one thing a universe exists to pin down.
+## Input genes outside the universe are dropped by enricher() itself, and
+## evidence() warns about them.
+mechanism_universe <- function(universe, genes, design) {
+    if (is.null(universe)) {
+        pkg <- "org.Hs.eg.db"
+        if (!requireNamespace(pkg, quietly = TRUE)) {
+            rlang::abort(c(
+                "No `universe` supplied and org.Hs.eg.db is not installed.",
+                i = "Install it with BiocManager::install(\"org.Hs.eg.db\"), or pass `universe`."
+            ))
+        }
+        universe <- AnnotationDbi::keys(getExportedValue(pkg, pkg), keytype = "SYMBOL")
+    }
+    universe <- as.character(universe)
+    universe <- unique(universe[!is.na(universe) & nzchar(universe)])
+    if (!length(universe)) rlang::abort("`universe` is empty after removing NA and blank entries.")
+    universe
+}
+
+## One row per tested set, with the regulator label it collapses to.
+mechanism_regulator_table <- function(res, gson_obj, source, selected,
+                                     species = "Homo sapiens") {
+    ## A collection in which no set passes the size window makes enricher()
+    ## return NULL; that is an empty answer, not an error, so it becomes an
+    ## empty table and the diagnostics still report what was tested.
+    if (is.null(res) || nrow(as.data.frame(res)) == 0) {
+        return(data.frame(
+            regulator = character(), source = character(), term = character(),
+            named = logical(), level = character(),
+            padj_within_source = numeric(), setSize = integer(), Count = integer(),
+            family = logical(), stringsAsFactors = FALSE
+        ))
+    }
+    df <- as.data.frame(res)
+    df <- df[!is.na(df$ID), , drop = FALSE]
+    members <- gson_obj@gsid2gene
+
+    ## setSize counts unique (gsid, gene) pairs; gson::gson() already dedupes
+    ## gsid2gene, and this keeps the count correct if that ever stops.
+    set_size <- table(unique(members[, c("gsid", "gene")])$gsid)
+    ## TF sets need collapsing; cell-state and tissue identifiers already are
+    ## the entity name, and only a TF label can be "unnamed" in the sense of
+    ## naming no factor at all.
+    regulator <- mechanism_entity(df$ID, source)
+    unnamed <- if (identical(source, "tf")) mechanism_unnamed(regulator) else rep(FALSE, length(regulator))
+
+    data.frame(
+        regulator          = mechanism_alias_regulator(regulator),
+        source             = source,
+        term               = df$ID,
+        named              = !unnamed,
+        ## A family or complex label cannot be looked up in a perturbation
+        ## database, and its string must not be matched against gene symbols.
+        family             = mechanism_is_family_label(regulator, species),
+        ## Whether this row is a measurement, a prediction or a signature. The
+        ## level says how strong it is and the source says which collection
+        ## produced it; neither says whether anything was measured.
+        evidence_kind      = mechanism_kind_of(source, df$ID),
+        level              = mechanism_reported_level(source, df$ID, regulator),
+        padj_within_source = df$p.adjust,
+        setSize            = as.integer(set_size[df$ID]),
+        Count              = df$Count,
+        stringsAsFactors   = FALSE
+    )
+}
+
+## The counts whose denominators differ. Kept in one data.frame so a caller
+## cannot pick a numerator and a denominator from different questions.
+mechanism_diagnostics <- function(regulators, upstream, genes, sets, design, universe) {
+    n_input <- length(genes)
+
+    ## Input genes the universe keeps. A gene outside the universe never
+    ## entered the test, whatever the collection says about it, and this is
+    ## the same intersection enricher() applies before computing DESize.
+    testable <- intersect(genes, universe)
+
+    per_source <- lapply(upstream, function(src) {
+        members <- unique(sets[[src]]@gsid2gene$gene)
+        if (is.null(members)) members <- character(0)
+        r <- regulators[regulators$source == src, , drop = FALSE]
+        sig <- r[!is.na(r$padj_within_source) & r$padj_within_source < 0.05, , drop = FALSE]
+
+        covered_by_set <- intersect(testable, members)
+        covered_sig <- if (nrow(sig)) {
+            intersect(testable, unique(sets[[src]]@gsid2gene$gene[
+                sets[[src]]@gsid2gene$gsid %in% sig$term]))
+        } else {
+            character(0)
+        }
+        ## DESize: the number of input genes that could enter the test at all,
+        ## i.e. inputs found in the universe *and* in some set. This is the
+        ## denominator enrichit puts in GeneRatio, and it is the only honest
+        ## measure of "how much of the list was tested" -- counting genes the
+        ## universe excluded reports a coverage the test never had.
+        n_tested <- length(covered_by_set)
+        annotated <- n_tested / n_input
+        floor <- design$coverage_floor
+        status <- if (is.null(floor)) {
+            "graded"
+        } else if (annotated >= floor) {
+            "graded"
+        } else {
+            "untested"
+        }
+
+        data.frame(
+            source           = src,
+            n_input          = n_input,
+            n_tested         = n_tested,
+            n_sig_covered    = length(covered_sig),
+            uncovered_sig    = n_input - length(covered_sig),
+            coverage_tested  = round(annotated, 4),
+            coverage_floor   = if (is.null(floor)) NA_real_ else floor,
+            status           = status,
+            stringsAsFactors = FALSE
+        )
+    })
+
+    list(
+        counts   = mechanism_counts_or_empty(per_source),
+        ## Where each individual gene stands, for the chapter that has to
+        ## explain "absent is evidence, untested is not".
+        per_gene = mechanism_per_gene(regulators, upstream, genes, sets, design, universe)
+    )
+}
+
+mechanism_per_gene <- function(regulators, upstream, genes, sets, design, universe) {
+    rows <- lapply(upstream, function(src) {
+        members_of <- sets[[src]]@gsid2gene
+        r <- regulators[regulators$source == src, , drop = FALSE]
+        sig <- r[!is.na(r$padj_within_source) & r$padj_within_source < 0.05, , drop = FALSE]
+        sig_genes <- unique(members_of$gene[members_of$gsid %in% sig$term])
+        ## A gene outside the universe is untested even if a set lists it.
+        annotated <- genes %in% universe & genes %in% unique(members_of$gene)
+
+        data.frame(
+            gene   = genes,
+            source = src,
+            status = ifelse(
+                genes %in% sig_genes, "supported",
+                ifelse(annotated, "absent", "untested")
+            ),
+            stringsAsFactors = FALSE
+        )
+    })
+    do.call(rbind, rows)
+}
+
+## STRING wants a taxonomy id; design$species carries the organism name.
+mechanism_taxid <- function(species) {
+    if (is.null(species) || identical(species, "auto")) return("auto")
+    if (grepl("^[0-9]+$", species)) return(species)
+    if (requireNamespace("yulab.utils", quietly = TRUE)) {
+        id <- tryCatch(getTaxID(species), error = function(e) NA)
+        if (!is.na(id)) return(as.character(id))
+    }
+    "auto"
+}
+
+## The sentence table is consensus()'s, not a second opinion computed here.
+##
+## Grading each term row separately produced contradictory advice for one
+## regulator -- 'AP4' was simultaneously "state it as a hypothesis" (one
+## significant set) and "no supporting evidence" (three non-significant ones),
+## because a verdict computed per row cannot see the entity's other rows.
+## consensus() decides per entity and carries its own `writable` column, so the
+## bundle simply defers to it.
+.evidence_writable_table <- function(bundle) {
+    cv <- consensus(bundle)
+    if (!nrow(cv)) {
+        return(data.frame(regulator = character(), sources = character(),
+                          n_sources = integer(), max_level = character(),
+                          verdict = character(), padj = numeric(),
+                          direction = character(), writable = character(),
+                          stringsAsFactors = FALSE))
+    }
+    cv
+}
+
+## A frame with every column the regulators table uses, so measured rows and
+## collection rows can be bound together without a shared subset.
+mechanism_pad_columns <- function(r) {
+    template <- data.frame(
+        regulator = character(), source = character(), term = character(),
+        named = logical(), level = character(), padj_within_source = numeric(),
+        setSize = integer(), Count = integer(),
+        ## A family or complex label can never be looked up as a gene, so this
+        ## column travels with every row and not only the collection ones.
+        family = logical(),
+        evidence_kind = character(),
+        ## Perturbation rows carry the direction the responding genes moved;
+        ## collection rows have none. The column must survive the rbind, so it
+        ## belongs in the template and not only in the measured table.
+        direction = character(),
+        ## Where a measured row came from: a dataset id means nothing to a
+        ## reader without the cell line and the method behind it.
+        dataset = character(), system = character(), method = character(),
+        stringsAsFactors = FALSE
+    )
+    ## Assign the right length, not the template's zero: `r` may already have
+    ## rows, and a zero-length vector cannot be recycled into them.
+    for (col in setdiff(names(template), names(r))) {
+        r[[col]] <- rep(template[[col]], length.out = nrow(r))
+    }
+    r[, names(template), drop = FALSE]
+}
+
+## One row per source is the contract. With no collection there is no row, but a
+## NULL breaks callers that subset counts$source, so return the empty frame.
+mechanism_counts_or_empty <- function(per_source) {
+    counts <- do.call(rbind, per_source)
+    if (!is.null(counts)) return(counts)
+    data.frame(
+        source = character(), n_input = integer(), n_tested = integer(),
+        n_sig_covered = integer(), uncovered_sig = integer(),
+        coverage_tested = numeric(), coverage_floor = numeric(),
+        status = character(), stringsAsFactors = FALSE
+    )
+}
+
+## design$treatment names the perturbation kind; GPSAdb wants a method string.
+## "none" means the study states no treatment, so nothing is queried.
+mechanism_treatment_method <- function(design) {
+    tr <- design$treatment %||% "none"
+    if (identical(tr, "none")) return(NULL)
+    tr
+}
+
+## Regulators worth asking GPSAdb about.
+##
+## Only a regulator the collections already found *significant* is worth a
+## query: asking about a factor whose target sets were unremarkable adds a
+## request and cannot strengthen the result. Candidates are ordered by
+## significance so the cap keeps the strongest, and the cap exists because each
+## candidate costs one request -- asking about every named regulator in a
+## 900-gene list meant 613 requests and a run that never finished.
+##
+## shortcut: a capped list, not the full set. Raise
+## `options(clusterProfiler_perturb_candidates =)` when completeness matters
+## more than the wait; how many were queried and how many were skipped is
+## recorded on the returned table.
+mechanism_perturb_candidates <- function(regulators, alpha = 0.05,
+    max_n = getOption("clusterProfiler_perturb_candidates", 30L)) {
+    if (is.null(regulators) || !nrow(regulators)) return(NULL)
+    ## A family or complex label is never worth a query: GPSAdb indexes gene
+    ## symbols, so a request for 'AP1' or 'NFAT' cannot return anything.
+    keep <- regulators$named &
+        !(regulators$family %||% FALSE) &
+        !is.na(regulators$padj_within_source) &
+        regulators$padj_within_source < alpha
+    if (!any(keep)) return(NULL)
+    r <- regulators[keep, , drop = FALSE]
+    r <- r[order(r$padj_within_source), , drop = FALSE]
+    named <- unique(r$regulator[!is.na(r$regulator) & nzchar(r$regulator)])
+    if (!length(named)) return(NULL)
+    considered <- length(named)
+    if (considered > max_n) {
+        rlang::warn(paste0(
+            considered, " regulators have significant target sets; querying GPSAdb ",
+            "for the ", max_n, " strongest. Set ",
+            "options(clusterProfiler_perturb_candidates = ", considered, ") ",
+            "to query them all."))
+        named <- named[seq_len(max_n)]
+    }
+    ## How many were considered is what makes the result interpretable: what the
+    ## sweep covered is part of the answer, not an implementation detail.
+    attr(named, "considered") <- considered
+    named
+}

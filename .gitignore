@@ -21,3 +21,6 @@ local_test/
 nsea_go_demo
 reasonix.toml
 reasonix.toml
+# testthat failure dumps (regenerated on demand)
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds
