@@ -22,6 +22,10 @@
 #' @param min_genes Minimum number of input genes a dataset must contain before
 #'   it is tested. A dataset with two hits says nothing about the list.
 #' @param pvalueCutoff Cutoff for a dataset to be reported as perturbing.
+#' @param considered How many candidate regulators were eligible, when the
+#'   caller already knows. Recorded on the result so a handful of datasets
+#'   reads as "3 of the 30 strongest candidates had one" rather than "3
+#'   factors drive this".
 #' @param candidates Genes to query as the perturbed gene. Supply the regulators
 #'   the collections already nominated and the sweep becomes targeted: asking
 #'   whether a known candidate was ever knocked down is a question GPSAdb

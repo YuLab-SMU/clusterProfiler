@@ -34,6 +34,11 @@ answers directly, while sweeping a sample of an arbitrary gene list only
 reports which genes happen to have datasets. Given NULL the function falls
 back to a spread sample and records how much it scanned in
 attr(x, "genes_scanned").}
+
+\item{considered}{How many candidate regulators were eligible, when the
+caller already knows. Recorded on the result so a handful of datasets
+reads as "3 of the 30 strongest candidates had one" rather than "3
+factors drive this".}
 }
 \value{
 A `data.frame` with `regulator` (the perturbed gene), `source`

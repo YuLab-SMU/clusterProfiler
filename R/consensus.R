@@ -222,13 +222,6 @@ consensus_findings <- function(cv) {
 #' mechanism_writable(c("supported", "single_source", "untested"),
 #'                    c("B", "C", NA), c("FOXO3", "MIR23C", "NFE2L2"))
 #' @export
-## A single label for the source of one writing decision.
-sources_source <- function(src) {
-    if (!length(src)) return(NA_character_)
-    if (any(src == "mirna")) return("mirna")
-    src[1]
-}
-
 mechanism_writable <- function(verdict, level, regulator, sources = NULL,
                               family = NULL) {
     vapply(seq_along(verdict), function(i) {
@@ -308,4 +301,12 @@ mechanism_writable <- function(verdict, level, regulator, sources = NULL,
             NA_character_
         )
     }, "")
+}
+
+
+## A single label for the source of one writing decision.
+sources_source <- function(src) {
+    if (!length(src)) return(NA_character_)
+    if (any(src == "mirna")) return("mirna")
+    src[1]
 }
