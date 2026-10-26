@@ -237,7 +237,20 @@ mechanism_is_family_label <- function(regulator, species = "Homo sapiens") {
     ## literal spelling read those as family names, which they are not -- NKX2-5
     ## is one gene, and it arrives from GTRD, so it is a measurement.
     hyphenated <- gsub("_", "-", regulator, fixed = TRUE)
-    !(regulator %in% known | hyphenated %in% known)
+
+    ## A name the collections use for one gene is not a family, however little
+    ## it looks like a symbol. TRANSFAC names a nuclear receptor by its protein
+    ## -- GR, PXR, FXR, HIF2A -- none of which are HGNC symbols, so testing
+    ## against the symbol list alone classified each as a family. The cost was
+    ## not cosmetic: mechanism_perturb_candidates() skips family labels, so `GR`
+    ## was never queried against GPSAdb and could not reach `supported` on a
+    ## glucocorticoid experiment, where it is the one answer that is certain.
+    aliases <- mechanism_regulator_aliases()
+    aliased <- vapply(regulator, function(r) {
+        any(names(aliases)[aliases == r] %in% known)
+    }, logical(1), USE.NAMES = FALSE)
+
+    !(regulator %in% known | hyphenated %in% known | aliased)
 }
 
 ## Gene symbols the organism package knows, used to decide whether a stripped
@@ -398,4 +411,38 @@ mechanism_alias_regulator <- function(regulator) {
     out <- regulator
     out[!is.na(hit)] <- aliases[hit[!is.na(hit)]]
     unname(out)
+}
+
+#' Names a regulator is known by in a perturbation database
+#'
+#' @description
+#' The name a collection uses is not always the name a database uses, and the
+#' difference silently costs the only evidence that can reach level A.
+#'
+#' @details
+#' C3:TFT names a nuclear receptor by the motif it was built from -- `GR`,
+#' `PXR`, `FXR` -- while GPSAdb indexes the same factor by its gene symbol,
+#' `NR3C1`, `NR1I2`, `NR1H4`. `mechanism_alias_regulator()` normalises towards
+#' the collection, which is right for the verdict table and wrong for the
+#' lookup: querying GPSAdb for `GR` returns nothing, so the regulator can never
+#' collect perturbation evidence and can never be reported as `supported`.
+#'
+#' Measured on the airway dexamethasone list, that is exactly what happened to
+#' `GR`: the only regulator a glucocorticoid experiment is guaranteed to
+#' involve came out `single_source` at level B, while GPSAdb held two datasets
+#' for `NR3C1` that both move the list at padj 1e-22.
+#'
+#' @param regulator Regulator names as the collections spell them.
+#' @return A list, one character vector per input, holding the name itself and
+#'   every gene symbol that normalises to it.
+#' @name mechanism-gpsadb-names
+#' @keywords internal
+mechanism_gpsadb_names <- function(regulator) {
+    aliases <- mechanism_regulator_aliases()
+    lapply(regulator, function(r) {
+        ## Both directions: a collection may use either spelling, and asking
+        ## under both costs one extra request only when they differ.
+        extra <- c(names(aliases)[aliases == r], aliases[names(aliases) == r])
+        unique(c(r, unname(extra)))
+    })
 }

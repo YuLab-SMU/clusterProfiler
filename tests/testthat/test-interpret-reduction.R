@@ -53,6 +53,39 @@ test_that("GO results use Wang similarity, and the threshold controls the merge"
   expect_identical(as.data.frame(keep_one)$ID, "GO:0006915")
 })
 
+test_that("a compareClusterResult without a geneID column is skipped, not crashed", {
+  # compareClusterResult has no geneSets slot: the guard must not touch it (#)
+  df <- data.frame(ID = paste0("t", 1:3), Description = c("a", "b", "c"),
+                   p.adjust = c(0.01, 0.02, 0.03), stringsAsFactors = FALSE)
+  cc <- new("compareClusterResult", compareClusterResult = cbind(Cluster = "A", df),
+            geneClusters = list(A = "x"), fun = "enricher", .call = call("compareCluster"))
+  expect_warning(red <- reduce_redundancy(cc), "No geneID")
+  expect_identical(as.data.frame(red), cbind(Cluster = "A", df))
+})
+
+test_that("GO IDs spanning several ontologies are reduced per ontology", {
+  skip_if_not_installed("GO.db")
+  skip_if_not_installed("org.Hs.eg.db")
+  # GO:0006915 (BP) and GO:0005524 (MF) overlap in neither DAG nor reality; a single
+  # Wang matrix over both would score MF terms against the BP DAG
+  df <- data.frame(ID = c("GO:0006915", "GO:0008283", "GO:0005524"),
+                   Description = c("apoptotic process", "cell population proliferation", "ATP binding"),
+                   GeneRatio = "2/5", BgRatio = "10/100", pvalue = c(0.001, 0.002, 0.003),
+                   p.adjust = c(0.01, 0.02, 0.03), qvalue = 0.01, geneID = "A/B", Count = 2L,
+                   stringsAsFactors = FALSE)
+  rownames(df) <- df$ID
+  x <- new("enrichResult", result = df, pvalueCutoff = 0.05, pAdjustMethod = "BH",
+           qvalueCutoff = 0.2, organism = "Homo sapiens", ontology = "BP",
+           gene = character(), keytype = "SYMBOL", universe = character(),
+           geneSets = list(), readable = FALSE)
+  keep_all <- suppressMessages(reduce_redundancy(x, threshold = 1.01))
+  expect_identical(nrow(as.data.frame(keep_all)), 3L)
+  keep_one <- suppressMessages(reduce_redundancy(x, threshold = -1))
+  # each ontology keeps its own most significant representative
+  kept <- as.data.frame(keep_one)$ID
+  expect_setequal(kept, c("GO:0006915", "GO:0005524"))
+})
+
 test_that("n_pathways = NULL sends every significant term", {
   process <- getFromNamespace("process_enrichment_input", "clusterProfiler")
   x <- make_kegg_enrich()

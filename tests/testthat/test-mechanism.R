@@ -1890,3 +1890,29 @@ test_that("a p-value tie between datasets cannot depend on row order", {
     ## The answer must not move when the rows arrive the other way round.
     expect_identical(pick(tied[2:1, , drop = FALSE]), "D25078")
 })
+
+test_that("a protein name that maps to a gene is not a family label", {
+    ## TRANSFAC names a nuclear receptor by its protein. None of these are HGNC
+    ## symbols, so testing against the symbol list alone called each one a
+    ## family -- and mechanism_perturb_candidates() skips families, so GR was
+    ## never queried and could never reach `supported` on a glucocorticoid
+    ## experiment, where it is the one answer that is certain.
+    expect_false(mechanism_is_family_label("GR"))
+    expect_false(mechanism_is_family_label("PXR"))
+    expect_false(mechanism_is_family_label("FXR"))
+    expect_false(mechanism_is_family_label("HIF2A"))
+    ## Genuine families stay families.
+    expect_true(mechanism_is_family_label("AP1"))
+    expect_true(mechanism_is_family_label("NFAT"))
+    ## And a real symbol is still a gene.
+    expect_false(mechanism_is_family_label("CEBPB"))
+})
+
+test_that("a regulator is queried under every name it is known by", {
+    ## The collection says GR, the database says NR3C1. Asking only under the
+    ## collection's name returned nothing, which looked like "never perturbed".
+    expect_setequal(mechanism_gpsadb_names("GR")[[1]], c("GR", "NR3C1"))
+    expect_setequal(mechanism_gpsadb_names("FXR")[[1]], c("FXR", "NR1H4"))
+    ## A name with no alias is returned unchanged, so no extra request is made.
+    expect_identical(mechanism_gpsadb_names("CEBPB")[[1]], "CEBPB")
+})

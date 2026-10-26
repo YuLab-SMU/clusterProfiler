@@ -67,8 +67,14 @@ evidence_perturbation <- function(genes,
     ## the question is whether this regulator was perturbed, which is well
     ## posed; without them it is whether any sampled gene has a dataset, which
     ## is a property of the database rather than of the biology.
+    ## A regulator is looked up under every name it is known by, because the
+    ## name the collection uses is not always the name the database indexes.
+    ## C3:TFT says `GR` where GPSAdb says `NR3C1`; querying only `GR` returns
+    ## nothing, and a regulator with no dataset can never reach level A no
+    ## matter what the literature says. See mechanism_gpsadb_names().
     query_genes <- if (is.null(candidates)) genes else
-        unique(as.character(candidates))
+        unique(unlist(mechanism_gpsadb_names(as.character(candidates)),
+                      use.names = FALSE))
 
     ## Which perturbations move any of these genes: the reverse lookup GPSAdb
     ## provides, which names the perturbed gene for each dataset.

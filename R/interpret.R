@@ -2242,7 +2242,9 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
     warning("Wang similarity needs GO terms; using Jaccard overlap of member genes instead.")
     method <- "jaccard"
   }
-  if (method == "jaccard" && is.na(gcol) && !length(x@geneSets)) {
+  # compareClusterResult has no geneSets slot, so the access must be guarded
+  gene_sets <- tryCatch(x@geneSets, error = function(e) list())
+  if (method == "jaccard" && is.na(gcol) && !length(gene_sets)) {
     warning("No geneID or core_enrichment column to compare; skipping reduction.")
     return(x)
   }
@@ -2252,6 +2254,44 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
   if (measure == "Wang" && !is.null(semData)) {
     own <- if (inherits(x, "gseaResult")) x@setType else x@ontology
     if (!identical(semData@ont, own)) semData <- NULL
+  }
+  # GO results whose IDs span several ontologies must be reduced per ontology: a single
+  # Wang call over mixed BP/MF/CC IDs would score terms against the wrong DAG. simplify()
+  # handles this itself only when the slot does not already say BP/MF/CC (then
+  # infer_go_ontology derives GOALL and simplify_ALL splits); when the slot says one
+  # ontology but the IDs say otherwise, this wrapper splits into per-ontology subsets.
+  y <- x
+  if (measure == "Wang" && nrow(df) >= 2) {
+    ont_terms <- .go_ontology_per_term(x, df)
+    if (length(unique(ont_terms)) > 1) {
+      kept <- character(0)
+      for (o in unique(ont_terms)) {
+        rows <- df$ID[ont_terms == o]
+        sub <- x
+        sub@result <- x@result[match(rows, x@result$ID), , drop = FALSE]
+        sub_sem <- if (!is.null(semData) && identical(semData@ont, o)) semData else NULL
+        kept <- c(kept, as.character(simplify(
+          sub, cutoff = threshold, by = "p.adjust", select_fun = min,
+          measure = measure, semData = sub_sem
+        )@result$ID))
+      }
+      y@result <- y@result[match(kept, y@result$ID), , drop = FALSE]
+      n0 <- nrow(df); n1 <- length(kept)
+      message(sprintf("Reduced redundant terms (Wang > %.2f): %d -> %d significant terms",
+                      threshold, n0, n1))
+      attr(y, "reduced") <- TRUE
+      attr(y, "n_original") <- n0
+      attr(y, "n_reduced") <- n1
+      attr(y, "reduction_method") <- method
+      attr(y, "reduction_threshold") <- threshold
+      # names read by the earlier ablation scorers
+      attr(y, "rrvgo_reduced") <- TRUE
+      attr(y, "rrvgo_original_n") <- n0
+      attr(y, "rrvgo_reduced_n") <- n1
+      attr(y, "rrvgo_threshold") <- threshold
+      attr(y, "rrvgo_method") <- method
+      return(y)
+    }
   }
   y <- tryCatch(
     simplify(x, cutoff = threshold, by = "p.adjust", select_fun = min,
@@ -2298,159 +2338,24 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
   })
 }
 
-#' Reduce GO term redundancy by semantic similarity
-#'
-#' Applies semantic similarity-based clustering to remove redundant GO terms
-#' before LLM interpretation. This algorithmic preprocessing complements the
-#' multi-agent interpretation layer by reducing input noise and token count.
-#'
-#' Implemented directly on GOSemSim, which is already an Imports dependency.
-#' The `rrvgo_*` attribute names are kept for backwards compatibility with
-#' existing ablation outputs and predate the switch away from rrvgo.
-#'
-#' @param enrich_result An enrichResult object from enrichGO()
-#' @param threshold Semantic similarity threshold (0-1). Higher values are more
-#'   aggressive. Default 0.7 means terms with >70% similarity are clustered.
-#' @param orgdb OrgDb package name (e.g., "org.Hs.eg.db"). If NULL, auto-detected
-#'   from the enrichResult organism field.
-#' @param method Similarity measure passed to [GOSemSim::goSim()]. Default "Wang",
-#'   which reads the GO DAG directly and needs no corpus statistics. The
-#'   information-content measures "Resnik", "Lin", "Rel" and "Jiang" are accepted
-#'   but require `godata(computeIC = TRUE)` and are substantially slower.
-#' @return A reduced enrichResult object with redundant terms removed. The object
-#'   carries attributes recording the reduction: `rrvgo_reduced`, `rrvgo_original_n`,
-#'   `rrvgo_reduced_n`, `rrvgo_threshold`, `rrvgo_method`.
-#' @md
-#' @export
-#' @examples
-#' \dontrun{
-#' ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
-#' ego_reduced <- reduce_go_redundancy(ego, threshold = 0.7)
-#' message(sprintf("Reduced from %d to %d terms",
-#'   attr(ego_reduced, "rrvgo_original_n"),
-#'   attr(ego_reduced, "rrvgo_reduced_n")))
-#' }
-
-# Greedy representative selection shared by the reduction functions: repeatedly keep the
-# most significant remaining term and drop every remaining term above `threshold` similarity
-# to it. Returns the kept positions, most significant first. The kept term is removed
-# explicitly: with a threshold of 1 or more its self-similarity never exceeds the threshold,
-# and relying on that comparison would loop forever.
-.greedy_representatives <- function(sim, padj, threshold) {
-  keep <- integer(0)
-  remaining <- seq_along(padj)
-  while (length(remaining) > 0) {
-    best <- remaining[which.min(padj[remaining])]
-    keep <- c(keep, best)
-    remaining <- setdiff(remaining[!(sim[best, remaining] > threshold)], best)
+# The GO ontology of each significant term: the ONTOLOGY column of an ont = "ALL" result,
+# else the object's own record (@ontology, @setType) -- but only when every term really
+# belongs to it (the slot can say "BP" while the result also holds MF/CC terms) -- else
+# looked up per term in GO.db.
+.go_ontology_per_term <- function(x, df) {
+  if ("ONTOLOGY" %in% names(df)) return(as.character(df$ONTOLOGY))
+  slot_ont <- tryCatch(if (inherits(x, "gseaResult")) x@setType else x@ontology, error = function(e) "")
+  if (length(slot_ont) == 1 && slot_ont %in% c("BP", "MF", "CC")) {
+    ont_map <- AnnotationDbi::Ontology(GO.db::GOTERM)[df$ID]
+    ont_map <- as.character(ont_map)
+    if (all(!is.na(ont_map) & ont_map == slot_ont)) return(rep(slot_ont, nrow(df)))
+    return(ifelse(is.na(ont_map), slot_ont, ont_map))
   }
-  keep
+  all_ont <- infer_go_ontology(df$ID)
+  if (all_ont %in% c("BP", "MF", "CC")) return(rep(all_ont, nrow(df)))
+  vapply(df$ID, infer_go_ontology, character(1), USE.NAMES = FALSE)
 }
 
-reduce_go_redundancy <- function(enrich_result,
-                                 threshold = 0.7,
-                                 orgdb = NULL,
-                                 method = "Wang") {
-  # Semantic-similarity redundancy reduction over an enrichGO result.
-  #
-  # Implemented directly on GOSemSim rather than on rrvgo. rrvgo is the obvious dependency
-  # and we tried it first, but installing it on the execution node failed: its chain runs
-  # rrvgo -> umap -> reticulate, and the node cannot complete it. GOSemSim -- which rrvgo
-  # itself sits on -- is already present, and supplies everything this step needs.
-  #
-  # `method` defaults to Wang deliberately. The information-content measures (Rel, Resnik,
-  # Lin, Jiang) require `godata(computeIC = TRUE)`, which on this dataset did not complete;
-  # Wang is graph-based, reads the GO DAG directly, needs no corpus statistics, and returns
-  # in seconds. Passing an IC-based measure here is allowed but will be slow or hang, and
-  # `computeIC` is set from `method` accordingly.
-  if (!is(enrich_result, "enrichResult")) {
-    message("Input is not an enrichResult object; skipping GO reduction.")
-    return(enrich_result)
-  }
-  ontology <- tryCatch(enrich_result@ontology, error = function(e) NULL)
-  if (is.null(ontology) || !ontology %in% c("BP", "MF", "CC")) {
-    warning("Not a GO enrichment result; skipping GO reduction.")
-    return(enrich_result)
-  }
-  if (!requireNamespace("GOSemSim", quietly = TRUE)) {
-    warning("GOSemSim not installed; skipping GO reduction and returning the input unchanged.")
-    return(enrich_result)
-  }
-  if (is.null(enrich_result@result) || nrow(enrich_result@result) == 0) {
-    warning("Empty enrichment result; skipping GO reduction.")
-    return(enrich_result)
-  }
-
-  # Reduce only the terms that pass the object's own cutoffs -- the ones a reader (and
-  # interpret()) actually sees. An enrichResult keeps every tested term in @result; running
-  # the O(n^2) similarity over thousands of non-significant rows was slow and pointless.
-  # Rows that do not pass the cutoffs are left in @result unchanged.
-  sig_ids <- tryCatch(as.data.frame(enrich_result)$ID, error = function(e) enrich_result@result$ID)
-  if (length(sig_ids) == 0) {
-    warning("No term passes the result's cutoffs; skipping GO reduction.")
-    return(enrich_result)
-  }
-  sig_rows <- match(sig_ids, enrich_result@result$ID)
-  n_original <- length(sig_ids)
-  go_ids <- sig_ids
-
-  if (is.null(orgdb)) {
-    organism <- tryCatch(enrich_result@organism, error = function(e) "")
-    orgdb <- if (grepl("sapiens|human|^hsa$", organism, ignore.case = TRUE)) {
-      "org.Hs.eg.db"
-    } else if (grepl("musculus|mouse|^mmu$", organism, ignore.case = TRUE)) {
-      "org.Mm.eg.db"
-    } else {
-      warning(sprintf("Cannot map organism '%s' to an OrgDb; skipping GO reduction.", organism))
-      return(enrich_result)
-    }
-  }
-  if (!requireNamespace(orgdb, quietly = TRUE)) {
-    warning(sprintf("%s not installed; skipping GO reduction.", orgdb))
-    return(enrich_result)
-  }
-
-  message(sprintf("Reducing GO redundancy: %d terms, %s similarity, threshold %.2f",
-                  n_original, method, threshold))
-
-  out <- tryCatch({
-    need_ic <- !identical(method, "Wang")
-    semdata <- GOSemSim::godata(orgdb, ont = ontology, computeIC = need_ic)
-
-    # Pairwise similarity in one vectorised call (termSim), instead of one goSim() call per
-    # pair. Terms GOSemSim cannot score get similarity 0, i.e. they are never merged.
-    n <- length(go_ids)
-    sim <- GOSemSim::termSim(go_ids, go_ids, semData = semdata, method = method)
-    sim <- sim[go_ids, go_ids, drop = FALSE]
-    sim[is.na(sim)] <- 0
-    diag(sim) <- 1
-
-    # Greedy representative selection: repeatedly take the most significant remaining term
-    # and drop everything above `threshold` similarity to it. The representative is chosen
-    # by adjusted p-value, so the surviving list is the significant one, not an arbitrary
-    # member of each cluster.
-    padj <- enrich_result@result$p.adjust[sig_rows]
-    keep <- .greedy_representatives(sim, padj, threshold)
-    drop_rows <- sig_rows[setdiff(seq_len(n), keep)]
-
-    reduced <- enrich_result
-    reduced@result <- if (length(drop_rows)) enrich_result@result[-drop_rows, , drop = FALSE] else enrich_result@result
-    n_reduced <- length(keep)
-    message(sprintf("GO reduction complete: %d -> %d terms (%.1f%% reduction)",
-                    n_original, n_reduced, 100 * (n_original - n_reduced) / n_original))
-
-    attr(reduced, "rrvgo_reduced") <- TRUE
-    attr(reduced, "rrvgo_original_n") <- n_original
-    attr(reduced, "rrvgo_reduced_n") <- n_reduced
-    attr(reduced, "rrvgo_threshold") <- threshold
-    attr(reduced, "rrvgo_method") <- method
-    reduced
-  }, error = function(e) {
-    warning(sprintf("GO reduction failed (%s); returning the input unchanged.", e$message))
-    enrich_result
-  })
-  out
-}
 
 ## Record what the narrative was allowed to see, and what it named anyway.
 ##
