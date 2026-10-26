@@ -1608,23 +1608,7 @@ test_that("the bundle carries failures where print() can show them", {
 
 ## ---- similarity and biotrigger -------------------------------------------
 
-test_that("a short list is refused before the round trip", {
-    ## GPSAdb rejects lists of 200 or fewer genes; the client check turns that
-    ## into a message that says what to do instead of a server error.
-    skip_if_not_installed("gpsadb")
-    expect_error(evidence_similarity(c("TP53", "MYC"), limit = 5),
-                 "more than 200")
-})
 
-test_that("a similarity ranking is a table of datasets, not of verdicts", {
-    ## "This knockdown looks like your list" is a statement about an
-    ## experiment. It must not enter $regulators, where a row reads as a
-    ## mechanism claim about a regulator.
-    e <- mechanism_empty_similarity()
-    expect_true(all(c("dataset", "perturbed_gene", "score") %in% names(e)))
-    expect_false("verdict" %in% names(e))
-    expect_equal(nrow(e), 0)
-})
 
 test_that("a biotrigger hit is graded B, not C", {
     ## It is a measurement (the factor was perturbed), but the evidence is the
@@ -1635,9 +1619,76 @@ test_that("a biotrigger hit is graded B, not C", {
     expect_equal(nrow(e), 0)
 })
 
-test_that("a fold-change vector must be named to be matched to genes", {
-    skip_if_not_installed("gpsadb")
-    expect_error(
-        evidence_similarity(paste0("G", 1:250), log2fc = rnorm(250)),
-        "named vector")
+
+## ---- mechanism graph: the verdicts as a network ---------------------------
+
+test_that("a mechanism graph carries grades on its nodes and terms on its edges", {
+    skip_if_not_installed("mechgraph")
+    dir <- tempfile("mechanism"); dir.create(dir)
+    ## The universe must dwarf the set, or enricher() has nothing to test: a
+    ## selection that is the whole set cannot be enriched against itself.
+    shared <- paste0("g", 1:10)
+    write_gmt(file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt"), list(
+        GF_A = shared))
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-26"),
+               file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt.meta"))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    ev <- suppressWarnings(
+        evidence(shared, upstream = "tf",
+                 universe = c(shared, paste0("u", 1:500))))
+    skip_if_not(nrow(consensus_findings(consensus(ev))) > 0, "fixture too small")
+    mg <- mechanism_graph(ev, max_genes = 5)
+
+    expect_s3_class(mg, "mechgraph")
+    ## A node says what it is and what grade it earned.
+    expect_true(all(c("id", "type", "label") %in% names(mg$nodes)))
+    expect_true("grade" %in% names(mg$nodes))
+    expect_true("verdict" %in% names(mg$nodes))
+    ## An edge says which collection produced the link.
+    expect_true(all(c("from", "to", "type", "term") %in% names(mg$edges)))
+    ## Every edge endpoint exists, which mechgraph validates.
+    expect_true(all(mg$edges$from %in% mg$nodes$id))
+    expect_true(all(mg$edges$to %in% mg$nodes$id))
+})
+
+test_that("a mechanism graph draws no absent entity", {
+    skip_if_not_installed("mechgraph")
+    dir <- tempfile("mechanism"); dir.create(dir)
+    write_gmt(file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt"),
+              list(GF_A = paste0("g", 1:10)))
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-26"),
+               file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt.meta"))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    ev <- suppressWarnings(
+        evidence(paste0("g", 1:10), upstream = "tf",
+                 universe = c(paste0("g", 1:10), paste0("u", 1:500))))
+    skip_if_not(nrow(consensus_findings(consensus(ev))) > 0, "fixture too small")
+    cv <- consensus(ev)
+    mg <- mechanism_graph(ev)
+    ## Only findings are drawn: the absent majority would bury them.
+    expect_true(all(mg$nodes$id[mg$nodes$type != "gene"] %in%
+                    consensus_findings(cv)$regulator))
+})
+
+test_that("a graph with nothing to draw refuses rather than plotting nothing", {
+    skip_if_not_installed("mechgraph")
+    dir <- tempfile("mechanism"); dir.create(dir)
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    ev <- suppressWarnings(evidence("g1", upstream = "perturbagen", universe = "g1",
+                                    design = list(treatment = "knockdown")))
+    expect_error(mechanism_graph(ev), "nothing to draw")
+})
+
+test_that("plot_mechanism wants a graph, not a bundle", {
+    skip_if_not_installed("mechgraph")
+    expect_error(plot_mechanism("not a graph"), "mechgraph")
 })

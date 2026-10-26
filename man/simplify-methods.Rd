@@ -44,7 +44,10 @@
 
 \item{select_fun}{function to select feature passed by 'by' parameter}
 
-\item{measure}{method to measure similarity}
+\item{measure}{method to measure similarity. One of `"Wang"` (default),
+`"Resnik"`, `"Rel"`, `"Jiang"`, `"Lin"`, `"TC"` for GO semantic
+similarity, or `"JC"` / `"overlap"` to compare the term gene sets, which
+works for every collection (KEGG, Reactome, MSigDB, ...)}
 
 \item{semData}{GOSemSimDATA object}
 }
@@ -58,12 +61,33 @@ simplify output from enrichGO and gseGO by removing redundancy of enriched GO te
 
 simplify output from compareCluster by removing redundancy of enriched GO terms
 }
+\details{
+`simplify()` removes redundant enriched terms by grouping the terms whose
+similarity exceeds `cutoff` and keeping one representative per group.
+
+For GO results the similarity is semantic and comes from GOSemSim
+(`measure = "Wang"`, `"Resnik"`, `"Rel"`, `"Jiang"`, `"Lin"`, `"TC"`),
+which needs an ontology and a `GOSemSimDATA` object.
+
+For KEGG, Reactome, MSigDB and any other gene-set collection, set
+`measure = "JC"` (Jaccard index of the gene sets) or
+`measure = "overlap"` (shared genes over the smaller set). These measures
+are computed from `@geneSets`, need no ontology, and therefore work on any
+enrichment result, including Reactome and KEGG results for which GO
+semantic similarity is undefined (#743). A Reactome or KEGG hierarchy gives
+many significantly enriched terms that share most of their genes; keeping
+the best-scoring term of each overlapping group compresses them into the
+distinct biological programs.
+}
 \references{
 issue #28
 \url{https://github.com/GuangchuangYu/clusterProfiler/issues/28}
 
 issue #162
 \url{https://github.com/GuangchuangYu/clusterProfiler/issues/162}
+}
+\seealso{
+[enrichplot::pairwise_termsim]
 }
 \author{
 Guangchuang Yu

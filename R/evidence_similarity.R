@@ -1,81 +1,3 @@
-#' Perturbation similarity from GPSAdb
-#'
-#' @description
-#' Ask which measured perturbations produce a signature most like the caller's
-#' gene list. This is the one question in the toolkit that does not start from a
-#' prior: the target-set collections can only nominate factors someone already
-#' annotated, while a similarity search compares the list against every
-#' experiment GPSAdb holds.
-#'
-#' @details
-#' The result is a ranking of *datasets*, not of regulators, and the distinction
-#' is deliberate. "CEBPB knockdown looks like your list" is a statement about
-#' an experiment; "CEBPB drives your list" is a statement about a mechanism, and
-#' the first does not establish the second -- a knockdown of a downstream
-#' effector produces a similar signature to a knockdown of its upstream
-#' regulator. The ranking therefore lands in `$similar_perturbations` with the
-#' datasets named, and does not enter `$regulators` where a verdict would be
-#' read as a mechanism claim.
-#'
-#' What a similarity score can do is nominate. A factor that appears at the top
-#' of this ranking and also has an enriched target set is a much better
-#' candidate than either alone, and [consensus()] can see that once the caller
-#' passes the names through `candidates`.
-#'
-#' @param genes Gene symbols.
-#' @param log2fc Optional named numeric vector of fold changes, so the ranking
-#'   can use direction rather than membership alone. Without it every gene is
-#'   weighted equally and an opposite-direction experiment can rank highly.
-#' @param limit Number of datasets to return.
-#' @param min_genes GPSAdb refuses a ranked list of 200 or fewer genes; the
-#'   server is the authority here, and its message is passed through.
-#' @return A `data.frame` with `rank`, `dataset`, `perturbed_gene`, `method`,
-#'   `system`, `score`, `effect` and `n_genes`.
-#' @seealso [evidence()], [evidence_biotrigger()]
-#' @examples
-#' \dontrun{
-#' evidence_similarity(c("HIF1A", "PGK1", "CA9"), limit = 10)
-#' }
-#' @export
-evidence_similarity <- function(genes, log2fc = NULL, limit = 20,
-                                min_genes = 200) {
-    mechanism_require_mcp("gpsadb")
-    genes <- unique(as.character(genes))
-    genes <- genes[!is.na(genes) & nzchar(genes)]
-    if (!length(genes)) return(mechanism_empty_similarity())
-
-    ## The server refuses short lists, and its own error explains why ("do not
-    ## filter the list by p-value"). Checking here turns a round trip into a
-    ## message that says what to do.
-    if (length(genes) < min_genes) {
-        rlang::abort(c(
-            paste0("A similarity search needs more than ", min_genes,
-                   " genes; this list has ", length(genes), "."),
-            i = "GPSAdb rejects short lists because a handful of genes matches anything.",
-            i = "Use the untrimmed result rather than a p-value-filtered subset."
-        ))
-    }
-
-    ranked <- .similarity_input(genes, log2fc)
-    res <- gpsadb::gpsadb_fastgpsa(ranked_list = ranked, limit = limit)
-    d <- res$data
-    if (is.null(d) || !nrow(d)) return(mechanism_empty_similarity())
-
-    data.frame(
-        rank        = as.integer(d$rank),
-        dataset     = as.character(d$dataset_id),
-        perturbed_gene = mechanism_alias_regulator(as.character(d$perturbed_gene)),
-        method      = as.character(d$method %||% NA_character_),
-        system      = as.character(d$cell_line %||% NA_character_),
-        ## Higher score is a stronger match; the server's sign already encodes
-        ## the direction of the effect.
-        score       = as.numeric(d$gscore),
-        effect      = tolower(as.character(d$effect %||% NA_character_)),
-        n_genes     = as.integer(d$n_genes_in_dataset %||% NA_integer_),
-        stringsAsFactors = FALSE
-    )
-}
-
 #' Upstream regulators from GPSAdb's biotrigger
 #'
 #' @description
@@ -156,11 +78,7 @@ evidence_biotrigger <- function(genes, effect = c("both", "activated", "inhibite
     out[order(-abs(out$effect_size)), , drop = FALSE]
 }
 
-mechanism_empty_similarity <- function() {
-    data.frame(rank = integer(), dataset = character(), perturbed_gene = character(),
-               method = character(), system = character(), score = numeric(),
-               effect = character(), n_genes = integer(), stringsAsFactors = FALSE)
-}
+
 
 mechanism_empty_biotrigger <- function() {
     out <- mechanism_empty_perturbation()
@@ -173,26 +91,3 @@ mechanism_empty_biotrigger <- function() {
 ## Direction matters more than membership -- an experiment that moves the same
 ## genes the other way is the opposite finding -- so a fold change is used when
 ## one is supplied and the caller's order otherwise.
-.similarity_input <- function(genes, log2fc = NULL) {
-    if (is.null(log2fc)) {
-        ## Order alone cannot express direction, and GPSAdb needs both signs to
-        ## separate an experiment that moves these genes up from one that moves
-        ## them down. Filling in the rank produced an all-positive vector, which
-        ## the server rejects -- so say so rather than sending a request that
-        ## cannot succeed.
-        rlang::abort(c(
-            "`log2fc` is required for a similarity search.",
-            i = "GPSAdb needs a signed score: without one it cannot tell a signature that rises from one that falls.",
-            i = "Pass `log2fc = setNames(de$log2FoldChange, de$gene)`."
-        ))
-    }
-    if (is.null(names(log2fc))) {
-        rlang::abort(c(
-            "`log2fc` must be a named vector, with gene symbols as names.",
-            i = "Without names it cannot be matched to `genes`."
-        ))
-    }
-    v <- log2fc[genes]
-    v[is.na(v)] <- 0
-    data.frame(gene = genes, log2fc = as.numeric(v), stringsAsFactors = FALSE)
-}

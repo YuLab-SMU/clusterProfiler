@@ -105,3 +105,97 @@ test_that("simplify() still refuses a non-GO enricher() result (#369)", {
 
   expect_error(simplify(res, cutoff = 0.7), "gene sets are GO terms")
 })
+
+## Gene-overlap redundancy removal for non-GO collections (#743)
+
+make_overlap_result <- function() {
+  # three overlapping sets plus one unrelated set, all tested on 200 genes
+  t2g <- data.frame(
+    term = c(rep("A", 40), rep("B", 40), rep("C", 40), rep("D", 40)),
+    gene = c(paste0("g", 1:40),             # A
+             paste0("g", 21:60),            # B overlaps A by 20 / union 60
+             paste0("g", 1:40),             # C is identical to A
+             paste0("u", 1:40))             # D is unrelated
+  )
+  gene <- c(paste0("g", 1:30), "u1", "u2")
+  enricher(gene, TERM2GENE = t2g, pvalueCutoff = 1, qvalueCutoff = 1,
+           minGSSize = 2, universe = c(paste0("g", 1:60), paste0("u", 1:40)))
+}
+
+test_that("simplify(measure = 'JC') removes redundant gene sets (#743)", {
+  res <- make_overlap_result()
+  skip_if(is.null(res) || nrow(as.data.frame(res)) == 0, "enricher returned no result")
+
+  y <- simplify(res, cutoff = 0.7, measure = "JC")
+  keep <- as.data.frame(y)$ID
+
+  # A and C are the same gene set, so only one of them survives
+  expect_equal(sum(c("A", "C") %in% keep), 1)
+  # B shares 20 of 60 genes with A: Jaccard 1/3 < 0.7, so B is kept
+  expect_true("B" %in% keep)
+  # D does not overlap anything
+  expect_true("D" %in% keep)
+  expect_s4_class(y, "enrichResult")
+
+  # A vs B is only 20/60 = 0.33, so a 0.5 cutoff still keeps B while
+  # collapsing the identical pair A / C
+  y2 <- simplify(res, cutoff = 0.5, measure = "JC")
+  keep2 <- as.data.frame(y2)$ID
+  expect_equal(sum(c("A", "C") %in% keep2), 1)
+  expect_true("B" %in% keep2)
+})
+
+test_that("simplify(measure = 'overlap') uses shared/smaller-set (#743)", {
+  res <- make_overlap_result()
+  skip_if(is.null(res) || nrow(as.data.frame(res)) == 0, "enricher returned no result")
+
+  # A vs B: 20 shared of 40 each -> 0.5, above a 0.4 cutoff
+  y <- simplify(res, cutoff = 0.4, measure = "overlap")
+  keep <- as.data.frame(y)$ID
+  expect_equal(sum(c("A", "B", "C") %in% keep), 1)
+})
+
+test_that("simplify(measure = 'JC') keeps the representative set by `by`", {
+  res <- make_overlap_result()
+  skip_if(is.null(res) || nrow(as.data.frame(res)) == 0, "enricher returned no result")
+
+  # A and C are identical gene sets but differ in p.adjust, so the better one
+  # must be the survivor no matter which row it sits in
+  df <- as.data.frame(res)
+  df$p.adjust[df$ID == "A"] <- 0.001
+  df$p.adjust[df$ID == "C"] <- 0.5
+  res@result <- df
+
+  keep <- as.data.frame(simplify(res, cutoff = 0.7, measure = "JC"))$ID
+  expect_true("A" %in% keep)
+  expect_false("C" %in% keep)
+})
+
+test_that("simplify(measure = 'JC') works on a KEGG result (#743)", {
+  skip_on_cran()
+  skip_if_offline("rest.kegg.jp")
+
+  data(geneList, package = "DOSE")
+  gene <- names(geneList)[abs(geneList) > 2]
+  kk <- tryCatch(
+    enrichKEGG(gene, organism = "hsa", pvalueCutoff = 0.5),
+    error = function(e) NULL
+  )
+  skip_if(is.null(kk) || nrow(as.data.frame(kk)) < 2, "KEGG not reachable")
+
+  y <- simplify(kk, cutoff = 0.7, measure = "JC")
+  expect_s4_class(y, "enrichResult")
+  expect_true(nrow(as.data.frame(y)) <= nrow(as.data.frame(kk)))
+  expect_true(nrow(as.data.frame(y)) > 0)
+})
+
+test_that("simplify() points non-GO users to measure = 'JC' (#743)", {
+  t2g <- data.frame(term = rep(paste0("set", 1:3), each = 40),
+                    gene = paste0("g", 1:120))
+  gene <- paste0("g", 1:50)
+  res <- enricher(gene, TERM2GENE = t2g, pvalueCutoff = 1, minGSSize = 2,
+                  universe = paste0("g", 1:300))
+  skip_if(is.null(res) || nrow(as.data.frame(res)) == 0, "enricher returned no result")
+
+  expect_error(simplify(res, cutoff = 0.7), 'measure = "JC"')
+})

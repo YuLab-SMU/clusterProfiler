@@ -50,6 +50,7 @@ Suggests:
     digest,
     DOSE,
     ggtangle,
+    mechgraph,
     gpsadb,
     org.Hs.eg.db,
     quarto,

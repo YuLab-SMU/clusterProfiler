@@ -198,29 +198,12 @@ evidence <- function(genes,
     }
 
 
-    ## A similarity search ranks datasets, not entities, so it is kept out of the
-    ## verdict table. It answers a different question: not "which factor drives
-    ## this" but "which experiment does this resemble", and the second does not
-    ## establish the first.
-    similar <- NULL
-    if ("similarity" %in% upstream) {
-        similar <- tryCatch(
-            evidence_similarity(genes),
-            error = function(e) {
-                failures$add(source = "similarity", stage = "query",
-                             message = conditionMessage(e))
-                mechanism_empty_similarity()
-            }
-        )
-        if (!nrow(similar)) similar <- NULL
-    }
-
     ## Nothing worked. An empty bundle here would report `absent` for every
     ## entity, which reads as a negative result when the truth is that no source
     ## answered.
     mechanism_abort_if_all_failed(
         failures, c(collection_sources,
-                    intersect(upstream, c("perturbagen", "biotrigger", "similarity"))))
+                    intersect(upstream, c("perturbagen", "biotrigger"))))
 
     ## The canonical shape, whatever came out of rbind: `direction` belongs to
     ## the contract even when no measured row is present to populate it.
@@ -294,7 +277,6 @@ evidence <- function(genes,
     if (!is.null(measured)) out$perturbagen <- measured
     ## Kept separate from the verdict table on purpose: this ranks experiments,
     ## not regulators, and a row here must never be read as a mechanism claim.
-    if (!is.null(similar)) out$similar_perturbations <- similar
     if (!is.null(ppi)) out$ppi <- ppi
 
     ## The class must exist before the writable table is built: it defers to
@@ -348,12 +330,6 @@ print.evidenceBundle <- function(x, ...) {
 
     ## A similarity ranking answers a different question from everything above,
     ## so it is reported apart from the verdicts.
-    if (!is.null(x$similar_perturbations) && nrow(x$similar_perturbations)) {
-        top <- utils::head(x$similar_perturbations, 3)
-        cat("  resembles:    ", paste0(top$perturbed_gene, " (", top$effect, ")", collapse = ", "),
-            "\n", sep = "")
-    }
-
     ## How much of the measured channel had data to answer with. Three hits out
     ## of three hundred candidates is not the same claim as three out of three,
     ## and nothing else in this output would tell the two apart.
