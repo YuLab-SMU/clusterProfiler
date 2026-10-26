@@ -125,6 +125,10 @@ evidence_perturbation <- function(genes,
             dataset            = meta$title,
             system             = meta$system,
             method             = meta$method,
+            ## A perturbation dataset reports a p-value, so significance is
+            ## decided by it rather than declared here.
+            significant        = NA,
+            effect_size        = NA_real_,
             stringsAsFactors   = FALSE
         )
     })
@@ -199,6 +203,7 @@ mechanism_empty_perturbation <- function() {
         setSize = integer(), Count = integer(), family = logical(),
         evidence_kind = character(), direction = character(),
         dataset = character(), system = character(), method = character(),
+        significant = logical(), effect_size = numeric(),
         stringsAsFactors = FALSE
     )
 }

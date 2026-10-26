@@ -3,9 +3,12 @@
 \name{mechanism-failures}
 \alias{mechanism-failures}
 \alias{print.mechanismFailures}
+\alias{mechanism_significant}
 \title{Record evidence-source failures instead of swallowing them}
 \usage{
 \method{print}{mechanismFailures}(x, ...)
+
+mechanism_significant(r, alpha = 0.05)
 }
 \arguments{
 \item{x}{An object carrying failures.}

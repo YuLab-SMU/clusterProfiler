@@ -166,7 +166,8 @@ test_that("evidence() returns an evidenceBundle with the documented elements", {
         names(ev$regulators),
         c("regulator", "source", "term", "named", "level",
           "padj_within_source", "setSize", "Count", "family",
-          "evidence_kind", "direction", "dataset", "system", "method")
+          "evidence_kind", "direction", "dataset", "system", "method",
+          "significant", "effect_size")
     )
     ## Per-collection correction is reported under a name that says so.
     expect_false("padj" %in% names(ev$regulators))
@@ -682,7 +683,8 @@ test_that("a missing MCP companion package aborts instead of reporting no eviden
     expect_named(mechanism_empty_perturbation(),
                  c("regulator", "source", "term", "named", "level",
                    "padj_within_source", "setSize", "Count", "family",
-                   "evidence_kind", "direction", "dataset", "system", "method"))
+                   "evidence_kind", "direction", "dataset", "system", "method",
+                   "significant", "effect_size"))
 })
 
 test_that("evidence(treatment = 'none') does not ask GPSAdb", {

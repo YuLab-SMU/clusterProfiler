@@ -78,7 +78,7 @@ mechanism_measured_prompt_rows <- function(x, admitted) {
     m <- x$perturbagen
     m <- m[m$term %in% keep, , drop = FALSE]
     if (!is.null(m$padj_within_source) && nrow(m)) {
-        m <- m[!is.na(m$padj_within_source) & m$padj_within_source < 0.05, , drop = FALSE]
+        m <- m[mechanism_significant(m), , drop = FALSE]
     }
     if (!nrow(m)) return(mechanism_empty_rows())
 
@@ -130,7 +130,7 @@ evidence_admitted <- function(x, min_independent = 2) {
 
     r[r$regulator %in% admitted_regulators &
           r$named &
-          !is.na(r$padj_within_source) & r$padj_within_source < 0.05, , drop = FALSE]
+          mechanism_significant(r), , drop = FALSE]
 }
 
 ## Abbreviations that a regulator narrative uses as words. Kept local to this

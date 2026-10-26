@@ -81,7 +81,7 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
         !is.na(counts$coverage_floor) & counts$coverage_tested < counts$coverage_floor
     ]
 
-    significant <- r[!is.na(r$padj_within_source) & r$padj_within_source < 0.05, , drop = FALSE]
+    significant <- r[mechanism_significant(r), , drop = FALSE]
     significant <- significant[!significant$source %in% untested_source, , drop = FALSE]
     ## A set that names no factor cannot support a claim about one: a consensus
     ## sequence is not a regulator, however strongly it is enriched.
@@ -136,9 +136,25 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
 
         ## A source counts once. Two motif sets in the same collection are one
         ## witness, and two rows from one source are one source.
-        n_witness <- n
+        ##
+        ## But two sources can also be one witness. `perturbagen` and
+        ## `biotrigger` are two views of the same GPSAdb experiment: one says
+        ## "knocking this down changes these genes", the other "perturbing this
+        ## matches this list". When both cite the same dataset, the agreement is
+        ## the server agreeing with itself, and 17 of this package's `supported`
+        ## verdicts were exactly that -- `C22orf46P` was level A supported on the
+        ## strength of D25689 counted twice.
+        datasets <- unique(mine$term[!is.na(mine$term) &
+                                        mine$source %in% c("perturbagen", "biotrigger")])
+        ## Distinct datasets, unless the sources name none (a collection term is
+        ## not a dataset, so those do not collapse).
+        n_witness <- if (length(datasets)) max(length(datasets), n) else n
+        ## Overlapping dataset ids mean the sources are not independent even
+        ## when they are different sources.
+        shared_dataset <- length(datasets) < n &&
+            all(mine$source %in% c("perturbagen", "biotrigger"))
 
-        corroborated <- n_witness >= min_independent &&
+        corroborated <- !shared_dataset && n_witness >= min_independent &&
             n_measured >= 1L &&
             n_measured >= min(n_witness, 1L) &&
             any(mine$level %in% c("A", "B"))

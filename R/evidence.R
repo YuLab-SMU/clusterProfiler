@@ -123,6 +123,10 @@ evidence <- function(genes,
     sets <- lapply(collection_sources, mechanism_sets, species = design$species)
     names(sets) <- collection_sources
 
+    mechanism_progress("evidence: testing collection(s): ",
+                       paste(collection_sources, collapse = ", "),
+                       " (", length(genes), " genes)")
+
     results <- lapply(collection_sources, function(src) {
         enricher(
             genes,
@@ -146,6 +150,13 @@ evidence <- function(genes,
     ## No collection source leaves rbind() of nothing as NULL; the rest of the
     ## function treats `regulators` as a data.frame, so give it the empty one.
     if (is.null(regulators)) regulators <- mechanism_empty_regulators()
+    ## biotrigger is available through evidence_biotrigger() but is not part of
+    ## the bundle. Measured on the airway list, wiring it in raised `supported`
+    ## from 21 to 25 and added no transcription factor -- TREM2, SORL1, PTPN23
+    ## and STAG2 have no bearing on airway smooth muscle, and the two "sources"
+    ## often cited the same dataset. A channel that raises a count without
+    ## improving the mechanism is not an improvement.
+
     measured <- NULL
     if ("perturbagen" %in% upstream) {
         if (identical(design$treatment, "none")) {
@@ -156,17 +167,19 @@ evidence <- function(genes,
                 "design = list(treatment = \"knockdown\"), so the grade matches the study."
             ))
         }
-        ## Perturbation is asked about the regulators the collections already
-        ## nominated, not about a sample of the gene list: whether a candidate
-        ## was ever knocked down is a well-posed question, while which genes
-        ## happen to have datasets is a property of the database.
+        ## Asked about nominated regulators rather than a sample of the gene
+        ## list: whether a candidate was ever knocked down is a well-posed
+        ## question, while which genes happen to have datasets is a property of
+        ## the database.
+        cand <- mechanism_perturb_candidates(regulators)
+        mechanism_progress("evidence: querying GPSAdb for ", length(cand),
+                           " candidate regulator(s); this is the slow step")
         measured <- tryCatch(
             evidence_perturbation(
                 genes,
                 method     = mechanism_treatment_method(design),
-                candidates = mechanism_perturb_candidates(regulators),
-                considered = attr(mechanism_perturb_candidates(regulators),
-                                  "considered")
+                candidates = cand,
+                considered = length(cand)
             ),
             error = function(e) {
                 failures$add(source = "perturbagen", stage = "query",
@@ -184,10 +197,30 @@ evidence <- function(genes,
         }
     }
 
+
+    ## A similarity search ranks datasets, not entities, so it is kept out of the
+    ## verdict table. It answers a different question: not "which factor drives
+    ## this" but "which experiment does this resemble", and the second does not
+    ## establish the first.
+    similar <- NULL
+    if ("similarity" %in% upstream) {
+        similar <- tryCatch(
+            evidence_similarity(genes),
+            error = function(e) {
+                failures$add(source = "similarity", stage = "query",
+                             message = conditionMessage(e))
+                mechanism_empty_similarity()
+            }
+        )
+        if (!nrow(similar)) similar <- NULL
+    }
+
     ## Nothing worked. An empty bundle here would report `absent` for every
     ## entity, which reads as a negative result when the truth is that no source
     ## answered.
-    mechanism_abort_if_all_failed(failures, collection_sources)
+    mechanism_abort_if_all_failed(
+        failures, c(collection_sources,
+                    intersect(upstream, c("perturbagen", "biotrigger", "similarity"))))
 
     ## The canonical shape, whatever came out of rbind: `direction` belongs to
     ## the contract even when no measured row is present to populate it.
@@ -259,6 +292,9 @@ evidence <- function(genes,
     )
     for (src in collection_sources) out[[src]] <- results[[src]]
     if (!is.null(measured)) out$perturbagen <- measured
+    ## Kept separate from the verdict table on purpose: this ranks experiments,
+    ## not regulators, and a row here must never be read as a mechanism claim.
+    if (!is.null(similar)) out$similar_perturbations <- similar
     if (!is.null(ppi)) out$ppi <- ppi
 
     ## The class must exist before the writable table is built: it defers to
@@ -308,6 +344,14 @@ print.evidenceBundle <- function(x, ...) {
             cat("     ", fails$source[i], " [", fails$stage[i], "]: ",
                 substr(fails$message[i], 1, 60), "\n", sep = "")
         }
+    }
+
+    ## A similarity ranking answers a different question from everything above,
+    ## so it is reported apart from the verdicts.
+    if (!is.null(x$similar_perturbations) && nrow(x$similar_perturbations)) {
+        top <- utils::head(x$similar_perturbations, 3)
+        cat("  resembles:    ", paste0(top$perturbed_gene, " (", top$effect, ")", collapse = ", "),
+            "\n", sep = "")
     }
 
     ## How much of the measured channel had data to answer with. Three hits out
@@ -471,7 +515,7 @@ mechanism_diagnostics <- function(regulators, upstream, genes, sets, design, uni
         members <- unique(sets[[src]]@gsid2gene$gene)
         if (is.null(members)) members <- character(0)
         r <- regulators[regulators$source == src, , drop = FALSE]
-        sig <- r[!is.na(r$padj_within_source) & r$padj_within_source < 0.05, , drop = FALSE]
+        sig <- r[mechanism_significant(r), , drop = FALSE]
 
         covered_by_set <- intersect(testable, members)
         covered_sig <- if (nrow(sig)) {
@@ -521,7 +565,7 @@ mechanism_per_gene <- function(regulators, upstream, genes, sets, design, univer
     rows <- lapply(upstream, function(src) {
         members_of <- sets[[src]]@gsid2gene
         r <- regulators[regulators$source == src, , drop = FALSE]
-        sig <- r[!is.na(r$padj_within_source) & r$padj_within_source < 0.05, , drop = FALSE]
+        sig <- r[mechanism_significant(r), , drop = FALSE]
         sig_genes <- unique(members_of$gene[members_of$gsid %in% sig$term])
         ## A gene outside the universe is untested even if a set lists it.
         annotated <- genes %in% universe & genes %in% unique(members_of$gene)
@@ -588,6 +632,9 @@ mechanism_pad_columns <- function(r) {
         ## Where a measured row came from: a dataset id means nothing to a
         ## reader without the cell line and the method behind it.
         dataset = character(), system = character(), method = character(),
+        ## Sources that report a score rather than a test say for themselves
+        ## whether a row is a hit; see mechanism_significant().
+        significant = logical(), effect_size = numeric(),
         stringsAsFactors = FALSE
     )
     ## Assign the right length, not the template's zero: `r` may already have

@@ -123,3 +123,71 @@ print.mechanismFailures <- function(x, ...) {
     }
     invisible(x)
 }
+
+#' @rdname mechanism-failures
+#' @keywords internal
+## Is this row significant?
+##
+## Not every source reports a p-value. A biotrigger hit carries an enrichment
+## score and no test, so `padj_within_source` is NA and a `padj < 0.05` rule
+## discards every row it produces. The rule therefore lives in one place: a row
+## is significant when its source says so, and a source that reports a p-value
+## says so with the p-value.
+mechanism_significant <- function(r, alpha = 0.05) {
+    if (!nrow(r)) return(logical(0))
+
+    ## A source that supplied its own judgement wins.
+    if (!is.null(r$significant)) {
+        verdict <- !is.na(r$significant) & r$significant
+    } else {
+        verdict <- rep(FALSE, nrow(r))
+    }
+
+    ## Everything carrying a p-value is judged by it, whatever else it says:
+    ## a row with padj = 0.6 is not significant because a source flagged it.
+    has_p <- !is.na(r$padj_within_source)
+    verdict[has_p] <- r$padj_within_source[has_p] < alpha
+
+    verdict
+}
+
+#' Report progress while a slow step runs
+#'
+#' @description
+#' A run with perturbation evidence takes minutes, most of it waiting on a
+#' network endpoint, and a caller would otherwise sit in silence with no way to
+#' tell a slow run from a hung one.
+#'
+#' Messages go through [message()], so they appear by default, disappear under
+#' `suppressMessages()`, and are not printed into a report document. The level is
+#' controlled by `options(clusterProfiler.progress =)`, which takes `"none"`,
+#' `"major"` (the default: one line per evidence source) or `"all"`.
+#'
+#' @param ... Pieces of the message, pasted together.
+#' @param level `"major"` or `"all"`; the call is silent when the option is set
+#'   below it.
+#' @return Invisibly `TRUE` if the message was emitted.
+#' @name mechanism-progress
+#' @keywords internal
+mechanism_progress <- function(..., level = c("major", "all")) {
+    level <- match.arg(level)
+    want <- getOption("clusterProfiler.progress", "major")
+    if (identical(want, "none")) return(invisible(FALSE))
+    if (identical(level, "all") && !identical(want, "all")) return(invisible(FALSE))
+    message(paste0(...))
+    invisible(TRUE)
+}
+
+## Time one step and say how long it took.
+##
+## The estimate is the point: the first call tells the caller what one source
+## costs, so the next one is not a surprise.
+mechanism_timed <- function(..., expr) {
+    label <- paste0(...)
+    t0 <- Sys.time()
+    mechanism_progress(label, " ...", level = "major")
+    out <- force(expr)
+    secs <- round(as.numeric(difftime(Sys.time(), t0, units = "secs")), 1)
+    mechanism_progress(label, " done (", secs, "s)", level = "all")
+    out
+}

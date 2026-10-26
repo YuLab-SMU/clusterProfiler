@@ -148,6 +148,11 @@ evidence_biotrigger <- function(genes, effect = c("both", "activated", "inhibite
     ## The enrichment score decides ordering; it is carried through so the
     ## caller can see why one hit ranked above another.
     out$effect_size <- as.numeric(d$es)
+    ## The server reports a score, not a test. A hit is significant by the
+    ## server's own construction -- it returned it as a hit -- so the row says
+    ## so itself rather than leaving consensus() to read a missing p-value as
+    ## "not significant", which is what a padj-only rule would do.
+    out$significant <- TRUE
     out[order(-abs(out$effect_size)), , drop = FALSE]
 }
 
@@ -170,8 +175,16 @@ mechanism_empty_biotrigger <- function() {
 ## one is supplied and the caller's order otherwise.
 .similarity_input <- function(genes, log2fc = NULL) {
     if (is.null(log2fc)) {
-        return(data.frame(gene = genes, log2fc = seq_along(genes),
-                          stringsAsFactors = FALSE))
+        ## Order alone cannot express direction, and GPSAdb needs both signs to
+        ## separate an experiment that moves these genes up from one that moves
+        ## them down. Filling in the rank produced an all-positive vector, which
+        ## the server rejects -- so say so rather than sending a request that
+        ## cannot succeed.
+        rlang::abort(c(
+            "`log2fc` is required for a similarity search.",
+            i = "GPSAdb needs a signed score: without one it cannot tell a signature that rises from one that falls.",
+            i = "Pass `log2fc = setNames(de$log2FoldChange, de$gene)`."
+        ))
     }
     if (is.null(names(log2fc))) {
         rlang::abort(c(
