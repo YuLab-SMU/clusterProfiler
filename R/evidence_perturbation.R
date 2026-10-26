@@ -172,8 +172,17 @@ evidence_perturbation <- function(genes,
     ## whose p-value was smaller, so a caller who named their system never saw
     ## the dataset that matched it. The most relevant system therefore wins
     ## first, and significance breaks ties within it.
-    out <- out[order(-as.integer(out$in_system), out$padj_within_source), ,
-               drop = FALSE]
+    ## The sort must be total, or the verdict is not reproducible. `padj` alone
+    ## is not: a p-value underflows to exactly 0 for well-powered datasets, so
+    ## SIX1's D25077 and D25078 tie, and `order()` then falls back on the order
+    ## the rows happened to arrive in -- measured at 5 runs, the answer flipped
+    ## between the two. The remaining keys settle it: more genes moved is the
+    ## stronger claim, and the dataset id is unique, so no tie can survive to
+    ## depend on row order.
+    out <- out[order(-as.integer(out$in_system),
+                     out$padj_within_source,
+                     -out$Count,
+                     out$dataset), , drop = FALSE]
     out[!duplicated(out$regulator), , drop = FALSE]
 }
 
@@ -274,11 +283,26 @@ mechanism_require_mcp <- function(pkg) {
 
 ## Parallel map over request-shaped work.
 ##
-## Only used where every element is independent and slow because of I/O. Forking
-## is unavailable on Windows, so that platform falls back to serial rather than
-## failing; `options(clusterProfiler_perturb_workers = 1)` forces serial.
+## Only used where every slice is slow because of I/O. Serial is the default
+## because the endpoint is not safe to query concurrently; see the note in the
+## body. Forking is unavailable on Windows, which degrades to serial anyway.
 mechanism_lapply <- function(x, fun) {
-    workers <- getOption("clusterProfiler_perturb_workers", 4L)
+    ## Serial by default, and that is a correctness decision rather than a
+    ## conservative one.
+    ##
+    ## The GPSAdb endpoint returns *different data* when it is queried
+    ## concurrently, and says nothing about it: twenty parallel lookups of the
+    ## same dataset produced the complete answer 16 times and a partial one 4
+    ## times (231 of 379 significant genes, one run 53 of 91), while six serial
+    ## lookups agreed exactly. Nothing distinguishes the partial answer -- same
+    ## request, same status, no warning -- so a parallel sweep silently changes
+    ## which dataset wins a regulator and therefore which verdicts come out.
+    ## Measured end to end, the supported set flipped between runs.
+    ##
+    ## The sweep is I/O bound, so the parallel form is a speed-up that trades
+    ## reproducibility for it. Raise `clusterProfiler_perturb_workers` to take
+    ## that trade knowingly.
+    workers <- getOption("clusterProfiler_perturb_workers", 1L)
     workers <- suppressWarnings(as.integer(workers))
     if (is.na(workers) || workers < 2L || length(x) < 2L ||
         .Platform$OS.type != "unix") {

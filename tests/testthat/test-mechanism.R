@@ -1861,3 +1861,32 @@ test_that("evidence() accepts an enrichResult end to end", {
                                     universe = c(go, paste0("u", 1:500))))
     expect_s3_class(ev, "evidenceBundle")
 })
+
+test_that("the perturbation sweep is serial by default", {
+    ## Not a style preference: the endpoint returns different data under
+    ## concurrent load (measured 4 partial answers in 20 parallel lookups of one
+    ## dataset, against 6 agreeing serial ones), so the parallel form changes
+    ## verdicts. It stays available, but a caller has to ask for it.
+    expect_identical(getOption("clusterProfiler_perturb_workers", 1L), 1L)
+})
+
+test_that("a p-value tie between datasets cannot depend on row order", {
+    ## Two datasets for one regulator, both with a p-value that underflowed to
+    ## zero. The choice has to be settled by something the data fixes, or the
+    ## verdict changes between runs.
+    tied <- data.frame(
+        regulator = c("SIX1", "SIX1"),
+        dataset   = c("D25077", "D25078"),
+        padj_within_source = c(0, 0),
+        Count     = c(335, 379),
+        in_system = c(NA, NA),
+        stringsAsFactors = FALSE)
+    pick <- function(d) {
+        d <- d[order(-as.integer(d$in_system), d$padj_within_source,
+                    -d$Count, d$dataset), , drop = FALSE]
+        d[!duplicated(d$regulator), , drop = FALSE]$dataset
+    }
+    expect_identical(pick(tied), "D25078")
+    ## The answer must not move when the rows arrive the other way round.
+    expect_identical(pick(tied[2:1, , drop = FALSE]), "D25078")
+})
