@@ -44,18 +44,21 @@ Imports:
     utils,
     yulab.utils (>= 0.2.3)
 Suggests:
-    AnnotationHub,
     aisdk.mcp,
+    AnnotationHub,
+    ape,
     BiocManager,
     digest,
     DOSE,
     ggtangle,
-    mechgraph,
+    ggtree,
     gpsadb,
+    mechgraph,
     org.Hs.eg.db,
     quarto,
     readr,
     testthat,
+    treeio,
     withr
 VignetteBuilder: quarto
 ByteCompile: true

@@ -1692,3 +1692,54 @@ test_that("plot_mechanism wants a graph, not a bundle", {
     skip_if_not_installed("mechgraph")
     expect_error(plot_mechanism("not a graph"), "mechgraph")
 })
+
+test_that("attribution gives every gene exactly one regulator", {
+    skip_if_not_installed("mechgraph")
+    ## The rule, in order: strongest grade, then most significant set, then
+    ## largest overlap.
+    e <- data.frame(
+        from = c("WEAK", "STRONG", "WEAK2"),
+        to = c("g1", "g1", "g2"),
+        type = "target", term = "t", level = c("C", "A", "B"),
+        source = "tf", padj = c(1e-9, 0.01, 1e-5), n_genes = c(50, 2, 30),
+        stringsAsFactors = FALSE)
+    n <- data.frame(
+        id = c("WEAK", "STRONG", "WEAK2", "g1", "g2"),
+        type = c("regulator", "regulator", "regulator", "gene", "gene"),
+        label = c("WEAK", "STRONG", "WEAK2", "g1", "g2"),
+        grade = c("C", "A", "B", NA, NA), verdict = NA_character_,
+        evidence_kind = NA_character_, stringsAsFactors = FALSE)
+    mg <- mechgraph::mg_from_edges(e, n)
+
+    a <- attribute_genes(mg)
+    ## g1 is claimed twice and goes to the level A regulator even though the
+    ## competing claim is far more significant and larger: a measured mechanism
+    ## outranks a well-powered prediction.
+    expect_equal(a$regulator[a$gene == "g1"], "STRONG")
+    expect_equal(a$n_claimed[a$gene == "g1"], 2L)
+    ## One row per gene: the ambiguity is resolved, not listed again.
+    expect_equal(nrow(a), length(unique(a$gene)))
+})
+
+test_that("the attribution becomes a rooted tree with named regulators", {
+    skip_if_not_installed("mechgraph")
+    skip_if_not_installed("ape")
+    a <- data.frame(gene = c("G1", "G2", "G3"),
+                    regulator = c("CEBPB", "CEBPB", "SRF"),
+                    level = c("A", "A", "B"),
+                    padj = c(1e-5, 1e-6, 1e-3), n_claimed = c(1L, 2L, 1L),
+                    stringsAsFactors = FALSE)
+    phy <- clusterProfiler:::.attribution_to_phylo(a)
+
+    expect_s3_class(phy, "phylo")
+    ## A tree: one more node than edges.
+    expect_equal(nrow(phy$edge), length(phy$tip.label) + phy$Nnode - 1)
+    ## The regulators are named on the internal nodes; the super-root is not.
+    expect_true(all(c("CEBPB", "SRF") %in% phy$node.label))
+    expect_false(any(grepl("\u0001", phy$node.label)))
+    ## Tips are genes, not "regulator|gene" labels.
+    expect_setequal(phy$tip.label, a$gene)
+    ## checkValidPhylo() prints and returns NULL; calling it is the assertion,
+    ## and an invalid phylo raises rather than returning.
+    expect_error(suppressMessages(ape::checkValidPhylo(phy)), NA)
+})

@@ -401,26 +401,29 @@ simplify_gene_overlap <- function(x, cutoff = 0.7, by = "p.adjust",
 
     by_value <- res[[by]]
     set_size <- vapply(sets, length, integer(1))
-    ## prefer the bigger gene set on ties, and the earlier row as a last resort
-    tie_key <- -set_size
-    if (identical(select_fun, min)) {
-        rank_secondary <- order(by_value, tie_key, seq_along(ids), na.last = TRUE)
-    } else {
-        rank_secondary <- order(by_value, seq_along(ids), na.last = TRUE)
-    }
+    ## `select_fun` says which value of `by` marks the preferred representative,
+    ## so the ordering has to follow the function rather than assume `min`:
+    ## `select_fun = max` picks the largest value, and its partners are the
+    ## smaller ones. Ties prefer the bigger gene set, then the earlier row, the
+    ## way the GO version prefers the more specific term.
+    decreasing <- !identical(select_fun, min)
+    rank_secondary <- order(by_value, if (decreasing) set_size else -set_size,
+                            seq_along(ids), decreasing = decreasing, na.last = TRUE)
     priority <- match(seq_along(ids), rank_secondary)
 
+    ## Walk the terms from the best representative to the worst and let each
+    ## surviving term absorb the terms it dominates. Removing from a term that
+    ## was itself already absorbed would delete terms whose only similar
+    ## partner is gone: with A~B and B~C above `cutoff` but A~C below it, B
+    ## disappears behind A, and C must then stay -- testing only "is anything
+    ## similar to C" would have dropped C behind the already-removed B.
     removed <- logical(nrow(res))
-    for (k in seq_along(ids)) {
+    for (k in rank_secondary) {
         if (removed[k]) {
             next
         }
-        group <- which(sim[k, ] > cutoff)
-        if (length(group) < 2L) {
-            next
-        }
-        winner <- group[which.min(priority[group])]
-        removed[group[group != winner]] <- TRUE
+        absorbed <- which(sim[k, ] > cutoff & priority > priority[k])
+        removed[absorbed] <- TRUE
     }
 
     res[!removed, , drop = FALSE]

@@ -199,3 +199,68 @@ test_that("simplify() points non-GO users to measure = 'JC' (#743)", {
 
   expect_error(simplify(res, cutoff = 0.7), 'measure = "JC"')
 })
+
+test_that("gene-overlap simplify does not delete a term whose only neighbour is gone (#743)", {
+  # A~B = 0.739 and B~C = 0.739 are both above 0.7, but A~C = 0.538 is not.
+  # A absorbs B; C's only similar partner was B, which is already removed, so
+  # C must survive. The old grouping tested "is anything similar to C" and
+  # dropped C behind the removed B.
+  A <- paste0("g", 1:40)
+  B <- c(paste0("g", 1:34), paste0("g", 100:105))
+  C <- c(paste0("g", 1:28), paste0("g", 100:105), paste0("g", 200:205))
+  t2g <- data.frame(term = rep(c("A", "B", "C"), each = 40), gene = c(A, B, C))
+  res <- enricher(paste0("g", 1:20), TERM2GENE = t2g, pvalueCutoff = 1,
+                  qvalueCutoff = 1, minGSSize = 2, universe = paste0("g", 1:400))
+  skip_if(is.null(res) || nrow(as.data.frame(res)) < 3, "enricher returned too few terms")
+
+  df <- as.data.frame(res)
+  df$p.adjust <- c(0.01, 0.02, 0.03)[match(df$ID, c("A", "B", "C"))]
+  res@result <- df
+
+  sim <- clusterProfiler:::gene_overlap_similarity(
+    clusterProfiler:::gene_overlap_sets(res, df), "JC")
+  skip_if(unname(sim[1, 2]) <= 0.7 || unname(sim[2, 3]) <= 0.7 ||
+            unname(sim[1, 3]) > 0.7, "fixture no longer has the transitivity shape")
+
+  keep <- as.data.frame(simplify(res, cutoff = 0.7, measure = "JC"))$ID
+  expect_true("A" %in% keep)   # best p.adjust
+  expect_false("B" %in% keep)  # absorbed by A
+  expect_true("C" %in% keep)   # only neighbour B is gone, so it must stay
+})
+
+test_that("gene-overlap simplify honours select_fun (#743)", {
+  # A and B are the same gene set, so exactly one survives, and which one is
+  # decided by `select_fun` -- the implementation used to sort ascending
+  # regardless, so select_fun = max still returned the min-p term
+  t2g <- data.frame(term = rep(c("A", "B"), each = 10), gene = rep(paste0("g", 1:10), 2))
+  res <- enricher(paste0("g", 1:5), TERM2GENE = t2g, pvalueCutoff = 1,
+                  qvalueCutoff = 1, minGSSize = 2, universe = paste0("g", 1:200))
+  skip_if(is.null(res) || nrow(as.data.frame(res)) < 2, "enricher returned too few terms")
+
+  df <- as.data.frame(res)
+  df$p.adjust <- c(0.01, 0.9)[match(df$ID, c("A", "B"))]
+  res@result <- df
+
+  expect_identical(as.data.frame(simplify(res, 0.7, measure = "JC"))$ID, "A")
+  expect_identical(
+    as.data.frame(simplify(res, 0.7, measure = "JC", select_fun = max))$ID, "B")
+})
+
+test_that("gene-overlap simplify breaks ties towards the larger gene set (#743)", {
+  # BIG and SML share 10 of BIG's 12 genes (Jaccard 0.83 > 0.7) and have equal
+  # p.adjust, so the larger set must be the representative even though SML is
+  # listed first
+  t2g <- data.frame(term = c(rep("BIG", 12), rep("SML", 10)),
+                    gene = c(paste0("g", 1:12), paste0("g", 1:10)))
+  res <- enricher(paste0("g", 1:5), TERM2GENE = t2g, pvalueCutoff = 1,
+                  qvalueCutoff = 1, minGSSize = 2, universe = paste0("g", 1:200))
+  skip_if(is.null(res) || nrow(as.data.frame(res)) < 2, "enricher returned too few terms")
+
+  df <- as.data.frame(res)
+  df$p.adjust <- 0.01
+  res@result <- df
+  skip_if(!setequal(df$ID, c("BIG", "SML")), "fixture no longer has both sets")
+
+  keep <- as.data.frame(simplify(res, 0.7, measure = "JC"))$ID
+  expect_identical(keep, "BIG")
+})
