@@ -2223,6 +2223,7 @@ print.interpretation_list <- function(x, ...) {
 #' kk <- enrichKEGG(gene = genes, organism = "hsa")
 #' reduce_redundancy(kk)                  # Jaccard on member genes, 0.5
 #' }
+#' @seealso [simplify()], which does the actual reduction.
 reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "jaccard"), semData = NULL) {
   method <- match.arg(method)
   if (!inherits(x, c("enrichResult", "gseaResult", "compareClusterResult"))) {
@@ -2230,7 +2231,7 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
     return(x)
   }
   df <- as.data.frame(x)
-  # rows without an ID (all-NA padding some result tables carry) are not terms; left in place
+  # rows without an ID (all-NA padding some result tables carry) are not terms
   df <- df[!is.na(df$ID), , drop = FALSE]
   if (nrow(df) < 2) return(x)
   threshold <- threshold %||% 0.5
@@ -2241,96 +2242,43 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
     warning("Wang similarity needs GO terms; using Jaccard overlap of member genes instead.")
     method <- "jaccard"
   }
-  if (method == "jaccard" && is.na(gcol)) {
+  if (method == "jaccard" && is.na(gcol) && !length(x@geneSets)) {
     warning("No geneID or core_enrichment column to compare; skipping reduction.")
     return(x)
   }
-  ont <- if (method == "Wang") .go_ontology_per_term(x, df) else rep("", nrow(df))
-  if (method == "Wang" && any(!ont %in% c("BP", "MF", "CC"))) {
-    warning("The GO ontology of some terms could not be determined; using Jaccard overlap of member genes instead.")
-    method <- "jaccard"; ont <- rep("", nrow(df))
+  measure <- if (method == "jaccard") "JC" else "Wang"
+  # a semData for a different ontology than the object's own would stop simplify();
+  # the previous implementation silently rebuilt the correct one instead
+  if (measure == "Wang" && !is.null(semData)) {
+    own <- if (inherits(x, "gseaResult")) x@setType else x@ontology
+    if (!identical(semData@ont, own)) semData <- NULL
   }
-  cl <- if ("Cluster" %in% names(df)) as.character(df$Cluster) else rep("", nrow(df))
-  groups <- split(seq_len(nrow(df)), paste(cl, ont, sep = "\r"))
-
-  sem <- list()
-  keep <- logical(nrow(df))
-  for (idx in groups) {
-    if (length(idx) == 1) { keep[idx] <- TRUE; next }
-    sim <- if (method == "Wang") {
-      o <- ont[idx[1]]
-      if (is.null(sem[[o]])) {
-        sem[[o]] <- if (!is.null(semData) && identical(semData@ont, o)) semData else GOSemSim::godata(ont = o)
-      }
-      ids <- df$ID[idx]
-      s <- GOSemSim::termSim(ids, ids, semData = sem[[o]], method = "Wang")
-      s <- s[ids, ids, drop = FALSE]; s[is.na(s)] <- 0; diag(s) <- 1; s
-    } else {
-      .jaccard_matrix(strsplit(as.character(df[[gcol]][idx]), "/", fixed = TRUE))
+  y <- tryCatch(
+    simplify(x, cutoff = threshold, by = "p.adjust", select_fun = min,
+             measure = measure, semData = semData),
+    error = function(e) {
+      warning(sprintf("Redundancy reduction failed (%s); returning the input unchanged.",
+                      conditionMessage(e)))
+      NULL
     }
-    keep[idx[.greedy_representatives(sim, df$p.adjust[idx], threshold)]] <- TRUE
-  }
-
-  dropped <- paste(cl, df$ID, sep = "\r")[!keep]
-  if (inherits(x, "compareClusterResult")) {
-    r <- x@compareClusterResult
-    x@compareClusterResult <- r[!paste(as.character(r$Cluster), r$ID, sep = "\r") %in% dropped, , drop = FALSE]
-  } else {
-    x@result <- x@result[!paste("", x@result$ID, sep = "\r") %in% dropped, , drop = FALSE]
-  }
-  n0 <- nrow(df); n1 <- sum(keep)
+  )
+  if (is.null(y)) return(x)
+  n0 <- nrow(df)
+  n1 <- nrow(as.data.frame(y))
   message(sprintf("Reduced redundant terms (%s > %.2f): %d -> %d significant terms",
-                  if (method == "Wang") "Wang" else "Jaccard", threshold, n0, n1))
-  attr(x, "reduced") <- TRUE
-  attr(x, "n_original") <- n0
-  attr(x, "n_reduced") <- n1
-  attr(x, "reduction_method") <- method
-  attr(x, "reduction_threshold") <- threshold
+                  if (measure == "Wang") "Wang" else "Jaccard", threshold, n0, n1))
+  attr(y, "reduced") <- TRUE
+  attr(y, "n_original") <- n0
+  attr(y, "n_reduced") <- n1
+  attr(y, "reduction_method") <- method
+  attr(y, "reduction_threshold") <- threshold
   # names read by the earlier ablation scorers
-  attr(x, "rrvgo_reduced") <- TRUE
-  attr(x, "rrvgo_original_n") <- n0
-  attr(x, "rrvgo_reduced_n") <- n1
-  attr(x, "rrvgo_threshold") <- threshold
-  attr(x, "rrvgo_method") <- method
-  x
-}
-
-# Greedy representative selection shared by the reduction functions: repeatedly keep the
-# most significant remaining term and drop every remaining term above `threshold` similarity
-# to it. Returns the kept positions, most significant first. The kept term is removed
-# explicitly: with a threshold of 1 or more its self-similarity never exceeds the threshold,
-# and relying on that comparison would loop forever.
-.greedy_representatives <- function(sim, padj, threshold) {
-  keep <- integer(0)
-  remaining <- seq_along(padj)
-  while (length(remaining) > 0) {
-    best <- remaining[which.min(padj[remaining])]
-    keep <- c(keep, best)
-    remaining <- setdiff(remaining[!(sim[best, remaining] > threshold)], best)
-  }
-  keep
-}
-
-.jaccard_matrix <- function(sets) {
-  n <- length(sets)
-  m <- diag(1, n)
-  if (n < 2) return(m)
-  for (i in seq_len(n - 1)) for (j in (i + 1):n) {
-    u <- length(union(sets[[i]], sets[[j]]))
-    m[i, j] <- m[j, i] <- if (u == 0) 0 else length(intersect(sets[[i]], sets[[j]])) / u
-  }
-  m
-}
-
-# The GO ontology of each significant term: the ONTOLOGY column of an ont = "ALL" result,
-# else the object's own record (@ontology, @setType), else looked up in GO.db.
-.go_ontology_per_term <- function(x, df) {
-  if ("ONTOLOGY" %in% names(df)) return(as.character(df$ONTOLOGY))
-  slot_ont <- tryCatch(if (inherits(x, "gseaResult")) x@setType else x@ontology, error = function(e) "")
-  if (length(slot_ont) == 1 && slot_ont %in% c("BP", "MF", "CC")) return(rep(slot_ont, nrow(df)))
-  all_ont <- infer_go_ontology(df$ID)
-  if (all_ont %in% c("BP", "MF", "CC")) return(rep(all_ont, nrow(df)))
-  vapply(df$ID, infer_go_ontology, character(1), USE.NAMES = FALSE)
+  attr(y, "rrvgo_reduced") <- TRUE
+  attr(y, "rrvgo_original_n") <- n0
+  attr(y, "rrvgo_reduced_n") <- n1
+  attr(y, "rrvgo_threshold") <- threshold
+  attr(y, "rrvgo_method") <- method
+  y
 }
 
 # The reduction step as the entry points run it. `reduce_go` / `go_reduction_threshold` are

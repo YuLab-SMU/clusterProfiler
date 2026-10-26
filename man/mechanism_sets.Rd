@@ -8,7 +8,8 @@ mechanism_sets(
   source = c("tf", "mirna", "perturbagen", "cellstate", "tissue"),
   species = "Homo sapiens",
   release = "2026.2.Hs",
-  cache_dir = getOption("clusterProfiler_cache_dir")
+  cache_dir = getOption("clusterProfiler_cache_dir"),
+  subset = NULL
 )
 }
 \arguments{

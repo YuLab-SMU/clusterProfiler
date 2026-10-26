@@ -167,7 +167,8 @@ test_that("evidence() returns an evidenceBundle with the documented elements", {
         c("regulator", "source", "term", "named", "level",
           "padj_within_source", "setSize", "Count", "family",
           "evidence_kind", "direction", "dataset", "system", "method",
-          "significant", "effect_size")
+          "significant", "effect_size",
+          "in_system")
     )
     ## Per-collection correction is reported under a name that says so.
     expect_false("padj" %in% names(ev$regulators))
@@ -684,7 +685,8 @@ test_that("a missing MCP companion package aborts instead of reporting no eviden
                  c("regulator", "source", "term", "named", "level",
                    "padj_within_source", "setSize", "Count", "family",
                    "evidence_kind", "direction", "dataset", "system", "method",
-                   "significant", "effect_size"))
+                   "significant", "effect_size",
+          "in_system"))
 })
 
 test_that("evidence(treatment = 'none') does not ask GPSAdb", {
@@ -1742,4 +1744,100 @@ test_that("the attribution becomes a rooted tree with named regulators", {
     ## checkValidPhylo() prints and returns NULL; calling it is the assertion,
     ## and an invalid phylo raises rather than returning.
     expect_error(suppressMessages(ape::checkValidPhylo(phy)), NA)
+})
+
+test_that("a TF subset can be chosen by rule, not by file name", {
+    dir <- tempfile("mechanism"); dir.create(dir)
+    ## Two halves of one collection: GTRD names a gene, the legacy half names
+    ## a family. Only the first is answerable by a perturbation dataset.
+    write_gmt(file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt"), list(
+        FOXO3_TARGET_GENES = paste0("g", 1:10),
+        TGANTCA_AP1_C      = paste0("g", 5:14)))
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-26"),
+               file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt.meta"))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    everything <- mechanism_sets("tf")
+    gtrd <- mechanism_sets("tf", subset = "gtrd")
+    expect_equal(length(unique(everything@gsid2gene$gsid)), 2)
+    expect_equal(unique(gtrd@gsid2gene$gsid), "FOXO3_TARGET_GENES")
+    ## A rule name is not a set-name pattern: the same call works for a
+    ## collection whose file naming says nothing about the rule.
+    expect_error(mechanism_sets("tf", subset = "not_a_rule"), "Unknown `subset`")
+})
+
+test_that("a dataset from the caller's system outranks a more significant one", {
+    ## SMAD3 has a smooth-muscle dataset (D20420) and a prostate one whose
+    ## p-value is smaller. Keeping the smallest p-value alone hid the dataset
+    ## that matched the system the caller named.
+    x <- data.frame(
+        regulator = c("SMAD3", "SMAD3"),
+        padj_within_source = c(1e-30, 1e-5),
+        in_system = c(FALSE, TRUE),
+        stringsAsFactors = FALSE)
+    keep <- x[order(-as.integer(x$in_system), x$padj_within_source), , drop = FALSE]
+    keep <- keep[!duplicated(keep$regulator), , drop = FALSE]
+    expect_true(keep$in_system)
+})
+
+test_that("a system is matched against cell lines and tissues alike", {
+    d <- data.frame(cell_line = c("HASMCs", "KYSE-150", "SMC", NA),
+                    tissue = c("Smooth_Muscle", "Esophagus", "Smooth_Muscle", NA),
+                    stringsAsFactors = FALSE)
+    ## A caller names a tissue; the database records a cell line.
+    expect_equal(.gpsadb_in_system(d, "smooth muscle"), c(TRUE, FALSE, TRUE, FALSE))
+    ## A caller names a cell line prefix.
+    expect_equal(.gpsadb_in_system(d, "HASM"), c(TRUE, FALSE, FALSE, FALSE))
+    ## Punctuation and case do not decide the match.
+    expect_equal(.gpsadb_in_system(d, "smooth-muscle"), c(TRUE, FALSE, TRUE, FALSE))
+})
+
+test_that("an enrichResult hands over genes, universe and keytype", {
+    skip_if_not_installed("org.Hs.eg.db")
+    go <- c("TP53","BRCA1","EGFR","MYC","KRAS","PTEN","RB1","CDKN2A","SMAD3","FOXO1")
+    e <- enrichGO(go, OrgDb = org.Hs.eg.db, keyType = "SYMBOL", ont = "BP",
+                  universe = keys(org.Hs.eg.db, "SYMBOL"),
+                  pvalueCutoff = 0.05, qvalueCutoff = 1)
+    ## The truncation warning must fire: with the default cutoff the object
+    ## cannot return every input gene, and the caller has to know that.
+    expect_warning(fr <- .mechanism_from_enrichresult(e, list()), "pvalueCutoff")
+    ## The background comes from the object, not from every symbol in the
+    ## annotation -- getting this wrong changes every hypergeometric p-value.
+    expect_identical(sort(fr$universe), sort(as.character(e@universe)))
+    ## Recovered genes are a subset of the input, never of the annotation.
+    expect_true(all(fr$genes %in% go))
+    expect_true(length(fr$genes) > 0)
+})
+
+test_that("an ENTREZID result is mapped to symbols, not matched against nothing", {
+    skip_if_not_installed("org.Hs.eg.db")
+    sym <- c("TP53","BRCA1","EGFR","MYC","KRAS")
+    ent <- unique(na.omit(AnnotationDbi::select(org.Hs.eg.db, keys = sym,
+                          columns = "ENTREZID", keytype = "SYMBOL")$ENTREZID))
+    e <- enrichGO(ent, OrgDb = org.Hs.eg.db, keyType = "ENTREZID", ont = "BP",
+                  pvalueCutoff = 1, qvalueCutoff = 1)
+    fr <- suppressWarnings(.mechanism_from_enrichresult(e, list()))
+    expect_false(any(grepl("^[0-9]+$", fr$genes)))
+    expect_true(all(fr$genes %in% sym))
+})
+
+test_that("evidence() accepts an enrichResult end to end", {
+    skip_if_not_installed("org.Hs.eg.db")
+    dir <- tempfile("mechanism"); dir.create(dir)
+    write_gmt(file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt"),
+              list(TP53_TARGET_GENES = paste0("g", 1:10)))
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-26"),
+               file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt.meta"))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    go <- c("TP53", paste0("g", 1:10))
+    e <- suppressWarnings(enrichGO(go, OrgDb = org.Hs.eg.db, keyType = "SYMBOL",
+                                   ont = "BP", pvalueCutoff = 1, qvalueCutoff = 1))
+    ev <- suppressWarnings(evidence(e, upstream = "tf",
+                                    universe = c(go, paste0("u", 1:500))))
+    expect_s3_class(ev, "evidenceBundle")
 })

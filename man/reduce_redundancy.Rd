@@ -49,3 +49,6 @@ kk <- enrichKEGG(gene = genes, organism = "hsa")
 reduce_redundancy(kk)                  # Jaccard on member genes, 0.5
 }
 }
+\seealso{
+\code{\link[=simplify]{simplify()}}, which does the actual reduction.
+}

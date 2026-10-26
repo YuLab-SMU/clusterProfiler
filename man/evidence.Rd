@@ -12,6 +12,7 @@ evidence(
   network = FALSE,
   minGSSize = 5,
   maxGSSize = Inf,
+  tft = NULL,
   print_pvalue = 1,
   print_qvalue = 1
 )

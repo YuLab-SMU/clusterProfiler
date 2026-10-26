@@ -264,3 +264,29 @@ test_that("gene-overlap simplify breaks ties towards the larger gene set (#743)"
   keep <- as.data.frame(simplify(res, 0.7, measure = "JC"))$ID
   expect_identical(keep, "BIG")
 })
+
+test_that("compareCluster simplify(measure = 'JC') reduces within clusters only", {
+  genes <- paste0("g", 1:10)
+  t2g <- data.frame(term = rep(c("A", "B", "C"), each = 10), gene = rep(genes, 3))
+  cc <- compareCluster(list(c1 = paste0("g", 1:5), c2 = paste0("g", 1:5)),
+                       fun = "enricher", TERM2GENE = t2g, pvalueCutoff = 1,
+                       qvalueCutoff = 1, minGSSize = 2, universe = paste0("g", 1:200))
+  skip_if(is.null(cc) || nrow(as.data.frame(cc)) == 0, "compareCluster returned nothing")
+
+  # identical clusters: each keeps one representative of the A/B pair
+  s <- simplify(cc, 0.7, measure = "JC")
+  d <- as.data.frame(s)
+  expect_equal(nrow(d), 2L)
+  expect_setequal(d$Cluster, c("c1", "c2"))
+  expect_true(all(d$ID == "A"))  # best p.adjust per cluster
+
+  # clusters are independent: C is identical to A but sits only in c2, and
+  # c1's A must not remove it
+  raw <- as.data.frame(cc)
+  keep_rows <- (raw$Cluster == "c1" & raw$ID %in% c("A", "B")) |
+    (raw$Cluster == "c2" & raw$ID == "C")
+  cc2 <- cc
+  cc2@compareClusterResult <- raw[keep_rows, ]
+  s2 <- simplify(cc2, 0.7, measure = "JC")
+  expect_setequal(as.data.frame(s2)$ID, c("A", "C"))
+})

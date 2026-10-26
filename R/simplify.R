@@ -233,6 +233,14 @@ simplify_internal <- function(res, cutoff=0.7, by="p.adjust", select_fun=min,
 setMethod("simplify", signature(x="compareClusterResult"),
           function(x, cutoff=0.7, by="p.adjust", select_fun=min, measure="Wang", semData=NULL) {
               res <- x@compareClusterResult
+              if (is_gene_overlap_measure(measure)) {
+                  ## gene-overlap measures need no ontology; each cluster is an
+                  ## independent reduction group so terms never merge across clusters
+                  x@compareClusterResult <- simplify_gene_overlap(x, cutoff = cutoff,
+                      by = by, select_fun = select_fun, measure = measure,
+                      groups = res$Cluster)
+                  return(x)
+              }
               ont <- get_go_ontology(x)
 
               ## organism <- x@.call$organism
@@ -312,7 +320,7 @@ is_gene_overlap_measure <- function(measure) {
 #' @noRd
 gene_overlap_sets <- function(x, res) {
     ids <- as.character(res$ID)
-    gene_sets <- x@geneSets
+    gene_sets <- tryCatch(x@geneSets, error = function(e) list())
 
     sets <- lapply(ids, function(id) {
         gs <- gene_sets[[id]]
@@ -379,9 +387,14 @@ gene_overlap_similarity <- function(sets, measure) {
 #' representative picked by `select_fun(by)` is kept. Ties are broken towards
 #' the larger gene set when `select_fun` is `min`, the way the GO version
 #' breaks ties towards the more specific term.
+#'
+#' `groups` optionally partitions the rows into independent sets (one per
+#' cluster, or one per GO ontology); similarity is never compared across
+#' groups. `NULL` treats every row as one group.
 #' @noRd
 simplify_gene_overlap <- function(x, cutoff = 0.7, by = "p.adjust",
-                                  select_fun = min, measure = "JC") {
+                                  select_fun = min, measure = "JC",
+                                  groups = NULL) {
     if (!is_gene_overlap_measure(measure)) {
         measure <- "JC"
     }
@@ -411,6 +424,11 @@ simplify_gene_overlap <- function(x, cutoff = 0.7, by = "p.adjust",
                             seq_along(ids), decreasing = decreasing, na.last = TRUE)
     priority <- match(seq_along(ids), rank_secondary)
 
+    if (is.null(groups)) {
+        groups <- rep(1L, nrow(res))
+    }
+    groups <- as.integer(factor(groups))
+
     ## Walk the terms from the best representative to the worst and let each
     ## surviving term absorb the terms it dominates. Removing from a term that
     ## was itself already absorbed would delete terms whose only similar
@@ -418,12 +436,15 @@ simplify_gene_overlap <- function(x, cutoff = 0.7, by = "p.adjust",
     ## disappears behind A, and C must then stay -- testing only "is anything
     ## similar to C" would have dropped C behind the already-removed B.
     removed <- logical(nrow(res))
-    for (k in rank_secondary) {
-        if (removed[k]) {
-            next
+    for (g in seq_len(max(groups))) {
+        members <- which(groups == g)
+        for (k in members[order(priority[members])]) {
+            if (removed[k]) {
+                next
+            }
+            absorbed <- members[sim[k, members] > cutoff & priority[members] > priority[k]]
+            removed[absorbed] <- TRUE
         }
-        absorbed <- which(sim[k, ] > cutoff & priority > priority[k])
-        removed[absorbed] <- TRUE
     }
 
     res[!removed, , drop = FALSE]

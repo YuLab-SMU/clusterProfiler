@@ -182,7 +182,9 @@ gseMKEGG <- function(geneList,
     ## "UNKNOWN" there is what this function has always done
     res@keytype <- if (inherits(organism, "GSON")) keyType else "UNKNOWN"
 
-    res <- append_kegg_category(res)
+    ## no `append_kegg_category()` here: kegg_category_data() only carries
+    ## pathway IDs (01100, ...), never module IDs, so the call set MKEGG first
+    ## and then only printed "not a KEGG enrichment result" on every run.
     return(res)
 }
 
@@ -264,7 +266,11 @@ gseKEGG <- function(geneList,
     res@setType <- "KEGG"
     #res@keytype <- "UNKNOWN"
     res@keytype <- keyType
-    
+
+    ## enrichKEGG() reports the KEGG BRITE classification, and a GSEA result
+    ## over the same pathways should as well: the same reader applies the same
+    ## filter to either table (#787).
+    res <- append_kegg_category(res)
     return(res)
 }
 

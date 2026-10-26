@@ -50,7 +50,8 @@ evidence_perturbation <- function(genes,
                                   min_genes = 5,
                                   pvalueCutoff = 0.05,
                                   candidates = NULL,
-                                  considered = NULL) {
+                                  considered = NULL,
+                                  system = NULL) {
     mechanism_require_mcp("gpsadb")
     genes <- unique(as.character(genes))
     genes <- genes[!is.na(genes) & nzchar(genes)]
@@ -77,6 +78,12 @@ evidence_perturbation <- function(genes,
                                      max_genes = if (is.null(candidates)) 30L else
                                          length(query_genes))
     if (is.null(datasets) || !nrow(datasets)) return(mechanism_empty_perturbation())
+
+    ## Which of these datasets were run in the caller's own system.
+    datasets$in_system <- NA
+    if (!is.null(system) && nzchar(system)) {
+        datasets$in_system <- .gpsadb_in_system(datasets, system)
+    }
 
     ## Each candidate costs a network round trip, so the sweep is run in
     ## parallel. With 23 of 30 candidates having data the serial version took
@@ -125,6 +132,11 @@ evidence_perturbation <- function(genes,
             dataset            = meta$title,
             system             = meta$system,
             method             = meta$method,
+            ## Whether this dataset was run in the system the caller named.
+            ## Carried rather than filtered on: a knockdown in BHK-21 still
+            ## says the factor moves these genes, and dropping it would hide
+            ## the caveat instead of stating it.
+            in_system          = datasets$in_system[i],
             ## A perturbation dataset reports a p-value, so significance is
             ## decided by it rather than declared here.
             significant        = NA,
@@ -146,9 +158,16 @@ evidence_perturbation <- function(genes,
     attr(out, "queried") <- if (is.null(candidates)) NA_integer_ else length(query_genes)
     attr(out, "considered") <- considered %||% attr(datasets, "genes_total")
     attr(out, "targeted") <- !is.null(candidates)
-    ## One row per perturbed gene: the strongest dataset that moves it,
-    ## because two datasets for the same gene are one claim, not two.
-    out <- out[order(out$padj_within_source), , drop = FALSE]
+    ## One row per perturbed gene, because two datasets for the same gene are
+    ## one claim, not two -- but which one to keep decides what the row means.
+    ##
+    ## Keeping the smallest p-value alone discarded the only airway smooth
+    ## muscle dataset for SMAD3 (D20420, HCASMC) in favour of a prostate one
+    ## whose p-value was smaller, so a caller who named their system never saw
+    ## the dataset that matched it. The most relevant system therefore wins
+    ## first, and significance breaks ties within it.
+    out <- out[order(-as.integer(out$in_system), out$padj_within_source), ,
+               drop = FALSE]
     out[!duplicated(out$regulator), , drop = FALSE]
 }
 
@@ -183,8 +202,8 @@ evidence_perturbation <- function(genes,
             error = function(e) NULL
         )
         if (is.null(res) || is.null(res$data) || !nrow(res$data)) return(NULL)
-        res$data[, intersect(c("dataset_id", "perturbed_gene"), colnames(res$data)),
-                 drop = FALSE]
+        res$data[, intersect(c("dataset_id", "perturbed_gene", "cell_line", "tissue"),
+                             colnames(res$data)), drop = FALSE]
     })
     found <- found[!vapply(found, is.null, TRUE)]
     if (!length(found)) return(NULL)
@@ -204,6 +223,7 @@ mechanism_empty_perturbation <- function() {
         evidence_kind = character(), direction = character(),
         dataset = character(), system = character(), method = character(),
         significant = logical(), effect_size = numeric(),
+        in_system = logical(),
         stringsAsFactors = FALSE
     )
 }
@@ -285,4 +305,32 @@ mechanism_lapply <- function(x, fun) {
         system = as.character(m$cell_line %||% NA_character_),
         method = as.character(m$method %||% NA_character_)
     )
+}
+
+## Which datasets were run in the system the caller named.
+##
+## Matched on cell line and on tissue, case-insensitively and ignoring
+## punctuation, because GPSAdb writes "HASMCs" where a caller would write "HASM"
+## and "Smooth_Muscle" where they would write "smooth muscle". A caller naming a
+## tissue therefore matches any of its cell lines, which is the useful
+## direction: the tissue is what they know, the cell line is what the database
+## records.
+.gpsadb_in_system <- function(datasets, system) {
+    norm <- function(x) tolower(gsub("[^a-z0-9]", "", tolower(x)))
+    want <- norm(system)
+    if (!nzchar(want)) return(rep(NA, nrow(datasets)))
+
+    haystack <- norm(paste(datasets$cell_line %||% "", datasets$tissue %||% ""))
+
+    ## Both directions, element by element: the caller may name a tissue where
+    ## the database records a cell line ("smooth muscle" against "HASMCs" is
+    ## the case that matters), or a cell line where it records a cell line.
+    ##
+    ## vapply over the elements rather than grepl over the vector, because the
+    ## second direction reverses pattern and subject and grepl would otherwise
+    ## take only the first element as the pattern.
+    vapply(haystack, function(h) {
+        if (!nzchar(h)) return(FALSE)
+        grepl(want, h, fixed = TRUE) || grepl(h, want, fixed = TRUE)
+    }, logical(1), USE.NAMES = FALSE)
 }

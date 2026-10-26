@@ -38,8 +38,10 @@
 mechanism_sets <- function(source = c("tf", "mirna", "perturbagen", "cellstate", "tissue"),
                            species = "Homo sapiens",
                            release = "2026.2.Hs",
-                           cache_dir = getOption("clusterProfiler_cache_dir")) {
+                           cache_dir = getOption("clusterProfiler_cache_dir"),
+                           subset = NULL) {
     source <- match.arg(source)
+    subset <- .mechanism_subset_source(source, subset)
 
     if (!identical(species, "Homo sapiens")) {
         rlang::abort(
@@ -57,6 +59,20 @@ mechanism_sets <- function(source = c("tf", "mirna", "perturbagen", "cellstate",
 
     accessed <- mechanism_fetch_gmt(path, release, cache_dir)
     parsed <- mechanism_parse_gmt(path)
+
+    ## A collection can hold two sources of very different quality under one
+    ## name. C3:TFT is the case that matters: GTRD holds ChIP-defined targets
+    ## for one gene each, while TFT_LEGACY holds motif matches, 73% of which
+    ## name a family or a consensus sequence rather than a gene. Mixing them
+    ## made 40% of the entities unqueryable.
+    if (!is.null(subset)) {
+        keep <- parsed$gsid2name$gsid[
+            mechanism_rule_for(source, parsed$gsid2name$gsid) %in% subset]
+        parsed$gsid2gene <- parsed$gsid2gene[parsed$gsid2gene$gsid %in% keep, ,
+                                             drop = FALSE]
+        parsed$gsid2name <- parsed$gsid2name[parsed$gsid2name$gsid %in% keep, ,
+                                             drop = FALSE]
+    }
 
     gson::gson(
         gsid2gene     = parsed$gsid2gene,
@@ -205,4 +221,23 @@ mechanism_parse_gmt <- function(path) {
     ))
 
     list(gsid2gene = gsid2gene, gsid2name = gsid2name)
+}
+
+## Restrict a collection to the parts worth using.
+##
+## `subset` is expressed in the vocabulary of the xref rules rather than in
+## set-name patterns, so a caller can say "only what was measured" and not have
+## to know that GTRD happens to be named `*_TARGET_GENES`.
+.mechanism_subset_source <- function(source, subset) {
+    if (is.null(subset)) return(NULL)
+    allowed <- c("gtrd", "motif", "unnamed_motif", "predicted_target", "signature",
+                 "recorded_perturbation")
+    bad <- setdiff(subset, allowed)
+    if (length(bad)) {
+        rlang::abort(c(
+            paste0("Unknown `subset`: ", paste(bad, collapse = ", "), "."),
+            i = paste0("Known rules: ", paste(allowed, collapse = ", "), ".")
+        ))
+    }
+    subset
 }

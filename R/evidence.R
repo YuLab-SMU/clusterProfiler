@@ -81,6 +81,10 @@ evidence <- function(genes,
                      network      = FALSE,
                      minGSSize    = 5,
                      maxGSSize    = Inf,
+                     ## Which parts of the TF collection to use. `"gtrd"` keeps
+                     ## only the ChIP-defined sets, whose identifiers are gene
+                     ## symbols; the default uses the whole collection.
+                     tft          = NULL,
                      print_pvalue = 1,
                      print_qvalue = 1) {
     upstream <- unique(upstream)
@@ -103,6 +107,19 @@ evidence <- function(genes,
     }
 
     design <- mechanism_design(design)
+
+    ## An enrichResult carries its own gene list, its own background and its own
+    ## keytype. All three are taken from the object rather than guessed, because
+    ## getting any of them wrong changes the statistics silently: the default
+    ## universe is every symbol in the annotation, which is not the background
+    ## the enrichment itself was run against.
+    from_result <- NULL
+    if (inherits(genes, "enrichResult")) {
+        from_result <- .mechanism_from_enrichresult(genes, design)
+        genes <- from_result$genes
+        if (is.null(universe)) universe <- from_result$universe
+    }
+
     genes <- mechanism_genes(genes, design)
     universe <- mechanism_universe(universe, genes, design)
 
@@ -120,7 +137,10 @@ evidence <- function(genes,
     failures <- mechanism_failure_collector()
 
     collection_sources <- intersect(upstream, c("tf", "mirna", "cellstate", "tissue"))
-    sets <- lapply(collection_sources, mechanism_sets, species = design$species)
+    sets <- lapply(collection_sources, function(src) {
+        mechanism_sets(src, species = design$species,
+                       subset = if (identical(src, "tf")) tft else NULL)
+    })
     names(sets) <- collection_sources
 
     mechanism_progress("evidence: testing collection(s): ",
@@ -179,7 +199,8 @@ evidence <- function(genes,
                 genes,
                 method     = mechanism_treatment_method(design),
                 candidates = cand,
-                considered = length(cand)
+                considered = length(cand),
+                system     = design$system %||% design$tissue
             ),
             error = function(e) {
                 failures$add(source = "perturbagen", stage = "query",
@@ -611,6 +632,10 @@ mechanism_pad_columns <- function(r) {
         ## Sources that report a score rather than a test say for themselves
         ## whether a row is a hit; see mechanism_significant().
         significant = logical(), effect_size = numeric(),
+        ## Whether a measured row was run in the system the caller named.
+        ## NA when no system was named, so the column never claims a match
+        ## that was not checked.
+        in_system = logical(),
         stringsAsFactors = FALSE
     )
     ## Assign the right length, not the template's zero: `r` may already have
@@ -682,4 +707,83 @@ mechanism_perturb_candidates <- function(regulators, alpha = 0.05,
     ## sweep covered is part of the answer, not an implementation detail.
     attr(named, "considered") <- considered
     named
+}
+
+## Genes, background and keytype taken from an enrichment result.
+##
+## The obvious source is wrong. `@gene` is `unique(c(original_genes, every
+## member of every gene set, the tested genes))`, so on a ten-gene input it
+## holds 15941 entries -- it is the annotation, not the query. The recoverable
+## source is the `geneID` column of `@result`, which lists, per pathway, the
+## input genes that pathway contains.
+##
+## That source is lossy, and the loss is silent. `@result` is truncated by
+## `pvalueCutoff` at construction, so a gene appearing only in pathways that did
+## not reach the cutoff cannot be recovered. Measured on the airway list with
+## the default cutoff of 0.05, 897 input genes came back as 483 -- 414 lost,
+## with nothing in the output to say so. Rebuilding the result with
+## `pvalueCutoff = 1` recovered 723. The warning below exists because that
+## difference changes the answer and the caller cannot see it.
+.mechanism_from_enrichresult <- function(x, design) {
+    df <- as.data.frame(x)
+    if (!"geneID" %in% names(df)) {
+        rlang::abort(c(
+            "This enrichment result has no `geneID` column, so its genes cannot be read.",
+            i = "Pass the gene list directly instead."
+        ))
+    }
+    genes <- unique(unlist(strsplit(as.character(df$geneID), "/"), use.names = FALSE))
+    genes <- genes[!is.na(genes) & nzchar(genes)]
+
+    cutoff <- tryCatch(x@pvalueCutoff, error = function(e) 1)
+    if (is.numeric(cutoff) && length(cutoff) == 1 && cutoff < 1) {
+        rlang::warn(c(
+            paste0("The enrichment result was built with pvalueCutoff = ", cutoff,
+                   ", so only pathways that reached it are stored."),
+            i = paste0("Only the ", length(genes),
+                       " gene(s) appearing in those pathways can be recovered; ",
+                       "any gene unique to a non-significant pathway is missing."),
+            i = "Rebuild with pvalueCutoff = 1, qvalueCutoff = 1 for the full list."
+        ))
+    }
+
+    keytype <- tryCatch(x@keytype, error = function(e) NULL)
+    species <- tryCatch(x@organism, error = function(e) NULL)
+    if (is.null(species) || !length(species) || is.na(species)) {
+        species <- design$species %||% "Homo sapiens"
+    }
+    universe <- tryCatch(as.character(x@universe), error = function(e) character())
+
+    ## evidence() works in symbols and its collections are symbol-keyed, so an
+    ## ENTREZID result would otherwise be matched against nothing and report a
+    ## confident `absent` for every entity.
+    if (!is.null(keytype) && length(keytype) && nzchar(keytype) &&
+        !identical(keytype, "SYMBOL")) {
+        orgdb <- mechanism_orgdb(species)
+        if (is.null(orgdb)) {
+            rlang::abort(c(
+                paste0("The result is keyed by ", keytype,
+                       " and the annotation for ", species, " is not installed."),
+                i = "Install the matching org.*.eg.db package, or pass symbols."
+            ))
+        }
+        genes <- .mechanism_to_symbol(orgdb, genes, keytype)
+        if (length(universe)) universe <- .mechanism_to_symbol(orgdb, universe, keytype)
+    }
+
+    list(genes = genes, universe = universe, keytype = keytype, species = species)
+}
+
+## Map one keytype to symbols, dropping what has no symbol rather than keeping
+## an identifier that would be silently matched against nothing.
+.mechanism_to_symbol <- function(orgdb, keys, keytype) {
+    mapped <- tryCatch(
+        AnnotationDbi::mapIds(orgdb, keys = keys, column = "SYMBOL",
+                              keytype = keytype, multiVals = "first"),
+        error = function(e) NULL)
+    if (is.null(mapped)) {
+        rlang::abort(paste0("Could not map `", keytype, "` to SYMBOL."))
+    }
+    mapped <- unique(as.character(mapped[!is.na(mapped)]))
+    mapped[nzchar(mapped)]
 }

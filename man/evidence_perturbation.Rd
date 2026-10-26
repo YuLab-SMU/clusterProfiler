@@ -11,7 +11,8 @@ evidence_perturbation(
   min_genes = 5,
   pvalueCutoff = 0.05,
   candidates = NULL,
-  considered = NULL
+  considered = NULL,
+  system = NULL
 )
 }
 \arguments{

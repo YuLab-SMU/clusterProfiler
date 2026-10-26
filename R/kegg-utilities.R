@@ -1,7 +1,14 @@
 #' add KEGG pathway category information
 #'
 #' This function appends the KEGG pathway category information to KEGG enrichment result
-#' (either output of 'enrichKEGG' or 'gseKEGG'
+#' (either output of 'enrichKEGG' or 'gseKEGG')
+#'
+#' The classification is the KEGG PATHWAY hierarchy published on
+#' \url{https://www.genome.jp/kegg/pathway.html}, shipped as a cached table
+#' rather than fetched on every call. A pathway released after the cache was
+#' built has no row there and comes back with \code{NA} in \code{category} and
+#' \code{subcategory}; the cache is refreshed with the package.
+#'
 #' @title append_kegg_category
 #' @param x KEGG enrichment result
 #' @return update KEGG enrichment result with category information
