@@ -46,6 +46,14 @@ upper bound of 500 would drop exactly the broad regulators that matter.}
 
 \item{maxGSSize}{Maximum gene-set size.}
 
+\item{tft}{Which part of the transcription-factor collection to test. `NULL`
+(the default) uses all of C3:TFT. `"gtrd"` keeps only the ChIP-defined sets,
+whose identifiers are gene symbols: measured on the airway list that takes
+the share of labels naming a family or a consensus sequence from 40% to 1%,
+and those labels are the ones no perturbation dataset can ever answer for.
+`"motif"` selects the predicted half instead; a character vector selects
+several, e.g. `c("gtrd", "motif")`.}
+
 \item{print_pvalue, print_qvalue}{Cutoffs used by the print method only. They
 do not filter the result: `$regulators` always holds every tested set, so
 that a set filtered out for display can still be distinguished from a set

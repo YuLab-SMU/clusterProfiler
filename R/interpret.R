@@ -2330,6 +2330,23 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
 #'   attr(ego_reduced, "rrvgo_original_n"),
 #'   attr(ego_reduced, "rrvgo_reduced_n")))
 #' }
+
+# Greedy representative selection shared by the reduction functions: repeatedly keep the
+# most significant remaining term and drop every remaining term above `threshold` similarity
+# to it. Returns the kept positions, most significant first. The kept term is removed
+# explicitly: with a threshold of 1 or more its self-similarity never exceeds the threshold,
+# and relying on that comparison would loop forever.
+.greedy_representatives <- function(sim, padj, threshold) {
+  keep <- integer(0)
+  remaining <- seq_along(padj)
+  while (length(remaining) > 0) {
+    best <- remaining[which.min(padj[remaining])]
+    keep <- c(keep, best)
+    remaining <- setdiff(remaining[!(sim[best, remaining] > threshold)], best)
+  }
+  keep
+}
+
 reduce_go_redundancy <- function(enrich_result,
                                  threshold = 0.7,
                                  orgdb = NULL,

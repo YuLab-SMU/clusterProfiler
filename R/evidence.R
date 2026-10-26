@@ -34,6 +34,13 @@
 #'   the finding interpretable is absent. Ask for it explicitly when the
 #'   question is about UTR composition.
 #' @param universe Background genes. `NULL` uses every symbol in `org.Hs.eg.db`.
+#' @param tft Which part of the transcription-factor collection to test. `NULL`
+#'   (the default) uses all of C3:TFT. `"gtrd"` keeps only the ChIP-defined sets,
+#'   whose identifiers are gene symbols: measured on the airway list that takes
+#'   the share of labels naming a family or a consensus sequence from 40% to 1%,
+#'   and those labels are the ones no perturbation dataset can ever answer for.
+#'   `"motif"` selects the predicted half instead; a character vector selects
+#'   several, e.g. `c("gtrd", "motif")`.
 #' @param network Whether to query STRING for interaction evidence. Off by
 #'   default because it needs the network; see [evidence_ppi()] for the grading.
 #' @param minGSSize Minimum gene-set size. The default is 5, not `enricher()`'s

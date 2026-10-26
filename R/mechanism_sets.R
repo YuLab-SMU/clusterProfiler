@@ -21,6 +21,14 @@
 #'   recorded in the `version` slot. Pinning it as a literal makes the
 #'   collection contents reproducible; a release is never inferred from the
 #'   current date.
+#' @param subset Keep only the parts of the collection produced by a named
+#'   evidence rule: `"gtrd"` for the ChIP-defined TF sets (whose identifiers are
+#'   gene symbols), `"motif"` for the predicted ones, `"unnamed_motif"` for
+#'   consensus sequences that name no factor. Measured on the airway list,
+#'   `subset = "gtrd"` takes C3:TFT's share of family-or-consensus labels from
+#'   40% to 1% -- but also its significant findings from 200 to 0, because the
+#'   ChIP target sets overlap this list less than chance. Read before setting
+#'   it.
 #' @param cache_dir Directory holding downloaded GMT files. Defaults to
 #'   `getOption("clusterProfiler_cache_dir")`, which [clusterProfiler-package]
 #'   sets once per session.

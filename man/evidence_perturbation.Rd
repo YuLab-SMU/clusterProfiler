@@ -40,6 +40,13 @@ attr(x, "genes_scanned").}
 caller already knows. Recorded on the result so a handful of datasets
 reads as "3 of the 30 strongest candidates had one" rather than "3
 factors drive this".}
+
+\item{system}{The biological system the datasets should come from, e.g.
+`"smooth muscle"` or `"HASM"`. Matched against each dataset's cell line and
+tissue, and used only to order the evidence: a dataset from the caller's
+system wins the per-regulator deduplication over a more significant one
+from elsewhere, and every row carries `in_system` so the match (or its
+absence) is visible rather than assumed. Set through `design$system`.}
 }
 \value{
 A `data.frame` with `regulator` (the perturbed gene), `source`
