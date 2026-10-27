@@ -1,5 +1,19 @@
 
+# clusterProfiler 4.21.4.002
+
++ `enrichDAVID()` applies `qvalueCutoff` row by row: an `NA` q-value means Storey estimation
+failed for that row, so it bypasses this cutoff (its `pvalue`/`p.adjust` filters still apply)
+instead of switching the cutoff off for every term. This was the last remaining copy of the
+wholesale guard fixed in enrichit 0.2.7.001 for `get_enriched()`, and the same four user reports
+stand behind it (clusterProfiler#710, #584, #614, #332) (2026-10-27, Tue)
+
 # clusterProfiler 4.21.4.001
+
++ `enrichDAVID()` applies `qvalueCutoff` row by row: an `NA` q-value means Storey estimation
+failed for that row, so it bypasses this cutoff (its `pvalue`/`p.adjust` filters still apply)
+instead of switching the cutoff off for every term. This was the last remaining copy of the
+wholesale guard fixed in enrichit 0.2.7.001 for `get_enriched()`, and the same four user reports
+stand behind it (clusterProfiler#710, #584, #614, #332) (2026-10-27, Tue)
 
 + **Switching ontology no longer evicts the GO annotation cache.** The cache was keyed on
 `(organism, ont, keytype)` and stored only the annotation of the last call, so BP then MF then BP

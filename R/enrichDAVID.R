@@ -153,8 +153,11 @@ enrichDAVID <- function(gene,
 
     Over <- Over[ Over$pvalue <= pvalueCutoff, ]
     Over <- Over[ Over$p.adjust <= pvalueCutoff, ]
-    if (! any(is.na(Over$qvalue))) {
-        Over <- Over[ Over$qvalue <= qvalueCutoff, ]
+    ## row-wise q-value filter: an NA qvalue means Storey estimation failed
+    ## for that row, so it bypasses this cutoff (its pvalue/p.adjust filters
+    ## still apply) instead of switching the cutoff off for every term
+    if (!all(is.na(Over$qvalue))) {
+        Over <- Over[ is.na(Over$qvalue) | Over$qvalue <= qvalueCutoff, ]
     }
 
     org <- getSpecieNames(david)
