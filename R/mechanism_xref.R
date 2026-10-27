@@ -245,9 +245,18 @@ mechanism_is_family_label <- function(regulator, species = "Homo sapiens") {
     ## not cosmetic: mechanism_perturb_candidates() skips family labels, so `GR`
     ## was never queried against GPSAdb and could not reach `supported` on a
     ## glucocorticoid experiment, where it is the one answer that is certain.
+    ## A name that resolves to a gene is not a family, in either direction of
+    ## the alias table. Checking only "which legacy names point here" caught GR
+    ## (NR3C1 -> GR) but missed HIF1, which is itself the legacy side of
+    ## HIF1 -> HIF1A. The consequence was concrete: on the hypoxia dataset the
+    ## HIF1 motif sets reached padj 1.4e-4 and were still dropped from the
+    ## perturbation candidates, so HIF1A -- the regulator the experiment is
+    ## about -- could not be corroborated by the five HIF1A knockdown datasets
+    ## GPSAdb holds.
     aliases <- mechanism_regulator_aliases()
     aliased <- vapply(regulator, function(r) {
-        any(names(aliases)[aliases == r] %in% known)
+        any(names(aliases)[aliases == r] %in% known) ||
+            any(aliases[names(aliases) == r] %in% known)
     }, logical(1), USE.NAMES = FALSE)
 
     !(regulator %in% known | hyphenated %in% known | aliased)

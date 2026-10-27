@@ -2018,3 +2018,17 @@ test_that("a from_gsearesult carries the ranking forward", {
     expect_identical(names(fr$ranked), names(stat))
     expect_false(is.unsorted(rev(fr$ranked)))
 })
+
+test_that("a legacy alias is not a family in either direction", {
+    ## GR is the collection side of NR3C1 -> GR; HIF1 is the legacy side of
+    ## HIF1 -> HIF1A. The first fix checked only the first, so HIF1 stayed a
+    ## "family", was dropped from the perturbation candidates, and HIF1A could
+    ## not be corroborated on the hypoxia dataset -- the regulator that
+    ## experiment is about.
+    expect_false(mechanism_is_family_label("GR"))     # collection side
+    expect_false(mechanism_is_family_label("HIF1"))   # legacy side
+    expect_false(mechanism_is_family_label("HIF2A"))
+    ## A true family is still a family.
+    expect_true(mechanism_is_family_label("AP1"))
+    expect_true(mechanism_is_family_label("NFAT"))
+})
