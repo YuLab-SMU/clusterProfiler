@@ -45,7 +45,7 @@
 #'   `"perturbagen"`, `"cellstate"` or `"tissue"`. Defaults to `"tf"` alone.
 #'
 #'   `"tfunion"` is C3:TFT plus four public transcription-factor libraries
-#'   (ENCODE, ChEA, TF_Perturbations and TRRUST), which together name 361
+#'   (ENCODE, ChEA, TF_Perturbations and TRRUST), which together name 315
 #'   factors C3:TFT has no set for -- including `EPAS1`, `NFKB1`, `TP53`,
 #'   `CTCF`, `ESR1`, `JUN` and `FOS`. Prefer it when the question is "which
 #'   regulator drives this list" rather than "which of these specific motif
@@ -70,6 +70,11 @@
 #'   and those labels are the ones no perturbation dataset can ever answer for.
 #'   `"motif"` selects the predicted half instead; a character vector selects
 #'   several, e.g. `c("gtrd", "motif")`.
+#'
+#'   Only `upstream = "tf"` honours this. Asking for it together with
+#'   `"tfunion"` is an error rather than a silent no-op: the union's other four
+#'   libraries have no GTRD/motif split, so ignoring the filter would answer a
+#'   wider question than the one asked.
 #' @param network Whether to query STRING for interaction evidence. Off by
 #'   default because it needs the network; see [evidence_ppi()] for the grading.
 #' @param minGSSize Minimum gene-set size. The default is 5, not `enricher()`'s
@@ -139,6 +144,23 @@ evidence <- function(genes,
             paste0("Unknown `upstream`: ",
                    paste(setdiff(upstream, supported), collapse = ", "), "."),
             i = paste0("This release supports: ", paste(supported, collapse = ", "), ".")
+        ))
+    }
+
+    ## `tft` selects part of C3:TFT and means nothing for the union, whose other
+    ## four libraries have no motif/GTRD split. Silently ignoring it would answer
+    ## a different question from the one asked: `tft = "gtrd"` is how a caller
+    ## avoids the family and consensus-sequence labels that no perturbation
+    ## dataset can ever answer for, and dropping that filter without a word
+    ## turns a 504-set search into a 2869-set one.
+    if (!is.null(tft) && "tfunion" %in% upstream) {
+        rlang::abort(c(
+            "`tft` cannot be combined with `upstream = \"tfunion\"`.",
+            i = paste0("`tft` selects part of C3:TFT; the union also contains",
+                       " ENCODE, ChEA, TF_Perturbations and TRRUST sets, which",
+                       " have no GTRD/motif split."),
+            i = paste0("Use `upstream = \"tf\"` with `tft`, or drop `tft` to",
+                       " search the whole union.")
         ))
     }
 

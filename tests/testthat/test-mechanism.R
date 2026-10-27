@@ -2102,3 +2102,53 @@ test_that("a knockdown's mixed direction cannot erase the collection's sign", {
     ## An empty vector is unknown, not "mixed".
     expect_true(is.na(clusterProfiler:::.consensus_direction(character(0))))
 })
+
+test_that("a library fragment is not mistaken for a cache hit", {
+    ## The bug this guards: a download that dies partway leaves a truncated GMT.
+    ## Checking file.exists() alone makes the next call reuse it, the collection
+    ## shrinks to whatever survived, and every regulator outside those sets is
+    ## graded `absent` ("tested, nothing found") instead of `failed`.
+    dir <- tempfile("enrichr"); dir.create(dir)
+    withr::defer(unlink(dir, recursive = TRUE))
+    gmt <- file.path(dir, "enrichr.Test_Lib.gmt")
+    writeLines(c("SET_A\t\tG1\tG2", "SET_B\t\tG3"), gmt)
+    expect_true(file.exists(gmt))
+    expect_false(file.exists(paste0(gmt, ".meta")))
+    ## With no .meta beside it the fragment must not count as cached, so the
+    ## parser goes back for the real thing rather than trusting this file.
+    expect_false(clusterProfiler:::.mechanism_enrichr_cached(gmt))
+    writeLines(c("library=Test_Lib", "accessed_date=2026-10-28"), paste0(gmt, ".meta"))
+    expect_true(clusterProfiler:::.mechanism_enrichr_cached(gmt))
+})
+
+test_that("the union parser drops other species and keeps the asked-for tag", {
+    ## Two real bugs lived here, so the filter is tested rather than trusted:
+    ## an uppercase-only prefix pattern routed ChEA's 653 sets down the C3:TFT
+    ## naming path, and 49% of ChEA's sets are mouse or rat. A mouse target list
+    ## matched against human symbols produces a confident wrong answer.
+    ## ChEA names carry the species capitalised ("... Human"), which is exactly
+    ## the detail the filter keys on.
+    lines <- c(
+        "HIF1A 21447827 ChIP-Seq MCF-7 Human\t\tG1\tG2\tG3",
+        "AHR 22903824 ChIP-Seq MCF-7 Human\t\tG4\tG5",
+        "CMYC 18555785 Chip-Seq ESCs Mouse\t\tG6\tG7",
+        "YY1 20551151 ChIP-Seq 293T Rat\t\tG8\tG9",
+        "YY1 22570637 ChIP-Seq MALME-3M Human\t\tG10",
+        "YY1 23942234 ChIP-Seq MYOBLASTS Mouse\t\tG11"
+    )
+    out <- clusterProfiler:::.mechanism_enrichr_parse(lines, "ChEA")
+    expect_true(all(c("ChEA:HIF1A 21447827 ChIP-Seq MCF-7 Human",
+                      "ChEA:YY1 22570637 ChIP-Seq MALME-3M Human") %in% out$gsid))
+    expect_false(any(grepl("Mouse|Rat", out$gsid)))
+    ## The prefix survives, so grading can still route it to the ChIP rule.
+    expect_identical(unique(clusterProfiler:::mechanism_union_prefix(out$gsid)), "ChEA")
+})
+
+test_that("tft is refused rather than ignored when searching the union", {
+    ## `tft = "gtrd"` is the documented way to escape the family and consensus
+    ## labels no perturbation dataset can answer for. Dropping it silently turned
+    ## a 504-set search into a 2869-set one and answered a different question.
+    expect_error(
+        evidence(c("HIF1A", "PGK1"), upstream = "tfunion", tft = "gtrd"),
+        "cannot be combined")
+})

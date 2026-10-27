@@ -36,7 +36,7 @@ libraries, so the search for an upstream regulator is not bounded by the
 `TP53`, `CTCF`, `ESR1`, `NOTCH1`, `JUN` or `FOS`. On a hypoxia dataset whose
 published answer is HIF-2 (`EPAS1`), no amount of grading can find a
 regulator the collection does not name -- the ceiling was the data, not the
-method. These four libraries together add 361 factors C3:TFT lacks.
+method. These four libraries together add 315 factors C3:TFT lacks.
 
 **Why the sets stay separate.** Merging each factor's sets into one gene list
 would be wrong, and measurably so: CTCF's 108 ENCODE sets union to 21295

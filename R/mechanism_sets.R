@@ -267,7 +267,7 @@ mechanism_parse_gmt <- function(path) {
 #' `TP53`, `CTCF`, `ESR1`, `NOTCH1`, `JUN` or `FOS`. On a hypoxia dataset whose
 #' published answer is HIF-2 (`EPAS1`), no amount of grading can find a
 #' regulator the collection does not name -- the ceiling was the data, not the
-#' method. These four libraries together add 361 factors C3:TFT lacks.
+#' method. These four libraries together add 315 factors C3:TFT lacks.
 #'
 #' **Why the sets stay separate.** Merging each factor's sets into one gene list
 #' would be wrong, and measurably so: CTCF's 108 ENCODE sets union to 21295
@@ -348,38 +348,88 @@ mechanism_tfunion <- function(species = "Homo sapiens",
 ##
 ## Enrichr serves plain GMT with a blank second column, which is why the gene
 ## list drops two fields rather than one.
-.mechanism_enrichr_gmt <- function(library, cache_dir, tag,
-                                   timeout = getOption("clusterProfiler_timeout", 120)) {
+##
+## The cache entry is the GMT *and* a `.meta` file beside it, and only both
+## together count as cached -- the same contract mechanism_fetch_gmt() uses.
+## Checking file.exists(GMT) alone is not enough: a download that dies partway
+## leaves a truncated file, the next call finds it and skips the download, and
+## the collection silently shrinks to the handful of sets that survived. Every
+## regulator outside those sets then reports `absent` ("tested, nothing found")
+## where the truth is `failed` ("could not be tested"), which is the one
+## distinction this package's grading exists to keep.
+.mechanism_enrichr_gmt <- function(library, cache_dir, tag) {
     file <- paste0("enrichr.", gsub("[^A-Za-z0-9_]", "_", library), ".gmt")
     path <- file.path(cache_dir, file)
-    if (!file.exists(path)) {
+
+    if (!.mechanism_enrichr_cached(path)) {
         url <- paste0("https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=",
                       utils::URLencode(library, reserved = TRUE))
         dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
+        ## A stale fragment must not be mistaken for a cache hit further down.
+        unlink(path)
         status <- tryCatch(
             suppressWarnings(utils::download.file(url, path, quiet = TRUE)),
             error = function(e) conditionMessage(e))
-        if (!is.numeric(status) || !identical(as.integer(status), 0L) || !file.exists(path)) {
-            rlang::abort(paste0("Could not download ", library))
-        }
-        if (mechanism_is_html(path)) {
+        bad <- !is.numeric(status) || !identical(as.integer(status), 0L) ||
+            !file.exists(path)
+        ## An HTML page from a captive proxy also arrives as a successful
+        ## download, and would then parse into an empty collection.
+        if (bad || mechanism_is_html(path)) {
             unlink(path)
-            rlang::abort(paste0("Got an HTML page instead of a GMT for ", library))
+            rlang::abort(paste0("Could not download ", library,
+                                if (bad) "" else " (got an HTML page instead of a GMT)"))
         }
+        writeLines(c(paste0("library=", library),
+                     paste0("accessed_date=", as.character(Sys.Date()))),
+                   paste0(path, ".meta"))
     }
+
     lines <- readLines(path, warn = FALSE, encoding = "UTF-8")
+    out <- .mechanism_enrichr_parse(lines, tag)
+    ## A library that parses to nothing is a download or format problem, not an
+    ## empty collection: every real one has hundreds of human sets. Failing here
+    ## keeps the union from quietly losing a library and grading the regulators
+    ## it names as `absent`.
+    if (!nrow(out)) {
+        rlang::abort(paste0("The ", library, " library parsed to no usable sets",
+                            " (cached at ", path, ")"))
+    }
+    out
+}
+
+## Whether a downloaded Enrichr library is safe to reuse.
+##
+## The `.meta` file is the completion marker, and it is written only after a
+## download that succeeded and parsed as something other than HTML. Requiring it
+## is what mechanism_fetch_gmt() already does for the MSigDB files, for the same
+## reason: a truncated GMT left behind by an interrupted download is
+## indistinguishable from a complete one if only the GMT itself is checked.
+.mechanism_enrichr_cached <- function(path) {
+    file.exists(path) && file.exists(paste0(path, ".meta"))
+}
+
+## Turn Enrichr GMT lines into a (gsid, gene) frame, keeping only the sets this
+## package can use.
+##
+## Split out from the fetching so the filter can be tested without a network:
+## two real bugs lived in here. An uppercase-only prefix pattern failed to match
+## ChEA's capitalisation and silently routed its 653 sets down the C3:TFT naming
+## path, and 49% of ChEA's sets and 17% of ENCODE's turned out to be mouse or
+## rat. A mouse target list matched against human symbols produces a confident
+## wrong answer, so the species is settled here rather than left to the symbol
+## overlap to filter out.
+##
+## Enrichr serves a blank second column, which is why the gene list drops two
+## fields rather than one.
+.mechanism_enrichr_parse <- function(lines, tag) {
     lines <- lines[nzchar(lines)]
     if (!length(lines)) {
-        rlang::abort(paste0("The library file for ", library, " is empty."))
+        return(data.frame(gsid = character(), gene = character(),
+                          stringsAsFactors = FALSE))
     }
     sp <- strsplit(lines, "\t", fixed = TRUE)
     gsid <- vapply(sp, function(x) x[1], "")
     genes <- lapply(sp, function(x) unique(x[-(1:2)]))
-    ## Every one of these libraries mixes species inside the set identifier,
-    ## and the mix is not small: 49% of ChEA's sets are Mouse or Rat and 17% of
-    ## ENCODE's are mm9. A mouse target list matched against a human gene set
-    ## produces a confident wrong answer, so the species is decided here rather
-    ## than left to the symbol overlap to filter out.
     keep <- switch(tag,
         TRRUST = grepl(" human$", gsid),
         TFP    = grepl("HUMAN", gsid) & grepl(" (KD|KO) ", gsid),
@@ -387,6 +437,10 @@ mechanism_tfunion <- function(species = "Homo sapiens",
         ENCODE = grepl("hg19|hg38", gsid) & !grepl("mm9|mm10|mm39|rat", gsid),
         rep(TRUE, length(gsid)))
     gsid <- gsid[keep]; genes <- genes[keep]
+    if (!length(gsid)) {
+        return(data.frame(gsid = character(), gene = character(),
+                          stringsAsFactors = FALSE))
+    }
     ids <- paste0(tag, ":", gsid)
     data.frame(gsid = rep(ids, lengths(genes)),
                gene = unlist(genes, use.names = FALSE),
