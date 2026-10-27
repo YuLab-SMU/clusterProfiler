@@ -174,3 +174,61 @@ the receptor and the GSEA path does not.
   head-of-list hit.
 - Do not read a GSEA `absent` as evidence against a regulator that ORA
   supports. The two disagree on real signals, as `GR` shows.
+
+## What the two front ends actually deliver on the airway list
+
+Same data, same collection, both run through the full pipeline:
+
+| | ORA | GSEA |
+| --- | --- | --- |
+| Wall time | 283 s | 562 s |
+| Entities with a verdict | 168 | 64 |
+| `supported` | **24** | **12** |
+| Rows carrying a direction | 25 | 64 |
+| Overlap | 4 of 32 | |
+
+`GR` is `supported` under ORA and **absent** under GSEA.
+
+### The direction GSEA adds is lost where it matters
+
+The case for GSEA was direction: ORA's binary list has no sign, GSEA's NES
+does. At the collection level that holds — 61 sets up, 19 down.
+
+At the entity level it arrives intact (49 up, 17 down) **until a regulator is
+corroborated by a perturbation**, at which point it is destroyed:
+
+- the collection rows say `up`
+- the perturbation rows say `mixed` — a knockdown moves genes both ways
+- `consensus()` takes the union of the two and reports `mixed`
+
+So every one of the 8 regulators GSEA found and ORA did not came back
+`mixed`. The direction is real, and it survives exactly on the regulators
+with the least evidence.
+
+The cause is that two different questions share one column. A collection's
+direction is *the regulator's inferred activity*; a perturbation's direction is
+*which way the responding genes moved*. Merging them makes the second overwrite
+the first. They should be two fields.
+
+## A second example is needed, and the obvious candidates fail
+
+**C3:TFT covers about 36% of human transcription factors** (591 gene entities
+against ~1639). The gaps are not marginal — `NFKB1`, `RELA`, `JUN`, `FOS`,
+`E2F1`, `TP53`, `CTCF`, `NOTCH1`, `ESR1` and `HIF1A` have **no target set at
+all**. Three independently chosen examples (`NFKB1`, `JUN`, `E2F1` knockdowns)
+returned zero findings for this reason alone.
+
+**GPSAdb datasets cannot substitute for a full transcriptome.** `gpsadb_de()`
+caps at 500 rows and reports no tested-gene total, so:
+
+- as ORA input the background is unrecoverable. Substituting the whole
+  annotation made the 500 genes 0.26% of the universe, against 3.92% for
+  airway, and no collection reached significance — 0 `supported` across five
+  knockdown datasets.
+- as GSEA input the ranking is a truncated top-500, so 3 of 5 datasets produced
+  no significant set at all (0, 13, 9, 0, 0).
+
+A second example therefore needs **a second full expression dataset with a
+known expected answer**. `airway` is currently the only one on this machine;
+`pasilla` carries metadata but not the counts, and the `airway` package's `gse`
+object is the same eight dexamethasone samples.
