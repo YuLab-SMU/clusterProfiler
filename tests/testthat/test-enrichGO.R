@@ -73,20 +73,26 @@ test_that("non-ENTREZID universe is converted together with gene", {
 })
 
 test_that("the GO cache is not reused for an unidentifiable OrgDb (#232)", {
+    ## The cache holds the all-ontology annotation and `ont` is not part of
+    ## the key, so a cache written by any ont serves any other ont. Keying on
+    ## `ont` used to evict the annotation on every ontology switch:
+    ## five alternating BP/MF enrichGO() calls took 85.5 s and 11.9 s after
+    ## the key change (human SYMBOL, 2026-10-27).
     mk_env <- function(organism = "Homo sapiens", keytype = "ENTREZID",
-                       ont = "BP", goAnno = TRUE) {
+                       goAnno = TRUE) {
         e <- new.env()
         assign("organism", organism, envir = e)
         assign("keytype", keytype, envir = e)
-        assign("ont", ont, envir = e)
         if (goAnno) assign("goAnno", data.frame(a = 1), envir = e)
         e
     }
 
     # a matching request can reuse the cache
     expect_true(go_cache_usable(mk_env(), "Homo sapiens", "BP", "ENTREZID"))
-    # an ont = "ALL" cache serves a single-ontology request
-    expect_true(go_cache_usable(mk_env(ont = "ALL"), "Homo sapiens", "BP", "ENTREZID"))
+    # a cache written under one ont serves a request for another ont
+    expect_true(go_cache_usable(mk_env(), "Homo sapiens", "BP", "ENTREZID"))
+    expect_true(go_cache_usable(mk_env(), "Homo sapiens", "MF", "ENTREZID"))
+    expect_true(go_cache_usable(mk_env(), "Homo sapiens", "ALL", "ENTREZID"))
 
     # get_organism() returns NA for an OrgDb it cannot identify (an
     # AnnotationHub OrgDb, say); that used to abort with
@@ -98,10 +104,42 @@ test_that("the GO cache is not reused for an unidentifiable OrgDb (#232)", {
     expect_false(go_cache_usable(new.env(), "Homo sapiens", "BP", "ENTREZID"))
     expect_false(go_cache_usable(mk_env(goAnno = FALSE), "Homo sapiens", "BP", "ENTREZID"))
 
-    # a different request must not be served from the cache
+    # a different organism or keytype must not be served from the cache
     expect_false(go_cache_usable(mk_env(), "Mus musculus", "BP", "ENTREZID"))
-    expect_false(go_cache_usable(mk_env(ont = "MF"), "Homo sapiens", "BP", "ENTREZID"))
     expect_false(go_cache_usable(mk_env(), "Homo sapiens", "BP", "SYMBOL"))
+})
+
+test_that("the GO cache survives an ontology switch", {
+    skip_if_not_installed("org.Hs.eg.db")
+    skip_if_not_installed("GO.db")
+
+    odb <- getExportedValue("org.Hs.eg.db", "org.Hs.eg.db")
+    gene <- head(AnnotationDbi::keys(odb, "ENTREZID"), 150)
+    run <- function(ont) {
+        enrichGO(gene, OrgDb = "org.Hs.eg.db", ont = ont,
+                 pvalueCutoff = 1, qvalueCutoff = 1)
+    }
+
+    GO_Env <- get_GO_Env()
+    ## start from a known cache state
+    rm(list = ls(GO_Env, all.names = TRUE), envir = GO_Env)
+
+    bp <- run("BP")
+    expect_s4_class(bp, "enrichResult")
+
+    ## switching ontology used to evict the annotation and pay a full
+    ## mapIds rebuild; it must now be a cache hit with identical results
+    expect_identical(as.data.frame(bp), as.data.frame(run("BP")))
+    expect_s4_class(mf <- run("MF"), "enrichResult")
+    expect_identical(as.data.frame(bp), as.data.frame(run("BP")))
+    expect_identical(as.data.frame(mf), as.data.frame(run("MF")))
+    expect_s4_class(all <- run("ALL"), "enrichResult")
+    expect_identical(as.data.frame(bp), as.data.frame(run("BP")))
+
+    ## the cached annotation is the all-ontology superset
+    expect_true(exists("goAnno", envir = GO_Env, inherits = FALSE))
+    goAnno <- get("goAnno", envir = GO_Env)
+    expect_true(setequal(unique(goAnno$ONTOLOGYALL), c("BP", "CC", "MF")))
 })
 
 test_that("enrichGO() can restrict the annotation by evidence code (#160)", {

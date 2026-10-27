@@ -672,8 +672,17 @@ map_gene_set_labels <- function(ids_list, labels) {
 
 #' Can the cached GO annotation serve this request?
 #'
-#' Compares a requested `(OrgDb organism, ont, keytype)` against what is already
+#' Compares a requested `(OrgDb organism, keytype)` against what is already
 #' in the package's GO data environment.
+#'
+#' The cache always holds the **all-ontology** annotation, and `ont` is
+#' deliberately not part of the key: a stored all-ontology annotation is a
+#' superset of every single-ontology view, which is filtered per call by
+#' `get_GO_data()`. Keying the cache on `ont` evicted the annotation whenever a
+#' session switched ontology — BP then MF then BP paid the full
+#' `AnnotationDbi::mapIds(GOALL → keytype)` rebuild twice, 22.3 s per miss on
+#' human SYMBOL (2026-10-27); five alternating BP/MF `enrichGO()` calls took
+#' 85.5 s and 11.9 s after the key change.
 #'
 #' Every comparison goes through `isTRUE()`: `get_organism()` returns `NA` for an
 #' OrgDb it cannot identify — an AnnotationHub OrgDb, for instance — and a bare
@@ -683,21 +692,19 @@ map_gene_set_labels <- function(ids_list, labels) {
 #'
 #' @param GO_Env the package GO data environment
 #' @param org organism of the requested OrgDb, possibly NA
-#' @param ont requested ontology
+#' @param ont requested ontology; accepted for call compatibility, not compared
 #' @param keytype requested keytype
 #' @return TRUE when the cache can be reused
 #' @noRd
 go_cache_usable <- function(GO_Env, org, ont, keytype) {
-    for (what in c("organism", "keytype", "ont", "goAnno")) {
+    for (what in c("organism", "keytype", "goAnno")) {
         if (!exists(what, envir = GO_Env, inherits = FALSE)) {
             return(FALSE)
         }
     }
 
     isTRUE(org == get("organism", envir = GO_Env)) &&
-        isTRUE(keytype == get("keytype", envir = GO_Env)) &&
-        (isTRUE(ont == get("ont", envir = GO_Env)) ||
-            isTRUE(get("ont", envir = GO_Env) == "ALL"))
+        isTRUE(keytype == get("keytype", envir = GO_Env))
 }
 
 #' Can a cached hybrid GO data object be reused?
@@ -787,7 +794,7 @@ get_GO_data <- function(OrgDb, ont, keytype, evidence = NULL) {
     use_cached <- FALSE
 
     ## An evidence-filtered annotation is deliberately never cached: the cache is
-    ## keyed by (organism, ont, keytype) only, so storing a filtered annotation
+    ## keyed by (organism, keytype) only, so storing a filtered annotation
     ## under that key — or serving the unfiltered one for a filtered request —
     ## would quietly answer with the wrong annotation.
     if (is.null(evidence) &&
@@ -805,10 +812,11 @@ get_GO_data <- function(OrgDb, ont, keytype, evidence = NULL) {
         }
 
         if (is.null(evidence)) {
+        ## Build the all-ontology annotation: it is a superset of every
+        ## single-ontology view, so the cache can serve any later `ont`
+        ## without another mapIds pass. Filtering to the requested ontology
+        ## happens below, after the cache lookup.
         goterms <- AnnotationDbi::Ontology(GO.db::GOTERM)
-        if (ont != "ALL") {
-            goterms <- goterms[goterms == ont]
-        }
         go2gene <- suppressMessages(
             AnnotationDbi::mapIds(
                 OrgDb,
@@ -825,7 +833,6 @@ get_GO_data <- function(OrgDb, ont, keytype, evidence = NULL) {
 
         assign("goAnno", goAnno, envir = GO_Env)
         assign("keytype", keytype, envir = GO_Env)
-        assign("ont", ont, envir = GO_Env)
         assign("organism", get_organism(OrgDb), envir = GO_Env)
         } else {
             goAnno <- go_annotation_by_evidence(OrgDb, keytype, evidence)
