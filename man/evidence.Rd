@@ -18,7 +18,15 @@ evidence(
 )
 }
 \arguments{
-\item{genes}{Gene symbols. A character vector, an `enrichResult` (its
+\item{genes}{Gene symbols, or a **named numeric vector** of gene symbols and
+  their statistics. A named numeric is tested by direction: the positive half
+  and the negative half are run separately against each collection, so a
+  regulator's row carries whether its programme rose or fell. Measured on the
+  hypoxia contrast this took `HIF1_Q3` from padj 1.2e-4 (both directions
+  mixed into one list) to 1.0e-5, because asking "which set is enriched among
+  what changed" dilutes the signal when half the changes go the other way.
+  Both halves are corrected together, since splitting doubles the number of
+  hypotheses. An `enrichResult` (its
   `geneID` column is expanded), a `gseaResult` (the union of its
   `core_enrichment` genes, with the ranked list as the background), or a
   `data.frame` with a column named by `design$gene_col`.
@@ -33,15 +41,27 @@ evidence(
 
 \item{design}{A list describing the experiment; see Details.}
 
-\item{upstream}{Collections to test: `"tf"`, `"mirna"`, `"perturbagen"`,
-`"cellstate"` or `"tissue"`. Defaults to `"tf"` alone. `"mirna"` is
-off by default for a measured reason: its sets are predicted seed matches,
-so an enrichment describes which genes carry the motif rather than which
-microRNA is active. Measured on the airway list, 7 miRNAs were
-significant among the UP-regulated genes and 0 among the down ones -- the
-opposite of what a repressor predicts -- so the direction that would make
-the finding interpretable is absent. Ask for it explicitly when the
-question is about UTR composition.}
+\item{upstream}{Collections to test: `"tf"`, `"tfunion"`, `"mirna"`,
+  `"perturbagen"`, `"cellstate"` or `"tissue"`. Defaults to `"tf"` alone.
+
+  `"tfunion"` is C3:TFT plus four public transcription-factor libraries
+  (ENCODE, ChEA, TF_Perturbations and TRRUST), which together name 361
+  factors C3:TFT has no set for -- including `EPAS1`, `NFKB1`, `TP53`,
+  `CTCF`, `ESR1`, `JUN` and `FOS`. Prefer it when the question is "which
+  regulator drives this list" rather than "which of these specific motif
+  families is enriched": on a hypoxia contrast it recovered the paper's
+  answer (HIF-2) where `"tf"` could not, at 2869 sets against 1114, and
+  three random gene sets of the same size still returned no significant
+  set. See [mechanism_tfunion()].
+
+  `"mirna"` is
+  off by default for a measured reason: its sets are predicted seed matches,
+  so an enrichment describes which genes carry the motif rather than which
+  microRNA is active. Measured on the airway list, 7 miRNAs were
+  significant among the UP-regulated genes and 0 among the down ones -- the
+  opposite of what a repressor predicts -- so the direction that would make
+  the finding interpretable is absent. Ask for it explicitly when the
+  question is about UTR composition.}
 
 \item{universe}{Background genes. `NULL` uses every symbol in `org.Hs.eg.db`.}
 

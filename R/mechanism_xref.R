@@ -63,6 +63,18 @@ mechanism_set_level <- function(source, gsid, xref = mechanism_xref()) {
 }
 
 mechanism_set_level1 <- function(source, gsid, xref) {
+    ## Same prefix-first dispatch as mechanism_rule_for(), and for the same
+    ## reason: the two must agree, or the level and the evidence kind describe
+    ## different things about one row.
+    lib <- mechanism_union_library(gsid)
+    if (!is.na(lib)) {
+        ur <- mechanism_union_rules()
+        return(ur$level[match(lib, ur$prefix)])
+    }
+    if (identical(source, "tfunion")) {
+        source <- "tf"
+        gsid <- sub("^C3TFT:", "", gsid)
+    }
     rules <- xref[xref$source == source, , drop = FALSE]
     if (nrow(rules) == 0 || is.na(gsid)) return(NA_character_)
     for (i in seq_len(nrow(rules))) {
@@ -108,6 +120,12 @@ mechanism_reported_level <- function(source, gsid, regulator = mechanism_regulat
 ## passed through unchanged.
 mechanism_entity <- function(gsid, source, species = "Homo sapiens") {
     if (source %in% c("cellstate", "tissue")) return(as.character(gsid))
+    ## The union's added libraries name their factor as the first token of a
+    ## free-text set id, which mechanism_regulator()'s motif-tier patterns would
+    ## mangle -- 'HIF1A 21447827 ChIP-Seq MCF-7 Human' is not a TRANSFAC name.
+    if (identical(source, "tfunion")) {
+        return(mechanism_union_entity(gsid, species = species))
+    }
     mechanism_regulator(gsid, symbols = mechanism_known_symbols(species))
 }
 
@@ -346,6 +364,10 @@ mechanism_is_collision <- function(regulator) {
 mechanism_evidence_kind <- function(source, rule) {
     kind <- c(
         recorded_perturbation = "measured",
+        chip_union            = "measured",
+        perturb_signature     = "observed",
+        curated_target        = "observed",
+        union_motif           = "none",
         gtrd                  = "measured",
         motif                 = "predicted",
         predicted_target      = "predicted",
@@ -366,13 +388,37 @@ mechanism_evidence_kind <- function(source, rule) {
 ## the level can never disagree about which row applied.
 mechanism_rule_for <- function(source, gsid, xref = mechanism_xref()) {
     out <- rep(NA_character_, length(gsid))
+    if (!length(gsid)) return(out)
+
+    ## A union set's library prefix decides its rule, before any pattern is
+    ## consulted: the prefix is a fact about where the set came from, while the
+    ## patterns below are guesses from its name.
+    lib <- mechanism_union_library(gsid)
+    ## A mask, not a subsetting of gsid: the pattern loop below indexes `out` by
+    ## positions in the full vector, so shortening gsid would misalign them and
+    ## silently assign rules to the wrong sets.
+    todo <- is.na(lib)
+    if (!all(todo)) {
+        ur <- mechanism_union_rules()
+        out[!todo] <- ur$rule[match(lib[!todo], ur$prefix)]
+    }
+
+    ## A C3TFT:-prefixed set is a C3:TFT set wearing a prefix, so it takes the
+    ## `tf` rules on its bare name. Without this the union source has no rows of
+    ## its own in the table and every C3:TFT set in it grades as unknown --
+    ## which reads as "no evidence", not "graded by a rule we did not apply".
+    if (identical(source, "tfunion")) {
+        source <- "tf"
+        gsid <- sub("^C3TFT:", "", gsid)
+    }
+
     rules <- xref[xref$source == source, , drop = FALSE]
-    if (!nrow(rules) || !length(gsid)) return(out)
+    if (!nrow(rules) || !any(todo)) return(out)
 
     ## Vectorised over `gsid`; the first matching row wins, as in
     ## mechanism_set_level1(). Assigning to the first still-unresolved hit keeps
     ## the order without a per-element loop.
-    todo <- !is.na(gsid)
+    gsid <- as.character(gsid)
     for (i in seq_len(nrow(rules))) {
         pattern <- rules$match[i]
         hit <- if (is.na(pattern)) todo else todo & grepl(pattern, gsid)
@@ -454,4 +500,30 @@ mechanism_gpsadb_names <- function(regulator) {
         extra <- c(names(aliases)[aliases == r], aliases[names(aliases) == r])
         unique(c(r, unname(extra)))
     })
+}
+
+## Grading for the transcription-factor union.
+##
+## The union's sets carry their library as a prefix, and each library's evidence
+## is worth something different, so the prefix decides the rule rather than a
+## pattern-matched row in mechanism_xref(). Folding them into that table would
+## need six rows and would still get C3TFT: sets wrong, because those keep the
+## motif-versus-GTRD distinction the plain `tf` source already makes.
+mechanism_union_rules <- function() {
+    data.frame(
+        prefix = c("ENCODE", "ChEA", "TFP", "TRRUST"),
+        rule   = c("chip_union", "chip_union", "perturb_signature", "curated_target"),
+        level  = c("B", "B", "B", "C"),
+        stringsAsFactors = FALSE
+    )
+}
+
+## The library prefix of a union set, or NA when it is a C3:TFT set or a plain id.
+mechanism_union_library <- function(gsid) {
+    pre <- mechanism_union_prefix(gsid)
+    rules <- mechanism_union_rules()
+    out <- rep(NA_character_, length(gsid))
+    hit <- !is.na(pre) & pre %in% rules$prefix
+    out[hit] <- pre[hit]
+    out
 }

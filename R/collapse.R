@@ -142,7 +142,8 @@ print.collapsedFindings <- function(x, ...) {
     r <- x$regulators
     r <- r[r$regulator %in% findings$regulator, , drop = FALSE]
     r <- r[!is.na(r$padj_within_source) & r$padj_within_source < 0.05, , drop = FALSE]
-    sources <- intersect(unique(r$source), c("tf", "mirna", "cellstate", "tissue"))
+    sources <- intersect(unique(r$source),
+                         c("tf", "tfunion", "mirna", "cellstate", "tissue"))
     if (!length(sources) || !nrow(r)) return(list())
 
     out <- list()

@@ -5,7 +5,7 @@
 \title{Upstream gene-set collections for mechanism analysis}
 \usage{
 mechanism_sets(
-  source = c("tf", "mirna", "perturbagen", "cellstate", "tissue"),
+  source = c("tf", "tfunion", "mirna", "perturbagen", "cellstate", "tissue"),
   species = "Homo sapiens",
   release = "2026.2.Hs",
   cache_dir = getOption("clusterProfiler_cache_dir"),
@@ -13,7 +13,8 @@ mechanism_sets(
 )
 }
 \arguments{
-\item{source}{One of `"tf"` (C3:TFT), `"mirna"` (C3:MIR),
+\item{source}{One of `"tf"` (C3:TFT), `"tfunion"` (C3:TFT plus four public
+transcription-factor collections, see [mechanism_tfunion()]), `"mirna"` (C3:MIR),
 `"perturbagen"` (C2:CGP), `"cellstate"` (C8) or `"tissue"` (C4:CGN).}
 
 \item{species}{Currently only human (`"Homo sapiens"`) is supported, because

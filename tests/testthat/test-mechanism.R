@@ -2032,3 +2032,73 @@ test_that("a legacy alias is not a family in either direction", {
     expect_true(mechanism_is_family_label("AP1"))
     expect_true(mechanism_is_family_label("NFAT"))
 })
+
+## ---- TF union and directional ORA -----------------------------------------
+
+test_that("a union prefix is read even when it contains a lowercase letter", {
+    ## ChEA is the case that broke: an uppercase-only pattern does not error on
+    ## it, it routes 653 sets down the C3:TFT naming path and mangles the names.
+    expect_identical(clusterProfiler:::mechanism_union_prefix("ChEA:HIF1A 21447827 ChIP-Seq MCF-7 Human"),
+                     "ChEA")
+    expect_identical(clusterProfiler:::mechanism_union_prefix("ENCODE:CTCF K562 hg19"), "ENCODE")
+    expect_identical(clusterProfiler:::mechanism_union_prefix("C3TFT:HIF1_Q3"), "C3TFT")
+    expect_true(is.na(clusterProfiler:::mechanism_union_prefix("HIF1_Q3")))
+})
+
+test_that("union libraries grade differently from each other and from C3:TFT", {
+    x <- c("ENCODE:HIF1A 21447827 ChIP-Seq MCF-7 Human",
+           "TFP:HIF1A KD HUMAN GSE44943 CREEDSID GENE 2235 DOWN",
+           "TRRUST:HIF1A human", "C3TFT:HIF1_Q3", "C3TFT:HIF1A_TARGET_GENES")
+    rule <- clusterProfiler:::mechanism_rule_for("tfunion", x)
+    lvl  <- clusterProfiler:::mechanism_set_level("tfunion", x)
+    kind <- clusterProfiler:::mechanism_kind_of("tfunion", x)
+    ## ChIP binding is measured; a knockdown signature and a literature curation
+    ## are observations, not measurements.
+    expect_equal(rule, c("chip_union", "perturb_signature", "curated_target",
+                         "motif", "gtrd"))
+    ## unname: mechanism_set_level() returns a named vector because vapply keeps
+    ## the input names. data.frame() drops them on the way into the table, so
+    ## the names are not part of the contract.
+    expect_identical(unname(lvl), c("B", "B", "C", "B", "B"))
+    expect_equal(kind, c("measured", "observed", "observed", "predicted", "measured"))
+})
+
+test_that("a signed input is tested by direction and keeps the sign", {
+    dir <- tempfile("mechanism"); dir.create(dir)
+    up <- paste0("u", 1:20); dn <- paste0("d", 1:20)
+    write_gmt(file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt"),
+              list(UPF_TARGET_GENES = up, DNF_TARGET_GENES = dn))
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-26"),
+               file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt.meta"))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    set.seed(2)
+    stat <- sort(setNames(c(rnorm(20, 3), rnorm(20, -3), rnorm(300, 0)),
+                          c(up, dn, paste0("x", 1:300))), decreasing = TRUE)
+    ev <- suppressWarnings(evidence(stat, universe = names(stat), upstream = "tf"))
+    r <- ev$regulators
+    ## Each set is reported against the half it was enriched in, never the other.
+    expect_identical(r$direction[r$term == "UPF_TARGET_GENES"], "up")
+    expect_identical(r$direction[r$term == "DNF_TARGET_GENES"], "down")
+    ## A named numeric input is still usable as a gene list.
+    expect_true(all(c("UPF", "DNF") %in% r$regulator))
+})
+
+test_that("a knockdown's mixed direction cannot erase the collection's sign", {
+    ## The bug this guards: consensus() unioned both directions into one column,
+    ## and since a knockdown is normally `mixed`, every corroborated regulator
+    ## lost the sign the collection had established.
+    mine <- data.frame(
+        source = c("tfunion", "perturbagen"),
+        direction = c("up", "mixed"), stringsAsFactors = FALSE)
+    coll <- clusterProfiler:::.consensus_direction(
+        mine$direction[!mine$source %in% c("perturbagen", "biotrigger")])
+    meas <- clusterProfiler:::.consensus_direction(
+        mine$direction[mine$source %in% c("perturbagen", "biotrigger")])
+    expect_identical(coll, "up")
+    expect_identical(meas, "mixed")
+    ## An empty vector is unknown, not "mixed".
+    expect_true(is.na(clusterProfiler:::.consensus_direction(character(0))))
+})

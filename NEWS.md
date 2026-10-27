@@ -1,4 +1,8 @@
-# clusterProfiler 4.21.4.003
+# clusterProfiler 4.21.4.004
+
++ `evidence()` accepts a **named numeric vector** and tests it by direction: the positive and negative halves are run separately, so a regulator's row says whether its programme rose or fell. On the hypoxia contrast this took `HIF1_Q3` from padj 1.2e-4 to 1.0e-5, because mixing both directions asks a diluted question. Both halves are corrected together, since splitting doubles the hypothesis count (2026-10-27, Tue)
++ `upstream = "tfunion"` adds four public TF collections (ENCODE ChIP-seq, ChEA 2022, TF_Perturbations, TRRUST) to C3:TFT -- 2869 sets naming 361 factors C3:TFT has no set for, including `EPAS1`, `NFKB1`, `TP53`, `CTCF`, `ESR1`, `JUN` and `FOS`. On a hypoxia dataset whose published answer is HIF-2, `"tf"` cannot find it at all and `"tfunion"` returns it as level-A `supported`; three random gene sets of the same size still return zero significant sets (2026-10-27, Tue)
++ `consensus()` reports `direction` and `measured_direction` separately. Unioning them into one column let a knockdown's `mixed` -- the normal answer, since removing a factor moves some genes up and others down -- overwrite the sign the collection had established, so every regulator corroborated by a perturbation lost its direction (2026-10-27, Tue)
 
 + **Alias resolution is checked in both directions.** `GR` is the collection side of `NR3C1 -> GR`; `HIF1` is the legacy side of `HIF1 -> HIF1A`. The earlier fix handled only the first, so `HIF1` was still classified as a family label and dropped from the perturbation candidates -- and on a hypoxia-versus-normoxia dataset (GSE319526, Mol Cell 2026) `HIF1A` could not reach `supported` despite GPSAdb holding five HIF1A knockdowns. It now does, under both front ends (2026-10-27, Tue)
 

@@ -244,7 +244,8 @@ plot_mechanism <- function(x, layout = "nicely", ...) {
     r <- x$regulators
     r <- r[r$regulator %in% findings$regulator, , drop = FALSE]
     r <- r[mechanism_significant(r), , drop = FALSE]
-    sources <- intersect(unique(r$source), c("tf", "mirna", "cellstate", "tissue"))
+    sources <- intersect(unique(r$source),
+                         c("tf", "tfunion", "mirna", "cellstate", "tissue"))
     if (!length(sources) || !nrow(r)) return(empty)
 
     selected <- unique(as.character(x$input$genes))

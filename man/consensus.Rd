@@ -17,8 +17,18 @@ in `x$input$design`.}
 }
 \value{
 A `data.frame` with `regulator`, `sources`, `n_sources`,
-  `max_level`, `verdict`, `padj`, `direction` and `writable` (the sentence
-  the evidence permits; see [mechanism_writable()]).
+  `max_level`, `verdict`, `padj`, `direction`, `measured_direction` and
+  `writable` (the sentence the evidence permits; see [mechanism_writable()]).
+
+  `direction` and `measured_direction` answer different questions and are
+  kept apart deliberately. `direction` is the collection's: which way the
+  regulator's programme moved in the caller's data, from the sign of the
+  input half it was enriched in or the sign of its NES.
+  `measured_direction` is the perturbation's: which way genes responded when
+  the factor was knocked down, which is `mixed` for most real knockdowns
+  because removing a factor moves some genes up and others down. Merging the
+  two into one column made the knockdown's `mixed` overwrite the collection's
+  established sign on exactly the best-supported entities.
 }
 \description{
 Combine an `evidenceBundle` into one verdict per regulator. The point is not

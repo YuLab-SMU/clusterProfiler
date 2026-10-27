@@ -49,8 +49,18 @@
 #'   reported as `untested` whatever it found. `NULL` takes the floor recorded
 #'   in `x$input$design`.
 #' @return A `data.frame` with `regulator`, `sources`, `n_sources`,
-#'   `max_level`, `verdict`, `padj`, `direction` and `writable` (the sentence
-#'   the evidence permits; see [mechanism_writable()]).
+#'   `max_level`, `verdict`, `padj`, `direction`, `measured_direction` and
+#'   `writable` (the sentence the evidence permits; see [mechanism_writable()]).
+#'
+#'   `direction` and `measured_direction` answer different questions and are
+#'   kept apart deliberately. `direction` is the collection's: which way the
+#'   regulator's programme moved in the caller's data, from the sign of the
+#'   input half it was enriched in or the sign of its NES.
+#'   `measured_direction` is the perturbation's: which way genes responded when
+#'   the factor was knocked down, which is `mixed` for most real knockdowns
+#'   because removing a factor moves some genes up and others down. Merging the
+#'   two into one column made the knockdown's `mixed` overwrite the collection's
+#'   established sign on exactly the best-supported entities.
 #' @seealso [evidence()], [mechanism_writable()]
 #' @examples
 #' \dontrun{
@@ -70,7 +80,8 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
             regulator = character(), sources = character(), n_sources = integer(),
             max_level = character(), verdict = character(), padj = numeric(),
             family = logical(), evidence_kind = character(),
-            direction = character(), writable = character(),
+            direction = character(), measured_direction = character(),
+            writable = character(),
             stringsAsFactors = FALSE
         ))
     }
@@ -189,15 +200,22 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
             evidence_kind = if (length(kinds)) {
                 paste(sort(unique(kinds)), collapse = ",")
             } else NA_character_,
-            ## Only a measured perturbation states a direction. Where several
-            ## datasets disagree the entity is "mixed", and a factor with no
-            ## measurement keeps NA rather than guessing from sign of a score.
-            direction  = {
-                dirs <- unique(mine$direction[!is.na(mine$direction)])
-                if (!length(dirs)) NA_character_
-                else if (length(dirs) == 1L) dirs
-                else "mixed"
-            },
+            ## Two questions, two columns, because merging them destroyed both.
+            ##
+            ## `direction` is the collection's: which way the regulator's
+            ## programme moved in the caller's data -- up-list enrichment or a
+            ## positive NES. `measured_direction` is the perturbation's: which
+            ## way the genes responded when the factor was knocked down. They
+            ## are not the same measurement of the same thing, and taking the
+            ## union of them meant a knockdown's `mixed` -- which is the normal
+            ## answer, since removing a factor moves some genes up and others
+            ## down -- overwrote the collection's direction on exactly the
+            ## entities with the most evidence. Every one of the 8 regulators
+            ## that only the GSEA path found came back `mixed`.
+            direction  = .consensus_direction(mine$direction[
+                !mine$source %in% c("perturbagen", "biotrigger")]),
+            measured_direction = .consensus_direction(mine$direction[
+                mine$source %in% c("perturbagen", "biotrigger")]),
             stringsAsFactors = FALSE
         )
     })
@@ -329,4 +347,17 @@ sources_source <- function(src) {
     if (!length(src)) return(NA_character_)
     if (any(src == "mirna")) return("mirna")
     src[1]
+}
+
+## Collapse a set of direction reports into one.
+##
+## `mixed` is not a value to average: it is what one source says when its own
+## rows disagree, and a second `mixed` adds no information. A single consistent
+## direction wins over an empty vector, and disagreement between sources is
+## reported as disagreement rather than resolved silently.
+.consensus_direction <- function(x) {
+    x <- x[!is.na(x) & nzchar(x)]
+    if (!length(x)) return(NA_character_)
+    if (length(unique(x)) == 1L) return(unique(x))
+    "mixed"
 }

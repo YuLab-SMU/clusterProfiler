@@ -13,7 +13,8 @@
 #' `species`, `keytype` and `gsname` into the result object, and
 #' [evidence()] relies on those three slots.
 #'
-#' @param source One of `"tf"` (C3:TFT), `"mirna"` (C3:MIR),
+#' @param source One of `"tf"` (C3:TFT), `"tfunion"` (C3:TFT plus four public
+#'   transcription-factor collections, see [mechanism_tfunion()]), `"mirna"` (C3:MIR),
 #'   `"perturbagen"` (C2:CGP), `"cellstate"` (C8) or `"tissue"` (C4:CGN).
 #' @param species Currently only human (`"Homo sapiens"`) is supported, because
 #'   the files addressed here are the `*.Hs.*` release.
@@ -43,7 +44,7 @@
 #' x <- enricher(c("HIF1A", "PGK1", "CA9"), gson = tf)
 #' }
 #' @export
-mechanism_sets <- function(source = c("tf", "mirna", "perturbagen", "cellstate", "tissue"),
+mechanism_sets <- function(source = c("tf", "tfunion", "mirna", "perturbagen", "cellstate", "tissue"),
                            species = "Homo sapiens",
                            release = "2026.2.Hs",
                            cache_dir = getOption("clusterProfiler_cache_dir"),
@@ -60,6 +61,10 @@ mechanism_sets <- function(source = c("tf", "mirna", "perturbagen", "cellstate",
         )
     }
 
+    if (identical(source, "tfunion")) {
+        return(mechanism_tfunion(species = species, release = release,
+                                 cache_dir = cache_dir))
+    }
     spec <- mechanism_set_files[[source]]
     file <- sub("<release>", release, spec$file, fixed = TRUE)
     cache_dir <- mechanism_cache_root(cache_dir)
@@ -248,4 +253,203 @@ mechanism_parse_gmt <- function(path) {
         ))
     }
     subset
+}
+
+#' The transcription-factor union collection
+#'
+#' @description
+#' Builds one collection from C3:TFT plus four public transcription-factor
+#' libraries, so the search for an upstream regulator is not bounded by the
+#' ~592 factors C3:TFT happens to name.
+#'
+#' @details
+#' **Why this exists.** C3:TFT has no target set at all for `EPAS1`, `NFKB1`,
+#' `TP53`, `CTCF`, `ESR1`, `NOTCH1`, `JUN` or `FOS`. On a hypoxia dataset whose
+#' published answer is HIF-2 (`EPAS1`), no amount of grading can find a
+#' regulator the collection does not name -- the ceiling was the data, not the
+#' method. These four libraries together add 361 factors C3:TFT lacks.
+#'
+#' **Why the sets stay separate.** Merging each factor's sets into one gene list
+#' would be wrong, and measurably so: CTCF's 108 ENCODE sets union to 21295
+#' genes, 11% of the background, which no enrichment test can interpret. Each
+#' set keeps its identity and is tagged with its library prefix
+#' (`ENCODE:`, `ChEA:`, `TFP:`, `TRRUST:`, `C3TFT:`); folding duplicates is
+#' [consensus()]'s job, and it has the evidence levels to do that with.
+#'
+#' **What it costs.** 3258 sets against C3:TFT's 1114, so the multiple-testing
+#' correction is spread over three times as many hypotheses. Measured on the
+#' hypoxia contrast, the true signal survived that comfortably -- `HIF1A` moved
+#' from padj 1.2e-4 (C3:TFT) to 9.3e-28 -- while three random gene sets of the
+#' same size returned **zero** significant sets, so the extra hypotheses did not
+#' buy extra false positives.
+#'
+#' @inheritParams mechanism_sets
+#' @return A `GSON`, in the same shape as [mechanism_sets()] returns.
+#' @seealso [mechanism_sets()]
+#' @examples
+#' \dontrun{
+#' ev <- evidence(genes, upstream = "tfunion")
+#' }
+#' @export
+mechanism_tfunion <- function(species = "Homo sapiens",
+                              release = "2026.2.Hs",
+                              cache_dir = getOption("clusterProfiler_cache_dir")) {
+    if (!identical(species, "Homo sapiens")) {
+        rlang::abort("The TF union collection is human-only: the libraries are named for Homo sapiens.")
+    }
+    cache_dir <- mechanism_cache_root(cache_dir)
+
+    base <- mechanism_sets("tf", species = species, release = release,
+                           cache_dir = cache_dir)
+    parts <- list(data.frame(gsid = paste0("C3TFT:", base@gsid2gene$gsid),
+                             gene = base@gsid2gene$gene,
+                             stringsAsFactors = FALSE))
+    gsid2name <- data.frame(gsid = paste0("C3TFT:", base@gsid2name$gsid),
+                            name = base@gsid2name$name,
+                            stringsAsFactors = FALSE)
+
+    for (tag in names(mechanism_tfunion_parts)) {
+        spec <- mechanism_tfunion_parts[[tag]]
+        df <- tryCatch(.mechanism_enrichr_gmt(spec$library, cache_dir, tag),
+                       error = function(e) {
+                           rlang::warn(paste0("TF union: could not fetch ",
+                                              spec$library, " (",
+                                              conditionMessage(e), "). The union ",
+                                              "proceeds without it."))
+                           NULL
+                       })
+        if (is.null(df)) next
+        parts[[length(parts) + 1L]] <- df
+        gsid2name <- rbind(gsid2name, data.frame(
+            gsid = unique(df$gsid),
+            name = sub("^[^:]+:", "", unique(df$gsid)),
+            stringsAsFactors = FALSE))
+    }
+
+    gsid2gene <- unique(do.call(rbind, parts))
+    ## Ensembl ids and retired symbols are in some of these libraries; a gene
+    ## that cannot be matched to a symbol cannot overlap a caller's list, and
+    ## leaving it in inflates setSize and dilutes every ratio.
+    known <- mechanism_known_symbols(species)
+    gsid2gene <- gsid2gene[gsid2gene$gene %in% known, , drop = FALSE]
+
+    gson::gson(
+        gsid2gene     = gsid2gene,
+        gsid2name     = gsid2name[!duplicated(gsid2name$gsid), , drop = FALSE],
+        species       = species,
+        gsname        = "TF union (C3:TFT + ENCODE + ChEA + TF_Perturbations + TRRUST)",
+        version       = release,
+        accessed_date = base@accessed_date,
+        keytype       = "SYMBOL"
+    )
+}
+
+## Fetch one Enrichr library as a GSON-shaped data frame.
+##
+## Enrichr serves plain GMT with a blank second column, which is why the gene
+## list drops two fields rather than one.
+.mechanism_enrichr_gmt <- function(library, cache_dir, tag,
+                                   timeout = getOption("clusterProfiler_timeout", 120)) {
+    file <- paste0("enrichr.", gsub("[^A-Za-z0-9_]", "_", library), ".gmt")
+    path <- file.path(cache_dir, file)
+    if (!file.exists(path)) {
+        url <- paste0("https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=",
+                      utils::URLencode(library, reserved = TRUE))
+        dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
+        status <- tryCatch(
+            suppressWarnings(utils::download.file(url, path, quiet = TRUE)),
+            error = function(e) conditionMessage(e))
+        if (!is.numeric(status) || !identical(as.integer(status), 0L) || !file.exists(path)) {
+            rlang::abort(paste0("Could not download ", library))
+        }
+        if (mechanism_is_html(path)) {
+            unlink(path)
+            rlang::abort(paste0("Got an HTML page instead of a GMT for ", library))
+        }
+    }
+    lines <- readLines(path, warn = FALSE, encoding = "UTF-8")
+    lines <- lines[nzchar(lines)]
+    if (!length(lines)) {
+        rlang::abort(paste0("The library file for ", library, " is empty."))
+    }
+    sp <- strsplit(lines, "\t", fixed = TRUE)
+    gsid <- vapply(sp, function(x) x[1], "")
+    genes <- lapply(sp, function(x) unique(x[-(1:2)]))
+    ## Every one of these libraries mixes species inside the set identifier,
+    ## and the mix is not small: 49% of ChEA's sets are Mouse or Rat and 17% of
+    ## ENCODE's are mm9. A mouse target list matched against a human gene set
+    ## produces a confident wrong answer, so the species is decided here rather
+    ## than left to the symbol overlap to filter out.
+    keep <- switch(tag,
+        TRRUST = grepl(" human$", gsid),
+        TFP    = grepl("HUMAN", gsid) & grepl(" (KD|KO) ", gsid),
+        ChEA   = grepl(" Human", gsid) & !grepl(" Mouse| Rat", gsid),
+        ENCODE = grepl("hg19|hg38", gsid) & !grepl("mm9|mm10|mm39|rat", gsid),
+        rep(TRUE, length(gsid)))
+    gsid <- gsid[keep]; genes <- genes[keep]
+    ids <- paste0(tag, ":", gsid)
+    data.frame(gsid = rep(ids, lengths(genes)),
+               gene = unlist(genes, use.names = FALSE),
+               stringsAsFactors = FALSE)
+}
+
+## The transcription-factor union: which library each prefix is, and what its
+## evidence is worth.
+##
+## The kinds differ deliberately. ENCODE and ChEA assign genes to ChIP peaks,
+## which measures binding. TFP records which genes moved when a factor was
+## knocked down, which measures an effect but not a direct target. TRRUST is a
+## literature curation with no assay visible to us, so it is reported as an
+## observation and cannot corroborate anything on its own.
+mechanism_tfunion_parts <- list(
+    ENCODE = list(library = "ENCODE_TF_ChIP-seq_2015",
+                  rule = "chip_union", level = "B"),
+    ChEA   = list(library = "ChEA_2022", rule = "chip_union", level = "B"),
+    TFP    = list(library = "TF_Perturbations_Followed_by_Expression",
+                  rule = "perturb_signature", level = "B"),
+    TRRUST = list(library = "TRRUST_Transcription_Factors_2019",
+                  rule = "curated_target", level = "C")
+)
+
+## Which library prefix a union set identifier carries, or NA for a plain id.
+mechanism_union_prefix <- function(gsid) {
+    ## `[A-Za-z0-9]`, not `[A-Z0-9]`: the ChEA prefix carries a lowercase
+    ## letter. An uppercase-only pattern does not error on it -- it routes those
+    ## 653 sets down the C3:TFT naming path and silently mangles their names.
+    hit <- grepl("^[A-Za-z0-9]+:", gsid)
+    out <- rep(NA_character_, length(gsid))
+    ## strsplit rather than a regex back-reference: a capture written as a
+    ## backslash-one in R source needs two backslashes, and one short yields the
+    ## control character 0x01 instead of the capture. That is not an error -- it
+    ## is a column of unprintable strings that then fails every symbol match.
+    out[hit] <- vapply(strsplit(gsid[hit], ":", fixed = TRUE),
+                       function(x) x[1], "", USE.NAMES = FALSE)
+    out
+}
+
+## The regulator a union set identifier names.
+##
+## The four added libraries all put the factor first and follow it with cell
+## line, assay or accession, so the first whitespace-delimited token is the
+## regulator. C3:TFT sets keep their own, harder naming (motif prefixes and
+## quality tiers), so they are routed to mechanism_regulator() instead.
+mechanism_union_entity <- function(gsid, species = "Homo sapiens") {
+    gsid <- as.character(gsid)
+    prefix <- mechanism_union_prefix(gsid)
+    bare <- sub("^[^:]+:", "", gsid)
+    out <- character(length(gsid))
+    is_c3 <- !is.na(prefix) & prefix == "C3TFT"
+    is_other <- !is.na(prefix) & !is_c3
+    plain <- is.na(prefix)
+    if (any(is_c3)) out[is_c3] <- mechanism_regulator(bare[is_c3],
+                                                      symbols = mechanism_known_symbols(species))
+    if (any(plain)) out[plain] <- mechanism_regulator(bare[plain],
+                                                      symbols = mechanism_known_symbols(species))
+    if (any(is_other)) {
+        tok <- vapply(strsplit(bare[is_other], " ", fixed = TRUE),
+                         function(x) x[1], "", USE.NAMES = FALSE)
+        ## ENCODE writes the phospho form of POLR2A as one run-on word.
+        out[is_other] <- sub("phosphoS2$", "", tok)
+    }
+    out
 }

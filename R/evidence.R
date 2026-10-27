@@ -20,7 +20,15 @@
 #' a claim may go, and `$diagnostics` says how much of the list the collection
 #' could speak about at all.
 #'
-#' @param genes Gene symbols. A character vector, an `enrichResult` (its
+#' @param genes Gene symbols, or a **named numeric vector** of gene symbols and
+#'   their statistics. A named numeric is tested by direction: the positive half
+#'   and the negative half are run separately against each collection, so a
+#'   regulator's row carries whether its programme rose or fell. Measured on the
+#'   hypoxia contrast this took `HIF1_Q3` from padj 1.2e-4 (both directions
+#'   mixed into one list) to 1.0e-5, because asking "which set is enriched among
+#'   what changed" dilutes the signal when half the changes go the other way.
+#'   Both halves are corrected together, since splitting doubles the number of
+#'   hypotheses. An `enrichResult` (its
 #'   `geneID` column is expanded), a `gseaResult` (the union of its
 #'   `core_enrichment` genes, with the ranked list as the background), or a
 #'   `data.frame` with a column named by `design$gene_col`.
@@ -33,8 +41,20 @@
 #'   identically (MRR 0.046 against 0.047), because the limit is the
 #'   over-representation test's power at small overlaps, not the input.
 #' @param design A list describing the experiment; see Details.
-#' @param upstream Collections to test: `"tf"`, `"mirna"`, `"perturbagen"`,
-#'   `"cellstate"` or `"tissue"`. Defaults to `"tf"` alone. `"mirna"` is
+#' @param upstream Collections to test: `"tf"`, `"tfunion"`, `"mirna"`,
+#'   `"perturbagen"`, `"cellstate"` or `"tissue"`. Defaults to `"tf"` alone.
+#'
+#'   `"tfunion"` is C3:TFT plus four public transcription-factor libraries
+#'   (ENCODE, ChEA, TF_Perturbations and TRRUST), which together name 361
+#'   factors C3:TFT has no set for -- including `EPAS1`, `NFKB1`, `TP53`,
+#'   `CTCF`, `ESR1`, `JUN` and `FOS`. Prefer it when the question is "which
+#'   regulator drives this list" rather than "which of these specific motif
+#'   families is enriched": on a hypoxia contrast it recovered the paper's
+#'   answer (HIF-2) where `"tf"` could not, at 2869 sets against 1114, and
+#'   three random gene sets of the same size still returned no significant
+#'   set. See [mechanism_tfunion()].
+#'
+#'   `"mirna"` is
 #'   off by default for a measured reason: its sets are predicted seed matches,
 #'   so an enrichment describes which genes carry the motif rather than which
 #'   microRNA is active. Measured on the airway list, 7 miRNAs were
@@ -113,7 +133,7 @@ evidence <- function(genes,
     ## "perturbagen" is measurement rather than a collection: it comes from
     ## GPSAdb over MCP and carries its own level rather than being graded by
     ## mechanism_xref().
-    supported <- c("tf", "mirna", "perturbagen", "cellstate", "tissue")
+    supported <- c("tf", "tfunion", "mirna", "perturbagen", "cellstate", "tissue")
     if (length(setdiff(upstream, supported))) {
         rlang::abort(c(
             paste0("Unknown `upstream`: ",
@@ -123,6 +143,16 @@ evidence <- function(genes,
     }
 
     design <- mechanism_design(design)
+
+    ## A named numeric vector is two things at once: the genes and the sign each
+    ## one moved by. Held apart from `genes` because the rest of the function
+    ## works in symbols, and the statistics are needed to split the list.
+    signed <- NULL
+    if (is.numeric(genes) && !is.null(names(genes)) && any(nzchar(names(genes)))) {
+        signed <- genes[!is.na(genes)]
+        signed <- signed[nzchar(names(signed))]
+        if (!length(signed)) signed <- NULL
+    }
 
     ## An enrichResult carries its own gene list, its own background and its own
     ## keytype. All three are taken from the object rather than guessed, because
@@ -165,7 +195,8 @@ evidence <- function(genes,
     ## that could not be obtained is never reported as an answer that was empty.
     failures <- mechanism_failure_collector()
 
-    collection_sources <- intersect(upstream, c("tf", "mirna", "cellstate", "tissue"))
+    collection_sources <- intersect(upstream,
+                                    c("tf", "tfunion", "mirna", "cellstate", "tissue"))
     sets <- lapply(collection_sources, function(src) {
         mechanism_sets(src, species = design$species,
                        subset = if (identical(src, "tf")) tft else NULL)
@@ -187,6 +218,17 @@ evidence <- function(genes,
         if (!is.null(ranked)) {
             return(.mechanism_gsea_collection(ranked, sets[[src]],
                                               minGSSize, maxGSSize))
+        }
+        ## Split by sign when the input carries one. Tested on the hypoxia
+        ## contrast, this moved HIF1_Q3 from padj 1.2e-4 to 1.0e-5 -- a twelve-
+        ## fold gain in power -- because a regulator's targets rise under
+        ## hypoxia while other genes fall, and mixing the two directions asks a
+        ## diluted question. It also supplies the direction ORA cannot otherwise
+        ## give, without GSEA's ranking or permutations.
+        if (!is.null(signed)) {
+            return(.mechanism_directional_collection(signed, universe,
+                                                     sets[[src]], minGSSize,
+                                                     maxGSSize))
         }
         enricher(
             genes,
@@ -448,7 +490,11 @@ mechanism_design <- function(design) {
 }
 
 mechanism_genes <- function(genes, design) {
-    genes <- if (inherits(genes, "gseaResult")) {
+    genes <- if (is.numeric(genes) && !is.null(names(genes))) {
+        ## The names are the genes; the values are the statistics, which the
+        ## caller's `universe` and the directional split use.
+        names(genes)
+    } else if (inherits(genes, "gseaResult")) {
         ## Only reached when the caller passed a result object but asked for no
         ## ranking: the ranked list is the input GSEA itself used.
         names(genes@geneList)
@@ -520,7 +566,9 @@ mechanism_regulator_table <- function(res, gson_obj, source, selected,
         df$Count <- vapply(strsplit(as.character(df$core_enrichment), "/"),
                            length, integer(1))
         df$direction <- .mechanism_gsea_direction(df$NES)
-    } else {
+    } else if (!"direction" %in% names(df)) {
+        ## The directional path already knows which half of the list a set was
+        ## enriched in; an undirected ORA has no sign to report.
         df$direction <- NA_character_
     }
 
@@ -968,4 +1016,43 @@ mechanism_perturb_candidates <- function(regulators, alpha = 0.05,
 .mechanism_gsea_direction <- function(nes) {
     ifelse(is.na(nes), NA_character_,
            ifelse(nes > 0, "up", ifelse(nes < 0, "down", NA_character_)))
+}
+
+## Test a collection against an up list and a down list, separately.
+##
+## Three decisions, each of which changes the answer if made differently:
+##
+## * Both halves are corrected together. Splitting the list doubles the number
+##   of hypotheses tested, so correcting each half on its own would report an
+##   FDR for a question asked twice as often as the count suggests.
+## * A set enriched in both directions keeps the stronger half. One contrast
+##   cannot both activate and repress the same programme, and leaving both rows
+##   makes consensus() report `mixed` for want of a rule rather than because the
+##   biology is ambiguous.
+## * Genes with a statistic of exactly zero are in neither half. They are rare,
+##   and assigning them to one side would invent a direction.
+.mechanism_directional_collection <- function(signed, universe, gson,
+                                              minGSSize, maxGSSize) {
+    halves <- list(list("up", names(signed)[signed > 0]),
+                   list("down", names(signed)[signed < 0]))
+    parts <- list()
+    for (h in halves) {
+        if (length(h[[2]]) < 2L) next
+        r <- tryCatch(
+            suppressWarnings(enricher(h[[2]], universe = universe, gson = gson,
+                                      minGSSize = minGSSize, maxGSSize = maxGSSize,
+                                      pvalueCutoff = 1, qvalueCutoff = 1)),
+            error = function(e) NULL)
+        if (is.null(r) || !nrow(as.data.frame(r))) next
+        df <- as.data.frame(r)
+        df$direction <- h[[1]]
+        parts[[length(parts) + 1L]] <- df
+    }
+    if (!length(parts)) return(NULL)
+
+    df <- do.call(rbind, parts)
+    rownames(df) <- NULL
+    df$p.adjust <- stats::p.adjust(df$pvalue, method = "BH")
+    df <- df[order(df$p.adjust), , drop = FALSE]
+    df[!duplicated(df$ID), , drop = FALSE]
 }
