@@ -1951,3 +1951,70 @@ test_that("a gseaResult hands over its core genes, not its whole ranked list", {
     ## The background is the ranked list GSEA tested against.
     expect_identical(sort(fr$universe), sort(names(stat)))
 })
+
+test_that("a GSEA collection is tested by GSEA, not by re-running ORA", {
+    dir <- tempfile("mechanism"); dir.create(dir)
+    set.seed(2)
+    ## One set rises with the phenotype, one falls: only GSEA can tell them
+    ## apart, because only GSEA reports a sign.
+    up <- paste0("u", 1:20)
+    down <- paste0("d", 1:20)
+    write_gmt(file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt"),
+              list(UP_TARGET_GENES = up, DOWN_TARGET_GENES = down))
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-26"),
+               file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt.meta"))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    gson <- mechanism_sets("tf")
+    stat <- sort(setNames(c(rnorm(20, 3), rnorm(20, -3), rnorm(200, 0)),
+                          c(up, down, paste0("x", 1:200))), decreasing = TRUE)
+    res <- .mechanism_gsea_collection(stat, gson, 5L, Inf)
+    skip_if(is.null(res), "GSEA unavailable here")
+
+    ## The object really is a gseaResult: the branch is not ORA in disguise.
+    expect_s4_class(res, "gseaResult")
+    df <- as.data.frame(res)
+    tbl <- mechanism_regulator_table(res, gson, "tf", names(stat))
+
+    ## Every row carries the sign the ranking implies.
+    expect_false(any(is.na(tbl$direction)))
+    expect_setequal(unique(tbl$direction), c("up", "down"))
+    ## And the sign points the right way round.
+    expect_equal(unname(tbl$direction[tbl$term == "UP_TARGET_GENES"]), "up")
+    expect_equal(unname(tbl$direction[tbl$term == "DOWN_TARGET_GENES"]), "down")
+})
+
+test_that("a from_gsearesult carries the ranking forward", {
+    skip_if_not_installed("org.Hs.eg.db")
+    dir <- tempfile("mechanism"); dir.create(dir)
+    write_gmt(file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt"),
+              list(GF_A = paste0("g", 1:20)))
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-26"),
+               file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt.meta"))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    set.seed(3)
+    stat <- sort(setNames(c(rnorm(10, 3), rnorm(40, 0)), paste0("g", 1:50)),
+                 decreasing = TRUE)
+    gs <- tryCatch(suppressWarnings(GSEA(stat, gson = mechanism_sets("tf"),
+                                         pvalueCutoff = 1, minGSSize = 5,
+                                         maxGSSize = Inf, verbose = FALSE)),
+                   error = function(e) NULL)
+    skip_if(is.null(gs), "GSEA unavailable here")
+
+    db <- tryCatch(getExportedValue("org.Hs.eg.db", "org.Hs.eg.db"),
+                   error = function(e) NULL)
+    skip_if(is.null(db), "org.Hs.eg.db not loadable here")
+
+    fr <- suppressWarnings(.mechanism_from_gsearesult(gs, list()))
+    ## Without this field the caller silently fell back to ORA and the two
+    ## "different" front ends agreed to within a rank.
+    expect_true(!is.null(fr$ranked))
+    expect_true(is.numeric(fr$ranked))
+    expect_identical(names(fr$ranked), names(stat))
+    expect_false(is.unsorted(rev(fr$ranked)))
+})

@@ -130,44 +130,47 @@ wrong. On the airway list the expected answer was recovered.
 
 ## GSEA instead of ORA
 
-A fair question: GSEA uses the whole ranked list, so it should carry more than
-a threshold-filtered gene list. Measured, it does not.
+`evidence()` accepts a `gseaResult` and tests each collection **with GSEA**, not
+with ORA. The first implementation took `core_enrichment` and ran `enricher()`
+on those genes, which silently discarded the ranking and the sign — the "GSEA
+path" was the ORA path with a different input, and measuring the two against
+each other compared nothing. That is fixed: the ranked statistic travels from
+`@geneList` into the collection stage, and each set is tested with `GSEA()`.
 
-`evidence()` now accepts a `gseaResult` and takes:
+What the correct version adds is **direction**, which ORA cannot supply: a
+binary gene list has no sign, so on the ORA path every collection row carries
+`direction = NA`. On the airway list GSEA labels all 1095 collection rows, 770
+up and 325 down. A regulator that a histone deacetylase inhibitor *induces* and
+one it *represses* were previously the same row.
 
-- **genes** from `core_enrichment` — the genes that produced each enriched
-  set's ranking, union across the sets the caller kept. Not `@geneList`, which
-  is every gene including the ten thousand that barely moved: asking which
-  regulator explains all 22899 returned **0 supported** regulators on the
-  airway list, because no factor stands out against the whole transcriptome.
-  On that list `core_enrichment` covers 4594 genes, against the 897 the ORA
-  path uses.
-- **universe** from the ranked list — the background GSEA itself tested
-  against. (`gseaResult` has no `@universe` slot, unlike `enrichResult`.)
-- **keytype** from `@keytype`, mapped as for `enrichResult`.
+### The two methods can disagree, and both are right
 
-Same 25 ground-truth datasets, both paths:
+Same list, same collection, opposite conclusions:
 
-| Metric | ORA | GSEA |
-| --- | --- | --- |
-| True regulator appears | 44% | **44%** |
-| recall@10 | 4% | **4%** |
-| recall@20 | 8% | **8%** |
-| MRR | 0.047 | **0.046** |
-| Median rank | 157 | **155** |
+| Set | ORA padj | GSEA padj | GSEA NES |
+| --- | --- | --- | --- |
+| GR_Q6 | **0.0002** | 0.166 | 1.27 |
+| GR_01 | 0.0031 | 0.285 | 1.27 |
 
-Per case they are near-identical (FOXO4 162 vs 161, ADNP 168 vs 163, ATF6 157
-vs 155). Both land at the same rank for the cases that fail.
+The reason is measurable rather than mysterious. GR's set holds 236 genes, of
+which **27 are among the 897 significant genes** — a strong over-representation,
+which is exactly what ORA tests. Across the full 22899-gene ranking those same
+236 genes sit at a **median rank of 10571**, barely ahead of the 11450 expected
+by chance: the set is over-represented at the top *and* spread thinly through
+the middle, and GSEA scores the whole distribution.
 
-That is the useful finding: **the limitation is not the threshold.** Feeding
-GSEA's continuous ranking or ORA's binary selection into the same
-over-representation test gives the same answer, because the test is what has no
-power at an overlap of six genes. Changing the front end cannot fix the back
-end.
+Neither is wrong. ORA asks "are this set's members over-represented among what
+changed", GSEA asks "does this set move together". For a glucocorticoid
+experiment the first is the question you want, which is why the ORA path finds
+the receptor and the GSEA path does not.
 
-What differs between the two inputs on the airway list is the candidate pool:
-`core_enrichment` makes 384 regulators significant against 55 for the 897-gene
-ORA list, so a fixed candidate cap of 30 admits a different, smaller fraction of
-the truthful ones. `GR` ranks 52nd under GSEA and 57th under ORA — outside the
-cap either way, which is why it needed the cap raised rather than a better front
-end.
+### What this means for choosing a front end
+
+- Use ORA when the question is "which regulator explains my significant genes".
+  That is the deviation-from-threshold question, and it is the one that
+  recovers GR here.
+- Use GSEA when the question is "which regulator's programme moves
+  monotonically with my phenotype", and when direction matters more than a
+  head-of-list hit.
+- Do not read a GSEA `absent` as evidence against a regulator that ORA
+  supports. The two disagree on real signals, as `GR` shows.

@@ -130,6 +130,7 @@ evidence <- function(genes,
     ## universe is every symbol in the annotation, which is not the background
     ## the enrichment itself was run against.
     from_result <- NULL
+    ranked <- NULL
     if (inherits(genes, "gseaResult")) {
         ## A GSEA result already carries the question this function asks: every
         ## gene, ranked, with a statistic saying how far it moved. Taking the
@@ -138,6 +139,10 @@ evidence <- function(genes,
         from_result <- .mechanism_from_gsearesult(genes, design)
         genes <- from_result$genes
         if (is.null(universe)) universe <- from_result$universe
+        ## The ranking itself is what GSEA measured, so it is carried into the
+        ## collection stage: re-running ORA on the core genes would throw away
+        ## the direction and the continuous signal GSEA was run to obtain.
+        ranked <- from_result$ranked
     } else if (inherits(genes, "enrichResult")) {
         from_result <- .mechanism_from_enrichresult(genes, design)
         genes <- from_result$genes
@@ -172,6 +177,17 @@ evidence <- function(genes,
                        " (", length(genes), " genes)")
 
     results <- lapply(collection_sources, function(src) {
+        ## When the caller supplied a GSEA result, the collection is tested with
+        ## GSEA too. Substituting ORA here was the first implementation and it
+        ## was wrong: ORA takes the core genes as a binary list, so the ranking
+        ## and the sign that GSEA produced are discarded, and the "GSEA path"
+        ## becomes the ORA path with a different input. Measured both ways they
+        ## agreed to within a rank, which is exactly what running the same test
+        ## twice looks like.
+        if (!is.null(ranked)) {
+            return(.mechanism_gsea_collection(ranked, sets[[src]],
+                                              minGSSize, maxGSSize))
+        }
         enricher(
             genes,
             universe     = universe,
@@ -490,12 +506,23 @@ mechanism_regulator_table <- function(res, gson_obj, source, selected,
             regulator = character(), source = character(), term = character(),
             named = logical(), level = character(),
             padj_within_source = numeric(), setSize = integer(), Count = integer(),
-            family = logical(), stringsAsFactors = FALSE
+            family = logical(), direction = character(), stringsAsFactors = FALSE
         ))
     }
     df <- as.data.frame(res)
     df <- df[!is.na(df$ID), , drop = FALSE]
     members <- gson_obj@gsid2gene
+
+    ## A gseaResult has no `Count`: the number of input genes in the set has to
+    ## come from the leading edge, and the direction from the sign of NES.
+    is_gsea <- inherits(res, "gseaResult")
+    if (is_gsea) {
+        df$Count <- vapply(strsplit(as.character(df$core_enrichment), "/"),
+                           length, integer(1))
+        df$direction <- .mechanism_gsea_direction(df$NES)
+    } else {
+        df$direction <- NA_character_
+    }
 
     ## setSize counts unique (gsid, gene) pairs; gson::gson() already dedupes
     ## gsid2gene, and this keeps the count correct if that ever stops.
@@ -522,6 +549,8 @@ mechanism_regulator_table <- function(res, gson_obj, source, selected,
         padj_within_source = df$p.adjust,
         setSize            = as.integer(set_size[df$ID]),
         Count              = df$Count,
+        ## Filled only on the GSEA path; ORA has no sign to report.
+        direction          = df$direction,
         stringsAsFactors   = FALSE
     )
 }
@@ -880,12 +909,23 @@ mechanism_perturb_candidates <- function(regulators, alpha = 0.05,
                 i = "Install the matching org.*.eg.db package, or pass symbols."
             ))
         }
-        genes <- .mechanism_to_symbol(orgdb, genes, keytype)
-        universe <- .mechanism_to_symbol(orgdb, universe, keytype)
+        ## The statistic travels with the gene through the mapping, otherwise
+        ## every renamed gene would silently drop out of the ranking.
+        mapped <- .mechanism_to_symbol(orgdb, names(ranked), keytype)
+        stats <- ranked[match(mapped, names(ranked))]
+        ranked <- sort(stats[!is.na(stats)], decreasing = TRUE)
+        genes <- unique(names(ranked))
+        universe <- genes
     }
 
     list(genes = genes, universe = universe, keytype = keytype,
-         species = species)
+         species = species,
+         ## The ranking, which is what distinguishes the GSEA path from the ORA
+         ## path. Dropped here it silently degraded the whole function to ORA on
+         ## the core genes, and the two "different" front ends then agreed to
+         ## within a rank -- which is what running the same test twice looks
+         ## like.
+         ranked = ranked)
 }
 
 ## Genes that produced the leading edge of the enriched sets.
@@ -902,4 +942,30 @@ mechanism_perturb_candidates <- function(regulators, alpha = 0.05,
     genes <- unique(unlist(strsplit(as.character(df$core_enrichment), "/"),
                           use.names = FALSE))
     genes[!is.na(genes) & nzchar(genes)]
+}
+
+## Test one collection with GSEA rather than ORA.
+##
+## Returns the same `enricher()`-shaped object the rest of the function expects,
+## so the parsing below is untouched. `pvalueCutoff`/`qvalueCutoff` are set to 1
+## for the same reason as the ORA call: "not shown" must never become "not
+## tested".
+.mechanism_gsea_collection <- function(ranked, gson, minGSSize, maxGSSize) {
+    tryCatch(
+        suppressWarnings(
+            GSEA(ranked, gson = gson, minGSSize = minGSSize,
+                 maxGSSize = maxGSSize, pvalueCutoff = 1, verbose = FALSE)
+        ),
+        error = function(e) NULL
+    )
+}
+
+## A GSEA result's per-set direction.
+##
+## ORA cannot supply one: a binary gene list has no sign. GSEA's normalised
+## enrichment score does -- a set whose members sit at the top of the ranking is
+## up, at the bottom is down.
+.mechanism_gsea_direction <- function(nes) {
+    ifelse(is.na(nes), NA_character_,
+           ifelse(nes > 0, "up", ifelse(nes < 0, "down", NA_character_)))
 }
