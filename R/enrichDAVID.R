@@ -156,7 +156,7 @@ enrichDAVID <- function(gene,
     ## row-wise q-value filter: an NA qvalue means Storey estimation failed
     ## for that row, so it bypasses this cutoff (its pvalue/p.adjust filters
     ## still apply) instead of switching the cutoff off for every term
-    if (!all(is.na(Over$qvalue))) {
+    if (nrow(Over) > 0L && !all(is.na(Over$qvalue))) {
         Over <- Over[ is.na(Over$qvalue) | Over$qvalue <= qvalueCutoff, ]
     }
 

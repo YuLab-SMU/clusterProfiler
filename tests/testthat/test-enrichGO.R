@@ -89,10 +89,10 @@ test_that("the GO cache is not reused for an unidentifiable OrgDb (#232)", {
 
     # a matching request can reuse the cache
     expect_true(go_cache_usable(mk_env(), "Homo sapiens", "BP", "ENTREZID"))
-    # a cache written under one ont serves a request for another ont
-    expect_true(go_cache_usable(mk_env(), "Homo sapiens", "BP", "ENTREZID"))
+    # a cache written under one ont serves a request for any other ont
     expect_true(go_cache_usable(mk_env(), "Homo sapiens", "MF", "ENTREZID"))
     expect_true(go_cache_usable(mk_env(), "Homo sapiens", "ALL", "ENTREZID"))
+    expect_true(go_cache_usable(mk_env(), "Homo sapiens", "CC", "ENTREZID"))
 
     # get_organism() returns NA for an OrgDb it cannot identify (an
     # AnnotationHub OrgDb, say); that used to abort with
@@ -121,8 +121,11 @@ test_that("the GO cache survives an ontology switch", {
     }
 
     GO_Env <- get_GO_Env()
-    ## start from a known cache state
-    rm(list = ls(GO_Env, all.names = TRUE), envir = GO_Env)
+    ## start from a known cache state -- drop only the annotation cache this
+    ## test exercises, so the hybrid GSON cache other tests build survives
+    rm(list = intersect(c("goAnno", "keytype", "organism"),
+                        ls(GO_Env, all.names = TRUE)),
+       envir = GO_Env)
 
     bp <- run("BP")
     expect_s4_class(bp, "enrichResult")
@@ -139,7 +142,8 @@ test_that("the GO cache survives an ontology switch", {
     ## the cached annotation is the all-ontology superset
     expect_true(exists("goAnno", envir = GO_Env, inherits = FALSE))
     goAnno <- get("goAnno", envir = GO_Env)
-    expect_true(setequal(unique(goAnno$ONTOLOGYALL), c("BP", "CC", "MF")))
+    expect_true(is.factor(goAnno$ONTOLOGYALL))
+    expect_true(setequal(unique(as.character(goAnno$ONTOLOGYALL)), c("BP", "CC", "MF")))
 })
 
 test_that("enrichGO() can restrict the annotation by evidence code (#160)", {

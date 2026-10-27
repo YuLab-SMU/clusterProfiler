@@ -9,12 +9,6 @@ stand behind it (clusterProfiler#710, #584, #614, #332) (2026-10-27, Tue)
 
 # clusterProfiler 4.21.4.001
 
-+ `enrichDAVID()` applies `qvalueCutoff` row by row: an `NA` q-value means Storey estimation
-failed for that row, so it bypasses this cutoff (its `pvalue`/`p.adjust` filters still apply)
-instead of switching the cutoff off for every term. This was the last remaining copy of the
-wholesale guard fixed in enrichit 0.2.7.001 for `get_enriched()`, and the same four user reports
-stand behind it (clusterProfiler#710, #584, #614, #332) (2026-10-27, Tue)
-
 + **Switching ontology no longer evicts the GO annotation cache.** The cache was keyed on
 `(organism, ont, keytype)` and stored only the annotation of the last call, so BP then MF then BP
 paid a full `AnnotationDbi::mapIds(GOALL → keytype)` rebuild on every switch — five alternating
@@ -22,9 +16,11 @@ BP/MF `enrichGO()` calls took 85.5 s on human SYMBOL, 22.3 s of it per miss, whi
 itself is 0.4 s. The cache now always stores the **all-ontology** annotation and `ont` is no longer
 part of the key; the requested ontology is filtered after the lookup, which is what the cached-ALL
 branch already did. Five alternating calls take 11.6 s (7.4x), a single re-switch 2.8 s, warm
-same-ontology calls are unchanged, results are identical (pinned by a test), and the cached frame
-grows from 1.14 M to 1.79 M rows (+17 MB). Motivated by the two-level cache proposed in
-clusterProfiler#71 (2026-10-27, Tue)
+same-ontology calls are unchanged, and results are identical (pinned by a test). The cached frame
+grows from 1.14 M to 1.79 M rows; its ontology column is now a factor rather than a character
+column, which is where most of the redundancy was, so the cost is +9 MB rather than +17 MB (38 MB
+against the old single-ontology 29 MB) and filtering is faster as well. Motivated by the two-level
+cache proposed in clusterProfiler#71 (2026-10-27, Tue)
 
 + **A `gseaResult` is now tested with GSEA, not re-tested with ORA.** The first implementation took the union of `core_enrichment` and ran `enricher()` on those genes, which discarded the ranking and the sign: the "GSEA path" was the ORA path with a different input, and comparing the two against ground truth compared nothing (both scored MRR 0.047, because both were the same test). The ranked statistic now travels from `@geneList` into the collection stage and each set is tested with `GSEA()`, which adds what ORA cannot supply -- **direction**. A binary gene list has no sign, so on the ORA path every collection row carries `direction = NA`; on the airway list GSEA labels all 1095 rows, 770 up and 325 down (2026-10-27, Tue)
 + The two front ends can disagree on a real signal, and that is worth knowing before choosing one. On the airway dexamethasone list, `GR_Q6` has ORA padj **0.0002** and GSEA padj **0.166**. Both are right: 27 of GR's 236 target-set genes are among the 897 significant genes (strong over-representation, which is what ORA tests), while across the full 22899-gene ranking those 236 sit at a median rank of 10571 against 11450 expected by chance -- over-represented at the top and spread thinly through the middle, which is what GSEA scores. Use ORA for "which regulator explains my significant genes"; use GSEA for "which programme moves monotonically with the phenotype" (2026-10-27, Tue)
