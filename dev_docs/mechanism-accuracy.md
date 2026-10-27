@@ -127,3 +127,47 @@ signature is dominated by downstream consequences, so the direct regulator need
 not dominate it. The benchmark bounds what the method can be trusted for — it
 does not show the mechanism reports on well-powered, on-target comparisons are
 wrong. On the airway list the expected answer was recovered.
+
+## GSEA instead of ORA
+
+A fair question: GSEA uses the whole ranked list, so it should carry more than
+a threshold-filtered gene list. Measured, it does not.
+
+`evidence()` now accepts a `gseaResult` and takes:
+
+- **genes** from `core_enrichment` — the genes that produced each enriched
+  set's ranking, union across the sets the caller kept. Not `@geneList`, which
+  is every gene including the ten thousand that barely moved: asking which
+  regulator explains all 22899 returned **0 supported** regulators on the
+  airway list, because no factor stands out against the whole transcriptome.
+  On that list `core_enrichment` covers 4594 genes, against the 897 the ORA
+  path uses.
+- **universe** from the ranked list — the background GSEA itself tested
+  against. (`gseaResult` has no `@universe` slot, unlike `enrichResult`.)
+- **keytype** from `@keytype`, mapped as for `enrichResult`.
+
+Same 25 ground-truth datasets, both paths:
+
+| Metric | ORA | GSEA |
+| --- | --- | --- |
+| True regulator appears | 44% | **44%** |
+| recall@10 | 4% | **4%** |
+| recall@20 | 8% | **8%** |
+| MRR | 0.047 | **0.046** |
+| Median rank | 157 | **155** |
+
+Per case they are near-identical (FOXO4 162 vs 161, ADNP 168 vs 163, ATF6 157
+vs 155). Both land at the same rank for the cases that fail.
+
+That is the useful finding: **the limitation is not the threshold.** Feeding
+GSEA's continuous ranking or ORA's binary selection into the same
+over-representation test gives the same answer, because the test is what has no
+power at an overlap of six genes. Changing the front end cannot fix the back
+end.
+
+What differs between the two inputs on the airway list is the candidate pool:
+`core_enrichment` makes 384 regulators significant against 55 for the 897-gene
+ORA list, so a fixed candidate cap of 30 admits a different, smaller fraction of
+the truthful ones. `GR` ranks 52nd under GSEA and 57th under ORA — outside the
+cap either way, which is why it needed the cap raised rather than a better front
+end.

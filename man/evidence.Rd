@@ -19,8 +19,17 @@ evidence(
 }
 \arguments{
 \item{genes}{Gene symbols. A character vector, an `enrichResult` (its
-`geneID` column is expanded), or a `data.frame` with a column named by
-`design$gene_col`.}
+  `geneID` column is expanded), a `gseaResult` (the union of its
+  `core_enrichment` genes, with the ranked list as the background), or a
+  `data.frame` with a column named by `design$gene_col`.
+
+  A `gseaResult` contributes the genes that produced each enriched set's
+  ranking rather than every gene in `@geneList`: asking which regulator
+  explains all of a transcriptome has no answer, and on the airway list that
+  form returned no `supported` regulator at all. Measured against known
+  answers, the GSEA form and the `enrichResult` form rank the true regulator
+  identically (MRR 0.046 against 0.047), because the limit is the
+  over-representation test's power at small overlaps, not the input.}
 
 \item{design}{A list describing the experiment; see Details.}
 

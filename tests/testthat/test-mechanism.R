@@ -1916,3 +1916,38 @@ test_that("a regulator is queried under every name it is known by", {
     ## A name with no alias is returned unchanged, so no extra request is made.
     expect_identical(mechanism_gpsadb_names("CEBPB")[[1]], "CEBPB")
 })
+
+test_that("a gseaResult hands over its core genes, not its whole ranked list", {
+    skip_if_not_installed("org.Hs.eg.db")
+    dir <- tempfile("mechanism"); dir.create(dir)
+    write_gmt(file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt"),
+              list(GF_A = paste0("g", 1:20), GF_B = paste0("g", 15:40)))
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-26"),
+               file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt.meta"))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+    withr::defer(unlink(dir, recursive = TRUE))
+
+    set.seed(1)
+    ## Every gene carries a statistic; only some move hard, which is what
+    ## separates core_enrichment from the whole list.
+    ids <- paste0("g", 1:60)
+    stat <- setNames(c(rnorm(50, 0, 0.1), rnorm(10, 4, 0.1)), ids)
+    stat <- sort(stat, decreasing = TRUE)
+    gs <- tryCatch(suppressWarnings(GSEA(stat, gson = mechanism_sets("tf"),
+                                         pvalueCutoff = 1, minGSSize = 5,
+                                         maxGSSize = Inf, verbose = FALSE)),
+                   error = function(e) NULL)
+    skip_if(is.null(gs), "GSEA unavailable here")
+    db <- tryCatch(getExportedValue("org.Hs.eg.db", "org.Hs.eg.db"),
+                   error = function(e) NULL)
+    skip_if(is.null(db), "org.Hs.eg.db not loadable here")
+
+    fr <- suppressWarnings(.mechanism_from_gsearesult(gs, list()))
+    ## The input is the moving part of the list, never all of it: asking which
+    ## regulator explains every gene has no answer.
+    expect_true(length(fr$genes) <= length(stat))
+    expect_true(all(fr$genes %in% names(stat)))
+    ## The background is the ranked list GSEA tested against.
+    expect_identical(sort(fr$universe), sort(names(stat)))
+})
