@@ -232,3 +232,68 @@ A second example therefore needs **a second full expression dataset with a
 known expected answer**. `airway` is currently the only one on this machine;
 `pasilla` carries metadata but not the counts, and the `airway` package's `gse`
 object is the same eight dexamethasone samples.
+
+## The TF collection is the binding constraint
+
+Measured on the hypoxia dataset, where the paper's answer is HIF-2 (`EPAS1`):
+
+| Collection | Human TFs resolvable | Finds `EPAS1`? |
+| --- | --- | --- |
+| **C3:TFT** (current default) | 592 | **no -- no EPAS1 set exists** |
+| ENCODE_TF_ChIP-seq_2015 | 171 | no |
+| ChEA_2022 | 273 | no |
+| **TF_Perturbations_Followed_by_Expression** | 219 | **yes, padj 4.1e-9** |
+| TRRUST_2019 | 284 | yes |
+
+Union of all five: 990 TFs (60% of ~1639), of which **398 are missing from
+C3:TFT**. `NFKB1`, `TP53`, `CTCF`, `ESR1`, `NOTCH1`, `KLF4`, `MYCN`, `SOX2`,
+`JUN`, `FOS`, `E2F1` are all absent from C3:TFT and present elsewhere.
+
+Running the hypoxia contrast against `TF_Perturbations` returns, in order:
+
+```
+HIF1A KD HUMAN GSE44943 ... DOWN   p = 1.4e-19
+RELA KD HUMAN GSE50588 ... DOWN    p = 9.1e-18
+EPAS1 KD HUMAN GSE54360 ... DOWN   p = 4.1e-09
+```
+
+C3:TFT's best is `HIF1_Q3` at 1.2e-4 -- an HRE motif, which cannot distinguish
+HIF-1 from HIF-2 because they bind the same element. **The collection, not the
+grading, is what capped the method.**
+
+### Self-reference was checked and is absent
+
+`TF_Perturbations` is built from knockdown experiments, and so is GPSAdb, so a
+set and a "measured" row could be the same study counted twice. Sampled 58
+GPSAdb dataset accessions against the library's 240 human GSEs: **0 overlap**.
+The specific hits (`GSE44943`, `GSE54360`, `GSE50588`) are not in GPSAdb at all,
+and GPSAdb's nine HIF1A datasets come from nine other studies.
+
+The risk is real in principle and needs a guard -- match source accession
+against GPSAdb's `accession` field before letting a library set corroborate a
+GPSAdb row -- but it did not bite here.
+
+### A correction
+
+An earlier section claimed GPSAdb reports no tested-gene total, so an ORA
+background cannot be recovered from it. That is wrong: `gpsadb_dataset()`
+returns `n_genes_tested` (26880, 19654, 29914 for three datasets checked). The
+background was available all along; the second-example failure was my not
+looking for it.
+
+### Up/down split, which gives ORA a direction without GSEA
+
+Splitting the airway-style input by sign and testing each half against C3:TFT,
+on the hypoxia contrast:
+
+| Input | Significant sets | `HIF1_Q3` padj |
+| --- | --- | --- |
+| Both directions (403 genes) | 21 | 1.2e-4 |
+| **Up only (351)** | **32** | **1.0e-5** |
+| Down only (52) | 0 | -- |
+
+Splitting improves power 12-fold and the sign of the result carries the
+direction: enrichment among up-genes means the regulator's targets rise. This
+is cheaper than GSEA (no ranking needed, no permutation) and it does not
+collide with the perturbation direction, because it is attached to the
+collection row rather than merged with the measured row.
