@@ -1,5 +1,6 @@
+# clusterProfiler 4.21.4.003
 
-# clusterProfiler 4.21.4.002
++ **Alias resolution is checked in both directions.** `GR` is the collection side of `NR3C1 -> GR`; `HIF1` is the legacy side of `HIF1 -> HIF1A`. The earlier fix handled only the first, so `HIF1` was still classified as a family label and dropped from the perturbation candidates -- and on a hypoxia-versus-normoxia dataset (GSE319526, Mol Cell 2026) `HIF1A` could not reach `supported` despite GPSAdb holding five HIF1A knockdowns. It now does, under both front ends (2026-10-27, Tue)
 
 + `enrichDAVID()` applies `qvalueCutoff` row by row: an `NA` q-value means Storey estimation
 failed for that row, so it bypasses this cutoff (its `pvalue`/`p.adjust` filters still apply)
