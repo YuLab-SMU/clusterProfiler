@@ -103,3 +103,54 @@ test_that("adjudicate() refuses anything that is not an evidenceBundle", {
                  "must be an evidenceBundle")
     expect_error(adjudicate(list()), "must be an evidenceBundle")
 })
+
+test_that("a carried verdict table wins over a fresh adjudication", {
+    ## The bug this guards: interpret() re-adjudicated with the default
+    ## `min_independent`, so a caller who adjudicated at a stricter setting had
+    ## their decision silently overridden -- the one thing that making
+    ## adjudication a separate step is supposed to prevent.
+    ##
+    ## Built by hand rather than through evidence(): the shared fixture's sets
+    ## hold five to eight genes, and against those nothing can ever be
+    ## significant, so a real bundle here would make the assertion vacuous.
+    bundle <- structure(
+        list(regulators = data.frame(
+                 regulator = c("FOXO3", "FOXO3"), source = c("tf", "perturbagen"),
+                 term = c("FOXO3_TARGET_GENES", "D1"),
+                 named = c(TRUE, TRUE), level = c("B", "A"),
+                 padj_within_source = c(1e-6, 1e-6), setSize = c(8L, 8L),
+                 Count = c(5L, 5L), family = c(FALSE, FALSE),
+                 evidence_kind = c("measured", "measured"),
+                 direction = c("up", "up"), dataset = c(NA, "d"), system = c(NA, "x"),
+                 method = c(NA, "knockout"), significant = c(NA, NA),
+                 effect_size = c(NA_real_, NA_real_), in_system = c(NA, FALSE),
+                 up_rise = c(NA_integer_, 0L), up_fall = c(NA_integer_, 6L),
+                 up_sign_padj = c(NA_real_, 1e-6),
+                 down_rise = c(NA_integer_, 0L), down_fall = c(NA_integer_, 0L),
+                 down_sign_padj = c(NA_real_, NA_real_), stringsAsFactors = FALSE),
+             diagnostics = list(counts = data.frame(
+                 source = "tf", n_input = 5L, n_tested = 5L, n_sig_covered = 5L,
+                 uncovered_sig = 0L, coverage_tested = 1, coverage_floor = NA_real_,
+                 status = "graded", stringsAsFactors = FALSE)),
+             input = list(genes = paste0("g", 1:5), universe = paste0("g", 1:8),
+                          design = list(coverage_floor = NULL, species = "Homo sapiens"),
+                          up = paste0("g", 1:5), down = character(0)),
+             provenance = list(upstream = "tf", release = "2026.2.Hs")),
+        class = c("evidenceBundle", "list"))
+
+    ## At the default the regulator is supported and admitted.
+    expect_identical(adjudicate(bundle)$verdicts$verdict, "supported")
+    expect_equal(nrow(evidence_admitted(bundle)), 2)
+
+    ## A stricter adjudication -- what a caller gets from min_independent = 3 --
+    ## must be what evidence_admitted() uses when it is handed over.
+    strict <- adjudicate(bundle, min_independent = 3)$verdicts
+    expect_identical(strict$verdict, "single_source")
+    expect_equal(nrow(evidence_admitted(bundle, verdicts = strict)), 2)
+    ## And a table that admits nothing must admit nothing.
+    none <- strict
+    none$verdict <- "absent"
+    expect_equal(nrow(evidence_admitted(bundle, verdicts = none)), 0)
+    ## Both rows of the bundle are excluded, one per source.
+    expect_equal(nrow(evidence_excluded(bundle, verdicts = none)), 2)
+})

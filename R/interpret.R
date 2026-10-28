@@ -547,6 +547,7 @@ interpret <- function(x,
   # frames -- the shape process_enrichment_input() already handles. Every other
   # input type takes the existing path unchanged.
   bundle <- NULL
+  verdicts <- NULL
   ## Adjudication is a step, not an option. Accepting a bundle here as well
   ## would let a caller pay for a model call while skipping the decision about
   ## which claims survive it, and the whole point of separating
@@ -561,11 +562,12 @@ interpret <- function(x,
   }
   if (inherits(x, "adjudication")) {
     bundle <- x$evidence
-    ## The verdict table is the authority for what may be said, not whatever
-    ## the bundle happened to carry -- a caller may have adjudicated at a
-    ## stricter `min_independent`, and that decision has to travel.
-    bundle$writable <- x$verdicts
-    x <- .process_evidence_input(bundle, n_pathways)
+    ## The verdict table is the authority for what may be said. It has to be
+    ## carried, not recomputed: a caller may have adjudicated at a stricter
+    ## `min_independent`, and recomputing here with the default would quietly
+    ## admit exactly what their adjudication ruled out.
+    verdicts <- x$verdicts
+    x <- .process_evidence_input(bundle, n_pathways, verdicts = verdicts)
     if (is.null(x)) {
       rlang::abort(c(
         paste0("No entity in this adjudication carries level A or B with a ",
@@ -661,10 +663,11 @@ interpret <- function(x,
   .p <- .prov_finalize(.prov, "interpret", .ev_sha)
 
   if (length(results) == 1 && names(results)[1] == "Default") {
-    return(.attach_evidence(.attach_provenance(results[[1]], .p), bundle))
+    return(.attach_evidence(.attach_provenance(results[[1]], .p), bundle,
+                            verdicts = verdicts))
   }
   class(results) <- c("interpretation_list", "list")
-  .attach_evidence(.attach_provenance(results, .p), bundle)
+  .attach_evidence(.attach_provenance(results, .p), bundle, verdicts = verdicts)
 }
 
 # ============================================================================
@@ -2378,14 +2381,14 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
 ##
 ## The two are kept on the result rather than printed, so a reader can check a
 ## published sentence against the evidence that admitted it.
-.attach_evidence <- function(res, bundle) {
+.attach_evidence <- function(res, bundle, verdicts = NULL) {
   if (is.null(bundle)) return(res)
-  res$evidence_admitted <- evidence_admitted(bundle)
-  res$evidence_excluded <- evidence_excluded(bundle)
+  res$evidence_admitted <- evidence_admitted(bundle, verdicts = verdicts)
+  res$evidence_excluded <- evidence_excluded(bundle, verdicts = verdicts)
   res$unsupported_claims <- if (inherits(res, "interpretation_list")) {
-    lapply(res, unsupported_claims, x = bundle)
+    lapply(res, unsupported_claims, x = bundle, verdicts = verdicts)
   } else {
-    unsupported_claims(res, bundle)
+    unsupported_claims(res, bundle, verdicts = verdicts)
   }
   res
 }

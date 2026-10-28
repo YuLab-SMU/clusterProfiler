@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.012
+# clusterProfiler 4.21.4.013
 
 ## mechanism analysis: collect, adjudicate, write
 
@@ -52,6 +52,7 @@
 
 ## interpret()
 
++ fix `interpret()` reverting a caller's adjudication. It re-ran `adjudicate()` with the default `min_independent` in three places -- the prompt builder and the two post-hoc evidence tables -- so a caller who adjudicated at a stricter setting had it silently overridden, which is the one thing making adjudication a separate step exists to prevent. The carried verdict table now travels through the whole call (2026-10-28, Wed)
 + `interpret()` gains `evidence_status()`, a deterministic grounding check: every gene symbol the interpretation names is classified as `observed` or `out_of_evidence`. No model is called, so unlike a second model the check is exact (2026-09-26, Sat)
 + `interpret()`, `interpret_agent()` and `interpret_hierarchical()` stamp their results with an execution record, read back with `provenance()`: the model actually addressed, the decoding parameters and whether the response confirmed them, digests of the prompts and response, token usage and `finish_reason`. A remote model is not a versionable dependency, and without the record a transport failure arrives as an ordinary result (2026-09-03, Thu)
 + `interpret()` reads per-gene statistics through `gene_stats`, a differential-expression table whose gene, log fold change and adjusted p-value columns are recognised by name or row names, and lists the genes of the enriched terms with those values (2026-10-18, Sun)

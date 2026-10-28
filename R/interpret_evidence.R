@@ -39,13 +39,13 @@ NULL
 ## The enrichment objects themselves are used when present, so the prompt keeps
 ## the same shape as a plain interpret() call; a bundle built with
 ## upstream = "tf" therefore looks exactly like interpret(list(tf = <enrichResult>)).
-.process_evidence_input <- function(x, n_pathways = NULL) {
+.process_evidence_input <- function(x, n_pathways = NULL, verdicts = NULL) {
     sources <- intersect(x$provenance$upstream, names(x))
     sources <- sources[vapply(sources, function(s) inherits(x[[s]], c("enrichResult",
                                                                      "gseaResult")), TRUE)]
     if (!length(sources)) return(NULL)
 
-    admitted <- evidence_admitted(x)
+    admitted <- evidence_admitted(x, verdicts = verdicts)
     out <- vector("list", length(sources))
     names(out) <- sources
 
@@ -119,10 +119,14 @@ mechanism_measured_prompt_rows_cols <- function(n) {
 }
 
 ## The rows adjudicate() supports and the level allows.
-evidence_admitted <- function(x, min_independent = 2) {
+evidence_admitted <- function(x, min_independent = 2, verdicts = NULL) {
     r <- x$regulators
     if (!nrow(r)) return(mechanism_empty_regulators())
-    cv <- adjudicate(x, min_independent = min_independent)$verdicts
+    ## The caller's adjudication wins over a fresh one. Recomputing here with the
+    ## default `min_independent` silently overrode a stricter decision the caller
+    ## had already made -- which is the one thing adjudication as a separate step
+    ## exists to prevent.
+    cv <- .verdicts_or_adjudicate(x, min_independent, verdicts)
 
     keep <- cv$verdict %in% c("supported", "single_source") &
         !is.na(cv$max_level) & cv$max_level %in% c("A", "B")
@@ -164,11 +168,14 @@ mechanism_empty_regulators <- function() {
 }
 
 ## Everything that did not reach the prompt, with the reason.
-evidence_excluded <- function(x, min_independent = 2) {
+evidence_excluded <- function(x, min_independent = 2, verdicts = NULL) {
     r <- x$regulators
     if (!nrow(r)) return(mechanism_empty_regulators()[0, ])
-    cv <- adjudicate(x, min_independent = min_independent)$verdicts
-    admitted <- evidence_admitted(x, min_independent = min_independent)
+    cv <- .verdicts_or_adjudicate(x, min_independent, verdicts)
+    ## The same table has to reach the admission decision too; recomputing it
+    ## here would put the exclusion reason and the admitted set in disagreement.
+    admitted <- evidence_admitted(x, min_independent = min_independent,
+                                 verdicts = cv)
     left <- r[!r$term %in% admitted$term, , drop = FALSE]
     if (!nrow(left)) return(cbind(left, reason = character(0)))
 
@@ -197,7 +204,8 @@ evidence_excluded <- function(x, min_independent = 2) {
 ## token is reported only when it matches the shape of a HGNC symbol -- starts
 ## with a letter, continues with letters and digits, and is neither a
 ## hyphenated compound nor a bare acronym longer than five characters.
-unsupported_claims <- function(interpretation, x, min_independent = 2) {
+unsupported_claims <- function(interpretation, x, min_independent = 2,
+                               verdicts = NULL) {
     admitted <- evidence_admitted(x, min_independent = min_independent)
     background <- toupper(x$input$design$background %||% character(0))
     vocab <- unique(c(toupper(admitted$regulator), background,
@@ -228,4 +236,14 @@ unsupported_claims <- function(interpretation, x, min_independent = 2) {
     caps <- caps[!grepl("^[A-Z][0-9]+$", caps)]
     unexplained <- setdiff(caps, c(vocab, .evidence_stop, .evidence_claims_stop))
     unexplained[!vapply(unexplained, is_family_of_admitted, TRUE)]
+}
+
+## The verdict table to use: the caller's if given, otherwise a fresh one.
+##
+## `verdicts = NULL` means "no adjudication was carried in", which is the case
+## for the legacy entry points; those still get a verdict computed here rather
+## than a different answer.
+.verdicts_or_adjudicate <- function(x, min_independent, verdicts) {
+    if (!is.null(verdicts)) return(verdicts)
+    adjudicate(x, min_independent = min_independent)$verdicts
 }
