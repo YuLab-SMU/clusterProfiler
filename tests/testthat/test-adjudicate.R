@@ -184,6 +184,21 @@ test_that("pathway attributions reach the prompt as context and only via decided
     ## rather than appearing with an empty list.
     expect_false(grepl("glycolysis", txt))
 
+    ## The most significant pathways come first, not the alphabetically first.
+    ## The layer groups its rows by pathway id, so row order is no guide.
+    shuffled <- pw
+    shuffled$pathway <- c("GO:0000001", "GO:0000001", "GO:9999999")
+    shuffled$pathway_description <- c("worst", "worst", "best")
+    shuffled$padj_within_pathway <- c(0.1, 0.1, 1e-20)
+    adj2 <- structure(
+        list(verdicts = data.frame(regulator = "HIF1A", verdict = "supported",
+                                   stringsAsFactors = FALSE),
+             evidence = list(pathways = shuffled)),
+        class = c("adjudication", "list"))
+    ordered <- .mechanism_pathway_context(adj2)
+    expect_lt(regexpr("best", paste(ordered, collapse = " ")),
+              regexpr("worst", paste(ordered, collapse = " ")))
+
     ## Rendered in its own section, next to the terms it is a reading of.
     prompt <- .build_data_sections("TERM1 (p=1e-3)", pathway_context = ctx)
     expect_match(prompt, "Regulator-Pathway Attribution")

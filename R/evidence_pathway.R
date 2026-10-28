@@ -257,7 +257,13 @@
     pw <- pw[pw$regulator %in% admitted, , drop = FALSE]
     if (!nrow(pw)) return(NULL)
 
-    ids <- utils::head(unique(pw$pathway), max_pathways)
+    ## Ordered by the pathway's best corrected p-value, not by its identifier.
+    ## The layer returns its rows grouped by pathway id (split() sorts the
+    ## levels), so taking the first few in row order would show whichever
+    ## identifiers sort early -- for GO, essentially at random -- instead of the
+    ## pathways the enrichment actually ranked highest.
+    best <- tapply(pw$padj_within_pathway, pw$pathway, min, na.rm = TRUE)
+    ids <- utils::head(names(sort(best)), max_pathways)
     lines <- vapply(ids, function(id) {
         rows <- pw[pw$pathway == id, , drop = FALSE]
         rows <- utils::head(rows[order(rows$padj_within_pathway), , drop = FALSE],
