@@ -40,6 +40,19 @@
 #'   answers, the GSEA form and the `enrichResult` form rank the true regulator
 #'   identically (MRR 0.046 against 0.047), because the limit is the
 #'   over-representation test's power at small overlaps, not the input.
+#' @param pathway The conventional enrichment layer. `FALSE` (the default)
+#'   skips it. `TRUE` runs it here, on the up and the down half separately, and
+#'   then asks which regulator's target set explains each pathway -- a different
+#'   question from the collection layer, which asks which regulator's target set
+#'   is over-represented in the whole list. An `enrichResult` or `gseaResult`
+#'   reuses a result the caller already built instead of recomputing it, which is
+#'   also the way to pass one: `evidence()` no longer takes a result as `genes`,
+#'   because reading genes back out of it silently drops every gene that appears
+#'   only in a pathway below its p-value cutoff.
+#'
+#'   The pathway rows are kept in `$pathways`, never in `$regulators`. They are
+#'   derived from the same collections, so counting them as a source would let
+#'   one collection corroborate itself.
 #' @param design A list describing the experiment; see Details.
 #' @param upstream Collections to test: `"tf"`, `"tfunion"`, `"mirna"`,
 #'   `"perturbagen"`, `"cellstate"` or `"tissue"`. Defaults to `"tf"` alone.
@@ -123,6 +136,7 @@
 #' @export
 evidence <- function(genes,
                      design       = list(),
+                     pathway      = FALSE,
                      upstream     = "tf",
                      universe     = NULL,
                      network      = FALSE,
@@ -170,12 +184,44 @@ evidence <- function(genes,
         ))
     }
 
+    ## Whether the caller named the fold-change column themselves, before the
+    ## defaults fill it in. An explicit name that is missing is an error; the
+    ## default name being absent just means the table has no direction.
+    logfc_given <- "logfc_col" %in% names(design)
+
     design <- mechanism_design(design)
 
     ## A named numeric vector is two things at once: the genes and the sign each
     ## one moved by. Held apart from `genes` because the rest of the function
     ## works in symbols, and the statistics are needed to split the list.
     signed <- NULL
+    ## A data.frame carrying a fold-change column is the canonical input: it is
+    ## the shape a DE table already has, and it holds the genes and the
+    ## direction at once.
+    if (is.data.frame(genes) && !is.null(design$logfc_col)) {
+        has_col <- design$logfc_col %in% names(genes)
+        if (!has_col && logfc_given) {
+            rlang::abort(c(
+                paste0("`genes` has no column \"", design$logfc_col, "\"."),
+                i = "Set `design$logfc_col` to the fold-change column, or drop it to run without direction."
+            ))
+        }
+        if (!has_col) {
+            rlang::warn(paste0(
+                "No \"", design$logfc_col, "\" column in `genes`, so the list has no ",
+                "direction: the up/down split, the perturbation sign test and the ",
+                "pathway layer cannot be asked. Set `design$logfc_col` to the ",
+                "column that holds it."))
+        } else {
+            lfc <- suppressWarnings(as.numeric(genes[[design$logfc_col]]))
+            sym <- as.character(genes[[design$gene_col]])
+            keep <- !is.na(lfc) & !is.na(sym) & nzchar(sym)
+            if (any(keep)) {
+                signed <- stats::setNames(lfc[keep], sym[keep])
+                signed <- signed[!duplicated(names(signed))]
+            }
+        }
+    }
     if (is.numeric(genes) && !is.null(names(genes)) && any(nzchar(names(genes)))) {
         signed <- genes[!is.na(genes)]
         signed <- signed[nzchar(names(signed))]
@@ -202,9 +248,18 @@ evidence <- function(genes,
         ## the direction and the continuous signal GSEA was run to obtain.
         ranked <- from_result$ranked
     } else if (inherits(genes, "enrichResult")) {
-        from_result <- .mechanism_from_enrichresult(genes, design)
-        genes <- from_result$genes
-        if (is.null(universe)) universe <- from_result$universe
+        ## Reading genes back out of an enrichment result loses them: @result is
+        ## truncated at pvalueCutoff, so on the airway list 897 input genes came
+        ## back as 483 with nothing in the output to say so. Taking the genes
+        ## from the DE table and the pathways from the result loses nothing.
+        rlang::abort(c(
+            "`evidence()` no longer accepts an `enrichResult` as `genes`.",
+            i = paste0("Pass the genes themselves and hand the result to `pathway =`, ",
+                       "which uses it for the pathways while the genes stay complete: ",
+                       "evidence(de, pathway = result)."),
+            i = paste0("Reading genes back out of a result silently drops any gene that ",
+                       "appears only in a pathway below its p-value cutoff.")
+        ))
     }
 
     genes <- mechanism_genes(genes, design)
@@ -364,7 +419,11 @@ evidence <- function(genes,
             genes     = genes,
             universe  = universe,
             design    = design,
-            namespace = "SYMBOL"
+            namespace = "SYMBOL",
+            ## Whether the caller's list carried a direction. The layers that
+            ## need one report `untested` when it is FALSE, and print() has to be
+            ## able to say which kind of silence this was.
+            directed  = !is.null(signed)
         ),
         sets = lapply(sets, function(g) list(
             gsname   = g@gsname,
@@ -409,6 +468,34 @@ evidence <- function(genes,
     ## Kept separate from the verdict table on purpose: this ranks experiments,
     ## not regulators, and a row here must never be read as a mechanism claim.
     if (!is.null(ppi)) out$ppi <- ppi
+
+    ## The pathway layer, also separate. See evidence_pathway.R for why it must
+    ## not become rows in $regulators.
+    ## NULL means "not asked", the same as FALSE: a caller who computed a result
+    ## conditionally ends up passing NULL, and treating that as a request would
+    ## silently skip the layer while pretending to attempt it.
+    if (!isFALSE(pathway) && !is.null(pathway)) {
+        up <- if (!is.null(signed)) names(signed)[signed > 0] else character(0)
+        dn <- if (!is.null(signed)) names(signed)[signed < 0] else character(0)
+        if (isTRUE(pathway) && is.null(signed)) {
+            rlang::warn(paste0(
+                "`pathway = TRUE` needs a direction to enrich each pathway against; ",
+                "the list has none, so the pathway layer was skipped. Supply ",
+                "`design$logfc_col`, or pass a computed result as `pathway =`."))
+        } else {
+            pw <- tryCatch({
+                pathways <- .mechanism_pathways(pathway, up, dn, universe, design)
+                .mechanism_pathway_layer(pathways, universe, sets,
+                                         minGSSize, maxGSSize,
+                                         top = design$pathway_top)
+            }, error = function(e) {
+                failures$add(source = "pathway", stage = "enrich",
+                             message = conditionMessage(e))
+                NULL
+            })
+            if (!is.null(pw)) out$pathways <- pw
+        }
+    }
 
     ## The class must exist before the writable table is built: it defers to
     ## consensus(), which refuses anything that is not an evidenceBundle.
@@ -474,6 +561,18 @@ print.evidenceBundle <- function(x, ...) {
         }
     }
 
+    ## What the optional layers could and could not be asked. A layer nobody
+    ## asked is not a layer that found nothing, and without these two lines the
+    ## reader cannot tell the difference.
+    if (!is.null(x$pathways)) {
+        cat("  pathways:     ", length(unique(x$pathways$pathway)),
+            " pathway(s) broken down into candidate regulators\n", sep = "")
+    }
+    if (!isTRUE(x$input$directed)) {
+        cat("  NO DIRECTION:  the up/down split, the perturbation sign test and",
+            "\n                 the pathway layer could not be asked.\n", sep = "")
+    }
+
     if (nrow(shown)) {
         shown <- shown[order(shown$padj_within_source), , drop = FALSE]
         shown <- utils::head(shown, 10)
@@ -504,6 +603,14 @@ mechanism_design <- function(design) {
         gene           = NULL,
         direction      = NULL,
         gene_col       = "gene",
+        ## Which column of a data.frame carries the direction. Named rather than
+        ## guessed: a table that spells it "logFC" would otherwise run with every
+        ## directional layer reporting `untested`, which reads as "not
+        ## answerable" when the truth is "a column was not found".
+        logfc_col      = "log2FoldChange",
+        ## The conventional enrichment this function runs when `pathway = TRUE`.
+        pathway_ontology = "BP",
+        pathway_top    = 20L,
         coverage_floor = NULL,
         ## Entities that belong to the experimental setting rather than to the
         ## findings, e.g. the receptor a treatment acts through.

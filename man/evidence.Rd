@@ -7,6 +7,7 @@
 evidence(
   genes,
   design = list(),
+  pathway = FALSE,
   upstream = "tf",
   universe = NULL,
   network = FALSE,
@@ -40,6 +41,20 @@ evidence(
   over-representation test's power at small overlaps, not the input.}
 
 \item{design}{A list describing the experiment; see Details.}
+
+\item{pathway}{The conventional enrichment layer. `FALSE` (the default)
+  skips it. `TRUE` runs it here, on the up and the down half separately, and
+  then asks which regulator's target set explains each pathway -- a different
+  question from the collection layer, which asks which regulator's target set
+  is over-represented in the whole list. An `enrichResult` or `gseaResult`
+  reuses a result the caller already built instead of recomputing it, which is
+  also the way to pass one: `evidence()` no longer takes a result as `genes`,
+  because reading genes back out of it silently drops every gene that appears
+  only in a pathway below its p-value cutoff.
+
+  The pathway rows are kept in `$pathways`, never in `$regulators`. They are
+  derived from the same collections, so counting them as a source would let
+  one collection corroborate itself.}
 
 \item{upstream}{Collections to test: `"tf"`, `"tfunion"`, `"mirna"`,
   `"perturbagen"`, `"cellstate"` or `"tissue"`. Defaults to `"tf"` alone.
