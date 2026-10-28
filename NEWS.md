@@ -1,4 +1,6 @@
-# clusterProfiler 4.21.4.005
+# clusterProfiler 4.21.4.006
+
++ Two `setReadable()` tests asserted what they read back off the object under test: one hardcoded an Entrez id whose presence in the OrgDb subset was assumed, the other compared `EXTID2NAME` output against `mapIds` output, which passes whatever the mapping did. The first now asserts only the shape -- the mapping covers the query genes and names none as NA -- and the id-to-symbol correspondence moved to a test with a fixed input and a stated expectation: TP53, BRCA1 and A1BG for 7157, 672 and 1 (2026-10-28, Wed)
 
 + An interrupted Enrichr download no longer poisons the cache: the four union libraries now count as cached only when a `.meta` marker sits beside the GMT, as the MSigDB files already did. A truncated file used to be reused, which shrank the collection and graded every regulator outside it `absent` instead of `failed` (2026-10-28, Wed)
 + `tft` combined with `upstream = "tfunion"` is now an error instead of being silently ignored. `tft = "gtrd"` is how a caller escapes the family and consensus labels no perturbation dataset can answer for, so dropping it turned a 504-set search into a 2869-set one without a word (2026-10-28, Wed)

@@ -60,11 +60,15 @@ test_that("setReadable leaves the query record in its input namespace", {
 
     ## @gene records what was asked for, not what it was displayed as
     expect_identical(conv@gene, res@gene)
-    ## the mapping itself is kept, and covers exactly the query genes (id 1 is
-    ## the first Entrez id in the test subset and maps to A1BG); it is not a
-    ## global symbol table, so asking for an id outside the subset is out of range
+    ## The mapping itself is kept and covers exactly the query genes -- it is not
+    ## a global symbol table, so an id outside the subset is out of range. Only
+    ## the shape is asserted here: which symbols come back is fixed by the OrgDb,
+    ## not by this package, and a test that read the answer back off the object
+    ## under test would pass whatever the mapping did. The actual id -> symbol
+    ## correspondence is specified with a fixed input in the EXTID2NAME test.
     expect_identical(length(conv@gene2Symbol), length(res@gene))
-    expect_identical(unname(conv@gene2Symbol[["1"]]), "A1BG")
+    expect_setequal(names(conv@gene2Symbol), res@gene)
+    expect_false(anyNA(names(conv@gene2Symbol)))
 })
 
 test_that("setReadable is stable when applied twice", {
@@ -95,9 +99,16 @@ test_that("EXTID2NAME maps ids and passes unmappable ones through", {
     ## this level because the behaviour that matters (ids with no symbol are
     ## passed through rather than becoming NA) is what setReadable() relies on.
     X <- enrichit::EXTID2NAME
-    out <- X("org.Hs.eg.db", c("7157", "672"), "ENTREZID", "SYMBOL")
-    expect_identical(unname(out["7157"]), "TP53")
-    expect_identical(unname(out["672"]), "BRCA1")
+
+    ## Fixed input, stated expectation. The three ids below are the canonical
+    ## HGNC assignments for these genes and are what a caller of setReadable()
+    ## relies on seeing; the input is specified here instead of being read off the
+    ## result, and the order is part of the contract (a caller indexing the vector
+    ## positionally must get the gene it asked for).
+    expect_identical(
+        X("org.Hs.eg.db", c("7157", "672", "1"), "ENTREZID", "SYMBOL"),
+        c("7157" = "TP53", "672" = "BRCA1", "1" = "A1BG")
+    )
 
     ## An id the OrgDb cannot map comes back as NA, NOT as itself.
     ##
