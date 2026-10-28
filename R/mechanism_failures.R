@@ -133,6 +133,28 @@ print.mechanismFailures <- function(x, ...) {
 ## discards every row it produces. The rule therefore lives in one place: a row
 ## is significant when its source says so, and a source that reports a p-value
 ## says so with the p-value.
+#' Which rows of a regulator table are significant
+#'
+#' One rule for the whole table. A row carrying `padj_within_source` is judged
+#' by it; a row without one falls back to the source's own `significant` flag.
+#' Neither alone is enough: a p-value of 0.6 is not made significant by a flag,
+#' and a source that reports no test (a similarity rank, say) still knows which
+#' of its rows are hits.
+#'
+#' Exported because the alternative -- testing `< alpha` by hand -- silently
+#' ignores the flag and treats a `NA` p-value as "not significant" rather than
+#' as "not tested".
+#'
+#' @param r A regulator `data.frame`, e.g. `evidence(x)$regulators`.
+#' @param alpha The threshold for `padj_within_source`.
+#' @return A logical vector, one per row.
+#' @seealso [evidence()], [adjudicate()]
+#' @examples
+#' \dontrun{
+#' r <- evidence(genes, upstream = "tf")$regulators
+#' r[mechanism_significant(r), ]
+#' }
+#' @export
 mechanism_significant <- function(r, alpha = 0.05) {
     if (!nrow(r)) return(logical(0))
 

@@ -264,6 +264,22 @@ adjudicate <- function(x, min_independent = 2, coverage_floor = NULL) {
 ## speaks about. An `absent` verdict is reported once per source in
 ## `$diagnostics`; repeating it for every one of a thousand factor labels turns
 ## the sentence table into noise and hides the few that matter.
+#' The findings an adjudication allows you to talk about
+#'
+#' Keep the entities whose verdict is `supported` or `single_source`, dropping
+#' the ones that were examined and found wanting. This is the set a narrative
+#' may discuss, and it is exported because the alternative -- filtering on the
+#' verdict column by hand -- is easy to get subtly wrong: `absent` is evidence
+#' against, `untested` is no evidence at all, and neither belongs in a claim.
+#'
+#' @param cv An `adjudication` from [adjudicate()], or its `$verdicts` table.
+#' @return A `data.frame` of the admitted rows.
+#' @seealso [adjudicate()], [collapse_findings()], [interpret()]
+#' @examples
+#' \dontrun{
+#' consensus_findings(adjudicate(ev))
+#' }
+#' @export
 consensus_findings <- function(cv) {
     ## Accepts the object as well as the frame: every caller has an
     ## adjudication, and reaching into $verdicts at each of them would spread

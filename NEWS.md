@@ -1,7 +1,10 @@
-# clusterProfiler 4.21.4.016
+# clusterProfiler 4.21.4.017
 
 ## mechanism analysis: collect, adjudicate, write
 
++ `consensus_findings()` and `mechanism_significant()` are exported. Both answer questions a caller asks immediately after `adjudicate()` -- which findings may be discussed, and which rows reached significance -- and both are easy to get subtly wrong by hand: filtering on a p-value ignores a source's own `significant` flag, and treating `absent` as fit to discuss contradicts the verdict (2026-10-28, Wed)
++ `mechanism_alias_regulator()` is exported. The collections say `HIF1` where the database says `HIF1A`, and `GR` where it says `NR3C1`; a caller comparing either side against an outside database hits the same mismatch, and a hand-written alias table drifts from this one (2026-10-28, Wed)
++ A `<enrichResult>` handed to `pathway =` now gets a `pathway_direction` inferred from the caller's own up and down halves, instead of reaching the narrative as "direction not stated". A pathway split evenly between the halves stays `NA` rather than being given the majority side (2026-10-28, Wed)
 + `evidence()` grades a gene list against upstream collections -- transcription-factor targets, microRNA targets, cell-state and tissue signatures -- and returns an `evidenceBundle` whose `$regulators` table carries a per-regulator level instead of a bare p-value. The column is `padj_within_source`: C3:TFT and C3:MIR hold different numbers of sets, so pooling would let a large collection dilute a small one (2026-10-25, Sun)
 + `$diagnostics` keeps separate counts whose denominators differ: `n_input` is what was handed in, `n_tested` is how many could enter the test at all, `n_sig_covered` is how many a significant regulator covers. `$diagnostics$per_gene` labels each gene `supported`, `absent` or `untested`, because the absence of evidence is not the evidence of absence (2026-10-25, Sun)
 + `$regulators` carries `evidence_kind` (`measured`, `predicted`, `observed` or `none`), and `supported` requires at least one measured source corroborated by a second. Counting sources is not counting evidence: two predictions agreeing is one observation confirmed by the same reasoning twice. On the airway list `tf+mirna` gave 177 findings and no `supported`, `tf+perturbagen` 22 and 22 (2026-10-25, Sun)

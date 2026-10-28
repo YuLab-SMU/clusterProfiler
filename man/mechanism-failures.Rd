@@ -14,9 +14,15 @@ mechanism_significant(r, alpha = 0.05)
 \item{x}{An object carrying failures.}
 
 \item{...}{Ignored.}
+
+\item{r}{A regulator `data.frame`, e.g. `evidence(x)$regulators`.}
+
+\item{alpha}{The threshold for `padj_within_source`.}
 }
 \value{
 `x`, invisibly.
+
+A logical vector, one per row.
 }
 \description{
 Every source this package consults can fail: a database rejects an
@@ -39,4 +45,86 @@ The rule this file implements is:
   silently admits everything is worse than no boundary, because the caller
   believes it was enforced.
 }
+\examples{
+\dontrun{
+r <- evidence(genes, upstream = "tf")$regulators
+r[mechanism_significant(r), ]
+}
+}
+\seealso{
+[evidence()], [adjudicate()]
+}
+\keyword{"not}
+\keyword{(a}
+\keyword{--}
+\keyword{0.6}
+\keyword{A}
+\keyword{Exported}
+\keyword{Neither}
+\keyword{One}
+\keyword{Which}
+\keyword{`<}
+\keyword{`NA`}
+\keyword{`padj_within_source`}
+\keyword{`significant`}
+\keyword{a}
+\keyword{alone}
+\keyword{alpha`}
+\keyword{alternative}
+\keyword{and}
+\keyword{are}
+\keyword{as}
+\keyword{back}
+\keyword{because}
+\keyword{by}
+\keyword{carrying}
+\keyword{enough:}
+\keyword{falls}
+\keyword{flag}
+\keyword{flag,}
+\keyword{flag.}
+\keyword{for}
+\keyword{hand}
+\keyword{hits.}
+\keyword{ignores}
 \keyword{internal}
+\keyword{is}
+\keyword{it;}
+\keyword{its}
+\keyword{judged}
+\keyword{knows}
+\keyword{made}
+\keyword{no}
+\keyword{not}
+\keyword{of}
+\keyword{one}
+\keyword{own}
+\keyword{p-value}
+\keyword{rank,}
+\keyword{rather}
+\keyword{regulator}
+\keyword{reports}
+\keyword{row}
+\keyword{rows}
+\keyword{rule}
+\keyword{say)}
+\keyword{significant}
+\keyword{significant"}
+\keyword{silently}
+\keyword{similarity}
+\keyword{source}
+\keyword{source's}
+\keyword{still}
+\keyword{table}
+\keyword{table.}
+\keyword{test}
+\keyword{tested".}
+\keyword{testing}
+\keyword{than}
+\keyword{that}
+\keyword{the}
+\keyword{to}
+\keyword{treats}
+\keyword{which}
+\keyword{whole}
+\keyword{without}

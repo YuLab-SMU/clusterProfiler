@@ -28,6 +28,7 @@
         NULL
     }
     if (is.null(df) || !nrow(df)) return(NULL)
+    df <- .mechanism_pathways_direction(df, up, down)
     .mechanism_pathways_dedupe(df)
 }
 
@@ -69,6 +70,31 @@
     out <- do.call(rbind, parts)
     rownames(out) <- NULL
     out
+}
+
+## Fill in a direction the source object does not carry.
+##
+## An `enrichResult` says nothing about which way its pathways moved -- there is
+## no NES to read -- so a reused result would reach the narrative as "direction
+## not stated" even when the caller handed in a signed gene list. The halves are
+## already in hand, so the pathway's own genes say it: whichever half they fall
+## in more often is the direction.
+##
+## A tie is left NA rather than broken. A pathway split evenly between the up
+## and down halves moved neither way, and picking the larger count would invent
+## one.
+.mechanism_pathways_direction <- function(df, up, down) {
+    if ("direction" %in% names(df) && any(!is.na(df$direction))) return(df)
+    if (!length(up) && !length(down)) {
+        df$direction <- NA_character_
+        return(df)
+    }
+    df$direction <- vapply(strsplit(as.character(df$geneID), "/"), function(genes) {
+        n_up <- sum(genes %in% up)
+        n_down <- sum(genes %in% down)
+        if (n_up > n_down) "up" else if (n_down > n_up) "down" else NA_character_
+    }, "")
+    df
 }
 
 ## A result the caller already built. The direction comes from the sign of NES

@@ -224,3 +224,25 @@ test_that("a repressor report does not change the verdict", {
     expect_true(all(is.na(cv$perturbation_effect)))
     expect_true("perturbation_effect" %in% names(cv))
 })
+
+test_that("a reused result gets its pathway direction from the caller's halves", {
+    ## An enrichResult carries no NES, so a reused result reached the narrative
+    ## as "direction not stated" even when the caller had handed in a signed
+    ## list. The halves are in hand, so the pathway's own genes decide.
+    df <- data.frame(
+        ID = c("GO:1", "GO:2", "GO:3"),
+        Description = c("rises", "falls", "split"),
+        geneID = c("a/b/c", "d/e/f", "g/h"),
+        p.adjust = c(1e-3, 1e-3, 1e-3),
+        stringsAsFactors = FALSE)
+    out <- clusterProfiler:::.mechanism_pathways_direction(
+        df, up = c("a", "b", "g"), down = c("d", "e", "h"))
+    expect_identical(out$direction, c("up", "down", NA_character_))
+
+    ## A tie is left NA rather than broken: a pathway split evenly moved neither
+    ## way, and taking the larger count would invent a direction.
+    ##
+    ## With no direction at all there is nothing to infer.
+    none <- clusterProfiler:::.mechanism_pathways_direction(df, character(0), character(0))
+    expect_true(all(is.na(none$direction)))
+})

@@ -460,6 +460,24 @@ mechanism_regulator_aliases <- function() {
     )
 }
 
+#' Bring a regulator label to one spelling
+#'
+#' The collections and the perturbation databases do not agree on symbol
+#' spelling: C3:TFT names the hypoxia factor `HIF1` (the legacy symbol) while
+#' GPSAdb names it `HIF1A`, and the collections say `GR` where the database says
+#' `NR3C1`. Without this, one factor supported by both its target sets and a
+#' knockdown arrives as two findings and can never be corroborated.
+#'
+#' Exported because a caller comparing the package's labels against an outside
+#' database hits the same mismatch, and a hand-written alias table drifts from
+#' this one.
+#'
+#' @param regulator Character vector of regulator labels.
+#' @return The same vector, with aliases replaced by their canonical symbol.
+#' @seealso [evidence()], [adjudicate()]
+#' @examples
+#' mechanism_alias_regulator(c("HIF1", "GR", "HIF1A"))
+#' @export
 mechanism_alias_regulator <- function(regulator) {
     aliases <- mechanism_regulator_aliases()
     hit <- match(regulator, names(aliases))
