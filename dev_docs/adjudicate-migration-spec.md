@@ -102,7 +102,7 @@ prompt 里必须带上 verdict 与 level 两列，并在指令中写死这张对
 1. `verdicts` 的列，**顺序以 `consensus()` 的实际输出为准**（下面这一行是从代码里跑出来的，不是回忆的）：
    `regulator / sources / n_sources / max_level / verdict / padj / family / evidence_kind / direction / measured_direction / writable`。
    本文档 2026-10-28 的早期草稿把 `verdict / padj / family / max_level` 写成了另一种次序，与代码不符，已按代码订正。
-   末尾**追加** `direction_concordant`（由 `dev_docs/evidence-direction-spec.md` §5.4 引入）。
+   末尾**追加** `perturbation_effect`（由 `dev_docs/evidence-direction-spec.md` §5.4 引入；三值 `activator`/`repressor`/`NA`，不是布尔）。
    列名可追加，不可改名，不可插在中间。
 2. 四类 verdict 的判定条件（`supported` 需 ≥ `min_independent` 类不同来源、同一实体、且至少一个 B 及以上）。
 3. `absent` 与 `untested` 的区分，以及 `coverage_floor` 的语义。

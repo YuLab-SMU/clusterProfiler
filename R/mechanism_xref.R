@@ -527,3 +527,46 @@ mechanism_union_library <- function(gsid) {
     out[hit] <- pre[hit]
     out
 }
+
+## Which way a perturbation moves the factor, in the direction the caller's own
+## contrast is stated in.
+##
+## One place, because both the sign test and the concordance flag have to agree
+## about it, and a second copy would drift. GPSAdb's `method` is a mixed
+## vocabulary ("siRNA", "knockout") while `method_label` is normalised
+## ("Knock_down", "Knock_out"), so the label is read first and the raw method
+## second.
+##
+## "decrease" means the factor was removed, so its targets should FALL when it
+## is; "increase" means it was supplied, so its targets should RISE. Anything
+## unrecognised returns NA rather than a guess -- a wrong direction here would
+## silently invert every concordance call it touches.
+mechanism_method_sign <- function(method, method_label = NULL) {
+    lab <- tolower(gsub("[^a-z]", "", tolower(paste(method_label %||% ""))))
+    raw <- tolower(gsub("[^a-z]", "", tolower(paste(method %||% ""))))
+    txt <- paste(lab, raw)
+    out <- rep(NA_character_, length(txt))
+    ## Removal first: "knockout" contains "knock" and "overexpression" does not.
+    remove <- grepl("knockdown|knockout|sirna|shrna|crispr|deletion|inhibition", txt)
+    add <- grepl("overexpression|overexpress|activation|induction|oe", txt)
+    out[remove] <- "decrease"
+    out[add & !remove] <- "increase"
+    out
+}
+
+## The direction the responding genes should move if the regulator drives the
+## programme the collection layer found.
+##
+## The collection layer says the programme moved `direction` in the caller's
+## contrast. A factor that was removed cannot have pushed it that way: removing
+## an activator makes its targets fall, so a programme seen rising under a
+## knockdown is one the factor was restraining. Flipping the expectation for a
+## removal is what makes the two observations comparable at all.
+mechanism_expected_measured <- function(direction, method_sign) {
+    out <- rep(NA_character_, length(direction))
+    ok <- !is.na(direction) & !is.na(method_sign)
+    flip <- function(d) ifelse(d == "up", "down", ifelse(d == "down", "up", NA))
+    out[ok] <- ifelse(method_sign[ok] == "decrease",
+                      flip(direction[ok]), direction[ok])
+    out
+}

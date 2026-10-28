@@ -265,6 +265,12 @@ evidence <- function(genes,
     genes <- mechanism_genes(genes, design)
     universe <- mechanism_universe(universe, genes, design)
 
+    ## The two halves of the caller's contrast, computed once. Both the
+    ## perturbation sign test and the pathway layer ask about a half rather than
+    ## about the list, and recomputing them separately invites them to differ.
+    directed_up   <- if (!is.null(signed)) names(signed)[signed > 0] else NULL
+    directed_down <- if (!is.null(signed)) names(signed)[signed < 0] else NULL
+
     needed <- setdiff(genes, universe)
     if (length(needed)) {
         rlang::warn(paste0(
@@ -365,7 +371,9 @@ evidence <- function(genes,
                 method     = mechanism_treatment_method(design),
                 candidates = cand,
                 considered = length(cand),
-                system     = design$system %||% design$tissue
+                system     = design$system %||% design$tissue,
+                up         = directed_up,
+                down       = directed_down
             ),
             error = function(e) {
                 failures$add(source = "perturbagen", stage = "query",
@@ -475,8 +483,8 @@ evidence <- function(genes,
     ## conditionally ends up passing NULL, and treating that as a request would
     ## silently skip the layer while pretending to attempt it.
     if (!isFALSE(pathway) && !is.null(pathway)) {
-        up <- if (!is.null(signed)) names(signed)[signed > 0] else character(0)
-        dn <- if (!is.null(signed)) names(signed)[signed < 0] else character(0)
+        up <- directed_up %||% character(0)
+        dn <- directed_down %||% character(0)
         if (isTRUE(pathway) && is.null(signed)) {
             rlang::warn(paste0(
                 "`pathway = TRUE` needs a direction to enrich each pathway against; ",
@@ -876,6 +884,9 @@ mechanism_pad_columns <- function(r) {
         ## NA when no system was named, so the column never claims a match
         ## that was not checked.
         in_system = logical(),
+        ## The two halves' sign tests; collection rows carry NA.
+        up_rise = integer(), up_fall = integer(), up_sign_padj = numeric(),
+        down_rise = integer(), down_fall = integer(), down_sign_padj = numeric(),
         stringsAsFactors = FALSE
     )
     ## Assign the right length, not the template's zero: `r` may already have

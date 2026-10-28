@@ -81,7 +81,7 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
             max_level = character(), verdict = character(), padj = numeric(),
             family = logical(), evidence_kind = character(),
             direction = character(), measured_direction = character(),
-            writable = character(),
+            perturbation_effect = character(), writable = character(),
             stringsAsFactors = FALSE
         ))
     }
@@ -216,6 +216,19 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
                 !mine$source %in% c("perturbagen", "biotrigger")]),
             measured_direction = .consensus_direction(mine$direction[
                 mine$source %in% c("perturbagen", "biotrigger")]),
+            ## What the perturbation says the regulator DOES to the programme,
+            ## when it says anything. A report, not a condition: requiring it
+            ## would re-decide every verdict this package has already made, and
+            ## those were not wrong -- they lacked one corroboration test, they
+            ## did not rest on a false one.
+            ##
+            ## Deliberately not a logical "concordant" flag. On the hypoxia
+            ## contrast a knockdown that pushes the up-genes further up reads as
+            ## `FALSE` under that framing, which sounds like the evidence
+            ## contradicts the finding; it does not, it says the factor represses
+            ## them. Both are mechanisms, and collapsing them to true/false
+            ## throws away the more interesting half.
+            perturbation_effect = .consensus_perturbation_effect(mine),
             stringsAsFactors = FALSE
         )
     })
@@ -360,4 +373,54 @@ sources_source <- function(src) {
     if (!length(x)) return(NA_character_)
     if (length(unique(x)) == 1L) return(unique(x))
     "mixed"
+}
+
+## What the measured perturbation says the regulator does to the programme.
+##
+## The collection layer says the programme moved `direction` in the caller's own
+## contrast; the perturbation says what happens to those same genes when the
+## factor is removed or supplied. Putting the two together answers a question
+## neither can: is the factor pushing these genes up, or holding them down?
+##
+##   * knockdown, programme up, its genes fall -> the factor promotes them
+##   * knockdown, programme up, its genes rise -> the factor restrains them
+##
+## "activator" and "repressor" are both mechanisms. Reporting a single
+## concordant/discordant flag would have called the second one a failure, and on
+## the hypoxia contrast that was 7 of 25 supported findings.
+##
+## NA when the comparison cannot be made -- no direction on one side, or the sign
+## test found no side. "Could not check" and "checked, and it restrains them" are
+## different answers.
+.consensus_perturbation_effect <- function(mine) {
+    if (is.null(mine) || !nrow(mine)) return(NA_character_)
+
+    coll <- mine$direction[!mine$source %in% c("perturbagen", "biotrigger")]
+    coll <- coll[!is.na(coll) & coll %in% c("up", "down")]
+    if (!length(coll)) return(NA_character_)
+    ## Two collection rows pointing different ways means there is no single
+    ## programme to compare against.
+    direction <- unique(coll)
+    if (length(direction) != 1L) return(NA_character_)
+
+    pert <- mine[mine$source %in% c("perturbagen", "biotrigger"), , drop = FALSE]
+    if (!nrow(pert)) return(NA_character_)
+    sign <- mechanism_method_sign(pert$method[1])
+    if (is.na(sign)) return(NA_character_)
+
+    ## Read the half the collection layer's direction refers to. The up half was
+    ## tested into `direction` by the perturbation layer; the down half's verdict
+    ## is derivable from the counts it stored.
+    measured <- if (identical(direction, "up")) {
+        pert$direction[1]
+    } else {
+        .mechanism_half_direction(list(rise = pert$down_rise[1],
+                                       fall = pert$down_fall[1],
+                                       padj = pert$down_sign_padj[1]))
+    }
+    if (is.null(measured) || is.na(measured) || !measured %in% c("up", "down")) {
+        return(NA_character_)
+    }
+    expected <- mechanism_expected_measured(direction, sign)
+    if (identical(measured, expected)) "activator" else "repressor"
 }

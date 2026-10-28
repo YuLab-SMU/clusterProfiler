@@ -115,11 +115,13 @@ direction <- if (all(signs > 0)) "up" else if (all(signs < 0)) "down" else "mixe
 
 ### 5.4 与 L1 的一致性（D5 的落地）
 
-`adjudicate()` 的 verdicts 表新增一列 `direction_concordant`：
+`adjudicate()` 的 verdicts 表新增一列 `perturbation_effect`（三值：`"activator"` / `"repressor"` / `NA`）：
 
-- L1 有方向、L2 有方向、且两者符合该 `method` 的预期 → `TRUE`
-- 两者都有但相反 → `FALSE`
-- 任一缺失 → `NA`
+- L1 有方向、L2 有方向、且两者符合该 `method` 的预期 → `"activator"`（该因子促进这个程序）
+- 两者都有但方向相反 → `"repressor"`（该因子压制这个程序）
+- 任一缺失，或符号检验判不出方向 → `NA`
+
+**不是布尔值，这是实现时改掉的一个设计错误。** 原计划叫 `direction_concordant` 并返回 `TRUE/FALSE`，但在缺氧数据上，「敲低后我的上调基因继续上调」会得到 `FALSE`，读起来像「证据矛盾」——其实它说明该因子**抑制**这批基因。激活与抑制都是机制，压成一个真假值会丢掉更有信息量的一半：实测 25 个 supported 里有 7 个是这种情况。
 
 **它不改变 verdict。** `supported` 的判定条件保持 `adjudicate-migration-spec.md` §5.2 原样。理由：并入必要条件会让现有 25 个 supported 全部重判，而那批结论本身没有错——它们只是缺一个加强标记。
 
@@ -210,7 +212,7 @@ regulator, source, term, Count, setSize, padj_within_pathway, geneID
 | `R/evidence_pathway.R`（新） | L3：`.mechanism_pathway_layer()` |
 | `R/evidence_perturbation.R` | §5 的方向判定；新增 `sign_padj` / `n_agree` / `n_disagree` |
 | `R/mechanism_xref.R` 或新文件 | `mechanism_method_sign()`：一处定义 method → 方向预期 |
-| `R/consensus.R` | 新增 `direction_concordant` 列（不参与 verdict） |
+| `R/consensus.R` | 新增 `perturbation_effect` 列（不参与 verdict） |
 | `R/interpret_evidence.R` | `.process_evidence_input()` 适配新 bundle；L3 作为上下文进入 prompt |
 | `NAMESPACE` / `man/` | 由 roxygen 生成 |
 | `dev_docs/mechanism-accuracy.md` | §7 的四组结果 |
@@ -224,8 +226,8 @@ regulator, source, term, Count, setSize, padj_within_pathway, geneID
 两份 spec 同时生效，必须满足：
 
 1. **顺序**：本文件先落地（R1–R3），`adjudicate` 改名最后做（R4）。`adjudicate` 的冻结项依赖 `$regulators` 的列，先改 evidence 再冻结，只冻结一次。
-2. **冻结列更新**：`adjudicate-migration-spec.md` §5.1 的冻结列需追加 `direction_concordant`。这是本文件 §5.4 带来的唯一变更，其余列名与顺序不动。
-3. **verdict 判定条件不变**：`supported` 仍需 ≥ `min_independent` 个不同来源且至少一条 measured。`direction_concordant` 是标记，不是条件（D5）。
+2. **冻结列更新**：`adjudicate-migration-spec.md` §5.1 的冻结列需追加 `perturbation_effect`。这是本文件 §5.4 带来的唯一变更，其余列名与顺序不动。
+3. **verdict 判定条件不变**：`supported` 仍需 ≥ `min_independent` 个不同来源且至少一条 measured。`perturbation_effect` 是报告，不是条件（D5）。
 4. **`interpret(evidenceBundle)` 仍然要删**：`adjudicate-migration-spec.md` D2 不变。本文件新增的 `$pathways` 不构成保留该分支的理由。
 5. **prompt 对照表需扩一行**：`adjudicate-migration-spec.md` §4.2 的措辞表要补「L3 通路上下文不得被写成新的机制实体」。
 6. **同一概念只有一个名字**：`direction` = 调用方对比里的方向；`measured_direction` = 扰动数据集让基因走的方向。两份 spec 及各层输出都不得再引入第三种说法。
@@ -248,8 +250,8 @@ regulator, source, term, Count, setSize, padj_within_pathway, geneID
 新增 `tests/testthat/test-evidence-concordance.R`：
 
 9. `measured_direction` 在符号检验不显著时为 `mixed`，显著时取多数方。
-10. `direction_concordant`：knockdown 下 L1=up、L2=down → `TRUE`；L2=up → `FALSE`；缺一方 → `NA`。
-11. `direction_concordant` 为 `FALSE` 时 verdict 不变（证明它不是判定条件）。
+10. `perturbation_effect`：knockdown 下 L1=up、L2=down → `"activator"`；L2=up → `"repressor"`；缺一方 → `NA`。overexpression 下预期方向相反。
+11. `perturbation_effect` 为 `"repressor"` 时 verdict 不变（证明它不是判定条件）。
 
 修改：`test-mechanism.R` 中依赖 `evidence(enrichResult)` 的用例，改走 `pathway=`。
 

@@ -28,6 +28,16 @@
 #'   system wins the per-regulator deduplication over a more significant one
 #'   from elsewhere, and every row carries `in_system` so the match (or its
 #'   absence) is visible rather than assumed. Set through `design$system`.
+#' @param up,down The two halves of the caller's own contrast, as gene symbols.
+#'   When given, `direction` is decided by a binomial test on the relevant half
+#'   rather than by requiring every moved gene to go the same way -- a knockdown
+#'   necessarily moves some genes up and some down, so that requirement was never
+#'   met by real data and every dataset came back `mixed`. Restricted to one
+#'   half, the question has an answer: among my up genes that this perturbation
+#'   moves, do they move the way an activator's targets would? Both halves' counts
+#'   and corrected p-values travel with the row, because which half is the right
+#'   one to read depends on the direction the collection layer found, which is not
+#'   known here. `NULL` (the default) keeps the older rule.
 #' @param considered How many candidate regulators were eligible, when the
 #'   caller already knows. Recorded on the result so a handful of datasets
 #'   reads as "3 of the 30 strongest candidates had one" rather than "3
@@ -57,7 +67,9 @@ evidence_perturbation <- function(genes,
                                   pvalueCutoff = 0.05,
                                   candidates = NULL,
                                   considered = NULL,
-                                  system = NULL) {
+                                  system = NULL,
+                                  up = NULL,
+                                  down = NULL) {
     mechanism_require_mcp("gpsadb")
     genes <- unique(as.character(genes))
     genes <- genes[!is.na(genes) & nzchar(genes)]
@@ -117,6 +129,26 @@ evidence_perturbation <- function(genes,
         moved <- d[d$padj < pvalueCutoff, , drop = FALSE]
         if (nrow(moved) < min_genes) return(NULL)
 
+        ## The direction is decided per half, by a test, not by requiring every
+        ## sign to agree.
+        ##
+        ## The old rule asked whether all moved genes went the same way. A
+        ## knockdown moves some genes up and some down, so on any list of a few
+        ## hundred genes that is almost never true, and the answer was `mixed`
+        ## for every dataset -- a property of the ruler, not of the data.
+        ## Restricted to one half of the caller's own contrast, the question has
+        ## an answer: among my up genes that this perturbation moves, do they
+        ## move the way an activator's targets would?
+        half_up <- .mechanism_sign_test(moved, up)
+        half_down <- .mechanism_sign_test(moved, down)
+        ## One correction across the two halves, because they are two tests of
+        ## the same dataset and reporting either alone would overstate it.
+        padj <- stats::p.adjust(c(half_up$p, half_down$p), method = "BH")
+        half_up$padj <- padj[1]
+        half_down$padj <- padj[2]
+        half_up$direction <- .mechanism_half_direction(half_up)
+        half_down$direction <- .mechanism_half_direction(half_down)
+
         signs <- sign(moved$log2fc)
         ## The dataset's own description travels with the row. "D22765" alone
         ## tells a reader nothing; the cell line and method decide whether the
@@ -139,8 +171,17 @@ evidence_perturbation <- function(genes,
             padj_within_source = min(moved$padj),
             setSize            = nrow(d),
             Count              = nrow(moved),
-            direction          = if (all(signs > 0)) "up" else
+            ## Without a direction there is no half to test, so the old rule
+            ## stands and says `mixed`: it is not wrong there, it is unaskable.
+            direction          = if (!is.null(up) || !is.null(down)) half_up$direction else
+                                  if (all(signs > 0)) "up" else
                                   if (all(signs < 0)) "down" else "mixed",
+            up_rise            = half_up$rise,
+            up_fall            = half_up$fall,
+            up_sign_padj       = half_up$padj,
+            down_rise          = half_down$rise,
+            down_fall          = half_down$fall,
+            down_sign_padj     = half_down$padj,
             dataset            = meta$title,
             system             = meta$system,
             method             = meta$method,
@@ -245,6 +286,11 @@ mechanism_empty_perturbation <- function() {
         dataset = character(), system = character(), method = character(),
         significant = logical(), effect_size = numeric(),
         in_system = logical(),
+        ## The two halves' sign tests. Carried rather than collapsed: which half
+        ## is the right one to read depends on the direction the collection
+        ## layer found, and that is not known here.
+        up_rise = integer(), up_fall = integer(), up_sign_padj = numeric(),
+        down_rise = integer(), down_fall = integer(), down_sign_padj = numeric(),
         stringsAsFactors = FALSE
     )
 }
@@ -369,4 +415,43 @@ mechanism_lapply <- function(x, fun) {
         if (!nzchar(h)) return(FALSE)
         grepl(want, h, fixed = TRUE) || grepl(h, want, fixed = TRUE)
     }, logical(1), USE.NAMES = FALSE)
+}
+
+## One half's sign test.
+##
+## Restricted to the caller's own up (or down) genes, so the question is "among
+## the genes I say went up, which way did this perturbation move them" rather
+## than "did everything move together", which a knockdown never satisfies.
+##
+## Fewer than three genes gives no p-value. A binomial test on two observations
+## can never reach 0.05, so it would be a test that always says `mixed` while
+## looking like it had been run.
+.mechanism_sign_test <- function(moved, half) {
+    empty <- list(direction = NA_character_, rise = 0L, fall = 0L, p = NA_real_,
+                  padj = NA_real_)
+    if (is.null(half) || !length(half) || is.null(moved) || !nrow(moved)) {
+        return(empty)
+    }
+    hit <- moved[moved$gene %in% half, , drop = FALSE]
+    rise <- sum(hit$log2fc > 0)
+    fall <- sum(hit$log2fc < 0)
+    n <- rise + fall
+    if (n < 3L) return(c(empty[c("direction", "p", "padj")],
+                         list(rise = as.integer(rise), fall = as.integer(fall))))
+    list(rise = as.integer(rise), fall = as.integer(fall),
+         p = stats::binom.test(rise, n, 0.5)$p.value,
+         padj = NA_real_, direction = NA_character_)
+}
+
+## Read a half's direction off its own test.
+##
+## `mixed` here means the test did not find a direction, which is not the same
+## as the genes going both ways. Saying `mixed` for "no evidence of a side" is
+## the honest report; saying `up` because one more gene rose would not be.
+.mechanism_half_direction <- function(half, alpha = 0.05) {
+    if (is.null(half$padj) || is.na(half$padj) || is.na(half$rise)) {
+        return(NA_character_)
+    }
+    if (half$padj >= alpha) return("mixed")
+    if (half$rise > half$fall) "up" else if (half$fall > half$rise) "down" else "mixed"
 }

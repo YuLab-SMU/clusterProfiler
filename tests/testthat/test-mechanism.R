@@ -127,8 +127,12 @@ test_that("evidence() returns an evidenceBundle with the documented elements", {
         c("regulator", "source", "term", "named", "level",
           "padj_within_source", "setSize", "Count", "family",
           "evidence_kind", "direction", "dataset", "system", "method",
-          "significant", "effect_size",
-          "in_system")
+          "significant", "effect_size", "in_system",
+          ## The two halves' sign tests travel with the table: which half is
+          ## the right one to read depends on the direction the collection
+          ## layer found, which is not known where the rows are built.
+          "up_rise", "up_fall", "up_sign_padj",
+          "down_rise", "down_fall", "down_sign_padj")
     )
     ## Per-collection correction is reported under a name that says so.
     expect_false("padj" %in% names(ev$regulators))
@@ -645,8 +649,9 @@ test_that("a missing MCP companion package aborts instead of reporting no eviden
                  c("regulator", "source", "term", "named", "level",
                    "padj_within_source", "setSize", "Count", "family",
                    "evidence_kind", "direction", "dataset", "system", "method",
-                   "significant", "effect_size",
-          "in_system"))
+                   "significant", "effect_size", "in_system",
+                   "up_rise", "up_fall", "up_sign_padj",
+                   "down_rise", "down_fall", "down_sign_padj"))
 })
 
 test_that("evidence(treatment = 'none') does not ask GPSAdb", {

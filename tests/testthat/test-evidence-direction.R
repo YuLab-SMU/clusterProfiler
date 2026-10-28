@@ -154,3 +154,73 @@ test_that("the pathway layer never becomes a witness in the verdict table", {
     expect_identical(a$n_sources, b$n_sources)
     expect_identical(a$verdict, b$verdict)
 })
+
+## ---- L2: the perturbation's direction --------------------------------------
+
+test_that("the sign test reads a side only when the test supports it", {
+    ## The old rule required every moved gene to agree. A knockdown moves some
+    ## genes up and some down, so on any real list that never held and every
+    ## dataset came back `mixed` -- a property of the ruler, not of the data.
+    moved <- data.frame(gene = paste0("g", 1:30),
+                        log2fc = c(rep(-2, 12), rep(2, 2), rep(0.5, 16)),
+                        padj = 1e-6)
+    up <- paste0("g", 1:14)
+    half <- clusterProfiler:::.mechanism_sign_test(moved, up)
+    expect_identical(half$fall, 12L)
+    expect_identical(half$rise, 2L)
+    expect_lt(half$p, 0.05)
+    half$padj <- half$p
+    expect_identical(clusterProfiler:::.mechanism_half_direction(half), "down")
+
+    ## Two observations cannot produce p < 0.05, so a half that small must report
+    ## no direction rather than a test that always says `mixed`.
+    tiny <- clusterProfiler:::.mechanism_sign_test(moved, c("g1", "g15"))
+    expect_true(is.na(tiny$p))
+    expect_true(is.na(tiny$direction))
+})
+
+test_that("perturbation_effect names the mode of action, not agreement", {
+    ## Both of these are mechanisms. A boolean "concordant" flag would call the
+    ## second one a failure, which it is not: it says the factor restrains these
+    ## genes. On the hypoxia contrast that was 7 of 25 supported findings.
+    row <- function(direction, method, measured, down = c(0L, 0L, NA_real_)) {
+        data.frame(source = c("tf", "perturbagen"),
+                   direction = c(direction, measured),
+                   method = c(NA, method),
+                   down_rise = c(0L, down[1]), down_fall = c(0L, down[2]),
+                   down_sign_padj = c(NA, down[3]),
+                   stringsAsFactors = FALSE)
+    }
+    act <- clusterProfiler:::.consensus_perturbation_effect(row("up", "knockout", "down"))
+    rep <- clusterProfiler:::.consensus_perturbation_effect(row("up", "knockout", "up"))
+    expect_identical(act, "activator")
+    expect_identical(rep, "repressor")
+
+    ## Overexpression inverts the expectation: the factor is supplied, so its
+    ## targets should rise for an activator.
+    expect_identical(
+        clusterProfiler:::.consensus_perturbation_effect(row("up", "overexpression", "up")),
+        "activator")
+
+    ## No direction, no claim.
+    expect_true(is.na(clusterProfiler:::.consensus_perturbation_effect(
+        row("up", "knockout", "mixed"))))
+    expect_true(is.na(clusterProfiler:::.consensus_perturbation_effect(
+        row("up", "unknown_method", "down"))))
+})
+
+test_that("a repressor report does not change the verdict", {
+    ## The flag is a report, not a condition. Requiring it would re-decide every
+    ## verdict the package has already made, and those were not wrong.
+    use_fixture_cache()
+    de <- data.frame(gene = c(paste0("g", 1:5), paste0("f", 1:5)),
+                     log2FoldChange = c(rep(3, 5), rep(-1, 5)),
+                     stringsAsFactors = FALSE)
+    ev <- suppressWarnings(evidence(de, universe = de$gene, upstream = "tf",
+                                    design = list(treatment = "none")))
+    cv <- consensus(ev)
+    ## Every regulator in this fixture is a collection-only finding, so there is
+    ## nothing to report and nothing that could have flipped a verdict.
+    expect_true(all(is.na(cv$perturbation_effect)))
+    expect_true("perturbation_effect" %in% names(cv))
+})

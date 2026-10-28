@@ -12,7 +12,9 @@ evidence_perturbation(
   pvalueCutoff = 0.05,
   candidates = NULL,
   considered = NULL,
-  system = NULL
+  system = NULL,
+  up = NULL,
+  down = NULL
 )
 }
 \arguments{
@@ -47,6 +49,17 @@ tissue, and used only to order the evidence: a dataset from the caller's
 system wins the per-regulator deduplication over a more significant one
 from elsewhere, and every row carries `in_system` so the match (or its
 absence) is visible rather than assumed. Set through `design$system`.}
+
+\item{up, down}{The two halves of the caller's own contrast, as gene symbols.
+When given, `direction` is decided by a binomial test on the relevant half
+rather than by requiring every moved gene to go the same way -- a knockdown
+necessarily moves some genes up and some down, so that requirement was never
+met by real data and every dataset came back `mixed`. Restricted to one
+half, the question has an answer: among my up genes that this perturbation
+moves, do they move the way an activator's targets would? Both halves' counts
+and corrected p-values travel with the row, because which half is the right
+one to read depends on the direction the collection layer found, which is not
+known here. `NULL` (the default) keeps the older rule.}
 }
 \value{
 A `data.frame` with `regulator` (the perturbed gene), `source`
