@@ -190,6 +190,13 @@
                 pathway_direction   = as.character(pathways$direction[i] %||%
                                                    NA_character_),
                 n_pathway_genes     = length(pgenes),
+                ## The pathway's own enrichment p-value, kept apart from
+                ## padj_within_pathway (which is the attribution's). Without it a
+                ## reader has no way to tell a strongly enriched pathway that
+                ## attracted a weak attribution from the reverse, and the
+                ## narrative context cannot order by what the enrichment ranked
+                ## highest.
+                pathway_padj        = as.numeric(pathways$p.adjust[i] %||% NA_real_),
                 regulator           = mechanism_alias_regulator(
                                           mechanism_entity(d$ID, src)),
                 source              = src,
@@ -262,8 +269,17 @@
     ## levels), so taking the first few in row order would show whichever
     ## identifiers sort early -- for GO, essentially at random -- instead of the
     ## pathways the enrichment actually ranked highest.
-    best <- tapply(pw$padj_within_pathway, pw$pathway, min, na.rm = TRUE)
-    ids <- utils::head(names(sort(best)), max_pathways)
+    ## Ordered by the pathway's own enrichment p-value where it is known: the
+    ## section is about pathways, so the reader expects the ones the enrichment
+    ## ranked highest, not the ones that happen to carry the sharpest
+    ## attribution. Falls back to the attribution when the pathway p is missing,
+    ## which is the case for a caller-supplied result that omits it.
+    order_key <- if (!is.null(pw$pathway_padj) && any(!is.na(pw$pathway_padj))) {
+        tapply(pw$pathway_padj, pw$pathway, min, na.rm = TRUE)
+    } else {
+        tapply(pw$padj_within_pathway, pw$pathway, min, na.rm = TRUE)
+    }
+    ids <- utils::head(names(sort(order_key)), max_pathways)
     lines <- vapply(ids, function(id) {
         rows <- pw[pw$pathway == id, , drop = FALSE]
         rows <- utils::head(rows[order(rows$padj_within_pathway), , drop = FALSE],

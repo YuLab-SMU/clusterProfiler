@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.015
+# clusterProfiler 4.21.4.016
 
 ## mechanism analysis: collect, adjudicate, write
 
@@ -52,6 +52,7 @@
 
 ## interpret()
 
++ `$pathways` carries `pathway_padj`, the pathway's own enrichment p-value, beside `padj_within_pathway`, which is the attribution's. The two answer different questions and without the first the narrative context could only order by attribution strength: on the hypoxia contrast that put "carbohydrate metabolic process" above "response to hypoxia" (2026-10-28, Wed)
 + An adjudicated run now adds one fixed sentence to its system prompt: only `supported` findings may be stated as mechanisms, `single_source` is a hypothesis, `absent` is not "does not exist", and `untested` is not an absence. It is appended rather than substituted, so the four legacy input types keep the prompt they had byte for byte -- a test compares the strings rather than trusting it (2026-10-28, Wed)
 + The pathway layer now reaches the narrative. `interpret(adjudication)` lists which regulator explains each enriched pathway, in its own prompt section marked as context, and only for entities the adjudication already graded -- so an attribution can never introduce a regulator or make a claim sound stronger. The "context, not evidence" instruction travels inside that section rather than in the system prompt, which would have changed the bytes of the four legacy input types (2026-10-28, Wed)
 + `network = TRUE` is documented as reference material: `$ppi` carries the graded STRING edges but nothing turns an edge into a corroboration, so it changes no verdict. A test pins that, so the assumption cannot creep back (2026-10-28, Wed)

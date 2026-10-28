@@ -170,10 +170,12 @@ direction <- if (all(signs > 0)) "up" else if (all(signs < 0)) "down" else "mixe
 
 ```
 pathway, pathway_description, pathway_direction, n_pathway_genes,
-regulator, source, term, Count, setSize, padj_within_pathway, geneID
+regulator, source, term, Count, setSize, padj_within_pathway, pathway_padj, geneID
 ```
 
 `padj_within_pathway` = 该通路内所有被测集合的 BH 校正值。「每条通路自己校正」与 `padj_within_source` 是同一套口径，不跨通路合并。
+
+`pathway_padj` = **通路自身**的富集校正 p 值，与 `padj_within_pathway`（归属的 p 值）是两件事。没有它就读不出「通路很强但归属很弱」和反过来，叙述上下文也就无法按富集本身的强弱排序——实测按归属排序时，缺氧实验的第一条会是「糖代谢」而不是「response to hypoxia」。
 
 `pathway_direction` = 该通路基因在调用方对比里的整体方向（`up` / `down` / `NA`）。
 

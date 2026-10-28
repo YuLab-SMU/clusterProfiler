@@ -167,6 +167,7 @@ test_that("pathway attributions reach the prompt as context and only via decided
         pathway_direction = c("up", "up", "up"),
         regulator = c("HIF1A", "MYC", "NOT_ADMITTED"),
         padj_within_pathway = c(1e-5, 1e-3, 1e-4),
+        pathway_padj = c(1e-13, 1e-13, 1e-2),
         stringsAsFactors = FALSE)
     adj <- structure(
         list(verdicts = data.frame(regulator = c("HIF1A", "MYC"),
@@ -190,6 +191,9 @@ test_that("pathway attributions reach the prompt as context and only via decided
     shuffled$pathway <- c("GO:0000001", "GO:0000001", "GO:9999999")
     shuffled$pathway_description <- c("worst", "worst", "best")
     shuffled$padj_within_pathway <- c(0.1, 0.1, 1e-20)
+    ## The pathway's own enrichment p is what orders the section, so give the
+    ## one with the weaker attribution the stronger pathway.
+    shuffled$pathway_padj <- c(1e-20, 1e-20, 0.5)
     adj2 <- structure(
         list(verdicts = data.frame(regulator = "HIF1A", verdict = "supported",
                                    stringsAsFactors = FALSE),
