@@ -334,12 +334,20 @@ process_enrichment_input <- function(x, n_pathways) {
 
 .build_data_sections <- function(pathway_text, context = NULL, ppi_network = NULL,
                                  fold_change = NULL, top_genes = NULL,
-                                 fold_change_label = NULL, gene_stats = NULL) {
+                                 fold_change_label = NULL, gene_stats = NULL,
+                                 pathway_context = NULL) {
   parts <- character(0)
   if (!is.null(context) && nzchar(context)) {
     parts <- c(parts, paste0("Experimental Context:\n", context))
   }
   parts <- c(parts, paste0("Enriched Terms:\n", pathway_text))
+  ## Rendered next to the terms rather than after the gene list, because it is a
+  ## reading of those terms; the block carries its own "context, not evidence"
+  ## instruction so the legacy prompts stay byte-identical.
+  if (!is.null(pathway_context) && length(pathway_context)) {
+    parts <- c(parts, paste0("Regulator-Pathway Attribution (context only):\n",
+                             paste(pathway_context, collapse = "\n")))
+  }
   if (!is.null(top_genes) && nzchar(top_genes)) {
     parts <- c(parts, paste0("Input Genes (most up-regulated first when fold changes are supplied):\n", top_genes))
   }
@@ -548,6 +556,7 @@ interpret <- function(x,
   # input type takes the existing path unchanged.
   bundle <- NULL
   verdicts <- NULL
+  pathway_context <- NULL
   ## Adjudication is a step, not an option. Accepting a bundle here as well
   ## would let a caller pay for a model call while skipping the decision about
   ## which claims survive it, and the whole point of separating
@@ -567,6 +576,7 @@ interpret <- function(x,
     ## `min_independent`, and recomputing here with the default would quietly
     ## admit exactly what their adjudication ruled out.
     verdicts <- x$verdicts
+    pathway_context <- .mechanism_pathway_context(x)
     x <- .process_evidence_input(bundle, n_pathways, verdicts = verdicts)
     if (is.null(x)) {
       rlang::abort(c(
@@ -640,7 +650,8 @@ interpret <- function(x,
 
     user_prompt <- .build_data_sections(
       pathway_text, context, ppi_text, fc_text, top_genes_text,
-      fold_change_label = fc_label, gene_stats = gene_stats_text
+      fold_change_label = fc_label, gene_stats = gene_stats_text,
+      pathway_context = pathway_context
     )
 
     res <- .call_generate_object(

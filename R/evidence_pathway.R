@@ -233,3 +233,46 @@
     rownames(out) <- NULL
     out
 }
+
+## Pathway attributions as narrative context.
+##
+## The pathway layer answers "which regulator explains this pathway", which is
+## worth writing down -- but it is a re-reading of the same collections the
+## verdicts already came from, so it must never add an entity or strengthen a
+## claim. Two guards make that structural rather than a request:
+##
+##   * only regulators the adjudication already admitted are listed, so the
+##     context cannot name anything the verdict table did not;
+##   * the block says so in its own text, because the instruction has to travel
+##     with the data. Putting it in the system prompt instead would change the
+##     prompt of the four legacy input types, whose bytes are frozen.
+.mechanism_pathway_context <- function(adj, max_pathways = 10L,
+                                       max_regulators = 3L) {
+    pw <- adj$evidence$pathways
+    if (is.null(pw) || !nrow(pw)) return(NULL)
+
+    admitted <- adj$verdicts$regulator[
+        adj$verdicts$verdict %in% c("supported", "single_source")]
+    if (!length(admitted)) return(NULL)
+    pw <- pw[pw$regulator %in% admitted, , drop = FALSE]
+    if (!nrow(pw)) return(NULL)
+
+    ids <- utils::head(unique(pw$pathway), max_pathways)
+    lines <- vapply(ids, function(id) {
+        rows <- pw[pw$pathway == id, , drop = FALSE]
+        rows <- utils::head(rows[order(rows$padj_within_pathway), , drop = FALSE],
+                            max_regulators)
+        direction <- rows$pathway_direction[1]
+        if (is.na(direction)) direction <- "direction not stated"
+        sprintf("- %s (%s): %s", rows$pathway_description[1], direction,
+                paste0(rows$regulator, " padj ", signif(rows$padj_within_pathway, 2),
+                       collapse = "; "))
+    }, "")
+
+    c(paste0("These are attributions of entities this analysis has already graded. ",
+             "They are context, not evidence: do not introduce a regulator that is ",
+             "not already supported or single_source, and do not describe a claim as ",
+             "stronger because a pathway is attributed to it."),
+      "",
+      lines)
+}

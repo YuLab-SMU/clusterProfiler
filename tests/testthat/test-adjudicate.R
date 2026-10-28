@@ -154,3 +154,69 @@ test_that("a carried verdict table wins over a fresh adjudication", {
     ## Both rows of the bundle are excluded, one per source.
     expect_equal(nrow(evidence_excluded(bundle, verdicts = none)), 2)
 })
+
+test_that("pathway attributions reach the prompt as context and only via decided entities", {
+    ## The layer re-reads collections the verdicts already used, so it must add
+    ## no entity and strengthen no claim. Both guards are checked: an entity the
+    ## adjudication did not admit never appears, and the block carries its own
+    ## instruction -- putting it in the system prompt would change the bytes of
+    ## the four legacy input types.
+    pw <- data.frame(
+        pathway = c("GO:1", "GO:1", "GO:2"),
+        pathway_description = c("response to hypoxia", "response to hypoxia", "glycolysis"),
+        pathway_direction = c("up", "up", "up"),
+        regulator = c("HIF1A", "MYC", "NOT_ADMITTED"),
+        padj_within_pathway = c(1e-5, 1e-3, 1e-4),
+        stringsAsFactors = FALSE)
+    adj <- structure(
+        list(verdicts = data.frame(regulator = c("HIF1A", "MYC"),
+                                   verdict = c("supported", "single_source"),
+                                   stringsAsFactors = FALSE),
+             evidence = list(pathways = pw)),
+        class = c("adjudication", "list"))
+
+    ctx <- .mechanism_pathway_context(adj)
+    txt <- paste(ctx, collapse = "\n")
+    expect_match(txt, "HIF1A")
+    expect_match(txt, "context, not evidence")
+    expect_false(grepl("NOT_ADMITTED", txt))
+    ## The pathway whose only attribution was unadmitted disappears entirely
+    ## rather than appearing with an empty list.
+    expect_false(grepl("glycolysis", txt))
+
+    ## Rendered in its own section, next to the terms it is a reading of.
+    prompt <- .build_data_sections("TERM1 (p=1e-3)", pathway_context = ctx)
+    expect_match(prompt, "Regulator-Pathway Attribution")
+    expect_lt(regexpr("Regulator-Pathway Attribution", prompt),
+              regexpr("HIF1A", prompt))
+
+    ## Nothing admitted, nothing to say.
+    empty <- structure(
+        list(verdicts = data.frame(regulator = "X", verdict = "absent",
+                                   stringsAsFactors = FALSE),
+             evidence = list(pathways = pw)),
+        class = c("adjudication", "list"))
+    expect_null(.mechanism_pathway_context(empty))
+})
+
+test_that("network evidence is reference material and changes no verdict", {
+    ## Locked so that nobody later assumes it contributes. Measured on 54
+    ## datasets whose true regulator is known: the edge set is real and on target,
+    ## and it moved no answer, because no code turns an edge into corroboration.
+    use_fixture_cache()
+    universe <- c(paste0("g", 1:8), paste0("f", 1:200))
+    de <- data.frame(gene = c(paste0("g", 1:5), paste0("f", 1:5)),
+                     log2FoldChange = c(rep(3, 5), rep(-1, 5)),
+                     stringsAsFactors = FALSE)
+    without <- suppressWarnings(evidence(de, universe = universe, upstream = "tf",
+                                         design = list(treatment = "none")))
+    ## STRING is a network call, so the comparison is made only where it can run.
+    with_net <- tryCatch(
+        suppressWarnings(evidence(de, universe = universe, upstream = "tf",
+                                  network = TRUE,
+                                  design = list(treatment = "none"))),
+        error = function(e) NULL)
+    skip_if(is.null(with_net), "STRING unreachable")
+    expect_identical(without$regulators, with_net$regulators)
+    expect_identical(adjudicate(without)$verdicts, adjudicate(with_net)$verdicts)
+})

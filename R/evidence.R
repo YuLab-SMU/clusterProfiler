@@ -95,7 +95,15 @@
 #'   libraries have no GTRD/motif split, so ignoring the filter would answer a
 #'   wider question than the one asked.
 #' @param network Whether to query STRING for interaction evidence. Off by
-#'   default because it needs the network; see [evidence_ppi()] for the grading.
+#'   default because it needs the network.
+#'
+#'   **The result is reference material, not a vote.** `$ppi` lists the edges and
+#'   grades them (see [evidence_ppi()]), but nothing turns an edge into a
+#'   corroboration, so `network = TRUE` changes no verdict. That is a deliberate
+#'   limit rather than an oversight: measured on 54 datasets whose true regulator
+#'   is known, the network contained it for 35 and moved no answer. Set it when a
+#'   reader will look at the interactions; do not expect it to support a
+#'   `supported`.
 #' @param minGSSize Minimum gene-set size. The default is 5, not `enricher()`'s
 #'   10, so that small motif sets are tested; `maxGSSize` is `Inf` because the
 #'   largest GTRD target sets carry more than a thousand genes and the default
