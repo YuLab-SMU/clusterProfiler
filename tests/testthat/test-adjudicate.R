@@ -235,3 +235,26 @@ test_that("network evidence is reference material and changes no verdict", {
     expect_identical(without$regulators, with_net$regulators)
     expect_identical(adjudicate(without)$verdicts, adjudicate(with_net)$verdicts)
 })
+
+test_that("the adjudication declaration is appended and never substituted", {
+    ## The four legacy input types keep the prompt they had byte for byte, so
+    ## the declaration may only ever be added on top -- and only for a run that
+    ## came through adjudicate().
+    base <- .interpretation_system_prompt()
+    expect_false(grepl("ADJUDICATION", base))
+    expect_identical(.interpretation_system_prompt_for(), base)
+    expect_identical(.interpretation_system_prompt_for(character(0)), base)
+    expect_identical(.interpretation_system_prompt_for(NULL), base)
+
+    with_decl <- .interpretation_system_prompt_for(.adjudication_declaration())
+    ## Appended, not replaced: the base has to survive inside the result.
+    expect_identical(substr(with_decl, 1, nchar(base)), base)
+    expect_gt(nchar(with_decl), nchar(base))
+    ## Every verdict is named, because the point is to stop each one being
+    ## upgraded in prose.
+    for (v in c("supported", "single_source", "absent", "untested")) {
+        expect_match(with_decl, v)
+    }
+    ## Annotation prompts are built elsewhere and never carry the declaration.
+    expect_false(grepl("ADJUDICATION", .annotation_system_prompt("c1")))
+})

@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.014
+# clusterProfiler 4.21.4.015
 
 ## mechanism analysis: collect, adjudicate, write
 
@@ -52,6 +52,7 @@
 
 ## interpret()
 
++ An adjudicated run now adds one fixed sentence to its system prompt: only `supported` findings may be stated as mechanisms, `single_source` is a hypothesis, `absent` is not "does not exist", and `untested` is not an absence. It is appended rather than substituted, so the four legacy input types keep the prompt they had byte for byte -- a test compares the strings rather than trusting it (2026-10-28, Wed)
 + The pathway layer now reaches the narrative. `interpret(adjudication)` lists which regulator explains each enriched pathway, in its own prompt section marked as context, and only for entities the adjudication already graded -- so an attribution can never introduce a regulator or make a claim sound stronger. The "context, not evidence" instruction travels inside that section rather than in the system prompt, which would have changed the bytes of the four legacy input types (2026-10-28, Wed)
 + `network = TRUE` is documented as reference material: `$ppi` carries the graded STRING edges but nothing turns an edge into a corroboration, so it changes no verdict. A test pins that, so the assumption cannot creep back (2026-10-28, Wed)
 + fix `interpret()` reverting a caller's adjudication. It re-ran `adjudicate()` with the default `min_independent` in three places -- the prompt builder and the two post-hoc evidence tables -- so a caller who adjudicated at a stricter setting had it silently overridden, which is the one thing making adjudication a separate step exists to prevent. The carried verdict table now travels through the whole call (2026-10-28, Wed)

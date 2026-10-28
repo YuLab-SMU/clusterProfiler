@@ -381,6 +381,29 @@ process_enrichment_input <- function(x, n_pathways) {
   )
 }
 
+## The one sentence an adjudicated run adds to the system prompt.
+##
+## It is a constant rather than a sentence generated from the verdicts: the
+## constraint is the same every time, and a generated one would drift from the
+## `writable` column the rest of the package uses. Verbatim from the design note.
+.adjudication_declaration <- function() {
+  paste0("ADJUDICATION: Only `supported` findings may be stated as mechanisms; ",
+         "`single_source` is a hypothesis; `absent` means no source found evidence ",
+         "rather than that none exists; `untested` is not an absence.")
+}
+
+## The interpretation system prompt, with the adjudication declaration appended
+## when there is one. Annotation prompts are built elsewhere and never carry it.
+##
+## Split out from the caller so "append, never substitute" can be tested without
+## a model: the four legacy input types have to keep the prompt they had byte for
+## byte, and comparing strings is the only way to know that.
+.interpretation_system_prompt_for <- function(system_extra = NULL) {
+  sys <- .interpretation_system_prompt()
+  if (is.null(system_extra) || !length(system_extra)) return(sys)
+  paste0(sys, "\n\n", system_extra)
+}
+
 .annotation_system_prompt <- function(cluster_id) {
   base <- paste0(
     "You are an expert cell biologist analyzing cluster ", cluster_id,
@@ -557,6 +580,7 @@ interpret <- function(x,
   bundle <- NULL
   verdicts <- NULL
   pathway_context <- NULL
+  system_extra <- NULL
   ## Adjudication is a step, not an option. Accepting a bundle here as well
   ## would let a caller pay for a model call while skipping the decision about
   ## which claims survive it, and the whole point of separating
@@ -577,6 +601,9 @@ interpret <- function(x,
     ## admit exactly what their adjudication ruled out.
     verdicts <- x$verdicts
     pathway_context <- .mechanism_pathway_context(x)
+    ## Only an adjudicated run carries the declaration; the legacy types keep
+    ## their prompt unchanged, which is what lets the four of them stay frozen.
+    system_extra <- .adjudication_declaration()
     x <- .process_evidence_input(bundle, n_pathways, verdicts = verdicts)
     if (is.null(x)) {
       rlang::abort(c(
@@ -659,6 +686,7 @@ interpret <- function(x,
       task = task,
       cluster_id = name,
       user_prompt = user_prompt,
+      system_extra = system_extra,
       max_tokens = max_tokens,
       temperature = temperature,
       reasoning = reasoning,
@@ -1880,13 +1908,14 @@ print.interpret_provenance <- function(x, ...) {
 .call_generate_object <- function(model, task, cluster_id, user_prompt,
                                   max_tokens = 8192,
                                   temperature = 0.3, collector = NULL,
-                                  stage = "interpret", reasoning = NULL) {
+                                  stage = "interpret", reasoning = NULL,
+                                  system_extra = NULL) {
   if (identical(task, "cell_type")) {
     sys <- .annotation_system_prompt(cluster_id)
     schema <- .annotation_schema()
     schema_name <- "annotation_result"
   } else {
-    sys <- .interpretation_system_prompt()
+    sys <- .interpretation_system_prompt_for(system_extra)
     schema <- .interpretation_schema()
     schema_name <- "interpretation_result"
   }
