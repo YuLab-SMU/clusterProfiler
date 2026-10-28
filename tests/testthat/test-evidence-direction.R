@@ -202,6 +202,30 @@ test_that("perturbation_effect names the mode of action, not agreement", {
         clusterProfiler:::.consensus_perturbation_effect(row("up", "overexpression", "up")),
         "activator")
 
+    ## The programme running DOWN is the case that was wrong. The caller has
+    ## already said which genes to look at, so the only question is whether
+    ## removing the factor moves those genes down -- which is true for an
+    ## activator whichever way the programme itself runs.
+    ##
+    ## Measured: MCF-7 cells with ESR1 (an activator) knocked out, compared with
+    ## GPSAdb's own ESR1 knockdown. Its genes fell and so did the caller's, 39 of
+    ## 39, and the old flip reported "repressor" for a reproduced experiment.
+    down_act <- row("down", "knockout", "mixed",
+                    down = c(0L, 39L, 1e-6))          # down-half: 0 rise, 39 fall
+    expect_identical(
+        clusterProfiler:::.consensus_perturbation_effect(down_act), "activator")
+    ## And the same programme with the genes rising under removal is a repressor.
+    down_rep <- row("down", "knockout", "mixed",
+                    down = c(30L, 2L, 1e-6))
+    expect_identical(
+        clusterProfiler:::.consensus_perturbation_effect(down_rep), "repressor")
+
+    ## measured_direction has to describe the same genes perturbation_effect
+    ## read. It used to report the up half always, so on a down programme the
+    ## two columns described different sets.
+    expect_identical(
+        clusterProfiler:::.consensus_measuring(down_act)$measured, "down")
+
     ## No direction, no claim.
     expect_true(is.na(clusterProfiler:::.consensus_perturbation_effect(
         row("up", "knockout", "mixed"))))

@@ -234,8 +234,11 @@ adjudicate <- function(x, min_independent = 2, coverage_floor = NULL) {
             ## that only the GSEA path found came back `mixed`.
             direction  = .consensus_direction(mine$direction[
                 !mine$source %in% c("perturbagen", "biotrigger")]),
-            measured_direction = .consensus_direction(mine$direction[
-                mine$source %in% c("perturbagen", "biotrigger")]),
+            ## Reported on the same half `perturbation_effect` reads. Taking
+            ## the perturbation row's own `direction` always reported the up
+            ## half, so for a programme that runs down the two columns described
+            ## different sets of genes.
+            measured_direction = .consensus_measuring(mine)$measured,
             ## What the perturbation says the regulator DOES to the programme,
             ## when it says anything. A report, not a condition: requiring it
             ## would re-decide every verdict this package has already made, and
@@ -415,38 +418,30 @@ sources_source <- function(src) {
     "mixed"
 }
 
-## What the measured perturbation says the regulator does to the programme.
+## The collection programme, the perturbation's effect on it, and the method.
 ##
-## The collection layer says the programme moved `direction` in the caller's own
-## contrast; the perturbation says what happens to those same genes when the
-## factor is removed or supplied. Putting the two together answers a question
-## neither can: is the factor pushing these genes up, or holding them down?
-##
-##   * knockdown, programme up, its genes fall -> the factor promotes them
-##   * knockdown, programme up, its genes rise -> the factor restrains them
-##
-## "activator" and "repressor" are both mechanisms. Reporting a single
-## concordant/discordant flag would have called the second one a failure, and on
-## the hypoxia contrast that was 7 of 25 supported findings.
-##
-## NA when the comparison cannot be made -- no direction on one side, or the sign
-## test found no side. "Could not check" and "checked, and it restrains them" are
-## different answers.
-.consensus_perturbation_effect <- function(mine) {
-    if (is.null(mine) || !nrow(mine)) return(NA_character_)
+## One helper for both columns, because they must describe the same genes:
+## `measured_direction` is what the perturbation did to the programme's own half,
+## and `perturbation_effect` is how to read it. Computing them from different
+## halves is how an activator came to be reported as a repressor on a knockdown
+## the database reproduced exactly.
+.consensus_measuring <- function(mine) {
+    empty <- list(direction = NA_character_, measured = NA_character_,
+                  sign = NA_character_)
+    if (is.null(mine) || !nrow(mine)) return(empty)
 
     coll <- mine$direction[!mine$source %in% c("perturbagen", "biotrigger")]
     coll <- coll[!is.na(coll) & coll %in% c("up", "down")]
-    if (!length(coll)) return(NA_character_)
+    if (!length(coll)) return(empty)
+    direction <- unique(coll)
     ## Two collection rows pointing different ways means there is no single
     ## programme to compare against.
-    direction <- unique(coll)
-    if (length(direction) != 1L) return(NA_character_)
+    if (length(direction) != 1L) return(empty)
 
     pert <- mine[mine$source %in% c("perturbagen", "biotrigger"), , drop = FALSE]
-    if (!nrow(pert)) return(NA_character_)
+    if (!nrow(pert)) return(empty)
     sign <- mechanism_method_sign(pert$method[1])
-    if (is.na(sign)) return(NA_character_)
+    if (is.na(sign)) return(empty)
 
     ## Read the half the collection layer's direction refers to. The up half was
     ## tested into `direction` by the perturbation layer; the down half's verdict
@@ -459,22 +454,30 @@ sources_source <- function(src) {
                                        padj = pert$down_sign_padj[1]))
     }
     if (is.null(measured) || is.na(measured) || !measured %in% c("up", "down")) {
-        return(NA_character_)
+        measured <- NA_character_
     }
-    expected <- mechanism_expected_measured(direction, sign)
-    if (identical(measured, expected)) "activator" else "repressor"
+    list(direction = direction, measured = measured, sign = sign)
 }
 
-## The verdict, with the evidence that produced it still attached.
+## What the measured perturbation says the regulator does to the programme.
 ##
-## A plain data.frame would do for printing, but `interpret()` has to tell an
-## adjudication apart from a caller's own data.frame -- that is a documented
-## input type -- so the class is load-bearing rather than decorative. Carrying
-## the bundle also means a saved verdict can be re-read next to what it was
-## derived from, instead of becoming a table nobody can audit.
+##   * the programme's genes fall when the factor is removed -> it promotes them
+##   * they rise -> it restrains them
 ##
-## `evidence_sha` hashes only what decides the verdict: the genes, the
-## background, the collections and their release. It deliberately excludes
+## "activator" and "repressor" are both mechanisms. Reporting a single
+## concordant/discordant flag would have called the second one a failure, and on
+## the hypoxia contrast that was 7 of 25 supported findings.
+##
+## NA when the comparison cannot be made -- no direction on one side, or the sign
+## test found no side. "Could not check" and "checked, and it restrains them" are
+## different answers.
+.consensus_perturbation_effect <- function(mine) {
+    m <- .consensus_measuring(mine)
+    if (is.na(m$measured)) return(NA_character_)
+    expected <- mechanism_expected_measured(m$sign)
+    if (is.na(expected)) return(NA_character_)
+    if (identical(m$measured, expected)) "activator" else "repressor"
+}
 ## `called_at` and every other timestamp, so the same input hashes the same way
 ## on two runs and a SHA comparison means "same evidence", not "same moment".
 .adjudication <- function(verdicts, bundle, min_independent, coverage_floor) {

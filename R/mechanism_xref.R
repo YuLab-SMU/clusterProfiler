@@ -572,19 +572,23 @@ mechanism_method_sign <- function(method, method_label = NULL) {
     out
 }
 
-## The direction the responding genes should move if the regulator drives the
-## programme the collection layer found.
+## The direction the programme's own genes should move if the regulator drives
+## them.
 ##
-## The collection layer says the programme moved `direction` in the caller's
-## contrast. A factor that was removed cannot have pushed it that way: removing
-## an activator makes its targets fall, so a programme seen rising under a
-## knockdown is one the factor was restraining. Flipping the expectation for a
-## removal is what makes the two observations comparable at all.
-mechanism_expected_measured <- function(direction, method_sign) {
-    out <- rep(NA_character_, length(direction))
-    ok <- !is.na(direction) & !is.na(method_sign)
-    flip <- function(d) ifelse(d == "up", "down", ifelse(d == "down", "up", NA))
-    out[ok] <- ifelse(method_sign[ok] == "decrease",
-                      flip(direction[ok]), direction[ok])
+## This does **not** depend on which way the caller's programme moved, and that
+## is the point. The caller has already told us which genes to look at -- the
+## half the collection layer found -- so the only question left is whether
+## removing the factor moves *those* genes down. It does for an activator and
+## does not for a repressor, whichever direction the programme itself runs in.
+##
+## An earlier version flipped the expectation when the programme ran the other
+## way, which read a regulator's own knockout wrongly. Measured on MCF-7 cells
+## with ESR1 (the oestrogen receptor, an activator) knocked out, GPSAdb's ESR1
+## knockdown moved the caller's down-genes down -- 39 of 39, the same experiment
+## reproduced -- and the flip turned that into "repressor".
+mechanism_expected_measured <- function(method_sign) {
+    out <- rep(NA_character_, length(method_sign))
+    out[!is.na(method_sign) & method_sign == "decrease"] <- "down"
+    out[!is.na(method_sign) & method_sign == "increase"] <- "up"
     out
 }

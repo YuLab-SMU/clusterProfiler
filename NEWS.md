@@ -1,7 +1,9 @@
-# clusterProfiler 4.21.4.017
+# clusterProfiler 4.21.4.018
 
 ## mechanism analysis: collect, adjudicate, write
 
++ fix `perturbation_effect` reporting an activator as a repressor when the caller's own contrast is a knockdown of that same factor. The expectation was flipped for a programme that runs down, but the caller has already said which genes to look at, so the question is only whether removing the factor moves those genes down -- true for an activator either way. Measured on MCF-7 cells with ESR1 (an activator) knocked out against GPSAdb's own ESR1 knockdown, which moved the caller's down-genes down 39 of 39: a reproduced experiment, called a repressor (2026-10-28, Wed)
++ fix `measured_direction` reporting the up half while `perturbation_effect` read the half the programme actually runs in, so on a down programme the two columns described different sets of genes. Both now come from one helper (2026-10-28, Wed)
 + `consensus_findings()` and `mechanism_significant()` are exported. Both answer questions a caller asks immediately after `adjudicate()` -- which findings may be discussed, and which rows reached significance -- and both are easy to get subtly wrong by hand: filtering on a p-value ignores a source's own `significant` flag, and treating `absent` as fit to discuss contradicts the verdict (2026-10-28, Wed)
 + `mechanism_alias_regulator()` is exported. The collections say `HIF1` where the database says `HIF1A`, and `GR` where it says `NR3C1`; a caller comparing either side against an outside database hits the same mismatch, and a hand-written alias table drifts from this one (2026-10-28, Wed)
 + A `<enrichResult>` handed to `pathway =` now gets a `pathway_direction` inferred from the caller's own up and down halves, instead of reaching the narrative as "direction not stated". A pathway split evenly between the halves stays `NA` rather than being given the majority side (2026-10-28, Wed)
