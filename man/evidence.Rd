@@ -54,6 +54,12 @@ evidence(
   three random gene sets of the same size still returned no significant
   set. See [mechanism_tfunion()].
 
+  Pass it **together with a measured source**, e.g.
+  `c("tfunion", "perturbagen")`. The union is one source however many sets
+  it holds, and corroboration counts sources rather than rows, so on its own
+  it can only reach `single_source` -- a page of those reads like a failure
+  when the finding is simply uncorroborated.
+
   `"mirna"` is
   off by default for a measured reason: its sets are predicted seed matches,
   so an enrichment describes which genes carry the motif rather than which

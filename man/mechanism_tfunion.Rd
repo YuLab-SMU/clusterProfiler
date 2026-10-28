@@ -45,12 +45,17 @@ set keeps its identity and is tagged with its library prefix
 (`ENCODE:`, `ChEA:`, `TFP:`, `TRRUST:`, `C3TFT:`); folding duplicates is
 [consensus()]'s job, and it has the evidence levels to do that with.
 
-**What it costs.** 3258 sets against C3:TFT's 1114, so the multiple-testing
-correction is spread over three times as many hypotheses. Measured on the
-hypoxia contrast, the true signal survived that comfortably -- `HIF1A` moved
-from padj 1.2e-4 (C3:TFT) to 9.3e-28 -- while three random gene sets of the
-same size returned **zero** significant sets, so the extra hypotheses did not
-buy extra false positives.
+**What it costs.** 2869 sets against C3:TFT's 1114, so the multiple-testing
+correction is spread over roughly three times as many hypotheses. Measured on
+the hypoxia contrast, the true signal survived that comfortably -- `HIF1A`
+moved from padj 1.2e-4 under C3:TFT to 2.5e-27 as a ChEA set -- while three random
+gene sets of the same size returned **zero** significant sets, so the extra
+hypotheses did not buy extra false positives.
+
+Building it reads 2.68 million rows, about 9 seconds. The result is kept for
+the rest of the session and reused, keyed on each source file's path, mtime
+and size, so replacing or re-downloading a library invalidates the entry
+rather than serving the old collection.
 }
 \examples{
 \dontrun{

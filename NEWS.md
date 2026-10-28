@@ -1,4 +1,7 @@
-# clusterProfiler 4.21.4.006
+# clusterProfiler 4.21.4.007
+
++ Collections are parsed once per session instead of on every `evidence()` call. Building the TF union reads 2.68 million rows and took 9 seconds; a loop over contrasts paid that each time for an identical object. Measured end to end, the first call stays at 19 s and every later one drops to 10 s. The entry is keyed on each source file's path, mtime and size, so a re-downloaded or replaced library invalidates it rather than serving a stale collection (2026-10-28, Wed)
++ `?evidence` now says to pass `"tfunion"` together with a measured source. The union is one source however many sets it holds and corroboration counts sources, so on its own it reaches only `single_source`, which reads like a failure when the finding is merely uncorroborated (2026-10-28, Wed)
 
 + Two `setReadable()` tests asserted what they read back off the object under test: one hardcoded an Entrez id whose presence in the OrgDb subset was assumed, the other compared `EXTID2NAME` output against `mapIds` output, which passes whatever the mapping did. The first now asserts only the shape -- the mapping covers the query genes and names none as NA -- and the id-to-symbol correspondence moved to a test with a fixed input and a stated expectation: TP53, BRCA1 and A1BG for 7157, 672 and 1 (2026-10-28, Wed)
 

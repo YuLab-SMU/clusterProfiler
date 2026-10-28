@@ -2152,3 +2152,26 @@ test_that("tft is refused rather than ignored when searching the union", {
         evidence(c("HIF1A", "PGK1"), upstream = "tfunion", tft = "gtrd"),
         "cannot be combined")
 })
+
+test_that("a rebuilt collection file invalidates the session cache", {
+    ## Collections are held in memory for the session, because parsing the union
+    ## costs 9 s and evidence() rebuilds it on every call. The risk that buys is
+    ## serving a stale object, so the stamp carries path, mtime and size: a file
+    ## replaced on disk must not be read from memory. Without this test the
+    ## cache could quietly ignore a re-download for the rest of the session.
+    dir <- tempfile("memo"); dir.create(dir)
+    withr::defer(unlink(dir, recursive = TRUE))
+    gmt <- file.path(dir, "c3.tft.v2026.2.Hs.symbols.gmt")
+    writeLines(c("release=2026.2.Hs", "accessed_date=2026-10-28"), paste0(gmt, ".meta"))
+    write_gmt(gmt, list(AAA_TARGET_GENES = c("G1", "G2")))
+    old <- options(clusterProfiler_cache_dir = dir)
+    withr::defer(options(old))
+
+    first <- mechanism_sets("tf")
+    expect_identical(length(unique(first@gsid2gene$gsid)), 1L)
+    ## Same key, different content on disk.
+    write_gmt(gmt, list(AAA_TARGET_GENES = c("G1", "G2"),
+                        BBB_TARGET_GENES = c("G3", "G4", "G5")))
+    second <- mechanism_sets("tf")
+    expect_identical(length(unique(second@gsid2gene$gsid)), 2L)
+})

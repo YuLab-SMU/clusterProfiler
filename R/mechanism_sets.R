@@ -1,3 +1,51 @@
+## Collections parsed during this session, keyed by what produced them.
+##
+## Parsing is the expensive part and it repeats for no reason: the union reads
+## 2.68 million rows (6.5 s) and C3:TFT 410 thousand (about a second), and
+## evidence() rebuilds them on every call. A loop over ten contrasts paid that
+## ten times for objects that were identical.
+##
+## The key carries each source file's path, mtime and size, so the entry
+## invalidates itself the moment the file is replaced -- a re-download, a
+## different release, or a different `cache_dir` cannot serve a stale object.
+## Nothing here needs a manual clear, which is why there is no forget().
+.mechanism_collections <- new.env(parent = emptyenv())
+
+## Files a collection is built from, or NULL when that cannot be known before
+## the build (the union downloads on first use).
+.mechanism_collection_paths <- function(source, release, cache_dir) {
+    if (identical(source, "tfunion")) {
+        base <- mechanism_set_files$tf$file
+        paths <- file.path(cache_dir, sub("<release>", release, base, fixed = TRUE))
+        for (tag in names(mechanism_tfunion_parts)) {
+            lib <- mechanism_tfunion_parts[[tag]]$library
+            paths <- c(paths, file.path(
+                cache_dir, paste0("enrichr.", gsub("[^A-Za-z0-9_]", "_", lib), ".gmt")))
+        }
+        return(paths)
+    }
+    spec <- mechanism_set_files[[source]]
+    if (is.null(spec)) return(NULL)
+    file.path(cache_dir, sub("<release>", release, spec$file, fixed = TRUE))
+}
+
+## A string that changes whenever any of `paths` changes, or NA when one of them
+## is missing -- a collection whose inputs are not all on disk yet cannot be
+## cached, because the build is about to create one of them.
+.mechanism_stamp <- function(paths) {
+    if (is.null(paths) || !length(paths)) return(NA_character_)
+    info <- file.info(paths)
+    if (anyNA(info$mtime)) return(NA_character_)
+    paste(paste(paths, as.numeric(info$mtime), info$size, sep = "|"), collapse = ";")
+}
+
+.mechanism_collection_key <- function(source, species, release, cache_dir, subset) {
+    paste(source, species, release, cache_dir,
+          if (is.null(subset)) "" else paste(sort(subset), collapse = ","),
+          sep = "\x1f")
+}
+
+
 #' Upstream gene-set collections for mechanism analysis
 #'
 #' Download an MSigDB collection whose members are genes and whose set
@@ -70,6 +118,13 @@ mechanism_sets <- function(source = c("tf", "tfunion", "mirna", "perturbagen", "
     cache_dir <- mechanism_cache_root(cache_dir)
     path <- file.path(cache_dir, file)
 
+    key <- .mechanism_collection_key(source, species, release, cache_dir, subset)
+    stamp <- .mechanism_stamp(.mechanism_collection_paths(source, release, cache_dir))
+    hit <- .mechanism_collections[[key]]
+    if (!is.na(stamp) && !is.null(hit) && identical(hit$stamp, stamp)) {
+        return(hit$value)
+    }
+
     accessed <- mechanism_fetch_gmt(path, release, cache_dir)
     parsed <- mechanism_parse_gmt(path)
 
@@ -87,7 +142,7 @@ mechanism_sets <- function(source = c("tf", "tfunion", "mirna", "perturbagen", "
                                              drop = FALSE]
     }
 
-    gson::gson(
+    out <- gson::gson(
         gsid2gene     = parsed$gsid2gene,
         gsid2name     = parsed$gsid2name,
         species       = species,
@@ -96,6 +151,11 @@ mechanism_sets <- function(source = c("tf", "tfunion", "mirna", "perturbagen", "
         accessed_date = accessed,
         keytype       = "SYMBOL"
     )
+    ## Re-read the stamp: the fetch above may have just created the file, and a
+    ## stamp taken before that would be NA and never match.
+    final <- .mechanism_stamp(path)
+    if (!is.na(final)) .mechanism_collections[[key]] <- list(stamp = final, value = out)
+    out
 }
 
 ## One row per collection: the file name pattern, and the gsname that
@@ -276,12 +336,17 @@ mechanism_parse_gmt <- function(path) {
 #' (`ENCODE:`, `ChEA:`, `TFP:`, `TRRUST:`, `C3TFT:`); folding duplicates is
 #' [consensus()]'s job, and it has the evidence levels to do that with.
 #'
-#' **What it costs.** 3258 sets against C3:TFT's 1114, so the multiple-testing
-#' correction is spread over three times as many hypotheses. Measured on the
-#' hypoxia contrast, the true signal survived that comfortably -- `HIF1A` moved
-#' from padj 1.2e-4 (C3:TFT) to 9.3e-28 -- while three random gene sets of the
-#' same size returned **zero** significant sets, so the extra hypotheses did not
-#' buy extra false positives.
+#' **What it costs.** 2869 sets against C3:TFT's 1114, so the multiple-testing
+#' correction is spread over roughly three times as many hypotheses. Measured on
+#' the hypoxia contrast, the true signal survived that comfortably -- `HIF1A`
+#' moved from padj 1.2e-4 under C3:TFT to 2.5e-27 as a ChEA set -- while three random
+#' gene sets of the same size returned **zero** significant sets, so the extra
+#' hypotheses did not buy extra false positives.
+#'
+#' Building it reads 2.68 million rows, about 9 seconds. The result is kept for
+#' the rest of the session and reused, keyed on each source file's path, mtime
+#' and size, so replacing or re-downloading a library invalidates the entry
+#' rather than serving the old collection.
 #'
 #' @inheritParams mechanism_sets
 #' @return A `GSON`, in the same shape as [mechanism_sets()] returns.
@@ -298,6 +363,16 @@ mechanism_tfunion <- function(species = "Homo sapiens",
         rlang::abort("The TF union collection is human-only: the libraries are named for Homo sapiens.")
     }
     cache_dir <- mechanism_cache_root(cache_dir)
+
+    ## Same session cache as mechanism_sets(), for the same reason: this is the
+    ## most expensive collection in the package and evidence() rebuilds it on
+    ## every call.
+    key <- .mechanism_collection_key("tfunion", species, release, cache_dir, NULL)
+    stamp <- .mechanism_stamp(.mechanism_collection_paths("tfunion", release, cache_dir))
+    hit <- .mechanism_collections[[key]]
+    if (!is.na(stamp) && !is.null(hit) && identical(hit$stamp, stamp)) {
+        return(hit$value)
+    }
 
     base <- mechanism_sets("tf", species = species, release = release,
                            cache_dir = cache_dir)
@@ -333,7 +408,7 @@ mechanism_tfunion <- function(species = "Homo sapiens",
     known <- mechanism_known_symbols(species)
     gsid2gene <- gsid2gene[gsid2gene$gene %in% known, , drop = FALSE]
 
-    gson::gson(
+    out <- gson::gson(
         gsid2gene     = gsid2gene,
         gsid2name     = gsid2name[!duplicated(gsid2name$gsid), , drop = FALSE],
         species       = species,
@@ -342,6 +417,11 @@ mechanism_tfunion <- function(species = "Homo sapiens",
         accessed_date = base@accessed_date,
         keytype       = "SYMBOL"
     )
+    ## Re-read the stamp: the libraries above may have just been downloaded, and
+    ## a stamp taken before that would be NA and never match.
+    final <- .mechanism_stamp(.mechanism_collection_paths("tfunion", release, cache_dir))
+    if (!is.na(final)) .mechanism_collections[[key]] <- list(stamp = final, value = out)
+    out
 }
 
 ## Fetch one Enrichr library as a GSON-shaped data frame.
