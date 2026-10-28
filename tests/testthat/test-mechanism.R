@@ -112,7 +112,7 @@ test_that("evidence() returns an evidenceBundle with the documented elements", {
     ev <- evidence(genes, upstream = "tf", universe = c(genes, paste0("u", 1:5)))
 
     expect_s3_class(ev, "evidenceBundle")
-    ## `$writable` is now consensus()'s table, so the bundle also carries
+    ## `$writable` is now adjudicate()'s table, so the bundle also carries
     ## `$perturbagen` only when measured evidence was requested; the elements
     ## asserted here are the ones a plain collection run must always produce.
     expect_named(ev, c("input", "sets", "regulators", "xref", "diagnostics",
@@ -385,7 +385,7 @@ test_that("consensus separates supported, single_source, absent and untested", {
 
     genes <- c(paste0("g", 1:15), paste0("a", 1:2), paste0("u", 1:2), "x1")
     ev <- evidence(genes, upstream = "tf", universe = c(genes, paste0("b", 1:180)))
-    cv <- consensus(ev)
+    cv <- adjudicate(ev)$verdicts
 
     expect_equal(cv$verdict[cv$regulator == "FOXO3"], "single_source")
     ## Tested and not significant is absent, not untested.
@@ -407,7 +407,7 @@ test_that("an unnamed motif is never reported as supported or single_source", {
     ## both are tested and both appear in the result.
     ev <- evidence(c(paste0("g", 1:15), paste0("m", 1:3)),
                    upstream = "tf", universe = c(paste0("g", 1:200), paste0("m", 1:20)))
-    cv <- consensus(ev)
+    cv <- adjudicate(ev)$verdicts
     unnamed <- ev$regulators$regulator[!ev$regulators$named]
     ## The unnamed motif is tested and does not reach significance: it is
     ## absent, but it must never be supported or single_source.
@@ -428,7 +428,7 @@ test_that("a source below coverage_floor reports untested, not absent", {
                  design = list(coverage_floor = 0.30))
     )
     expect_equal(ev$diagnostics$counts$status, "untested")
-    cv <- consensus(ev)
+    cv <- adjudicate(ev)$verdicts
     expect_false("absent" %in% cv$verdict)
 })
 
@@ -474,7 +474,7 @@ test_that("an unnamed motif never reaches supported or single_source", {
     ## Overlaps the unnamed set strongly enough that it is significant.
     ev <- evidence(c(paste0("m", 1:8), paste0("g", 1:2)),
                    upstream = "tf", universe = c(paste0("g", 1:200), paste0("m", 1:20)))
-    cv <- consensus(ev)
+    cv <- adjudicate(ev)$verdicts
     unnamed <- ev$regulators$regulator[!ev$regulators$named & !is.na(ev$regulators$padj_within_source)]
     expect_gt(length(unnamed), 0)
     for (one in unnamed) {
@@ -532,7 +532,14 @@ test_that("a bundle with nothing admissible aborts instead of inventing a narrat
                    upstream = "tf",
                    universe = c(paste0("a", 1:5), paste0("b", 1:30), paste0("m", 1:20)))
     expect_equal(nrow(evidence_admitted(ev)), 0)
-    expect_error(interpret(ev), "level A or B")
+    ## A bundle is refused outright now: adjudication is the step that decides
+    ## what may be said, and skipping it would let the model narrate a
+    ## single-source finding as a mechanism.
+    expect_error(interpret(ev), "no longer accepts an `evidenceBundle`")
+    expect_error(interpret(ev), "then pass the")
+    expect_error(interpret(ev), "narrated as a mechanism")
+    ## The nothing-admissible abort still exists, one step later.
+    expect_error(interpret(adjudicate(ev)), "No entity in this adjudication")
 })
 
 test_that("excluded entries keep the reason they were excluded", {
@@ -578,7 +585,7 @@ test_that("the bundle is turned into the shape interpret() already understands",
 
 test_that("legacy and current symbols of one factor are the same entity", {
     ## C3:TFT names the hypoxia factor 'HIF1'; GPSAdb names it 'HIF1A'. Without
-    ## an alias the two never agree and consensus() cannot report `supported`.
+    ## an alias the two never agree and adjudicate() cannot report `supported`.
     expect_equal(mechanism_alias_regulator("HIF1"), "HIF1A")
     expect_equal(mechanism_alias_regulator("HIF1A"), "HIF1A")
     ## An unknown label is passed through unchanged.
@@ -612,7 +619,7 @@ test_that("a factor named by both a perturbation and a collection is supported",
     )
     class(b) <- c("evidenceBundle", "list")
 
-    cv <- consensus(b)
+    cv <- adjudicate(b)$verdicts
     expect_equal(cv$verdict[cv$regulator == "HIF1A"], "supported")
     expect_equal(cv$n_sources[cv$regulator == "HIF1A"], 2)
     expect_equal(cv$max_level[cv$regulator == "HIF1A"], "A")
@@ -637,7 +644,7 @@ test_that("a level C source never contributes to a supported verdict", {
     class(b) <- c("evidenceBundle", "list")
 
     ## Two sources agree, but both are predictions: still single_source.
-    expect_equal(consensus(b)$verdict, "single_source")
+    expect_equal(adjudicate(b)$verdicts$verdict, "single_source")
 })
 
 test_that("a missing MCP companion package aborts instead of reporting no evidence", {
@@ -746,7 +753,7 @@ test_that("a bundle with only measured evidence does not crash", {
                    design = list(treatment = "knockdown"))
     expect_s3_class(ev, "evidenceBundle")
     expect_equal(nrow(ev$regulators), 0)
-    expect_equal(nrow(consensus(ev)), 0)
+    expect_equal(nrow(adjudicate(ev)$verdicts), 0)
     expect_output(print(ev), "input genes")
 })
 
@@ -779,7 +786,7 @@ test_that("the writable table has one row per entity and agrees with consensus",
     ev <- evidence(c(paste0("g", 1:15), paste0("m", 1:3)),
                    upstream = "tf",
                    universe = c(paste0("g", 1:200), paste0("m", 1:20)))
-    cv <- consensus(ev)
+    cv <- adjudicate(ev)$verdicts
 
     ## One regulator produced several terms, some significant and some not;
     ## grading per row gave contradictory sentences for the same entity.
@@ -904,7 +911,7 @@ test_that("a label that means two different things cannot be supported", {
         input = list(design = list(coverage_floor = NULL)))
     class(b) <- c("evidenceBundle", "list")
 
-    cv <- consensus(b)
+    cv <- adjudicate(b)$verdicts
     expect_equal(cv$verdict, "single_source")
     ## The reason is stated rather than left for the reader to guess.
     expect_match(cv$writable, "coincidence of spelling")
@@ -913,7 +920,7 @@ test_that("a label that means two different things cannot be supported", {
     ## A label that names one thing is unaffected.
     r2 <- r; r2$regulator <- "SRF"; r2$term <- c("D20458", "SRF_Q6")
     b2 <- b; b2$regulators <- r2
-    expect_equal(consensus(b2)$verdict, "supported")
+    expect_equal(adjudicate(b2)$verdicts$verdict, "supported")
 })
 
 ## ---- item 1: family labels and index suffixes ------------------------------
@@ -958,7 +965,7 @@ test_that("a family label is marked and cannot be supported", {
               input = list(design = list(coverage_floor = NULL)))
     class(b) <- c("evidenceBundle", "list")
 
-    cv <- consensus(b)
+    cv <- adjudicate(b)$verdicts
     expect_true(cv$family)
     ## The sentence names the limitation rather than pretending a knock-out
     ## could ever exist for a complex.
@@ -1024,7 +1031,7 @@ test_that("a dialogue refuses to open when nothing was graded", {
 test_that("the system prompt carries the rules and the numbers behind them", {
     skip_if_not_installed("aisdk")
     b <- dialogue_fixture()
-    cv <- consensus(b)
+    cv <- adjudicate(b)$verdicts
     admitted <- cv[cv$verdict %in% c("supported", "single_source"), , drop = FALSE]
     p <- clusterProfiler:::.dialogue_system_prompt(b, admitted, context = "airway")
 
@@ -1050,7 +1057,7 @@ test_that("an unexamined entity in a reply is caught, an admitted one is not", {
 test_that("a caller assertion is recorded but never changes a verdict", {
     skip_if_not_installed("aisdk")
     b <- dialogue_fixture()
-    before <- consensus(b)
+    before <- adjudicate(b)$verdicts
 
     d <- structure(
         list(session = list(append_message = function(...) NULL),
@@ -1065,8 +1072,8 @@ test_that("a caller assertion is recorded but never changes a verdict", {
     expect_equal(nrow(d$assertions), 1)
     expect_equal(d$assertions$level, "U")
     ## The point of the design: saying it does not grade it.
-    expect_equal(consensus(b)$verdict, before$verdict)
-    expect_equal(consensus(b)$max_level, before$max_level)
+    expect_equal(adjudicate(b)$verdicts$verdict, before$verdict)
+    expect_equal(adjudicate(b)$verdicts$max_level, before$max_level)
 
     ## A second statement accumulates rather than replacing the first.
     d <- say(d, "second fact")
@@ -1360,7 +1367,7 @@ test_that("collapse keeps the strongest of a group and counts what it absorbed",
     expect_false(all(c("GF_A", "GF_B") %in% keep))
     ## The counts describe dropped findings, not similar ones.
     expect_equal(sum(cl$collapsed) - nrow(cl),
-                 nrow(consensus_findings(consensus(ev))) - nrow(cl))
+                 nrow(consensus_findings(adjudicate(ev))) - nrow(cl))
 })
 
 test_that("collapse leaves findings that say different things alone", {
@@ -1378,7 +1385,7 @@ test_that("collapse leaves findings that say different things alone", {
     genes <- c(paste0("a", 1:10), paste0("b", 1:10), paste0("c", 1:10))
     ev <- suppressWarnings(evidence(genes, upstream = "tf",
                                     universe = c(genes, paste0("u", 1:10))))
-    before <- nrow(consensus_findings(consensus(ev)))
+    before <- nrow(consensus_findings(adjudicate(ev)))
     cl <- collapse_findings(ev)
     ## Nothing overlaps, so nothing may be dropped.
     expect_equal(nrow(cl), before)
@@ -1441,7 +1448,7 @@ test_that("corroboration needs a measurement, not just two agreeing rows", {
                       coverage_floor = NA_real_)),
                   input = list(design = list(coverage_floor = NULL)))
         class(b) <- c("evidenceBundle", "list")
-        consensus(b)
+        adjudicate(b)$verdicts
     }
 
     ## A measurement plus anything else is the case worth reporting.
@@ -1481,7 +1488,7 @@ test_that("an unnamed motif cannot count toward a verdict", {
                       coverage_floor = NA_real_)),
                   input = list(design = list(coverage_floor = NULL)))
         class(b) <- c("evidenceBundle", "list")
-        consensus(b)
+        adjudicate(b)$verdicts
     }
     ## "none" names no factor, so it is not one of the kinds that corroborate.
     cv <- mk(c("none", "measured"))
@@ -1606,7 +1613,7 @@ test_that("a mechanism graph carries grades on its nodes and terms on its edges"
     ev <- suppressWarnings(
         evidence(shared, upstream = "tf",
                  universe = c(shared, paste0("u", 1:500))))
-    skip_if_not(nrow(consensus_findings(consensus(ev))) > 0, "fixture too small")
+    skip_if_not(nrow(consensus_findings(adjudicate(ev))) > 0, "fixture too small")
     mg <- mechanism_graph(ev, max_genes = 5)
 
     expect_s3_class(mg, "mechgraph")
@@ -1635,8 +1642,8 @@ test_that("a mechanism graph draws no absent entity", {
     ev <- suppressWarnings(
         evidence(paste0("g", 1:10), upstream = "tf",
                  universe = c(paste0("g", 1:10), paste0("u", 1:500))))
-    skip_if_not(nrow(consensus_findings(consensus(ev))) > 0, "fixture too small")
-    cv <- consensus(ev)
+    skip_if_not(nrow(consensus_findings(adjudicate(ev))) > 0, "fixture too small")
+    cv <- adjudicate(ev)$verdicts
     mg <- mechanism_graph(ev)
     ## Only findings are drawn: the absent majority would bury them.
     expect_true(all(mg$nodes$id[mg$nodes$type != "gene"] %in%
@@ -2052,7 +2059,7 @@ test_that("a signed input is tested by direction and keeps the sign", {
 })
 
 test_that("a knockdown's mixed direction cannot erase the collection's sign", {
-    ## The bug this guards: consensus() unioned both directions into one column,
+    ## The bug this guards: adjudicate() unioned both directions into one column,
     ## and since a knockdown is normally `mixed`, every corroborated regulator
     ## lost the sign the collection had established.
     mine <- data.frame(

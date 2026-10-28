@@ -431,7 +431,12 @@ evidence <- function(genes,
             ## Whether the caller's list carried a direction. The layers that
             ## need one report `untested` when it is FALSE, and print() has to be
             ## able to say which kind of silence this was.
-            directed  = !is.null(signed)
+            directed  = !is.null(signed),
+            ## The split itself, kept because it -- not the magnitudes -- is what
+            ## the directional layers read. A verdict fingerprint that ignored it
+            ## would call two opposite experiments the same evidence.
+            up        = directed_up,
+            down      = directed_down
         ),
         sets = lapply(sets, function(g) list(
             gsname   = g@gsname,
@@ -506,7 +511,7 @@ evidence <- function(genes,
     }
 
     ## The class must exist before the writable table is built: it defers to
-    ## consensus(), which refuses anything that is not an evidenceBundle.
+    ## adjudicate(), which refuses anything that is not an evidenceBundle.
     class(out) <- c("evidenceBundle", "list")
     out$writable <- .evidence_writable_table(out)
     out
@@ -839,16 +844,16 @@ mechanism_taxid <- function(species) {
     "auto"
 }
 
-## The sentence table is consensus()'s, not a second opinion computed here.
+## The sentence table is adjudicate()'s, not a second opinion computed here.
 ##
 ## Grading each term row separately produced contradictory advice for one
 ## regulator -- 'AP4' was simultaneously "state it as a hypothesis" (one
 ## significant set) and "no supporting evidence" (three non-significant ones),
 ## because a verdict computed per row cannot see the entity's other rows.
-## consensus() decides per entity and carries its own `writable` column, so the
+## adjudicate() decides per entity and carries its own `writable` column, so the
 ## bundle simply defers to it.
 .evidence_writable_table <- function(bundle) {
-    cv <- consensus(bundle)
+    cv <- adjudicate(bundle)$verdicts
     if (!nrow(cv)) {
         return(data.frame(regulator = character(), sources = character(),
                           n_sources = integer(), max_level = character(),
@@ -1173,7 +1178,7 @@ mechanism_perturb_candidates <- function(regulators, alpha = 0.05,
 ##   FDR for a question asked twice as often as the count suggests.
 ## * A set enriched in both directions keeps the stronger half. One contrast
 ##   cannot both activate and repress the same programme, and leaving both rows
-##   makes consensus() report `mixed` for want of a rule rather than because the
+##   makes adjudicate() report `mixed` for want of a rule rather than because the
 ##   biology is ambiguous.
 ## * Genes with a statistic of exactly zero are in neither half. They are rare,
 ##   and assigning them to one side would invent a direction.

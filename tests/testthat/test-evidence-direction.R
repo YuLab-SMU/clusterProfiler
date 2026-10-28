@@ -149,8 +149,8 @@ test_that("the pathway layer never becomes a witness in the verdict table", {
     ## evidence_biotrigger() raise `supported` without adding a regulator.
     expect_false("pathway" %in% with_pw$regulators$source)
     expect_setequal(unique(with_pw$regulators$source), c("tf"))
-    a <- consensus_findings(consensus(with_pw))
-    b <- consensus_findings(consensus(without))
+    a <- consensus_findings(adjudicate(with_pw))
+    b <- consensus_findings(adjudicate(without))
     expect_identical(a$n_sources, b$n_sources)
     expect_identical(a$verdict, b$verdict)
 })
@@ -218,7 +218,7 @@ test_that("a repressor report does not change the verdict", {
                      stringsAsFactors = FALSE)
     ev <- suppressWarnings(evidence(de, universe = de$gene, upstream = "tf",
                                     design = list(treatment = "none")))
-    cv <- consensus(ev)
+    cv <- adjudicate(ev)$verdicts
     ## Every regulator in this fixture is a collection-only finding, so there is
     ## nothing to report and nothing that could have flipped a verdict.
     expect_true(all(is.na(cv$perturbation_effect)))

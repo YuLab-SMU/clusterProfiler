@@ -440,7 +440,7 @@ mechanism_kind_of <- function(source, gsid, xref = mechanism_xref()) {
 ## The collections and the perturbation databases do not agree on symbol
 ## spelling: C3:TFT names the hypoxia factor 'HIF1' (the legacy symbol) while
 ## GPSAdb names it 'HIF1A'. Without this step a factor supported by both its
-## target sets and a knockdown is two findings, and consensus() can never
+## target sets and a knockdown is two findings, and adjudicate() can never
 ## report the agreement that a mechanism needs.
 ##
 ## shortcut: a fixed alias table, not an OrgDb lookup. OrgDb would be more

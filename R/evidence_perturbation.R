@@ -8,7 +8,7 @@
 #' The returned rows carry the same `regulator` label as the collections built by
 #' [mechanism_sets()], so a transcription factor named both by its target sets
 #' and by a knockdown dataset is *one* entity supported by *two* sources --
-#' which is what [consensus()] needs in order to report `supported` at all.
+#' which is what [adjudicate()] needs in order to report `supported` at all.
 #'
 #' GPSAdb is reached through its MCP endpoint, so `gpsadb` and `aisdk.mcp` must
 #' be installed. They are suggested, not required: without them this function
@@ -54,7 +54,7 @@
 #'   reported, `"B"` when the dataset is absent but the gene is in GPSAdb),
 #'   `padj_within_source`, `setSize`, `Count` and `direction` (`"up"`, `"down"`
 #'   or `"mixed"`, from the sign of the responding genes).
-#' @seealso [evidence()], [consensus()]
+#' @seealso [evidence()], [adjudicate()]
 #' @examples
 #' \dontrun{
 #' evidence_perturbation(c("HIF1A", "PGK1", "CA9"), method = "knockdown")

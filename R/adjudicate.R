@@ -1,8 +1,18 @@
 #' Decide which mechanisms the evidence actually supports
 #'
-#' Combine an `evidenceBundle` into one verdict per regulator. The point is not
-#' to rank by p-value but to say which claims survive a change of evidence
-#' type, and -- just as importantly -- which ones were never examined.
+#' Combine an `evidenceBundle` into one verdict per regulator, and return a
+#' verdict object rather than a bare table. The point is not to rank by p-value
+#' but to say which claims survive a change of evidence type, and -- just as
+#' importantly -- which ones were never examined.
+#'
+#' **Adjudication is a step.** `evidence()` collects and grades, `adjudicate()`
+#' decides, [interpret()] writes. Only the last one calls a model, and it needs
+#' an `adjudication` -- not a bundle -- so the decision cannot be skipped on the
+#' way to prose.
+#'
+#' The name is deliberate: this function does not find where sources agree, it
+#' decides which claims survive. "Consensus" in bioinformatics means agreement
+#' between clusterings, which is a different operation.
 #'
 #' Four verdicts:
 #'
@@ -32,7 +42,7 @@
 #'   becomes reachable once evidence that names the *same* entity is added --
 #'   a second target collection for the same factor, a perturbation signature
 #'   naming the feature it perturbed, or a network grade attached to the same
-#'   regulator. Until then `consensus()` still does its job: it separates what
+#'   regulator. Until then `adjudicate()` still does its job: it separates what
 #'   was tested and not found from what was never tested, which is the part a
 #'   p-value threshold cannot do.
 #' * `single_source` -- one source names it. That is a hypothesis, not a
@@ -48,9 +58,17 @@
 #' @param coverage_floor A source whose `coverage_tested` is below this is
 #'   reported as `untested` whatever it found. `NULL` takes the floor recorded
 #'   in `x$input$design`.
-#' @return A `data.frame` with `regulator`, `sources`, `n_sources`,
-#'   `max_level`, `verdict`, `padj`, `direction`, `measured_direction` and
-#'   `writable` (the sentence the evidence permits; see [mechanism_writable()]).
+#' @return An S3 object of class `adjudication` with `verdicts`, `evidence`,
+#'   `diagnostics`, `parameters` and `provenance`. `$verdicts` is a `data.frame`
+#'   whose columns, in order, are `regulator`, `sources`, `n_sources`,
+#'   `max_level`, `verdict`, `padj`, `family`, `evidence_kind`, `direction`,
+#'   `measured_direction`, `perturbation_effect` and `writable` (the sentence
+#'   the evidence permits; see [mechanism_writable()]).
+#'
+#'   `$provenance$evidence_sha` fingerprints the genes, the background, the
+#'   collections and their release -- and deliberately not the time, so two runs
+#'   over the same evidence hash alike and a comparison means "same evidence"
+#'   rather than "same moment".
 #'
 #'   `direction` and `measured_direction` answer different questions and are
 #'   kept apart deliberately. `direction` is the collection's: which way the
@@ -61,14 +79,16 @@
 #'   because removing a factor moves some genes up and others down. Merging the
 #'   two into one column made the knockdown's `mixed` overwrite the collection's
 #'   established sign on exactly the best-supported entities.
-#' @seealso [evidence()], [mechanism_writable()]
+#' @seealso [evidence()], [interpret()], [mechanism_writable()]
 #' @examples
 #' \dontrun{
-#' ev <- evidence(c("HIF1A", "PGK1", "CA9"))
-#' consensus(ev)
+#' ev <- evidence(setNames(c(2.1, 1.8, 1.4), c("PGK1", "CA9", "VEGFA")))
+#' adj <- adjudicate(ev)
+#' adj
+#' consensus_findings(adj)
 #' }
 #' @export
-consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
+adjudicate <- function(x, min_independent = 2, coverage_floor = NULL) {
     if (!inherits(x, "evidenceBundle")) {
         rlang::abort("`x` must be an evidenceBundle from evidence().")
     }
@@ -76,14 +96,14 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
 
     r <- x$regulators
     if (!nrow(r)) {
-        return(data.frame(
+        return(.adjudication(data.frame(
             regulator = character(), sources = character(), n_sources = integer(),
             max_level = character(), verdict = character(), padj = numeric(),
             family = logical(), evidence_kind = character(),
             direction = character(), measured_direction = character(),
             perturbation_effect = character(), writable = character(),
             stringsAsFactors = FALSE
-        ))
+        ), x, min_independent, coverage_floor))
     }
 
     ## A source that never examined these genes cannot report an absence.
@@ -237,7 +257,7 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
     rownames(out) <- NULL
     out$writable <- mechanism_writable(out$verdict, out$max_level, out$regulator,
                                        sources = out$sources, family = out$family)
-    out
+    .adjudication(out, x, min_independent, coverage_floor)
 }
 
 ## The subset of a verdict table worth reading: entities the evidence actually
@@ -245,6 +265,10 @@ consensus <- function(x, min_independent = 2, coverage_floor = NULL) {
 ## `$diagnostics`; repeating it for every one of a thousand factor labels turns
 ## the sentence table into noise and hides the few that matter.
 consensus_findings <- function(cv) {
+    ## Accepts the object as well as the frame: every caller has an
+    ## adjudication, and reaching into $verdicts at each of them would spread
+    ## knowledge of the object's shape across the package.
+    cv <- adjudication_verdicts(cv)
     keep <- cv$verdict %in% c("supported", "single_source")
     cv[keep, , drop = FALSE]
 }
@@ -256,20 +280,20 @@ consensus_findings <- function(cv) {
 #' finding out of a mechanism sentence: the wording available at C describes a
 #' correlation, and no higher wording is offered.
 #'
-#' @param verdict A `consensus()` verdict.
+#' @param verdict A `adjudicate()` verdict.
 #' @param level An evidence level (`"A"`, `"B"`, `"C"`) or `NA`.
 #' @param regulator The entity name.
-#' @param sources Comma-separated source labels as `consensus()` records them.
+#' @param sources Comma-separated source labels as `adjudicate()` records them.
 #'   A measured perturbation is graded A whether it hit a regulator or a
 #'   downstream effector, so the sentence for a single-source A finding depends
 #'   on whether a target-set collection also names the gene as a regulator.
 #' @return A character vector of sentences.
-#' @seealso [consensus()]
+#' @seealso [adjudicate()]
 #' @examples
 #' mechanism_writable(c("supported", "single_source", "untested"),
 #'                    c("B", "C", NA), c("FOXO3", "MIR23C", "NFE2L2"))
 #' @export
-#' @param family Logical vector from `consensus()`, TRUE where the label names
+#' @param family Logical vector from `adjudicate()`, TRUE where the label names
 #'   a protein family or a complex rather than one gene. Such a label is a real
 #'   answer, so it gets its own sentence: the collection names the group, not one
 #'   gene, and no perturbation dataset can exist for it.
@@ -423,4 +447,115 @@ sources_source <- function(src) {
     }
     expected <- mechanism_expected_measured(direction, sign)
     if (identical(measured, expected)) "activator" else "repressor"
+}
+
+## The verdict, with the evidence that produced it still attached.
+##
+## A plain data.frame would do for printing, but `interpret()` has to tell an
+## adjudication apart from a caller's own data.frame -- that is a documented
+## input type -- so the class is load-bearing rather than decorative. Carrying
+## the bundle also means a saved verdict can be re-read next to what it was
+## derived from, instead of becoming a table nobody can audit.
+##
+## `evidence_sha` hashes only what decides the verdict: the genes, the
+## background, the collections and their release. It deliberately excludes
+## `called_at` and every other timestamp, so the same input hashes the same way
+## on two runs and a SHA comparison means "same evidence", not "same moment".
+.adjudication <- function(verdicts, bundle, min_independent, coverage_floor) {
+    structure(
+        list(
+            verdicts    = verdicts,
+            evidence    = bundle,
+            diagnostics = bundle$diagnostics,
+            ## What was asked, so a reader can reproduce the decision without
+            ## reading the call that made it.
+            parameters  = list(
+                min_independent = min_independent,
+                coverage_floor  = coverage_floor,
+                species         = bundle$input$design$species,
+                design          = bundle$input$design
+            ),
+            provenance  = list(
+                evidence_sha = .adjudication_sha(bundle),
+                call         = deparse(sys.call(-1L))[1],
+                time         = as.character(Sys.time())
+            )
+        ),
+        class = c("adjudication", "list")
+    )
+}
+
+## A fingerprint of the evidence, not of the run.
+##
+## Everything in this list changes only when the input or the collections
+## change. `bundles` are in a fixed order after the sort, so two runs over the
+## same list hash identically however they were invoked.
+.adjudication_sha <- function(bundle) {
+    stable <- list(
+        genes    = sort(bundle$input$genes),
+        universe = sort(bundle$input$universe),
+        ## Which half each gene is in, because that is what the directional
+        ## layers read. The magnitudes are excluded on purpose: they decide no
+        ## verdict, and including them would make the fingerprint change for a
+        ## difference no answer can see.
+        up       = sort(bundle$input$up %||% character(0)),
+        down     = sort(bundle$input$down %||% character(0)),
+        upstream = sort(bundle$provenance$upstream),
+        release  = sort(bundle$provenance$release)
+    )
+    rlang::hash(stable)
+}
+
+#' Print an adjudication
+#'
+#' Shows what a reader needs in order to decide whether to go on to
+#' [interpret()]: how many findings reached each verdict, and which regulators
+#' the strongest ones name. The per-entity table is not printed -- at a few
+#' hundred entities it buries the summary it is supposed to support.
+#'
+#' @param x An `adjudication` from [adjudicate()].
+#' @param ... Ignored.
+#' @return `x`, invisibly.
+#' @export
+print.adjudication <- function(x, ...) {
+    v <- x$verdicts
+    cat("<adjudication>\n")
+    cat("  evidence:     ", length(x$evidence$input$genes), " genes, ",
+        paste(x$evidence$provenance$upstream, collapse = ", "), "\n", sep = "")
+
+    counts <- table(factor(v$verdict, levels = c("supported", "single_source",
+                                                 "absent", "untested")))
+    cat("  verdicts:     ", paste0(names(counts), " ", as.integer(counts),
+                                  collapse = "  "), "\n", sep = "")
+
+    ## A source that could not be consulted, or that did not cover enough of the
+    ## list, changes what `untested` means -- say so here rather than leaving it
+    ## to be discovered in $diagnostics.
+    floors <- vapply(x$diagnostics$counts$status %||% character(0),
+                     function(s) identical(s, "untested"), TRUE)
+    if (any(floors)) {
+        cat("  coverage:      ", sum(floors), " source(s) below the coverage floor",
+            " -- their entities are untested, not absent\n", sep = "")
+    }
+
+    sup <- v[v$verdict == "supported", , drop = FALSE]
+    if (nrow(sup)) {
+        sup <- utils::head(sup, 3)
+        cat("  supported:    ",
+            paste0(sup$regulator, " (", sup$max_level, ")",
+                   ifelse(is.na(sup$perturbation_effect), "",
+                          paste0(", ", sup$perturbation_effect)),
+                   collapse = "; "), "\n", sep = "")
+    }
+    cat("  sha:          ", substr(x$provenance$evidence_sha, 1, 16), "\n", sep = "")
+    invisible(x)
+}
+
+## The verdict table, for callers that only want the frame.
+##
+## `consensus_findings()` and several helpers took the data.frame directly, and
+## making them reach into `$verdicts` at every call site would spread knowledge
+## of the object's shape across the package.
+adjudication_verdicts <- function(x) {
+    if (inherits(x, "adjudication")) x$verdicts else x
 }

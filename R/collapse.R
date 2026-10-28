@@ -5,7 +5,7 @@
 #' than as every set that crossed a threshold.
 #'
 #' The need is not uniform across sources, which is why this is a separate step
-#' rather than something [consensus()] always does. Measured on the airway list:
+#' rather than something [adjudicate()] always does. Measured on the airway list:
 #' transcription-factor findings barely overlap at all (median pairwise Jaccard
 #' 0.000 over 155 findings), cell-state findings likewise (0.008 over 337), and
 #' only tissue signatures are genuinely redundant (17% of pairs above 0.5, and
@@ -20,7 +20,7 @@
 #' @return A data frame like `consensus_findings()`, with two extra columns:
 #'   `collapsed` (how many findings this row stands for) and `absorbed` (the
 #'   labels it replaced). Ordered by significance.
-#' @seealso [consensus()], [consensus_findings()]
+#' @seealso [adjudicate()], [consensus_findings()]
 #' @examples
 #' \dontrun{
 #' ev <- evidence(genes, upstream = "tissue")
@@ -39,7 +39,7 @@ collapse_findings <- function(x,
         rlang::abort("`threshold` must be one number in (0, 1].")
     }
 
-    findings <- consensus_findings(consensus(x))
+    findings <- consensus_findings(adjudicate(x))
     if (!nrow(findings)) {
         return(.collapse_empty())
     }
@@ -114,7 +114,7 @@ print.collapsedFindings <- function(x, ...) {
 ## The empty result, with exactly the columns a populated one has.
 ##
 ## Written out rather than derived, so this is the one place that can drift
-## from consensus(). `evidence_kind` was added to the verdict table and missed
+## from adjudicate(). `evidence_kind` was added to the verdict table and missed
 ## here, which made an empty result and a non-empty one disagree about their
 ## own shape -- the kind of difference that only shows up in a caller that
 ## happens to get no findings.

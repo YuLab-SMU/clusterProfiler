@@ -43,7 +43,7 @@ distinction is why an edge here is evidence of association regardless of the
 regulator's own grade.
 
 Absent and untested entities are not included. They are the larger part of
-most results and including them would bury the findings; [consensus()] lists
+most results and including them would bury the findings; [adjudicate()] lists
 them.
 }
 \examples{
@@ -55,5 +55,5 @@ plot(mg)
 }
 }
 \seealso{
-[plot_mechanism()], [evidence()], [consensus()]
+[plot_mechanism()], [evidence()], [adjudicate()]
 }

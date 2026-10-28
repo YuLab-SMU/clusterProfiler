@@ -21,7 +21,7 @@ entities the evidence actually supports. This is the same call as
 input -- so there is no second function to learn.
 }
 \details{
-The restriction is the point. Only entries that `consensus()` grades
+The restriction is the point. Only entries that `adjudicate()` grades
 `supported` or `single_source` **and** that carry level `A` or `B` reach the
 prompt. A level C finding is a correlation: letting it into the prompt is how
 a narrative ends up asserting a mechanism nobody demonstrated. Everything
@@ -41,5 +41,5 @@ interpret(ev)
 }
 }
 \seealso{
-[evidence()], [consensus()], [interpret()]
+[evidence()], [adjudicate()], [interpret()]
 }

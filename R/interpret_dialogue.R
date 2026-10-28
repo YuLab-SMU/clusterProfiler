@@ -8,7 +8,7 @@
 #' The conversation is bounded by what the evidence says, and the boundary is
 #' enforced rather than requested. Three rules hold for every turn:
 #'
-#' * Only entities that [consensus()] already reports may be discussed. A
+#' * Only entities that [adjudicate()] already reports may be discussed. A
 #'   question about a regulator the evidence does not contain is answered with
 #'   that fact, not with model knowledge, because a plausible answer about an
 #'   unexamined factor is indistinguishable from an invented one.
@@ -44,7 +44,7 @@
 #'   The session is a reference object and is mutated in place, so assigning the
 #'   result of [ask()] rebinds the variable but does not copy the conversation.
 #'   Use [fork_dialogue()] to take a branch that can be abandoned.
-#' @seealso [ask()], [evidence()], [consensus()]
+#' @seealso [ask()], [evidence()], [adjudicate()]
 #' @examples
 #' \dontrun{
 #' ev <- evidence(genes, upstream = c("tf", "perturbagen"),
@@ -67,10 +67,10 @@ interpret_dialogue <- function(x,
         ))
     }
 
-    ## The bundle already carries the verdicts consensus() computed for it; the
+    ## The bundle already carries the verdicts adjudicate() computed for it; the
     ## dialogue reads them rather than recomputing, so what is discussed is
     ## exactly what print() and $writable report.
-    cv <- x$writable %||% consensus(x)
+    cv <- x$writable %||% adjudicate(x)$verdicts
     if (is.null(cv) || !nrow(cv)) {
         rlang::abort(c(
             "There is nothing to discuss: this bundle carries no entity the sources graded.",

@@ -547,14 +547,31 @@ interpret <- function(x,
   # frames -- the shape process_enrichment_input() already handles. Every other
   # input type takes the existing path unchanged.
   bundle <- NULL
+  ## Adjudication is a step, not an option. Accepting a bundle here as well
+  ## would let a caller pay for a model call while skipping the decision about
+  ## which claims survive it, and the whole point of separating
+  ## adjudicate() is that the decision happens before the prose.
   if (inherits(x, "evidenceBundle")) {
-    bundle <- x
-    x <- .process_evidence_input(x, n_pathways)
+    rlang::abort(c(
+      "`interpret()` no longer accepts an `evidenceBundle`.",
+      i = "Call `adjudicate()` first, then pass the `adjudication` to `interpret()`.",
+      i = paste0("The verdict decides which claims may be written; skipping it ",
+                 "would let a single-source finding be narrated as a mechanism.")
+    ))
+  }
+  if (inherits(x, "adjudication")) {
+    bundle <- x$evidence
+    ## The verdict table is the authority for what may be said, not whatever
+    ## the bundle happened to carry -- a caller may have adjudicated at a
+    ## stricter `min_independent`, and that decision has to travel.
+    bundle$writable <- x$verdicts
+    x <- .process_evidence_input(bundle, n_pathways)
     if (is.null(x)) {
       rlang::abort(c(
-        "No entity in this evidenceBundle carries level A or B with a supported verdict.",
+        paste0("No entity in this adjudication carries level A or B with a ",
+               "`supported` or `single_source` verdict."),
         i = "Nothing may be asserted about a mechanism, so there is nothing to interpret.",
-        i = "Inspect `consensus(x)` and `x$diagnostics` to see what was tested."
+        i = "Inspect the `adjudication` and its `$diagnostics` to see what was tested."
       ))
     }
   }

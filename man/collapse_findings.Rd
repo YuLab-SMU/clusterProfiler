@@ -35,7 +35,7 @@ than as every set that crossed a threshold.
 }
 \details{
 The need is not uniform across sources, which is why this is a separate step
-rather than something [consensus()] always does. Measured on the airway list:
+rather than something [adjudicate()] always does. Measured on the airway list:
 transcription-factor findings barely overlap at all (median pairwise Jaccard
 0.000 over 155 findings), cell-state findings likewise (0.008 over 337), and
 only tissue signatures are genuinely redundant (17% of pairs above 0.5, and
@@ -49,5 +49,5 @@ collapse_findings(ev)
 }
 }
 \seealso{
-[consensus()], [consensus_findings()]
+[adjudicate()], [consensus_findings()]
 }

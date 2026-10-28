@@ -120,7 +120,7 @@ mechanism_grade_ppi <- function(raw) {
     out
 }
 
-## Does the network support a specific pair? Used by consensus() to attach a
+## Does the network support a specific pair? Used by adjudicate() to attach a
 ## verdict to a gene pair rather than to a regulator.
 mechanism_pair_evidence <- function(ppi, a, b) {
     if (!nrow(ppi)) return(NULL)

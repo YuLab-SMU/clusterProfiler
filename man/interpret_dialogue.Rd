@@ -62,7 +62,7 @@ with rather than announced.
 The conversation is bounded by what the evidence says, and the boundary is
 enforced rather than requested. Three rules hold for every turn:
 
-* Only entities that [consensus()] already reports may be discussed. A
+* Only entities that [adjudicate()] already reports may be discussed. A
   question about a regulator the evidence does not contain is answered with
   that fact, not with model knowledge, because a plausible answer about an
   unexamined factor is indistinguishable from an invented one.
@@ -85,5 +85,5 @@ d  <- say(d, "Our CEBPB knockdown showed no phenotype in this line.")
 }
 }
 \seealso{
-[ask()], [evidence()], [consensus()]
+[ask()], [evidence()], [adjudicate()]
 }

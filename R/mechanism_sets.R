@@ -334,7 +334,7 @@ mechanism_parse_gmt <- function(path) {
 #' genes, 11% of the background, which no enrichment test can interpret. Each
 #' set keeps its identity and is tagged with its library prefix
 #' (`ENCODE:`, `ChEA:`, `TFP:`, `TRRUST:`, `C3TFT:`); folding duplicates is
-#' [consensus()]'s job, and it has the evidence levels to do that with.
+#' [adjudicate()]'s job, and it has the evidence levels to do that with.
 #'
 #' **What it costs.** 2869 sets against C3:TFT's 1114, so the multiple-testing
 #' correction is spread over roughly three times as many hypotheses. Measured on

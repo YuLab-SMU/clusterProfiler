@@ -20,7 +20,7 @@
 #' regulator's own grade.
 #'
 #' Absent and untested entities are not included. They are the larger part of
-#' most results and including them would bury the findings; [consensus()] lists
+#' most results and including them would bury the findings; [adjudicate()] lists
 #' them.
 #'
 #' @param x An `evidenceBundle` from [evidence()].
@@ -33,7 +33,7 @@
 #'   `"family"` or `"gene"`), `label`, `grade` and `verdict`; `edges` carry
 #'   `from`, `to`, `type` (`"target"`), `term`, `level` and `source`.
 #'   `metadata` records the input size and the species.
-#' @seealso [plot_mechanism()], [evidence()], [consensus()]
+#' @seealso [plot_mechanism()], [evidence()], [adjudicate()]
 #' @examples
 #' \dontrun{
 #' ev <- evidence(genes, upstream = c("tf", "perturbagen"),
@@ -53,7 +53,7 @@ mechanism_graph <- function(x, max_genes = 8, species = NULL, release = NULL) {
         rlang::abort("`x` must be an evidenceBundle from evidence().")
     }
 
-    findings <- consensus_findings(consensus(x))
+    findings <- consensus_findings(adjudicate(x))
     if (is.null(species)) species <- x$input$design$species %||% "Homo sapiens"
     if (is.null(release)) {
         rel <- unique(stats::na.omit(x$provenance$release))
@@ -66,7 +66,7 @@ mechanism_graph <- function(x, max_genes = 8, species = NULL, release = NULL) {
     if (!nrow(findings)) {
         rlang::abort(c(
             "There is nothing to draw: no entity reached a supported or single-source verdict.",
-            i = "`consensus()` lists what was examined and why it did not qualify."
+            i = "`adjudicate()` lists what was examined and why it did not qualify."
         ))
     }
 

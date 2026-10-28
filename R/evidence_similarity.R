@@ -72,7 +72,7 @@ evidence_biotrigger <- function(genes, effect = c("both", "activated", "inhibite
     out$effect_size <- as.numeric(d$es)
     ## The server reports a score, not a test. A hit is significant by the
     ## server's own construction -- it returned it as a hit -- so the row says
-    ## so itself rather than leaving consensus() to read a missing p-value as
+    ## so itself rather than leaving adjudicate() to read a missing p-value as
     ## "not significant", which is what a padj-only rule would do.
     out$significant <- TRUE
     out[order(-abs(out$effect_size)), , drop = FALSE]

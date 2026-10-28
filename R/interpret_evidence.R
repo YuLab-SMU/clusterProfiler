@@ -5,7 +5,7 @@
 #' `interpret()` on an enrichment result -- `interpret()` dispatches on its
 #' input -- so there is no second function to learn.
 #'
-#' The restriction is the point. Only entries that `consensus()` grades
+#' The restriction is the point. Only entries that `adjudicate()` grades
 #' `supported` or `single_source` **and** that carry level `A` or `B` reach the
 #' prompt. A level C finding is a correlation: letting it into the prompt is how
 #' a narrative ends up asserting a mechanism nobody demonstrated. Everything
@@ -24,7 +24,7 @@
 #' @return An `interpretation` object with two extra elements:
 #'   `evidence_admitted` (the rows that reached the prompt) and
 #'   `evidence_excluded` (the rows that did not, with the reason).
-#' @seealso [evidence()], [consensus()], [interpret()]
+#' @seealso [evidence()], [adjudicate()], [interpret()]
 #' @examples
 #' \dontrun{
 #' ev <- evidence(c("HIF1A", "PGK1", "CA9"))
@@ -118,11 +118,11 @@ mechanism_measured_prompt_rows_cols <- function(n) {
     )
 }
 
-## The rows consensus() supports and the level allows.
+## The rows adjudicate() supports and the level allows.
 evidence_admitted <- function(x, min_independent = 2) {
     r <- x$regulators
     if (!nrow(r)) return(mechanism_empty_regulators())
-    cv <- consensus(x, min_independent = min_independent)
+    cv <- adjudicate(x, min_independent = min_independent)$verdicts
 
     keep <- cv$verdict %in% c("supported", "single_source") &
         !is.na(cv$max_level) & cv$max_level %in% c("A", "B")
@@ -167,7 +167,7 @@ mechanism_empty_regulators <- function() {
 evidence_excluded <- function(x, min_independent = 2) {
     r <- x$regulators
     if (!nrow(r)) return(mechanism_empty_regulators()[0, ])
-    cv <- consensus(x, min_independent = min_independent)
+    cv <- adjudicate(x, min_independent = min_independent)$verdicts
     admitted <- evidence_admitted(x, min_independent = min_independent)
     left <- r[!r$term %in% admitted$term, , drop = FALSE]
     if (!nrow(left)) return(cbind(left, reason = character(0)))
