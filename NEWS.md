@@ -25,6 +25,8 @@
 + `simplify()` removes redundancy from any collection, not only GO: `measure = "JC"` compares term gene sets by Jaccard index, `measure = "overlap"` by shared genes over the smaller set. Both read `@geneSets`, so KEGG, Reactome and MSigDB results work without `GOSemSimDATA` (#743, 2026-10-26, Mon)
 + Collections are parsed once per session and the entry is keyed on each source file's path, mtime and size, so a re-downloaded library invalidates it instead of serving a stale one (2026-10-28, Wed)
 
+# clusterProfiler 4.21.4
+
 ## fixes
 
 + The headline verdict could be produced by a symbol collision. TRANSFAC's `NF1` is Nuclear Factor I while the HGNC symbol `NF1` is neurofibromin, and matched on the string the motif term and a knockout dataset "agreed". A collided label can no longer reach `supported` (2026-10-25, Sun)
