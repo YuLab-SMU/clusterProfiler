@@ -19,6 +19,7 @@
 | **D5** | 四层证据，**L3 单独成表**，不进 `regulators` | L3 由同一批 TF 集合派生，若作为行进入 `regulators`，`adjudicate()` 会把它当成独立见证者——与当初删掉 biotrigger 是同一个错误 |
 | **D6** | L2 的方向由「交集限定 + 符号检验」决定，取代「所有符号相同才算 up」 | 现在的规则在混合列表上必然给出 `mixed`，那是尺子的问题，不是数据的问题 |
 | **D7** | 通道增减按**实测**：biotrigger / similarity / network 各跑一次对比，只有指标变好才回加 | 当初删除的理由是实测；重新评估也必须用实测，不能因为「设计变了」就假定它们现在有用 |
+| **D7'** | **已测（2026-10-28），结果见 `mechanism-accuracy.md` §R3**：biotrigger 与基线逐位相同（MRR 0.083 → 0.083），不回复；network 的 `$ppi` 从未被任何代码读取（`mechanism_pair_evidence()` 零调用点），保持默认关闭并改标为「参考信息」；similarity 函数已删除，未测 | 三声明的实测落地 |
 
 ---
 
@@ -200,6 +201,8 @@ regulator, source, term, Count, setSize, padj_within_pathway, geneID
 **准入判据**：新增通道使 MRR 提升或使真值调控者进入 recall@10，且不引入仅由同一数据集重复计数得来的 supported。任一不满足，保持删除。
 
 四组结果写进 `dev_docs/mechanism-accuracy.md`，作为去留依据。
+
+**已执行（2026-10-28）**：结论见 `mechanism-accuracy.md` 的 §R3。biotrigger 不回复，network 保持关闭并改标参考，similarity 未测（实现已删）。
 
 ---
 

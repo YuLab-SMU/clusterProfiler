@@ -297,3 +297,69 @@ direction: enrichment among up-genes means the regulator's targets rise. This
 is cheaper than GSEA (no ranking needed, no permutation) and it does not
 collide with the perturbation direction, because it is attached to the
 collection row rather than merged with the measured row.
+
+## R3: re-testing the channels that were dropped (2026-10-28)
+
+The design changed underneath the original decision -- the TF collection is
+wider and the perturbation layer now has a direction -- so the three dropped
+channels were measured again rather than re-admitted on the strength of that
+change. Script and raw output: `adjudicate-interpret/scripts/12_channel_retest.R`
+and `results/12_channel_retest.{log,tsv}`.
+
+Setup: 54 GPSAdb datasets whose perturbed gene is a known truth, input is that
+dataset's own significant genes as a named numeric (so the direction is real),
+and the metric is the rank of the true regulator among significant entities.
+
+| arm | found | recall@1 | recall@10 | MRR | median rank |
+| --- | --- | --- | --- | --- | --- |
+| baseline (`tf`) | 15/54 (28%) | 1 | 1 | **0.083** | 133 |
+| + biotrigger | 15/54 (28%) | 1 | 1 | **0.083** | 133 |
+
+Identical to three decimals. Adding about twenty biotrigger rows per dataset
+moved nothing.
+
+### Why it moves nothing, which is the useful part
+
+`evidence_biotrigger()` returns rows with `padj_within_source = NA` and
+`significant = TRUE`. Two consequences:
+
+* With no test statistic it cannot be ranked, so it sorts behind every
+  collection row and can never displace anything. It is structurally incapable
+  of improving a ranking, not merely unhelpful at it.
+* The `regulator` it reports is the gene perturbed in a *similar-signature*
+  dataset. That is a similarity partner, not a regulator of the caller's genes.
+  Naming it `regulator` is a category error, and it is why wiring the channel in
+  raised the `supported` count without ever adding a transcription factor -- the
+  "second source" was a different gene's experiment agreeing that the signature
+  looks familiar.
+
+Measured across the 54 datasets the returned genes were a near-constant handful
+(ARID1A, TMEM106B, PTPN23, AK2, SORL1, ...): generic signatures, not regulators.
+
+**Decision: stays out.** The direction and the wider collection did not rescue
+it because neither was what limited it.
+
+### Network: advertised as evidence, never read
+
+`network = TRUE` builds a `$ppi` table -- 3074 edges per run on average, with the
+true regulator present in the network for 35 of 54 datasets. It changes no
+verdict, because `mechanism_pair_evidence()` (the only consumer) is **never
+called anywhere in the package**. Grep confirms it: one definition, zero call
+sites.
+
+So "does the network support this?" has no implementation behind it today. The
+edge data is real and often on-target; what is missing is the step that turns an
+edge into a corroboration. That is a decision for a later round, not something
+R3 can settle by re-running the benchmark: no amount of measurement will make a
+table that nothing reads change an answer.
+
+**Decision: stays off by default, and is documented as informational** until
+something consumes it.
+
+### Similarity: not tested
+
+`evidence_similarity()` no longer exists -- the file now holds only
+`evidence_biotrigger()`. Re-testing it would mean restoring the implementation
+first, which is more work than the channel is worth given what biotrigger just
+showed about the shape of that evidence. Left undone and named here rather than
+quietly skipped.
