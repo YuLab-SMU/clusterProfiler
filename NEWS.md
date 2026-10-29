@@ -1,7 +1,8 @@
-# clusterProfiler 4.21.4.022
+# clusterProfiler 4.21.4.023
 
 ## mechanism analysis: collect, adjudicate, write
 
++ fix `unsupported_claims()` treating every single-letter-plus-digits token as a panel label. `P53`, `P63`, `P68`, `P300` and `F10` are real symbols and were dropped with `A4` and `Q4`, so a narrative naming p53 as the mechanism went unseen. Only a letter and one digit is suppressed now (2026-10-29, Thu)
 + fix `unsupported_claims()` letting a rejected regulator through whenever its symbol was also an input gene. Being an input gene exempted a symbol, so "ESR1 drives this program" passed untouched if ESR1 was differentially expressed -- which regulators routinely are, ESR1 at lfc -1.94 in the MCF-7 example. A symbol the adjudication graded and did not admit now keeps no exemption (2026-10-29, Thu)
 + fix the same check's family exemption using the whole vocabulary instead of the admitted labels, so a rejected regulator was excused whenever its symbol prefixed an unrelated gene: MYB was exempted because MYBL1 happened to be an input gene (2026-10-29, Thu)
 + fix `print()` reporting the perturbation sweep as "31 of 30 candidate regulator(s) queried". The numerator counted the names the lookup sent -- a regulator is queried under every alias it is known by -- and the denominator counted candidate regulators, so the two halves of the fraction measured different things. Both are now counted in regulators (2026-10-29, Thu)

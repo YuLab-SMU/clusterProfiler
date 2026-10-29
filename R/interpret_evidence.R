@@ -258,9 +258,15 @@ unsupported_claims <- function(interpretation, x, min_independent = 2,
     is_family_of_admitted <- function(tok) {
         any(startsWith(admitted_labels, tok))
     }
-    ## A single letter followed by digits ('A4', 'Q4') is a list marker or a
-    ## quality tier, never a symbol.
-    caps <- caps[!grepl("^[A-Z][0-9]+$", caps)]
+    ## A single letter followed by ONE digit ('A4', 'Q4', 'B2') is a panel label
+    ## or a quality tier, never a symbol.
+    ##
+    ## The rule used to suppress any number of digits, which swallowed real
+    ## symbols: P53, P63, P68, P300 and F10 all match the wider form and were
+    ## silently dropped, so a narrative could name p53 as the mechanism and this
+    ## check would not see it. Measured by injecting every unadmitted regulator
+    ## of the MCF-7 example: five of the nineteen misses were exactly this.
+    caps <- caps[!grepl("^[A-Z][0-9]$", caps)]
     unexplained <- setdiff(caps, c(vocab, .evidence_stop, .evidence_claims_stop))
     unexplained[!vapply(unexplained, is_family_of_admitted, TRUE)]
 }
