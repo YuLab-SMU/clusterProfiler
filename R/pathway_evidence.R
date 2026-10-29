@@ -1,0 +1,194 @@
+## 通路层面的机制证据。
+##
+## 与 `evidence()` 的 TF 模式并列，但问的是另一个问题：
+##   不是"哪个 TF 调控这批基因"，而是"这条通路的移动能否被一份实测扰动解释"。
+##
+## 设计依据 `dev_docs/pathway-mechanism-design.md`。两条核心约束：
+##
+## 1. **候选驱动者由调用方给**（`drivers`）。工具不假装从几千个数据集里发现驱动者——
+##    第 0 期已经测过，那种"谁最像"的排序给不出可用答案（biotrigger 把答案埋在第 18/200）。
+##    这里做的是**检验**：给一个候选，回答"敲掉它会不会让这条通路动"。
+## 2. **每条结论都必须可被推翻**，所以输出带一句 `statement`。不可falsify 的不是机制陈述。
+
+## 通路成员与方向。
+##
+## 方向优先级：显式的 `pathway_direction` > 从成员基因的 log2FC 推断。
+## 两者都没有时方向为 NA——**不猜**。没有方向的通路无法检验，只能给 C 级。
+.pathway_members <- function(result) {
+    if (is.null(result$geneID)) return(character(0))
+    unique(trimws(unlist(strsplit(as.character(result$geneID), "/"))))
+}
+
+.pathway_direction <- function(result, members, signed) {
+    if (!is.null(result$pathway_direction) && !is.na(result$pathway_direction)) {
+        return(as.character(result$pathway_direction))
+    }
+    if (!is.null(result$NES) && !is.na(result$NES)) {
+        return(if (result$NES > 0) "up" else "down")
+    }
+    ## An ORA result carries no direction of its own -- it says the pathway is
+    ## enriched, not which way it moved. When the caller supplies signed fold
+    ## changes the members answer it: whichever way the majority went is the way
+    ## the pathway went. Returning NULL here instead made every row untestable,
+    ## which is what the first run of this function did.
+    if (is.null(signed) || !length(signed)) return(NULL)
+    hit <- members[members %in% names(signed)]
+    if (!length(hit)) return(NULL)
+    moves <- signed[hit]
+    n_up <- sum(moves > 0)
+    n_down <- sum(moves < 0)
+    if (n_up > n_down) "up" else if (n_down > n_up) "down" else NULL
+}
+
+## 成员方向一致性：方向一致且过阈值的成员占比。
+##
+## 这条存在的理由与旧 spec 的 `support` 相同——少数基因驱动的高分不能算整条通路的支持。
+## 一条 33 个成员的通路里若只有 5 个朝同一方向，那不是"通路在动"，是"几个基因在动"。
+.pathway_support <- function(members, signed, direction) {
+    if (is.null(signed) || !length(signed) || is.null(direction)) return(NA_real_)
+    hit <- members[members %in% names(signed)]
+    if (!length(hit)) return(NA_real_)
+    moves <- signed[hit]
+    want <- if (direction == "up") moves > 0 else moves < 0
+    mean(want)
+}
+
+## 把候选驱动基因解析成 GPSAdb 数据集。
+##
+## 一个基因可能有多份数据集。全部取回，逐一检验，取最强的那一份——
+## 但把用了哪一份记下来，因为"同一个基因在不同细胞系里表现不同"是真实存在的
+## （第 0 期里 VHL 在 HK-2 上就不符合预期）。
+.pathway_datasets <- function(gene, limit = 5L) {
+    d <- tryCatch(as.data.frame(
+        gpsadb::gpsadb_search_datasets(perturbed_gene = gene, method = "knockdown",
+                                       limit = 50)[[1]]),
+        error = function(e) NULL)
+    if (is.null(d) || !nrow(d)) return(NULL)
+    d <- d[!is.na(d$in_reference) & d$in_reference, , drop = FALSE]
+    if (!nrow(d)) return(NULL)
+    utils::head(d[order(-d$n_samples), , drop = FALSE], limit)
+}
+
+#' Test enriched pathways against measured perturbation data
+#'
+#' @param x An `enrichResult` or `gseaResult` from [enrichGO()], [enrichKEGG()]
+#'   and friends, or a `$pathways` table from an [evidence()] bundle.
+#' @param drivers Character vector of candidate driver genes. Each is resolved to
+#'   its perturbation datasets and tested against every pathway.
+#' @param signed Optional named numeric of log2 fold changes, used to work out
+#'   which way a pathway's members moved when the result does not say.
+#' @param alpha Significance threshold for a perturbation to count.
+#' @param min_support Minimum fraction of members moving the same way before a
+#'   pathway counts as moved at all.
+#' @param max_pathways How many pathways to report, taken in the result's own order.
+#' @return A `data.frame`, one row per pathway, with a `statement` column holding
+#'   a claim that a perturbation experiment could refute.
+#' @export
+pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
+                             min_support = 0.5, max_pathways = 20L) {
+    d <- if (is.data.frame(x)) x else as.data.frame(x)
+    if (!nrow(d)) return(.pathway_evidence_empty())
+    d <- utils::head(d, max_pathways)
+
+    ## 候选数据集只解析一次，不按通路重复查——同一个驱动者在几十条通路上是同一批数据集。
+    sets <- list()
+    if (length(drivers)) {
+        for (g in drivers) {
+            ds <- .pathway_datasets(g)
+            if (!is.null(ds)) sets[[g]] <- ds[, c("dataset_id", "cell_line"), drop = FALSE]
+        }
+    }
+
+    rows <- lapply(seq_len(nrow(d)), function(i) {
+        members <- .pathway_members(d[i, ])
+        direction <- .pathway_direction(d[i, ], members, signed)
+        support <- .pathway_support(members, signed, direction)
+        desc <- d$Description[i] %||% d$ID[i] %||% NA_character_
+
+        ## 没有方向有两种，必须是两个结论，不是一个：
+        ##   * `signed` 没给 —— 我们没有测过成员往哪边走，这是**没测**；
+        ##   * `signed` 给了但成员对半分 —— 测过了，它们没有共同方向，这是**测了不成立**。
+        ## 混成一句"没有方向"会把后者说成缺失，与 `absent` / `untested` 分开是同一条纪律。
+        if (is.null(direction)) {
+            untested <- is.null(signed) || !length(signed)
+            return(data.frame(
+                pathway = desc, direction = NA_character_, n_members = length(members),
+                support = support, driver = NA_character_, dataset = NA_character_,
+                cell_line = NA_character_, es = NA_real_, padj = NA_real_,
+                level = "C",
+                verdict = if (untested) "untestable" else "unsupported",
+                statement = if (untested)
+                    "No signed fold changes were supplied, so the pathway's movement is unknown."
+                else
+                    "Members split evenly, so the pathway has no common direction to explain.",
+                stringsAsFactors = FALSE))
+        }
+
+        ## 逐个候选驱动者检验，留最强的一份。
+        best <- NULL
+        for (g in names(sets)) {
+            for (j in seq_len(nrow(sets[[g]]))) {
+                id <- as.character(sets[[g]]$dataset_id[j])
+                r <- tryCatch(gpsadb::gpsadb_test_gene_set(id, members),
+                              error = function(e) NULL)
+                if (is.null(r)) next
+                t <- as.data.frame(r[[1]])
+                if (!nrow(t) || is.na(t$padj[1])) next
+                if (is.null(best) || t$padj[1] < best$padj) {
+                    best <- list(gene = g, dataset = id,
+                                 cell_line = as.character(sets[[g]]$cell_line[j]),
+                                 es = as.numeric(t$es[1]), padj = as.numeric(t$padj[1]))
+                }
+            }
+        }
+
+        if (!is.null(best) && best$padj < alpha) {
+            level <- "A"; verdict <- "perturbation-supported"
+            statement <- sprintf(
+                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g).",
+                best$gene, length(members), best$dataset, best$padj)
+            return(data.frame(
+                pathway = desc, direction = direction, n_members = length(members),
+                support = support, driver = best$gene, dataset = best$dataset,
+                cell_line = best$cell_line, es = best$es, padj = best$padj,
+                level = level, verdict = verdict, statement = statement,
+                stringsAsFactors = FALSE))
+        }
+
+        ## 没有实测支持时，成员方向一致仍是一条弱证据（B 级），
+        ## 但要明说它只是"通路在动"，不是"谁让它动"。
+        if (!is.na(support) && support >= min_support) {
+            return(data.frame(
+                pathway = desc, direction = direction, n_members = length(members),
+                support = support, driver = NA_character_, dataset = NA_character_,
+                cell_line = NA_character_, es = NA_real_, padj = NA_real_,
+                level = "B", verdict = "coherent-untested",
+                statement = sprintf(
+                    "%.0f%% of members moved %s, so the pathway moved; no perturbation test identified a driver.",
+                    100 * support, direction),
+                stringsAsFactors = FALSE))
+        }
+
+        data.frame(
+            pathway = desc, direction = direction, n_members = length(members),
+            support = support, driver = NA_character_, dataset = NA_character_,
+            cell_line = NA_character_, es = NA_real_, padj = NA_real_,
+            level = "C", verdict = "unsupported",
+            statement = if (is.na(support))
+                "Members were not found in the signed gene list; the pathway's movement is unknown."
+            else sprintf("%.0f%% of members moved %s, below the support floor of %.0f%%.",
+                         100 * support, direction, 100 * min_support),
+            stringsAsFactors = FALSE)
+    })
+
+    out <- do.call(rbind, rows)
+    out[order(match(out$level, c("A", "B", "C")), -out$support), , drop = FALSE]
+}
+
+.pathway_evidence_empty <- function() {
+    data.frame(pathway = character(), direction = character(), n_members = integer(),
+               support = numeric(), driver = character(), dataset = character(),
+               cell_line = character(), es = numeric(), padj = numeric(),
+               level = character(), verdict = character(), statement = character(),
+               stringsAsFactors = FALSE)
+}

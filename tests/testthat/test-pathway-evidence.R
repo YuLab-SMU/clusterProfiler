@@ -1,0 +1,71 @@
+## 通路模式的第一批测试。
+##
+## 这些测的是**判断逻辑**，不是网络。`pathway_evidence()` 在有驱动者时会调 GPSAdb，
+## 所以涉及网络的用例一律 skip；离线用例覆盖方向推导、成员一致性、分级与陈述。
+
+pathway_fixture_result <- function() {
+    data.frame(
+        ID = c("GO:1", "GO:2", "GO:3"),
+        Description = c("response to hypoxia", "coherent pathway", "incoherent pathway"),
+        geneID = c("A/B/C/D", "E/F/G/H", "I/J/K/L"),
+        Count = 4L, p.adjust = c(1e-10, 1e-5, 1e-3),
+        stringsAsFactors = FALSE)
+}
+
+test_that("direction is derived from the members when the result has none", {
+    ## ORA 结果本身不带方向：它只说通路富集了，不说往哪边动。
+    ## 第一版这里返回 NULL，导致每一行都变成 untestable——这是跑起来才发现的。
+    r <- pathway_fixture_result()[1, ]
+    members <- c("A", "B", "C", "D")
+    signed <- c(A = 2, B = 1.5, C = 3, D = 0.5)
+    expect_identical(.pathway_direction(r, members, signed), "up")
+    expect_identical(.pathway_direction(r, members, -signed), "down")
+    ## 没有 signed 时不猜。
+    expect_null(.pathway_direction(r, members, NULL))
+})
+
+test_that("member support measures the fraction moving together", {
+    ## 少数基因驱动的高分不能算整条通路的支持。
+    members <- c("A", "B", "C", "D")
+    expect_equal(.pathway_support(members, c(A = 1, B = 2, C = 3, D = 4), "up"), 1)
+    expect_equal(.pathway_support(members, c(A = 1, B = -2, C = 3, D = -4), "up"), 0.5)
+    ## 成员一个都不在被检验的基因里时，不是 0，是 NA——"没测"不等于"没通过"。
+    expect_true(is.na(.pathway_support(members, c(Z = 1), "up")))
+})
+
+test_that("no signed input is untestable, and says which", {
+    ## 没有 signed 是**没测**，不是测了不成立。
+    r <- pathway_fixture_result()
+    out <- pathway_evidence(r, max_pathways = 3)
+    expect_equal(nrow(out), 3)
+    expect_true(all(out$level == "C"))
+    expect_true(all(out$verdict == "untestable"))
+    expect_true(all(grepl("No signed fold changes were supplied", out$statement)))
+})
+
+test_that("coherent members give level B and say what is missing", {
+    r <- pathway_fixture_result()[1:2, ]
+    signed <- c(A = 2, B = 1.5, C = 3, D = 0.5, E = -2, F = -1, G = -3, H = -0.5)
+    out <- pathway_evidence(r, signed = signed, max_pathways = 2)
+    expect_true(all(out$level == "B"))
+    expect_true(all(out$verdict == "coherent-untested"))
+    ## 没有驱动者时不能说"谁让它动"。
+    expect_true(all(is.na(out$driver)))
+    expect_true(all(grepl("no perturbation test identified a driver", out$statement)))
+})
+
+test_that("members splitting evenly are unsupported, not untested", {
+    ## 给了 signed、成员却对半分：这是**测了，没有共同方向**，与"没测"是两个结论。
+    r <- pathway_fixture_result()[3, ]
+    signed <- c(I = 2, J = -1, K = 3, L = -4)
+    out <- pathway_evidence(r, signed = signed)
+    expect_equal(out$level, "C")
+    expect_equal(out$verdict, "unsupported")
+    expect_match(out$statement, "split evenly")
+})
+
+test_that("an empty result returns an empty frame with the right columns", {
+    out <- pathway_evidence(pathway_fixture_result()[0, ])
+    expect_equal(nrow(out), 0)
+    expect_true(all(c("pathway", "level", "statement") %in% names(out)))
+})

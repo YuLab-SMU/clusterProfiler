@@ -1,8 +1,12 @@
-# clusterProfiler 4.21.4.025
+# clusterProfiler 4.21.4.026
 
 ## GO annotation cache
 
 + **The built GO gene-set object is cached per (organism, ont, keytype) instead of being rebuilt on every call.** After the annotation cache landed, what a warm call still paid was reshaping that annotation into the object the engine consumes: 1.4 s of a 2.8 s warm BP call on human ENTREZID, and `compareCluster()` pays it once per cluster, so 13 clusters took 39.5 s against 19.7 s with the object cached, results identical. Up to three objects are kept, least recently used first out, so BP/MF/CC of one organism cost about 35 MB and a session walking through organisms evicts rather than accumulates; an `evidence`-filtered annotation is never cached, the same rule the annotation cache already applied. This is the second level of the two-level cache proposed in clusterProfiler#71, the first level being the annotation cache that no longer evicts on an ontology switch (2026-10-29, Thu)
+
+## pathway-level mechanism evidence
+
++ `pathway_evidence()` tests enriched pathways against measured perturbation data instead of hunting for transcription factors. Give it candidate driver genes and it resolves each to its knockdown datasets, asks whether that perturbation moves the pathway's members, and reports A/B/C with a `statement` column holding the claim a perturbation experiment could refute. Candidates are supplied by the caller on purpose: stage zero measured what happens when the tool tries to pick a driver itself and the ordering carried no usable signal (2026-10-30, Fri)
 
 ## mechanism analysis: collect, adjudicate, write
 
