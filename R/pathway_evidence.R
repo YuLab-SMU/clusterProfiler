@@ -122,6 +122,29 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         }
     }
 
+    ## 按 (数据集, 成员签名) 记忆化。
+    ##
+    ## 不能按通路缓存——测试结果取决于成员，换了通路就是另一次检验。但**不同通路
+    ## 常常共享完全相同的成员集**：缺氧结果里 `response to hypoxia`、
+    ## `response to decreased oxygen levels`、`response to oxygen levels` 三个
+    ## 都是同一批 33 个基因，原来各测一遍。签名相同时复用是安全的，因为请求完全相同。
+    memo <- new.env(parent = emptyenv())
+    calls <- 0L
+    ask <- function(id, members) {
+        key <- paste0(id, "|", paste(sort(members), collapse = ","))
+        if (!is.null(memo[[key]])) return(memo[[key]])
+        calls <<- calls + 1L
+        r <- tryCatch(gpsadb::gpsadb_test_gene_set(id, members),
+                      error = function(e) NULL)
+        val <- if (is.null(r)) list(.failed = TRUE) else {
+            t <- as.data.frame(r[[1]])
+            if (!nrow(t)) list(.failed = TRUE) else
+                list(padj = as.numeric(t$padj[1]), es = as.numeric(t$es[1]))
+        }
+        memo[[key]] <- val
+        val
+    }
+
     rows <- lapply(seq_len(nrow(d)), function(i) {
         members <- .pathway_members(d[i, ])
         dsrc <- .pathway_direction_source(d[i, ], signed)
@@ -129,7 +152,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         support <- .pathway_support(members, signed, direction)
         desc <- d$Description[i] %||% d$ID[i] %||% NA_character_
         ## 先给默认值：下面的"无方向"分支会提前 return，那时检验还没跑，
-        ## 但已经要填 `n_datasets_tested` 这一列。
+        ## 但已经要填 `n_tests_run` 这一列。
         n_tested <- 0L
 
         ## 没有方向有两种，必须是两个结论，不是一个：
@@ -142,7 +165,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 pathway = desc, direction = NA_character_, n_members = length(members),
                 support = support, driver = NA_character_, dataset = NA_character_,
                 cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-                effect = NA_character_, n_datasets_tested = n_tested,
+                effect = NA_character_, n_tests_run = n_tested,
                 n_cell_lines_supported = 0L, level = "C",
                 verdict = if (untested) "untestable" else "unsupported",
                 statement = if (untested)
@@ -161,15 +184,16 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         for (g in names(sets)) {
             for (j in seq_len(nrow(sets[[g]]))) {
                 id <- as.character(sets[[g]]$dataset_id[j])
-                r <- tryCatch(gpsadb::gpsadb_test_gene_set(id, members),
-                              error = function(e) NULL)
-                if (is.null(r)) next
-                t <- as.data.frame(r[[1]])
-                if (!nrow(t) || is.na(t$padj[1])) next
+                got <- ask(id, members)
+                if (isTRUE(got$.failed) || is.na(got$padj)) next
+                ## 同一个数据集可能被两个驱动者指向同一个基因的别名，只记一次。
+                already <- vapply(tested, function(z) identical(z$dataset, id) &&
+                                  identical(z$gene, g), TRUE)
+                if (any(already)) next
                 tested[[length(tested) + 1L]] <- list(
                     gene = g, dataset = id,
                     cell_line = as.character(sets[[g]]$cell_line[j]),
-                    es = as.numeric(t$es[1]), padj = as.numeric(t$padj[1]))
+                    es = got$es, padj = got$padj)
             }
         }
         ## 最强的显著者决定"提出主张"的那一份；复现则要求**另一个细胞系**也显著且同向。
@@ -220,7 +244,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 pathway = desc, direction = direction, n_members = length(members),
                 support = support, driver = best$gene, dataset = best$dataset,
                 cell_line = best$cell_line, es = best$es, padj = best$padj,
-                effect = effect, n_datasets_tested = n_tested,
+                effect = effect, n_tests_run = n_tested,
                 n_cell_lines_supported = length(cells_agree),
                 level = level, verdict = verdict, statement = statement,
                 stringsAsFactors = FALSE))
@@ -236,7 +260,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 pathway = desc, direction = direction, n_members = length(members),
                 support = support, driver = NA_character_, dataset = NA_character_,
                 cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-                effect = NA_character_, n_datasets_tested = n_tested,
+                effect = NA_character_, n_tests_run = n_tested,
                 n_cell_lines_supported = 0L, level = "B", verdict = "coherent-untested",
                 statement = sprintf(
                     "%.0f%% of members moved %s, so the pathway moved; no perturbation test identified a driver.",
@@ -248,7 +272,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             pathway = desc, direction = direction, n_members = length(members),
             support = support, driver = NA_character_, dataset = NA_character_,
             cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-            effect = NA_character_, n_datasets_tested = n_tested,
+            effect = NA_character_, n_tests_run = n_tested,
             n_cell_lines_supported = 0L, level = "C", verdict = "unsupported",
             statement = if (is.na(support))
                 "Members were not found in the signed gene list; the pathway's movement is unknown."
@@ -258,6 +282,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     })
 
     out <- do.call(rbind, rows)
+    attr(out, "network_calls") <- calls
     out[order(match(out$level, c("A", "B", "C")), -out$support), , drop = FALSE]
 }
 
@@ -265,7 +290,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     data.frame(pathway = character(), direction = character(), n_members = integer(),
                support = numeric(), driver = character(), dataset = character(),
                cell_line = character(), es = numeric(), padj = numeric(),
-               effect = character(), n_datasets_tested = integer(),
+               effect = character(), n_tests_run = integer(),
                n_cell_lines_supported = integer(),
                level = character(), verdict = character(), statement = character(),
                stringsAsFactors = FALSE)

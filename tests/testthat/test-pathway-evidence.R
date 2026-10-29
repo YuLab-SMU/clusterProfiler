@@ -94,9 +94,9 @@ test_that("level A requires two cell lines, and one dataset is not enough", {
     r <- pathway_fixture_result()[1, ]
     out <- pathway_evidence(r, drivers = "HIF1A", signed = c(A = 2, B = 1.5, C = 3, D = 0.5))
     expect_true("n_cell_lines_supported" %in% names(out))
-    expect_true("n_datasets_tested" %in% names(out))
+    expect_true("n_tests_run" %in% names(out))
     ## 若有显著支持但只有单一细胞系，不能是 A。
-    if (out$n_datasets_tested > 0 && out$padj < 0.05 && out$n_cell_lines_supported < 2) {
+    if (out$n_tests_run > 0 && out$padj < 0.05 && out$n_cell_lines_supported < 2) {
         expect_false(out$level == "A")
         expect_equal(out$verdict, "single-dataset")
     }

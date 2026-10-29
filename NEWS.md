@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.031
+# clusterProfiler 4.21.4.032
 
 ## GO annotation cache
 
@@ -6,6 +6,7 @@
 
 ## pathway-level mechanism evidence
 
++ `pathway_evidence()` no longer re-tests datasets for pathways that share the same member set. The hypoxia result has three pathways over one identical set of 33 genes and three more over another, so the same query was being sent repeatedly; results are now memoised on (dataset, member signature) and the call count is exposed as the `network_calls` attribute (2026-10-30, Fri)
 + `pathway_evidence()` now requires **replication across two cell lines** before granting level A. It tests every dataset available for each candidate driver rather than keeping the single most significant one, and reports `n_datasets_tested`, `n_cell_lines_supported` and a `single-dataset` verdict. Evidence from one cell line is not weak evidence about one cell line -- it is unevaluated evidence about the others, and on the hypoxia pilot EPAS1 support existed in a single line while HIF1A support held in five (2026-10-30, Fri)
 + fix `pathway_evidence()` granting level B on a tautology: when the pathway's direction is derived from its own members, the fraction moving together is at least 50% by construction, so `min_support = 0.5` was always met and every pathway with a direction earned a B. Member support is an independent signal only when the direction comes from elsewhere (an explicit `pathway_direction` or a GSEA `NES`); otherwise it is reported but cannot promote (2026-10-30, Fri)
 + fix `pathway_evidence()` grading level A on significance alone. A perturbation that moves the pathway the same way it is already running reads as repression, not drive; it is now reported as `direction-conflict` and held at B (2026-10-30, Fri)
