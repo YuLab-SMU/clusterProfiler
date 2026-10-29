@@ -206,10 +206,30 @@ evidence_excluded <- function(x, min_independent = 2, verdicts = NULL) {
 ## hyphenated compound nor a bare acronym longer than five characters.
 unsupported_claims <- function(interpretation, x, min_independent = 2,
                                verdicts = NULL) {
-    admitted <- evidence_admitted(x, min_independent = min_independent)
+    ## The caller's adjudication is used for both steps. Computing it twice would
+    ## let the admission decision and the exemptions below disagree about who was
+    ## admitted, which is the same class of bug as re-adjudicating behind a
+    ## caller's back.
+    cv <- .verdicts_or_adjudicate(x, min_independent, verdicts)
+    admitted <- evidence_admitted(x, min_independent = min_independent, verdicts = cv)
     background <- toupper(x$input$design$background %||% character(0))
     vocab <- unique(c(toupper(admitted$regulator), background,
                       toupper(unlist(strsplit(as.character(x$input$genes), "/")))))
+    ## Being an input gene exempts a symbol from this check, because naming a
+    ## gene that is in the data is not a claim about a regulator.
+    ##
+    ## That exemption is also how a rejected regulator walked through: the
+    ## adjudication grades a symbol, declines to admit it, and the narrative
+    ## names it as the mechanism -- and the check stays silent because the
+    ## symbol is, separately, a differentially expressed gene. Measured on the
+    ## MCF-7 example, where ESR1 is itself DE at lfc -1.94 and was knocked out.
+    ##
+    ## A symbol the adjudication graded and did not admit therefore keeps no
+    ## exemption. Genes that were never graded are unaffected, so ordinary
+    ## mentions of the input list stay out of the report.
+    graded_out <- toupper(cv$regulator[!is.na(cv$verdict) &
+        !cv$verdict %in% c("supported", "single_source")])
+    vocab <- setdiff(vocab, graded_out)
 
     txt <- paste(unlist(interpretation[intersect(
         c("overview", "key_mechanisms", "regulatory_drivers", "crosstalk",
@@ -228,8 +248,15 @@ unsupported_claims <- function(interpretation, x, min_independent = 2,
     ## which made 1018 human symbols exempt, including STAT1, STAT3, FOXO1 and
     ## NFKB1 -- exactly the fabricated-regulator case this check exists to
     ## catch, so the check silently stopped working where it mattered most.
+    ## Against the admitted labels only, not against `vocab`. `vocab` carries
+    ## background and the input gene list, so a rejected regulator whose symbol
+    ## prefixes an unrelated gene walked free: MYB was exempted because MYBL1 is
+    ## an input gene, and MYBL1 is itself a rejected regulator in the MCF-7
+    ## example. The exemption exists to let STAT5 stand for an admitted STAT5A,
+    ## which is a statement about admitted labels.
+    admitted_labels <- toupper(admitted$regulator)
     is_family_of_admitted <- function(tok) {
-        any(startsWith(vocab, tok))
+        any(startsWith(admitted_labels, tok))
     }
     ## A single letter followed by digits ('A4', 'Q4') is a list marker or a
     ## quality tier, never a symbol.

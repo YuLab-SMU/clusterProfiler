@@ -831,6 +831,51 @@ test_that("a fabricated regulator is caught even when its prefix was admitted", 
     expect_true("NFKB1" %in% caught("NFKB1 does too"))
 })
 
+test_that("a graded and rejected regulator keeps no exemption from being an input gene", {
+    ## Being an input gene exempts a symbol, because naming a gene that is in the
+    ## data is not a claim about a regulator. That exemption used to swallow the
+    ## case this check exists for: the adjudication grades a symbol, declines to
+    ## admit it, and the narrative names it as the mechanism -- while the symbol
+    ## is separately a differentially expressed gene, which regulators routinely
+    ## are. MCF-7: ESR1 knocked out, its own mRNA down at lfc -1.94, padj 2e-4.
+    build <- function(genes) {
+        b <- list(
+            regulators = data.frame(
+                regulator = c("HIF1A", "ESR1"), source = "tf", term = "t",
+                named = TRUE, level = "B",
+                padj_within_source = c(1e-5, 0.5), setSize = 10L, Count = 5L,
+                significant = c(TRUE, FALSE), direction = c("up", "down"),
+                stringsAsFactors = FALSE),
+            diagnostics = list(counts = data.frame(
+                source = "tf", coverage_tested = 0.9, coverage_floor = NA_real_)),
+            input = list(genes = genes, design = list(background = character(0)))
+        )
+        class(b) <- c("evidenceBundle", "list")
+        b
+    }
+    cv <- data.frame(regulator = c("HIF1A", "ESR1"),
+                     verdict = c("supported", "absent"),
+                     max_level = c("B", "B"),
+                     padj = c(1e-5, 0.5), stringsAsFactors = FALSE)
+
+    txt <- "ESR1 drives this program."
+    ## Rejected and absent from the input list: caught before and after.
+    expect_true("ESR1" %in% unsupported_claims(list(narrative = txt),
+                                               build(c("HIF1A", "A")), verdicts = cv))
+    ## Rejected and present in the input list: this is the case that was missed.
+    expect_true("ESR1" %in% unsupported_claims(list(narrative = txt),
+                                               build(c("HIF1A", "A", "ESR1")), verdicts = cv))
+
+    ## The exemption still applies to genes the adjudication never graded, or the
+    ## check would flag every mention of the input list.
+    expect_length(unsupported_claims(list(narrative = "GAPDH is among the genes."),
+                                     build(c("HIF1A", "A", "GAPDH")), verdicts = cv), 0)
+
+    ## An admitted regulator is still fine, including as its own family.
+    expect_length(unsupported_claims(list(narrative = "HIF1A drives it."),
+                                     build(c("HIF1A", "A", "ESR1")), verdicts = cv), 0)
+})
+
 test_that("missing counts come back as an empty frame, not NULL", {
     counts <- mechanism_counts_or_empty(list())
     expect_s3_class(counts, "data.frame")

@@ -1,7 +1,9 @@
-# clusterProfiler 4.21.4.021
+# clusterProfiler 4.21.4.022
 
 ## mechanism analysis: collect, adjudicate, write
 
++ fix `unsupported_claims()` letting a rejected regulator through whenever its symbol was also an input gene. Being an input gene exempted a symbol, so "ESR1 drives this program" passed untouched if ESR1 was differentially expressed -- which regulators routinely are, ESR1 at lfc -1.94 in the MCF-7 example. A symbol the adjudication graded and did not admit now keeps no exemption (2026-10-29, Thu)
++ fix the same check's family exemption using the whole vocabulary instead of the admitted labels, so a rejected regulator was excused whenever its symbol prefixed an unrelated gene: MYB was exempted because MYBL1 happened to be an input gene (2026-10-29, Thu)
 + fix `print()` reporting the perturbation sweep as "31 of 30 candidate regulator(s) queried". The numerator counted the names the lookup sent -- a regulator is queried under every alias it is known by -- and the denominator counted candidate regulators, so the two halves of the fraction measured different things. Both are now counted in regulators (2026-10-29, Thu)
 + fix `perturbation_effect` reporting an activator as a repressor when the caller's own contrast is a knockdown of that same factor. The expectation was flipped for a programme that runs down, but the caller has already said which genes to look at, so the question is only whether removing the factor moves those genes down -- true for an activator either way. Measured on MCF-7 cells with ESR1 (an activator) knocked out against GPSAdb's own ESR1 knockdown, which moved the caller's down-genes down 39 of 39: a reproduced experiment, called a repressor (2026-10-28, Wed)
 + fix `measured_direction` reporting the up half while `perturbation_effect` read the half the programme actually runs in, so on a down programme the two columns described different sets of genes. Both now come from one helper (2026-10-28, Wed)
