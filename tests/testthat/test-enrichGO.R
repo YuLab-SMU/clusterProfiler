@@ -146,6 +146,69 @@ test_that("the GO cache survives an ontology switch", {
     expect_true(setequal(unique(as.character(goAnno$ONTOLOGYALL)), c("BP", "CC", "MF")))
 })
 
+test_that("the built GO cache is keyed exactly and bounded", {
+    e <- new.env()
+    expect_null(go_built_cache_get(e, "Homo sapiens", "BP", "ENTREZID"))
+
+    ## an unidentifiable organism must never share a key with another one
+    expect_null(go_built_cache_key(NA_character_, "BP", "ENTREZID"))
+    expect_null(go_built_cache_key("Homo sapiens", "BP", NA_character_))
+    go_built_cache_put(e, NA_character_, "BP", "ENTREZID", "x")
+    expect_null(go_built_cache_get(e, NA_character_, "BP", "ENTREZID"))
+
+    go_built_cache_put(e, "Homo sapiens", "BP", "ENTREZID", "bp")
+    expect_identical(go_built_cache_get(e, "Homo sapiens", "BP", "ENTREZID"), "bp")
+
+    ## exact key: another ontology, keytype or organism is a miss
+    expect_null(go_built_cache_get(e, "Homo sapiens", "MF", "ENTREZID"))
+    expect_null(go_built_cache_get(e, "Homo sapiens", "BP", "SYMBOL"))
+    expect_null(go_built_cache_get(e, "Mus musculus", "BP", "ENTREZID"))
+
+    ## bounded, least recently used first out: BP was just served, so the three
+    ## further puts push it out while ALL stays
+    for (ont in c("MF", "CC", "ALL")) {
+        go_built_cache_put(e, "Homo sapiens", ont, "ENTREZID", ont)
+    }
+    expect_identical(length(get("goBuilt", envir = e)), 3L)
+    expect_null(go_built_cache_get(e, "Homo sapiens", "BP", "ENTREZID"))
+    expect_identical(go_built_cache_get(e, "Homo sapiens", "ALL", "ENTREZID"), "ALL")
+})
+
+test_that("a built GO gene-set object is cached by (organism, ont, keytype)", {
+    skip_if_not_installed("org.Hs.eg.db")
+    skip_if_not_installed("GO.db")
+
+    odb <- getExportedValue("org.Hs.eg.db", "org.Hs.eg.db")
+    GO_Env <- get_GO_Env()
+    rm(list = intersect(c("goAnno", "keytype", "organism", "goBuilt"),
+                        ls(GO_Env, all.names = TRUE)),
+       envir = GO_Env)
+
+    bp <- get_GO_data("org.Hs.eg.db", "BP", "ENTREZID")
+    key <- go_built_cache_key(get_organism(odb), "BP", "ENTREZID")
+    expect_true(key %in% names(get("goBuilt", envir = GO_Env)))
+    expect_identical(get(key, get("goBuilt", envir = GO_Env)), bp)
+
+    ## the second call must come from the built-object cache. The annotation
+    ## frame is dropped first, so a rebuild would have to re-create it; that it
+    ## is still absent afterwards is what proves the early return.
+    rm(list = c("goAnno", "keytype", "organism"), envir = GO_Env)
+    expect_identical(get_GO_data("org.Hs.eg.db", "BP", "ENTREZID"), bp)
+    expect_false(exists("goAnno", envir = GO_Env, inherits = FALSE))
+
+    ## a second ontology is a second object, and both stay cached
+    mf <- get_GO_data("org.Hs.eg.db", "MF", "ENTREZID")
+    expect_false(identical(mf, bp))
+    expect_true(all(c(key, go_built_cache_key(get_organism(odb), "MF", "ENTREZID")) %in%
+                    names(get("goBuilt", envir = GO_Env))))
+    expect_identical(get_GO_data("org.Hs.eg.db", "BP", "ENTREZID"), bp)
+
+    ## an evidence-filtered annotation is never cached
+    before <- names(get("goBuilt", envir = GO_Env))
+    invisible(get_GO_data("org.Hs.eg.db", "BP", "ENTREZID", evidence = "IDA"))
+    expect_identical(names(get("goBuilt", envir = GO_Env)), before)
+})
+
 test_that("enrichGO() can restrict the annotation by evidence code (#160)", {
     skip_if_not_installed("org.Hs.eg.db")
     skip_if_not_installed("GO.db")
