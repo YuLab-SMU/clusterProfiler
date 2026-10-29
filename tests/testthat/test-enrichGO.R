@@ -121,9 +121,10 @@ test_that("the GO cache survives an ontology switch", {
     }
 
     GO_Env <- get_GO_Env()
-    ## start from a known cache state -- drop only the annotation cache this
-    ## test exercises, so the hybrid GSON cache other tests build survives
-    rm(list = intersect(c("goAnno", "keytype", "organism"),
+    ## start from a known cache state -- drop the annotation cache and the built
+    ## objects this test exercises, so the hybrid GSON cache other tests build
+    ## survives and no earlier block can make this one pass from a stale object
+    rm(list = intersect(c("goAnno", "keytype", "organism", "goBuilt"),
                         ls(GO_Env, all.names = TRUE)),
        envir = GO_Env)
 
@@ -153,6 +154,7 @@ test_that("the built GO cache is keyed exactly and bounded", {
     ## an unidentifiable organism must never share a key with another one
     expect_null(go_built_cache_key(NA_character_, "BP", "ENTREZID"))
     expect_null(go_built_cache_key("Homo sapiens", "BP", NA_character_))
+    expect_null(go_built_cache_key("Homo sapiens", NA_character_, "ENTREZID"))
     go_built_cache_put(e, NA_character_, "BP", "ENTREZID", "x")
     expect_null(go_built_cache_get(e, NA_character_, "BP", "ENTREZID"))
 
@@ -172,6 +174,16 @@ test_that("the built GO cache is keyed exactly and bounded", {
     expect_identical(length(get("goBuilt", envir = e)), 3L)
     expect_null(go_built_cache_get(e, "Homo sapiens", "BP", "ENTREZID"))
     expect_identical(go_built_cache_get(e, "Homo sapiens", "ALL", "ENTREZID"), "ALL")
+
+    ## re-inserting a key that is already stored moves it to the end instead of
+    ## leaving it at the front, so the entry a caller keeps asking for is the one
+    ## that survives the next eviction
+    go_built_cache_put(e, "Homo sapiens", "MF", "ENTREZID", "mf again")
+    expect_identical(names(get("goBuilt", envir = e))[3], "Homo sapiens|MF|ENTREZID")
+    expect_identical(get("goBuilt", envir = e)[[3]], "mf again")
+    go_built_cache_put(e, "Homo sapiens", "BP", "ENTREZID", "bp")
+    expect_null(go_built_cache_get(e, "Homo sapiens", "CC", "ENTREZID"))
+    expect_identical(go_built_cache_get(e, "Homo sapiens", "MF", "ENTREZID"), "mf again")
 })
 
 test_that("a built GO gene-set object is cached by (organism, ont, keytype)", {
@@ -186,8 +198,17 @@ test_that("a built GO gene-set object is cached by (organism, ont, keytype)", {
 
     bp <- get_GO_data("org.Hs.eg.db", "BP", "ENTREZID")
     key <- go_built_cache_key(get_organism(odb), "BP", "ENTREZID")
-    expect_true(key %in% names(get("goBuilt", envir = GO_Env)))
-    expect_identical(get(key, get("goBuilt", envir = GO_Env)), bp)
+    ## a helper rather than `get("goBuilt")`, so a regression reports a failed
+    ## expectation instead of an "object not found" error
+    built <- function() {
+        if (exists("goBuilt", envir = GO_Env, inherits = FALSE)) {
+            get("goBuilt", envir = GO_Env)
+        } else {
+            list()
+        }
+    }
+    expect_true(key %in% names(built()))
+    expect_identical(unname(built()[key]), list(bp))
 
     ## the second call must come from the built-object cache. The annotation
     ## frame is dropped first, so a rebuild would have to re-create it; that it
@@ -200,13 +221,13 @@ test_that("a built GO gene-set object is cached by (organism, ont, keytype)", {
     mf <- get_GO_data("org.Hs.eg.db", "MF", "ENTREZID")
     expect_false(identical(mf, bp))
     expect_true(all(c(key, go_built_cache_key(get_organism(odb), "MF", "ENTREZID")) %in%
-                    names(get("goBuilt", envir = GO_Env))))
+                    names(built())))
     expect_identical(get_GO_data("org.Hs.eg.db", "BP", "ENTREZID"), bp)
 
     ## an evidence-filtered annotation is never cached
-    before <- names(get("goBuilt", envir = GO_Env))
+    before <- names(built())
     invisible(get_GO_data("org.Hs.eg.db", "BP", "ENTREZID", evidence = "IDA"))
-    expect_identical(names(get("goBuilt", envir = GO_Env)), before)
+    expect_identical(names(built()), before)
 })
 
 test_that("enrichGO() can restrict the annotation by evidence code (#160)", {

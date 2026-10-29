@@ -759,6 +759,12 @@ go_built_cache_max <- function() 3L
 #' An unidentifiable organism (`NA`, an AnnotationHub OrgDb for instance) gets no
 #' key at all, so it can never collide with another unidentifiable OrgDb.
 #'
+#' The key is the annotation cache's key plus the ontology, which is deliberate:
+#' a request that takes a wrong annotation frame upstream (two OrgDbs reporting
+#' the same organism, say) takes the same wrong gene sets here. Holding the same
+#' granularity means this cache cannot disagree with the one it is built from,
+#' and so adds no failure mode of its own.
+#'
 #' @param org organism of the requested OrgDb, possibly NA
 #' @param ont requested ontology
 #' @param keytype requested keytype
@@ -766,6 +772,9 @@ go_built_cache_max <- function() 3L
 #' @noRd
 go_built_cache_key <- function(org, ont, keytype) {
     if (length(org) != 1L || is.na(org)) {
+        return(NULL)
+    }
+    if (length(ont) != 1L || is.na(ont)) {
         return(NULL)
     }
     if (length(keytype) != 1L || is.na(keytype)) {
