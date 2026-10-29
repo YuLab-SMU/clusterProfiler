@@ -128,6 +128,9 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         direction <- .pathway_direction(d[i, ], members, signed)
         support <- .pathway_support(members, signed, direction)
         desc <- d$Description[i] %||% d$ID[i] %||% NA_character_
+        ## 先给默认值：下面的"无方向"分支会提前 return，那时检验还没跑，
+        ## 但已经要填 `n_datasets_tested` 这一列。
+        n_tested <- 0L
 
         ## 没有方向有两种，必须是两个结论，不是一个：
         ##   * `signed` 没给 —— 我们没有测过成员往哪边走，这是**没测**；
