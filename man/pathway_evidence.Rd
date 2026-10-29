@@ -12,7 +12,9 @@ pathway_evidence(
   alpha = 0.05,
   min_support = 0.5,
   max_pathways = 20L,
-  max_datasets_per_driver = 6L
+  max_datasets_per_driver = 6L,
+  ppi = FALSE,
+  ppi_null = 5L
 )
 
 \method{print}{pathway_evidence}(x, n = 10L, ...)
@@ -39,6 +41,13 @@ Testing all of them is `n_drivers * n_datasets` calls and grows without
 bound; six is enough to see two cell lines agree, which is all level A
 needs. Datasets from distinct cell lines are preferred over extra replicates
 of one line, because replication is what the grade turns on.}
+
+\item{ppi}{Also ask STRING whether the pathway's members are more connected
+than size-matched random sets, as a second evidence type agreeing with the
+perturbation result. Off by default: it is another network call per member
+set per null draw.}
+
+\item{ppi_null}{How many random sets to compare PPI density against.}
 
 \item{n}{For `print()`, how many rows to show.}
 

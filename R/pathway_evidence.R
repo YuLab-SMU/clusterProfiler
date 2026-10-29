@@ -101,6 +101,11 @@
 #'   bound; six is enough to see two cell lines agree, which is all level A
 #'   needs. Datasets from distinct cell lines are preferred over extra replicates
 #'   of one line, because replication is what the grade turns on.
+#' @param ppi Also ask STRING whether the pathway's members are more connected
+#'   than size-matched random sets, as a second evidence type agreeing with the
+#'   perturbation result. Off by default: it is another network call per member
+#'   set per null draw.
+#' @param ppi_null How many random sets to compare PPI density against.
 #' @param n For `print()`, how many rows to show.
 #' @param ... Ignored, for method consistency.
 #' @return A `data.frame`, one row per pathway, with a `statement` column holding
@@ -108,7 +113,8 @@
 #' @export
 pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                              min_support = 0.5, max_pathways = 20L,
-                             max_datasets_per_driver = 6L) {
+                             max_datasets_per_driver = 6L,
+                             ppi = FALSE, ppi_null = 5L) {
     d <- if (is.data.frame(x)) x else as.data.frame(x)
     if (!nrow(d)) return(.pathway_evidence_empty())
     d <- utils::head(d, max_pathways)
@@ -142,6 +148,21 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 list(padj = as.numeric(t$padj[1]), es = as.numeric(t$es[1]))
         }
         memo[[key]] <- val
+        val
+    }
+
+    ## 跨源一致的网络侧。按成员签名缓存，与扰动侧同一套理由。
+    edge_count <- function(members) {
+        r <- tryCatch(suppressWarnings(evidence_ppi(members)), error = function(e) NULL)
+        if (is.null(r) || !is.data.frame(r)) return(NA_integer_)
+        as.integer(nrow(r))
+    }
+    ppi_cache <- new.env(parent = emptyenv())
+    ppi_of <- function(members) {
+        key <- paste(sort(members), collapse = ",")
+        if (!is.null(ppi_cache[[key]])) return(ppi_cache[[key]])
+        val <- edge_count(members)
+        ppi_cache[[key]] <- val
         val
     }
 
@@ -282,6 +303,40 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     })
 
     out <- do.call(rbind, rows)
+
+    ## 跨源一致：扰动证据（A 级）与 PPI 拓扑是否指向同一件事。
+    ## **只作注释，不改等级**——设计文档 §6.4 说它不一致时降置信、不作否决。
+    out$ppi_edges <- NA_integer_
+    out$ppi_null_median <- NA_integer_
+    out$cross_source <- NA_character_
+    if (isTRUE(ppi) && nrow(out)) {
+        ## 随机对照只需要抽一次，供所有通路共用。
+        pool <- unique(unlist(lapply(seq_len(nrow(d)), function(i) .pathway_members(d[i, ]))))
+        for (i in seq_len(nrow(out))) {
+            members <- .pathway_members(d[i, ])
+            if (length(members) < 2) next
+            real <- ppi_of(members)
+            if (is.na(real)) next
+            set.seed(3L + i)
+            nulls <- vapply(seq_len(ppi_null), function(j) {
+                ppi_of(sample(pool, length(members)))
+            }, integer(1))
+            out$ppi_edges[i] <- real
+            out$ppi_null_median[i] <- stats::median(nulls, na.rm = TRUE)
+            if (!is.na(out$level[i]) && out$level[i] == "A") {
+                ## 三档而不是两档。`67 vs 67` 是**打平**——拓扑上这些成员并不比同 size
+                ## 随机集更相连。把它记成 "disagrees" 会读成"两个来源矛盾"，而实际是
+                ## "这个来源没提供额外信息"。打平与矛盾是不同的结论，必须分开。
+                null_med <- out$ppi_null_median[i]
+                ratio <- if (is.na(null_med) || null_med == 0) NA_real_ else real / null_med
+                out$cross_source[i] <- if (is.na(ratio)) NA_character_
+                    else if (ratio >= 1.2) "agrees"
+                    else if (ratio <= 0.8) "disagrees"
+                    else "no-additional-signal"
+            }
+        }
+    }
+
     attr(out, "network_calls") <- calls
     out[order(match(out$level, c("A", "B", "C")), -out$support), , drop = FALSE]
 }
