@@ -92,6 +92,8 @@
 #' @param min_support Minimum fraction of members moving the same way before a
 #'   pathway counts as moved at all.
 #' @param max_pathways How many pathways to report, taken in the result's own order.
+#' @param n For `print()`, how many rows to show.
+#' @param ... Ignored, for method consistency.
 #' @return A `data.frame`, one row per pathway, with a `statement` column holding
 #'   a claim that a perturbation experiment could refute.
 #' @export
@@ -220,4 +222,38 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                effect = character(), level = character(), verdict = character(),
                statement = character(),
                stringsAsFactors = FALSE)
+}
+
+#' @rdname pathway_evidence
+#' @export
+print.pathway_evidence <- function(x, n = 10L, ...) {
+    cat("<pathway evidence>\n")
+    counts <- table(factor(x$level, levels = c("A", "B", "C")))
+    cat("  levels:       ", paste0(names(counts), " ", as.integer(counts),
+                                  collapse = "  "), "\n", sep = "")
+
+    shown <- utils::head(x, n)
+    if (nrow(shown)) {
+        cat("\n")
+        for (i in seq_len(nrow(shown))) {
+            row <- shown[i, ]
+            driver <- if (is.na(row$driver)) "-" else
+                sprintf("%s/%s padj %.2g", row$driver, row$cell_line, row$padj)
+            cat(sprintf("  [%s] %s (%s, %d members, %.0f%% together)\n",
+                        row$level, substr(row$pathway, 1, 52), row$direction %||% "?",
+                        row$n_members, 100 * (row$support %||% NA)))
+            cat(sprintf("      driver: %s\n", driver))
+        }
+        if (nrow(x) > nrow(shown)) {
+            cat(sprintf("  ... %d more\n", nrow(x) - nrow(shown)))
+        }
+    }
+
+    ## 陈述放在末尾而不是每行都印：它是要被检验的主张，不是摘要的一部分。
+    a <- x[x$level == "A", , drop = FALSE]
+    if (nrow(a)) {
+        cat("\n  claim to test:\n")
+        cat("   ", a$statement[1], "\n")
+    }
+    invisible(x)
 }

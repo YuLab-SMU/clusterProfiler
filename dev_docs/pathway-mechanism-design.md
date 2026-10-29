@@ -347,6 +347,33 @@ biotrigger 缺的那一环（它只和自己在 200 个候选内部比，而那 
 
 ---
 
+### 7.5 第 1 期实现记录（2026-10-30）
+
+`R/pathway_evidence.R`：`pathway_evidence(x, drivers, signed, alpha, min_support, max_pathways)`
+加 `print.pathway_evidence()`。7 条测试，`R CMD check` 0/0/0。
+
+**入口是 `enrichResult`，不是 `evidence()`。** 这是实现时明确的架构点：
+P1 说骨架是用户自己的富集结果，那么 `pathway_evidence(enrichResult)` 就是自然的入口，
+再塞进 `evidence()`（它吃的是基因列表）反而是往回走。目标里"实现 `evidence()` 的通路模式"
+应按此修订——**通路模式是并列入口，不是 `evidence()` 的一个开关**。
+
+**审核发现并修掉的两个缺陷：**
+
+1. `support` 恒真。方向由成员多数推导时，一致性必然 ≥ 50%，`min_support = 0.5` 永远满足，
+   每条有方向的通路都白得一个 B。修法：只有方向来自外部（`pathway_direction` / `NES`）时，
+   成员一致性才算独立证据。
+2. A 级不看扰动方向。任何显著结果都记支持，包括把通路推向同一方向的那种——那是压制不是驱动。
+   修法：方向冲突记 `direction-conflict`，降到 B。
+
+**一次虚警（记录以示区分）：** 我曾怀疑陈述里的成员数（33）与 `n_members`（19）不一致。
+核查后**不是缺陷**——10 行里 8 行带成员数，与 `n_members` 全部相符；33 vs 19 是打印时
+列分组错位，19 属于 `cellular response to hypoxia`，被对到了 `response to hypoxia` 的陈述上。
+**报出来的怀疑要查清，查清是虚警也要说。**
+
+**缺氧试点**（`adjudicate-interpret/scripts/21_pathway_evidence.R`）：
+6 条通路达 A，ARNT/A-498 与 HIF1A/HeLa 的 `es` 均为负（敲掉驱动者后程序回落），
+判 `activator`；候选驱动者来自四个细胞系，**没有一个是 Panc1**（真值数据），异源要求满足。
+
 ## 8. 风险
 
 - **循环性没有消失，只是转移了。** 真值若是"这条通路由 X 驱动"而证据也来自 GPSAdb，仍可能同源。

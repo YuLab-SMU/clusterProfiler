@@ -2,6 +2,7 @@
 % Please edit documentation in R/pathway_evidence.R
 \name{pathway_evidence}
 \alias{pathway_evidence}
+\alias{print.pathway_evidence}
 \title{Test enriched pathways against measured perturbation data}
 \usage{
 pathway_evidence(
@@ -12,6 +13,8 @@ pathway_evidence(
   min_support = 0.5,
   max_pathways = 20L
 )
+
+\method{print}{pathway_evidence}(x, n = 10L, ...)
 }
 \arguments{
 \item{x}{An `enrichResult` or `gseaResult` from [enrichGO()], [enrichKEGG()]
@@ -29,6 +32,10 @@ which way a pathway's members moved when the result does not say.}
 pathway counts as moved at all.}
 
 \item{max_pathways}{How many pathways to report, taken in the result's own order.}
+
+\item{n}{For `print()`, how many rows to show.}
+
+\item{...}{Ignored, for method consistency.}
 }
 \value{
 A `data.frame`, one row per pathway, with a `statement` column holding
