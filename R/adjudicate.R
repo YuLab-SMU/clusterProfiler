@@ -566,6 +566,14 @@ print.adjudication <- function(x, ...) {
                           paste0(", ", sup$perturbation_effect)),
                    collapse = "; "), "\n", sep = "")
     }
+    ## A supported finding resting on a few percent of the input is not a weaker
+    ## claim by rule, but it is a different claim to read. Named explicitly
+    ## rather than folded into the verdict, which stays as it was.
+    thin <- .mechanism_thin_supported(x)
+    if (!is.null(thin)) {
+        cat("  thin:         ", paste(thin, collapse = "; "),
+            " -- supported, but the measured evidence covers little of the input\n", sep = "")
+    }
     cat("  sha:          ", substr(x$provenance$evidence_sha, 1, 16), "\n", sep = "")
     invisible(x)
 }

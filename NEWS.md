@@ -1,7 +1,13 @@
-# clusterProfiler 4.21.4.023
+# clusterProfiler 4.21.4.024
+
+## GO annotation cache
+
++ **The built GO gene-set object is cached per (organism, ont, keytype) instead of being rebuilt on every call.** After the annotation cache landed, what a warm call still paid was reshaping that annotation into the object the engine consumes: 1.4 s of a 2.8 s warm BP call on human ENTREZID, and `compareCluster()` pays it once per cluster, so 13 clusters took 39.5 s against 19.7 s with the object cached, results identical. Up to three objects are kept, least recently used first out, so BP/MF/CC of one organism cost about 35 MB and a session walking through organisms evicts rather than accumulates; an `evidence`-filtered annotation is never cached, the same rule the annotation cache already applied. This is the second level of the two-level cache proposed in clusterProfiler#71, the first level being the annotation cache that no longer evicts on an ontology switch (2026-10-29, Thu)
 
 ## mechanism analysis: collect, adjudicate, write
 
++ `print()` now says how much of the input the measured evidence covers. A perturbation dataset's `padj_within_source` is the dataset's own best p-value, not evidence that it explains the caller's list, so a level-A `supported` can rest on a few percent of the genes -- the airway example graded GR at A on 23 of 896, against a median of 17% across the datasets queried. A `coverage:` line on the bundle and a `thin:` line on the adjudication make that visible without changing any verdict (2026-10-29, Thu)
++ `options(clusterProfiler_coverage_note = )` sets the threshold, default 0.05; 0 switches the report off (2026-10-29, Thu)
 + fix `unsupported_claims()` treating every single-letter-plus-digits token as a panel label. `P53`, `P63`, `P68`, `P300` and `F10` are real symbols and were dropped with `A4` and `Q4`, so a narrative naming p53 as the mechanism went unseen. Only a letter and one digit is suppressed now (2026-10-29, Thu)
 + fix `unsupported_claims()` letting a rejected regulator through whenever its symbol was also an input gene. Being an input gene exempted a symbol, so "ESR1 drives this program" passed untouched if ESR1 was differentially expressed -- which regulators routinely are, ESR1 at lfc -1.94 in the MCF-7 example. A symbol the adjudication graded and did not admit now keeps no exemption (2026-10-29, Thu)
 + fix the same check's family exemption using the whole vocabulary instead of the admitted labels, so a rejected regulator was excused whenever its symbol prefixed an unrelated gene: MYB was exempted because MYBL1 happened to be an input gene (2026-10-29, Thu)

@@ -33,6 +33,18 @@ injection_fixture <- function() {
         class = c("adjudication", "list"))
 }
 
+coverage_fixture <- function(counts, n_input = 100L, sources = "perturbagen,tfunion") {
+    structure(
+        list(verdicts = data.frame(
+                 regulator = c("HIF1A", "MYC", "ESR1", "PGR"),
+                 verdict = c("supported", "single_source", "absent", "absent"),
+                 max_level = "B", padj = c(1e-5, 1e-3, 0.5, 0.6),
+                 direction = c("up", "up", "down", "down"),
+                 stringsAsFactors = FALSE),
+             evidence = b),
+        class = c("adjudication", "list"))
+}
+
 test_that("the compliant narrative names only admitted entities", {
     adj <- injection_fixture()
     text <- .mechanism_narrative(adj)
@@ -128,4 +140,97 @@ test_that("a bundle with nothing admitted yields no narrative and no report", {
     adj$verdicts$verdict <- "absent"
     expect_null(.mechanism_narrative(adj))
     expect_equal(nrow(.mechanism_injection_report(adj)), 0)
+})
+
+## ---- E3: coverage visibility -------------------------------------------------
+
+coverage_bundle <- function(counts, n_input = 100L) {
+    b <- structure(
+        list(
+            regulators = data.frame(regulator = "GR", source = "perturbagen",
+                                    term = "D1", named = TRUE, level = "A",
+                                    padj_within_source = 1e-23, setSize = 329L,
+                                    Count = counts[1], significant = TRUE,
+                                    stringsAsFactors = FALSE),
+            perturbagen = data.frame(
+                regulator = "GR", term = paste0("D", seq_along(counts)),
+                method = "shRNA", Count = counts, setSize = 329L,
+                padj_within_source = rep(1e-23, length(counts)),
+                stringsAsFactors = FALSE),
+            provenance = list(upstream = "perturbagen", evidence_sha = "abc"),
+            input = list(genes = paste0("g", seq_len(n_input)),
+                         design = list(background = character(0)))),
+        class = c("evidenceBundle", "list"))
+    ## The real bundle carries these; the count line is printed only when it can.
+    ## Set here so the test can assert that the count and the coverage line both
+    ## appear -- they answer different questions and neither replaces the other.
+    attr(b$perturbagen, "queried") <- 1L
+    attr(b$perturbagen, "considered") <- 1L
+    b
+}
+
+coverage_fixture <- function(counts, n_input = 100L, sources = "perturbagen,tfunion") {
+    structure(
+        list(verdicts = data.frame(
+                 regulator = "GR", sources = sources, n_sources = 2L,
+                 max_level = "A", verdict = "supported", padj = 1e-23,
+                 family = FALSE, evidence_kind = "measured",
+                 direction = "up", measured_direction = "mixed",
+                 perturbation_effect = NA_character_, writable = "mechanism",
+                 stringsAsFactors = FALSE),
+             evidence = coverage_bundle(counts, n_input), min_independent = 2,
+             coverage_floor = NULL),
+        class = "adjudication")
+}
+
+test_that("coverage is reported next to the dataset count, not in place of it", {
+    ## The count line says how many datasets were queried. It does not say how
+    ## much of the caller's list any of them speaks to, which is what a level-A
+    ## grade rests on. Airway: GR at A on 23 of 896 genes.
+    thin <- capture.output(print(coverage_bundle(counts = 23, n_input = 896)))
+    expect_true(any(grepl("coverage:", thin)))
+    expect_match(paste(thin, collapse = " "), "median 2\\.6%")
+
+    ## The count line is still there: the two answer different questions.
+    expect_true(any(grepl("measured:", thin)))
+})
+
+test_that("coverage is shown for every bundle, thin or not", {
+    ## This is a description, not a warning. Suppressing it when healthy would
+    ## make its absence ambiguous again -- "nothing to report" or "not measured".
+    healthy <- capture.output(print(coverage_bundle(counts = c(400, 350), n_input = 1000)))
+    expect_match(paste(healthy, collapse = " "), "median 37\\.5%")
+    expect_match(paste(healthy, collapse = " "), "none below")
+})
+
+test_that("the coverage threshold can be switched off", {
+    old <- options(clusterProfiler_coverage_note = 0)
+    withr::defer(options(old))
+    expect_null(.mechanism_measured_coverage(coverage_bundle(counts = 2)))
+})
+
+test_that("a supported entity leaning on thin measured evidence is named", {
+    ## Airway GR: supported at level A on 2.6% of the input. The verdict is not
+    ## wrong -- the dataset does show the effect -- but it is not the same claim
+    ## as one resting on most of the list, and the print should say which it is.
+    adj <- coverage_fixture(counts = 23, n_input = 896)
+    out <- capture.output(print(adj))
+    expect_true(any(grepl("thin:", out)))
+    expect_match(paste(out, collapse = " "), "GR \\(2\\.6% of input\\)")
+    ## The verdict itself is untouched.
+    expect_identical(adj$verdicts$verdict, "supported")
+})
+
+test_that("an entity supported only by collections has no coverage to report", {
+    ## Reporting "0%" here would be wrong rather than conservative: there is no
+    ## measured evidence to cover the list with.
+    adj <- coverage_fixture(counts = 23, n_input = 896, sources = "tfunion")
+    out <- capture.output(print(adj))
+    expect_false(any(grepl("thin:", out)))
+})
+
+test_that("a healthy bundle prints no thin line", {
+    adj <- coverage_fixture(counts = 700, n_input = 896)
+    out <- capture.output(print(adj))
+    expect_false(any(grepl("thin:", out)))
 })

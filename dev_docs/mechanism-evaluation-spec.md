@@ -282,6 +282,29 @@ airway 的 GR 是 A 级 `supported`，建立在 `Count=23 / 我的列表 896 = 2
 - 不加 `coverage_floor` 到扰动通道——那是行为变更，会改动现有判定，不在本轮。
 - 不在 verdict 表加列——冻结列集已定，追加需另立决策。
 
+### 5.3b E3 已实现（2026-10-29）
+
+落在 `R/evidence.R`（`.mechanism_measured_coverage()`、`.mechanism_thin_supported()`）
+与两处 print。实测输出：
+
+```
+<adjudication>
+  evidence:     896 genes, perturbagen
+  verdicts:     supported 1  single_source 0  absent 0  untested 0
+  supported:    GR (A)
+  thin:         GR (2.6% of input) -- supported, but the measured evidence covers little of the input
+```
+
+bundle 侧在 `measured:` 行之后多一行 `coverage: median 2.6% of the input; 3 of 26 dataset(s) below 5%`
+（健康时写作 `none below 5%`，不写 `0 of N`）。
+
+两处细节值得记：
+
+- **覆盖行放在 `queried` 属性判断之外**。计数行需要那个属性，覆盖行不该因为它缺失就一起消失——
+  描述性信息的存在与否，不应取决于一条统计属性有没有被记上。
+- **只有依赖 measured 来源的 `supported` 才标 `thin`**。仅靠集合来源支持的实体没有覆盖可言，
+  给它写 `0%` 不是保守，是错的。
+
 ### 5.4 验收
 
 1. 构造一个覆盖 2% 的 measured 行，`print()` 输出中出现提示；覆盖 40% 的输出中没有。

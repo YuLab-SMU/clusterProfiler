@@ -525,6 +525,80 @@ evidence <- function(genes,
     out
 }
 
+## How much of the input list a measured dataset actually speaks to.
+##
+## A perturbation row's `padj_within_source` is the *dataset's* own best p-value,
+## not evidence that the dataset explains the caller's list. A level-A grade can
+## therefore rest on a handful of genes, and the number that says so -- `Count` --
+## is not in the first ten rows that `print()` shows. Measured on the airway
+## example: GR graded A on 23 of 896 genes, 2.6%, where the median across the 26
+## datasets queried was 17%.
+##
+## Reported, never enforced. Turning this into a gate would change verdicts, and
+## the verdicts are not wrong -- they are under-described. A reader who can see
+## the coverage can weigh it; one who cannot sees "strong" and "weak" as the same.
+.mechanism_coverage_threshold <- function() {
+    threshold <- getOption("clusterProfiler_coverage_note", 0.05)
+    if (!is.numeric(threshold) || length(threshold) != 1L ||
+        is.na(threshold) || threshold <= 0) return(NULL)
+    threshold
+}
+
+.mechanism_input_size <- function(bundle) {
+    n <- length(bundle$input$genes)
+    if (is.null(n) || !n) return(NULL)
+    n
+}
+
+## One line summarising the measured channel, or NULL when there is nothing to
+## say: no perturbation rows, no threshold set, or no denominator.
+.mechanism_measured_coverage <- function(bundle, threshold = NULL) {
+    threshold <- threshold %||% .mechanism_coverage_threshold()
+    if (is.null(threshold)) return(NULL)
+    p <- bundle$perturbagen
+    n_input <- .mechanism_input_size(bundle)
+    if (is.null(p) || !nrow(p) || is.null(p$Count) || is.null(n_input)) return(NULL)
+
+    share <- p$Count / n_input
+    if (!length(share) || all(is.na(share))) return(NULL)
+    thin <- sum(share < threshold, na.rm = TRUE)
+    below <- if (thin == 0L) "none below" else
+        sprintf("%d of %d dataset(s) below", thin, nrow(p))
+    sprintf("median %.1f%% of the input; %s %.0f%%",
+            100 * stats::median(share, na.rm = TRUE), below, 100 * threshold)
+}
+
+## Supported entities whose measured evidence covers less than the threshold.
+##
+## Only entities that lean on a measured source are returned: one supported by
+## collections alone has no coverage to report, and saying "0%" of it would be
+## wrong rather than conservative.
+.mechanism_thin_supported <- function(x, threshold = NULL) {
+    threshold <- threshold %||% .mechanism_coverage_threshold()
+    if (is.null(threshold)) return(NULL)
+    v <- x$verdicts
+    p <- x$evidence$perturbagen
+    n_input <- .mechanism_input_size(x$evidence)
+    if (is.null(v) || !nrow(v) || is.null(p) || !nrow(p) || is.null(n_input)) return(NULL)
+
+    sup <- v[v$verdict == "supported", , drop = FALSE]
+    if (!nrow(sup)) return(NULL)
+    measured <- vapply(strsplit(as.character(sup$sources), ","),
+                       function(s) any(trimws(s) %in% c("perturbagen", "biotrigger")),
+                       TRUE)
+    sup <- sup[measured, , drop = FALSE]
+    if (!nrow(sup)) return(NULL)
+
+    out <- vapply(seq_len(nrow(sup)), function(i) {
+        rows <- p[p$regulator == sup$regulator[i], , drop = FALSE]
+        if (!nrow(rows)) return(NA_real_)
+        max(rows$Count, na.rm = TRUE) / n_input
+    }, numeric(1))
+    keep <- !is.na(out) & out < threshold
+    if (!any(keep)) return(NULL)
+    sprintf("%s (%.1f%% of input)", sup$regulator[keep], 100 * out[keep])
+}
+
 #' Print an evidence bundle
 #'
 #' Show the input size, the collections used and the most significant
@@ -580,6 +654,12 @@ print.evidenceBundle <- function(x, ...) {
                 " dataset(s) for ", q, " of ", cons,
                 " candidate regulator(s) queried\n", sep = "")
         }
+    }
+    ## Outside that block: the count line needs the `queried` attribute, and the
+    ## coverage description should not vanish just because the attribute did.
+    if (!is.null(x$perturbagen) && nrow(x$perturbagen)) {
+        note <- .mechanism_measured_coverage(x)
+        if (!is.null(note)) cat("  coverage:     ", note, "\n", sep = "")
     }
 
     ## What the optional layers could and could not be asked. A layer nobody
