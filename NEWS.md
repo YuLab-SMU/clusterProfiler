@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.026
+# clusterProfiler 4.21.4.027
 
 ## GO annotation cache
 
@@ -6,6 +6,8 @@
 
 ## pathway-level mechanism evidence
 
++ fix `pathway_evidence()` granting level B on a tautology: when the pathway's direction is derived from its own members, the fraction moving together is at least 50% by construction, so `min_support = 0.5` was always met and every pathway with a direction earned a B. Member support is an independent signal only when the direction comes from elsewhere (an explicit `pathway_direction` or a GSEA `NES`); otherwise it is reported but cannot promote (2026-10-30, Fri)
++ fix `pathway_evidence()` grading level A on significance alone. A perturbation that moves the pathway the same way it is already running reads as repression, not drive; it is now reported as `direction-conflict` and held at B (2026-10-30, Fri)
 + `pathway_evidence()` tests enriched pathways against measured perturbation data instead of hunting for transcription factors. Give it candidate driver genes and it resolves each to its knockdown datasets, asks whether that perturbation moves the pathway's members, and reports A/B/C with a `statement` column holding the claim a perturbation experiment could refute. Candidates are supplied by the caller on purpose: stage zero measured what happens when the tool tries to pick a driver itself and the ordering carried no usable signal (2026-10-30, Fri)
 
 ## mechanism analysis: collect, adjudicate, write

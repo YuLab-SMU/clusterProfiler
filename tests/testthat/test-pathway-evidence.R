@@ -43,15 +43,28 @@ test_that("no signed input is untestable, and says which", {
     expect_true(all(grepl("No signed fold changes were supplied", out$statement)))
 })
 
-test_that("coherent members give level B and say what is missing", {
+test_that("support derived from the members themselves cannot promote to level B", {
+    ## 审核发现的缺陷：方向由成员多数推导时，support 恒 >= 0.5，`min_support = 0.5`
+    ## 永远成立，于是每条有方向的通路都白得一个 B。方向自己来自成员，再拿成员的
+    ## 一致性当证据，是同一批基因既定方向又证方向。
     r <- pathway_fixture_result()[1:2, ]
     signed <- c(A = 2, B = 1.5, C = 3, D = 0.5, E = -2, F = -1, G = -3, H = -0.5)
     out <- pathway_evidence(r, signed = signed, max_pathways = 2)
-    expect_true(all(out$level == "B"))
-    expect_true(all(out$verdict == "coherent-untested"))
-    ## 没有驱动者时不能说"谁让它动"。
-    expect_true(all(is.na(out$driver)))
-    expect_true(all(grepl("no perturbation test identified a driver", out$statement)))
+    expect_true(all(out$level == "C"))
+    expect_false(any(out$verdict == "coherent-untested"))
+    ## 但 support 仍然照实报出来，它不是错，只是不能当独立证据。
+    expect_true(all(out$support == 1))
+})
+
+test_that("an externally supplied direction makes member support meaningful again", {
+    ## 方向来自结果本身（外部信息）时，成员一致性才是独立证据，可以给 B。
+    r <- pathway_fixture_result()[1, ]
+    r$pathway_direction <- "up"
+    signed <- c(A = 2, B = 1.5, C = 3, D = -0.5)
+    out <- pathway_evidence(r, signed = signed)
+    expect_equal(out$level, "B")
+    expect_equal(out$verdict, "coherent-untested")
+    expect_equal(out$support, 0.75)
 })
 
 test_that("members splitting evenly are unsupported, not untested", {

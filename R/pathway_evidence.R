@@ -19,6 +19,17 @@
     unique(trimws(unlist(strsplit(as.character(result$geneID), "/"))))
 }
 
+## 方向从哪来，决定 `support` 能不能当证据用。
+##   "given"   —— 结果自己写明（外部信息，support 独立）
+##   "nes"     —— GSEA 的 NES 符号（外部信息，support 独立）
+##   "members" —— 由成员多数推导（**support 因此是恒真的**，见 .pathway_direction_source）
+.pathway_direction_source <- function(result, signed) {
+    if (!is.null(result$pathway_direction) && !is.na(result$pathway_direction)) return("given")
+    if (!is.null(result$NES) && !is.na(result$NES)) return("nes")
+    if (!is.null(signed) && length(signed)) return("members")
+    "none"
+}
+
 .pathway_direction <- function(result, members, signed) {
     if (!is.null(result$pathway_direction) && !is.na(result$pathway_direction)) {
         return(as.character(result$pathway_direction))
@@ -101,6 +112,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
 
     rows <- lapply(seq_len(nrow(d)), function(i) {
         members <- .pathway_members(d[i, ])
+        dsrc <- .pathway_direction_source(d[i, ], signed)
         direction <- .pathway_direction(d[i, ], members, signed)
         support <- .pathway_support(members, signed, direction)
         desc <- d$Description[i] %||% d$ID[i] %||% NA_character_
@@ -115,7 +127,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 pathway = desc, direction = NA_character_, n_members = length(members),
                 support = support, driver = NA_character_, dataset = NA_character_,
                 cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-                level = "C",
+                effect = NA_character_, level = "C",
                 verdict = if (untested) "untestable" else "unsupported",
                 statement = if (untested)
                     "No signed fold changes were supplied, so the pathway's movement is unknown."
@@ -143,26 +155,42 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         }
 
         if (!is.null(best) && best$padj < alpha) {
-            level <- "A"; verdict <- "perturbation-supported"
-            statement <- sprintf(
+            ## 显著性还不够：**方向必须对得上**。
+            ## 通路往上走、驱动者被敲低，那这条通路应当**回落**（es < 0）——这说明
+            ## 该因子在启动它。若敲低后通路反而**更往上**（es > 0），那它是在压制，
+            ## 不是驱动。原版不看这一点，把任何显著结果都记成支持。
+            effect <- if (is.na(best$es) || is.na(direction)) NA_character_ else
+                if ((direction == "up" && best$es < 0) ||
+                    (direction == "down" && best$es > 0)) "activator" else "repressor"
+            agrees <- is.na(effect) || effect == "activator"
+            level <- if (agrees) "A" else "B"
+            verdict <- if (agrees) "perturbation-supported" else "direction-conflict"
+            statement <- if (agrees) sprintf(
                 "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g).",
                 best$gene, length(members), best$dataset, best$padj)
+            else sprintf(
+                "%s moves these %d members in the same direction the pathway already runs (padj %.2g), which reads as repression rather than drive.",
+                best$gene, length(members), best$padj)
             return(data.frame(
                 pathway = desc, direction = direction, n_members = length(members),
                 support = support, driver = best$gene, dataset = best$dataset,
                 cell_line = best$cell_line, es = best$es, padj = best$padj,
+                effect = effect,
                 level = level, verdict = verdict, statement = statement,
                 stringsAsFactors = FALSE))
         }
 
-        ## 没有实测支持时，成员方向一致仍是一条弱证据（B 级），
-        ## 但要明说它只是"通路在动"，不是"谁让它动"。
-        if (!is.na(support) && support >= min_support) {
+        ## 没有实测支持时，成员方向一致只能算弱证据（B 级）——而且**只有当方向来自外部时**才算。
+        ##
+        ## 方向若由成员多数推导，`support` 就是恒真的（多数必然 >= 50%），拿它当证据
+        ## 等于用同一批基因既定方向又证方向。这是审核时发现的：`min_support = 0.5`
+        ## 永远成立，B 级因此没有信息量。
+        if (!is.na(support) && support >= min_support && dsrc != "members") {
             return(data.frame(
                 pathway = desc, direction = direction, n_members = length(members),
                 support = support, driver = NA_character_, dataset = NA_character_,
                 cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-                level = "B", verdict = "coherent-untested",
+                effect = NA_character_, level = "B", verdict = "coherent-untested",
                 statement = sprintf(
                     "%.0f%% of members moved %s, so the pathway moved; no perturbation test identified a driver.",
                     100 * support, direction),
@@ -173,7 +201,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             pathway = desc, direction = direction, n_members = length(members),
             support = support, driver = NA_character_, dataset = NA_character_,
             cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-            level = "C", verdict = "unsupported",
+            effect = NA_character_, level = "C", verdict = "unsupported",
             statement = if (is.na(support))
                 "Members were not found in the signed gene list; the pathway's movement is unknown."
             else sprintf("%.0f%% of members moved %s, below the support floor of %.0f%%.",
@@ -189,6 +217,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     data.frame(pathway = character(), direction = character(), n_members = integer(),
                support = numeric(), driver = character(), dataset = character(),
                cell_line = character(), es = numeric(), padj = numeric(),
-               level = character(), verdict = character(), statement = character(),
+               effect = character(), level = character(), verdict = character(),
+               statement = character(),
                stringsAsFactors = FALSE)
 }
