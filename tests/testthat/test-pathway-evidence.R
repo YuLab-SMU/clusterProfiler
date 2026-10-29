@@ -82,3 +82,22 @@ test_that("an empty result returns an empty frame with the right columns", {
     expect_equal(nrow(out), 0)
     expect_true(all(c("pathway", "level", "statement") %in% names(out)))
 })
+
+test_that("level A requires two cell lines, and one dataset is not enough", {
+    ## 实测依据：四个驱动者里三个换一个细胞系就不成立，效应量符号也翻转
+    ## （results/stage3_refutation.tsv）。只留最强一份的实现让 A 级等于
+    ## "某一份数据支持"，这个含义太弱，所以 A 级现在要求复现。
+    ##
+    ## 这里只能测判断逻辑，不调网络：用 skip 保护，真值由 pathway_evidence 内部算。
+    skip_on_cran()
+    skip_if_not(identical(Sys.getenv("CLUSTERPROFILER_NETWORK_TESTS"), "1"))
+    r <- pathway_fixture_result()[1, ]
+    out <- pathway_evidence(r, drivers = "HIF1A", signed = c(A = 2, B = 1.5, C = 3, D = 0.5))
+    expect_true("n_cell_lines_supported" %in% names(out))
+    expect_true("n_datasets_tested" %in% names(out))
+    ## 若有显著支持但只有单一细胞系，不能是 A。
+    if (out$n_datasets_tested > 0 && out$padj < 0.05 && out$n_cell_lines_supported < 2) {
+        expect_false(out$level == "A")
+        expect_equal(out$verdict, "single-dataset")
+    }
+})

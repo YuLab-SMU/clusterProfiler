@@ -129,7 +129,8 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 pathway = desc, direction = NA_character_, n_members = length(members),
                 support = support, driver = NA_character_, dataset = NA_character_,
                 cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-                effect = NA_character_, level = "C",
+                effect = NA_character_, n_datasets_tested = n_tested,
+                n_cell_lines_supported = 0L, level = "C",
                 verdict = if (untested) "untestable" else "unsupported",
                 statement = if (untested)
                     "No signed fold changes were supplied, so the pathway's movement is unknown."
@@ -138,8 +139,12 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 stringsAsFactors = FALSE))
         }
 
-        ## 逐个候选驱动者检验，留最强的一份。
-        best <- NULL
+        ## 逐个候选驱动者的**每一份**数据集都检验，不只看最强的那一份。
+        ##
+        ## 原版只留 padj 最小的一个，于是 A 级等于"某一份数据支持"。实测这个含义太弱：
+        ## 四个驱动者里三个换一个细胞系就不成立，而且效应量符号翻转
+        ## （`results/stage3_refutation.tsv`）。所以要看得见全部数据集，才能判断复现。
+        tested <- list()
         for (g in names(sets)) {
             for (j in seq_len(nrow(sets[[g]]))) {
                 id <- as.character(sets[[g]]$dataset_id[j])
@@ -148,13 +153,30 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 if (is.null(r)) next
                 t <- as.data.frame(r[[1]])
                 if (!nrow(t) || is.na(t$padj[1])) next
-                if (is.null(best) || t$padj[1] < best$padj) {
-                    best <- list(gene = g, dataset = id,
-                                 cell_line = as.character(sets[[g]]$cell_line[j]),
-                                 es = as.numeric(t$es[1]), padj = as.numeric(t$padj[1]))
-                }
+                tested[[length(tested) + 1L]] <- list(
+                    gene = g, dataset = id,
+                    cell_line = as.character(sets[[g]]$cell_line[j]),
+                    es = as.numeric(t$es[1]), padj = as.numeric(t$padj[1]))
             }
         }
+        ## 最强的显著者决定"提出主张"的那一份；复现则要求**另一个细胞系**也显著且同向。
+        best <- NULL
+        for (cand in tested) {
+            if (is.na(cand$padj) || cand$padj >= alpha) next
+            if (is.null(best) || cand$padj < best$padj) best <- cand
+        }
+        n_tested <- length(tested)
+        cells_agree <- character(0)
+        if (!is.null(best)) {
+            want <- sign(best$es)
+            cells_agree <- unique(vapply(tested, function(cand) {
+                if (is.na(cand$padj) || cand$padj >= alpha) return(NA_character_)
+                if (is.na(cand$es) || sign(cand$es) != want) return(NA_character_)
+                cand$cell_line
+            }, character(1)))
+            cells_agree <- cells_agree[!is.na(cells_agree)]
+        }
+        replicated <- length(cells_agree) >= 2L
 
         if (!is.null(best) && best$padj < alpha) {
             ## 显著性还不够：**方向必须对得上**。
@@ -165,10 +187,18 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 if ((direction == "up" && best$es < 0) ||
                     (direction == "down" && best$es > 0)) "activator" else "repressor"
             agrees <- is.na(effect) || effect == "activator"
-            level <- if (agrees) "A" else "B"
-            verdict <- if (agrees) "perturbation-supported" else "direction-conflict"
-            statement <- if (agrees) sprintf(
-                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g).",
+            ## A 级要求**复现**：至少两个不同细胞系都显著且同向。
+            ## 单份数据支持降为 B 并标记 `single-dataset`——它不是没有证据，
+            ## 是证据只有一个来源，而实测这种证据有 3/4 会在换数据后翻转。
+            level <- if (!agrees) "B" else if (replicated) "A" else "B"
+            verdict <- if (!agrees) "direction-conflict"
+                       else if (replicated) "perturbation-supported"
+                       else "single-dataset"
+            statement <- if (agrees && replicated) sprintf(
+                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g) and %d cell lines agree.",
+                best$gene, length(members), best$dataset, best$padj, length(cells_agree))
+            else if (agrees) sprintf(
+                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g), but only one cell line supports it.",
                 best$gene, length(members), best$dataset, best$padj)
             else sprintf(
                 "%s moves these %d members in the same direction the pathway already runs (padj %.2g), which reads as repression rather than drive.",
@@ -177,7 +207,8 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 pathway = desc, direction = direction, n_members = length(members),
                 support = support, driver = best$gene, dataset = best$dataset,
                 cell_line = best$cell_line, es = best$es, padj = best$padj,
-                effect = effect,
+                effect = effect, n_datasets_tested = n_tested,
+                n_cell_lines_supported = length(cells_agree),
                 level = level, verdict = verdict, statement = statement,
                 stringsAsFactors = FALSE))
         }
@@ -192,7 +223,8 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 pathway = desc, direction = direction, n_members = length(members),
                 support = support, driver = NA_character_, dataset = NA_character_,
                 cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-                effect = NA_character_, level = "B", verdict = "coherent-untested",
+                effect = NA_character_, n_datasets_tested = n_tested,
+                n_cell_lines_supported = 0L, level = "B", verdict = "coherent-untested",
                 statement = sprintf(
                     "%.0f%% of members moved %s, so the pathway moved; no perturbation test identified a driver.",
                     100 * support, direction),
@@ -203,7 +235,8 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             pathway = desc, direction = direction, n_members = length(members),
             support = support, driver = NA_character_, dataset = NA_character_,
             cell_line = NA_character_, es = NA_real_, padj = NA_real_,
-            effect = NA_character_, level = "C", verdict = "unsupported",
+            effect = NA_character_, n_datasets_tested = n_tested,
+            n_cell_lines_supported = 0L, level = "C", verdict = "unsupported",
             statement = if (is.na(support))
                 "Members were not found in the signed gene list; the pathway's movement is unknown."
             else sprintf("%.0f%% of members moved %s, below the support floor of %.0f%%.",
@@ -219,8 +252,9 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     data.frame(pathway = character(), direction = character(), n_members = integer(),
                support = numeric(), driver = character(), dataset = character(),
                cell_line = character(), es = numeric(), padj = numeric(),
-               effect = character(), level = character(), verdict = character(),
-               statement = character(),
+               effect = character(), n_datasets_tested = integer(),
+               n_cell_lines_supported = integer(),
+               level = character(), verdict = character(), statement = character(),
                stringsAsFactors = FALSE)
 }
 
