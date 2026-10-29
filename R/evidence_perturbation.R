@@ -208,7 +208,12 @@ evidence_perturbation <- function(genes,
     out <- do.call(rbind, rows)
     ## What the sweep covered, so the result is readable as "3 of the 30
     ## strongest candidates had a dataset" rather than "3 factors drive this".
-    attr(out, "queried") <- if (is.null(candidates)) NA_integer_ else length(query_genes)
+    ## Counted in candidate regulators, not in names. The names are what the
+    ## lookup sent -- a regulator is queried under every alias it is known by --
+    ## so reporting them against `considered` produced "31 of 30", a fraction
+    ## whose halves measure different things.
+    attr(out, "queried") <- if (is.null(candidates)) NA_integer_ else
+        length(unique(as.character(candidates)))
     attr(out, "considered") <- considered %||% attr(datasets, "genes_total")
     attr(out, "targeted") <- !is.null(candidates)
     ## One row per perturbed gene, because two datasets for the same gene are

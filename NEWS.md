@@ -1,7 +1,8 @@
-# clusterProfiler 4.21.4.018
+# clusterProfiler 4.21.4.019
 
 ## mechanism analysis: collect, adjudicate, write
 
++ fix `print()` reporting the perturbation sweep as "31 of 30 candidate regulator(s) queried". The numerator counted the names the lookup sent -- a regulator is queried under every alias it is known by -- and the denominator counted candidate regulators, so the two halves of the fraction measured different things. Both are now counted in regulators (2026-10-29, Thu)
 + fix `perturbation_effect` reporting an activator as a repressor when the caller's own contrast is a knockdown of that same factor. The expectation was flipped for a programme that runs down, but the caller has already said which genes to look at, so the question is only whether removing the factor moves those genes down -- true for an activator either way. Measured on MCF-7 cells with ESR1 (an activator) knocked out against GPSAdb's own ESR1 knockdown, which moved the caller's down-genes down 39 of 39: a reproduced experiment, called a repressor (2026-10-28, Wed)
 + fix `measured_direction` reporting the up half while `perturbation_effect` read the half the programme actually runs in, so on a down programme the two columns described different sets of genes. Both now come from one helper (2026-10-28, Wed)
 + `consensus_findings()` and `mechanism_significant()` are exported. Both answer questions a caller asks immediately after `adjudicate()` -- which findings may be discussed, and which rows reached significance -- and both are easy to get subtly wrong by hand: filtering on a p-value ignores a source's own `significant` flag, and treating `absent` as fit to discuss contradicts the verdict (2026-10-28, Wed)
