@@ -101,11 +101,16 @@
 #'   bound; six is enough to see two cell lines agree, which is all level A
 #'   needs. Datasets from distinct cell lines are preferred over extra replicates
 #'   of one line, because replication is what the grade turns on.
-#' @param ppi Also ask STRING whether the pathway's members are more connected
-#'   than size-matched random sets, as a second evidence type agreeing with the
-#'   perturbation result. Off by default: it is another network call per member
-#'   set per null draw.
-#' @param ppi_null How many random sets to compare PPI density against.
+#' @param reactome A second annotation source, as a `data.frame` with a
+#'   `Description` column and a `genes` column holding the member genes of each
+#'   pathway, **in the same identifier space as the enrichment result**. Typically
+#'   `as.data.frame(ReactomePA::enrichPathway(...))` with `geneID` split and
+#'   translated to whatever the GO result uses. The identifier space is required
+#'   rather than guessed: mapping Entrez to symbol inside the package would mean
+#'   depending on an organism annotation package, and guessing wrong would compare
+#'   two lists that share no identifiers and report agreement everywhere.
+#' @param reactome_overlap Share of the smaller pathway that must also be in the
+#'   other before the two sources are said to agree.
 #' @param n For `print()`, how many rows to show.
 #' @param ... Ignored, for method consistency.
 #' @return A `data.frame`, one row per pathway, with a `statement` column holding
@@ -114,7 +119,7 @@
 pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                              min_support = 0.5, max_pathways = 20L,
                              max_datasets_per_driver = 6L,
-                             ppi = FALSE, ppi_null = 5L) {
+                             reactome = NULL, reactome_overlap = 0.3) {
     d <- if (is.data.frame(x)) x else as.data.frame(x)
     if (!nrow(d)) return(.pathway_evidence_empty())
     d <- utils::head(d, max_pathways)
@@ -148,21 +153,6 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 list(padj = as.numeric(t$padj[1]), es = as.numeric(t$es[1]))
         }
         memo[[key]] <- val
-        val
-    }
-
-    ## 跨源一致的网络侧。按成员签名缓存，与扰动侧同一套理由。
-    edge_count <- function(members) {
-        r <- tryCatch(suppressWarnings(evidence_ppi(members)), error = function(e) NULL)
-        if (is.null(r) || !is.data.frame(r)) return(NA_integer_)
-        as.integer(nrow(r))
-    }
-    ppi_cache <- new.env(parent = emptyenv())
-    ppi_of <- function(members) {
-        key <- paste(sort(members), collapse = ",")
-        if (!is.null(ppi_cache[[key]])) return(ppi_cache[[key]])
-        val <- edge_count(members)
-        ppi_cache[[key]] <- val
         val
     }
 
@@ -304,35 +294,50 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
 
     out <- do.call(rbind, rows)
 
-    ## 跨源一致：扰动证据（A 级）与 PPI 拓扑是否指向同一件事。
+    ## 跨源一致：第二个**独立注解来源**（Reactome）是否也指向同一批基因。
     ## **只作注释，不改等级**——设计文档 §6.4 说它不一致时降置信、不作否决。
-    out$ppi_edges <- NA_integer_
-    out$ppi_null_median <- NA_integer_
+    ##
+    ## 为什么不用 PPI（本功能的第一版）：GO 通路不是蛋白复合体，成员散在不同区室做不同的事，
+    ## 实测六条通路的 PPI 密度与同 size 随机集持平（67 vs 67），第二来源什么都没说。
+    ## Reactome 是另一个**人工策展**的通路库，与 GO 独立，才是"跨源"该有的样子。
+    out$reactome_best <- NA_character_
+    out$reactome_overlap <- NA_real_
     out$cross_source <- NA_character_
-    if (isTRUE(ppi) && nrow(out)) {
-        ## 随机对照只需要抽一次，供所有通路共用。
-        pool <- unique(unlist(lapply(seq_len(nrow(d)), function(i) .pathway_members(d[i, ]))))
-        for (i in seq_len(nrow(out))) {
-            members <- .pathway_members(d[i, ])
-            if (length(members) < 2) next
-            real <- ppi_of(members)
-            if (is.na(real)) next
-            set.seed(3L + i)
-            nulls <- vapply(seq_len(ppi_null), function(j) {
-                ppi_of(sample(pool, length(members)))
-            }, integer(1))
-            out$ppi_edges[i] <- real
-            out$ppi_null_median[i] <- stats::median(nulls, na.rm = TRUE)
-            if (!is.na(out$level[i]) && out$level[i] == "A") {
-                ## 三档而不是两档。`67 vs 67` 是**打平**——拓扑上这些成员并不比同 size
-                ## 随机集更相连。把它记成 "disagrees" 会读成"两个来源矛盾"，而实际是
-                ## "这个来源没提供额外信息"。打平与矛盾是不同的结论，必须分开。
-                null_med <- out$ppi_null_median[i]
-                ratio <- if (is.na(null_med) || null_med == 0) NA_real_ else real / null_med
-                out$cross_source[i] <- if (is.na(ratio)) NA_character_
-                    else if (ratio >= 1.2) "agrees"
-                    else if (ratio <= 0.8) "disagrees"
-                    else "no-additional-signal"
+    if (!is.null(reactome) && nrow(out)) {
+        rm <- as.data.frame(reactome)
+        if (all(c("Description", "genes") %in% names(rm))) {
+            rlist <- lapply(rm$genes, function(g) {
+                unique(trimws(unlist(strsplit(as.character(g), "[/,;]"))))
+            })
+            names(rlist) <- as.character(rm$Description)
+            for (i in seq_len(nrow(out))) {
+                members <- .pathway_members(d[i, ])
+                if (!length(members)) next
+                ## 分母是**这条 GO 通路的成员数**，不是两者中的较小者，也不加最小绝对重叠。
+                ##
+                ## 第一版用 `min(length)`，理由是"宽泛的母通路可以包含具体子通路"。实测立刻翻车：
+                ## 七条通路的"最佳匹配"全是 Interleukin-4/IL-13 signaling——它在本次分析里
+                ## 只有 10 个基因，其中 4 个落在缺氧通路里就得到 0.4 的"重叠"，而生物学上
+                ## IL-4/IL-13 与缺氧无关。**分母取较小者会系统性奖励小集合。**
+                ##
+                ## 改问一个更该问的问题：**这条 Reactome 通路能覆盖我这批成员的多少**。
+                ## 覆盖不到就说明它没解释这条通路，而不是"两个来源对上了"。
+                shares <- vapply(rlist, function(g) {
+                    n_shared <- length(intersect(members, g))
+                    if (n_shared < 3L) return(0)
+                    n_shared / length(members)
+                }, numeric(1))
+                best <- which.max(shares)
+                if (!length(best) || is.na(shares[best])) next
+                out$reactome_best[i] <- names(rlist)[best]
+                out$reactome_overlap[i] <- shares[best]
+                if (!is.na(out$level[i]) && out$level[i] == "A") {
+                    ## 三档。有重叠但不高是**这个来源没提供额外信息**，不是矛盾——
+                    ## 与 PPI 那版同一个理由：打平与相反是不同的结论。
+                    out$cross_source[i] <- if (shares[best] >= reactome_overlap) "agrees"
+                        else if (shares[best] > 0) "partial"
+                        else "no-additional-signal"
+                }
             }
         }
     }

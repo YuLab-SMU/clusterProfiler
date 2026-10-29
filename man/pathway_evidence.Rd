@@ -13,8 +13,8 @@ pathway_evidence(
   min_support = 0.5,
   max_pathways = 20L,
   max_datasets_per_driver = 6L,
-  ppi = FALSE,
-  ppi_null = 5L
+  reactome = NULL,
+  reactome_overlap = 0.3
 )
 
 \method{print}{pathway_evidence}(x, n = 10L, ...)
@@ -42,12 +42,17 @@ bound; six is enough to see two cell lines agree, which is all level A
 needs. Datasets from distinct cell lines are preferred over extra replicates
 of one line, because replication is what the grade turns on.}
 
-\item{ppi}{Also ask STRING whether the pathway's members are more connected
-than size-matched random sets, as a second evidence type agreeing with the
-perturbation result. Off by default: it is another network call per member
-set per null draw.}
+\item{reactome}{A second annotation source, as a `data.frame` with a
+`Description` column and a `genes` column holding the member genes of each
+pathway, **in the same identifier space as the enrichment result**. Typically
+`as.data.frame(ReactomePA::enrichPathway(...))` with `geneID` split and
+translated to whatever the GO result uses. The identifier space is required
+rather than guessed: mapping Entrez to symbol inside the package would mean
+depending on an organism annotation package, and guessing wrong would compare
+two lists that share no identifiers and report agreement everywhere.}
 
-\item{ppi_null}{How many random sets to compare PPI density against.}
+\item{reactome_overlap}{Share of the smaller pathway that must also be in the
+other before the two sources are said to agree.}
 
 \item{n}{For `print()`, how many rows to show.}
 

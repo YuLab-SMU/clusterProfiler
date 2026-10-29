@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.033
+# clusterProfiler 4.21.4.034
 
 ## GO annotation cache
 
@@ -6,6 +6,7 @@
 
 ## pathway-level mechanism evidence
 
++ `pathway_evidence(reactome = )` takes a second annotation source instead of the PPI comparison. `reactome.db` also carries an official GO cross-reference, and for `GO:0071456` that maps to "Oxygen-dependent proline hydroxylation of Hypoxia-inducible Factor Alpha" -- an exact mechanistic match where PPI density had nothing to say. Overlap scoring is reported in `reactome_overlap` with a three-way label; note that the member-overlap fallback picks IL-4/IL-13 signalling for every hypoxia pathway, because that pathway shares HIF1A and glycolytic genes, so the overlap alone is not corroboration and the threshold reflects that (2026-10-30, Fri)
 + `pathway_evidence(ppi = TRUE)` compares a pathway's PPI density against size-matched random sets as a second evidence type, reported as `agrees` / `no-additional-signal` / `disagrees` and never used to change a grade. The three-way label matters: a tie is not a contradiction, and calling one "disagrees" would read as the sources opposing each other when the second source simply has nothing to say. On the hypoxia pilot all six pathways come back `no-additional-signal` -- GO terms are not protein complexes, so their members are no more connected than random (2026-10-30, Fri)
 + `pathway_evidence()` no longer re-tests datasets for pathways that share the same member set. The hypoxia result has three pathways over one identical set of 33 genes and three more over another, so the same query was being sent repeatedly; results are now memoised on (dataset, member signature) and the call count is exposed as the `network_calls` attribute (2026-10-30, Fri)
 + `pathway_evidence()` now requires **replication across two cell lines** before granting level A. It tests every dataset available for each candidate driver rather than keeping the single most significant one, and reports `n_datasets_tested`, `n_cell_lines_supported` and a `single-dataset` verdict. Evidence from one cell line is not weak evidence about one cell line -- it is unevaluated evidence about the others, and on the hypoxia pilot EPAS1 support existed in a single line while HIF1A support held in five (2026-10-30, Fri)
