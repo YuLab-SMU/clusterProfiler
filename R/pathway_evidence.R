@@ -77,7 +77,11 @@
     if (is.null(d) || !nrow(d)) return(NULL)
     d <- d[!is.na(d$in_reference) & d$in_reference, , drop = FALSE]
     if (!nrow(d)) return(NULL)
-    utils::head(d[order(-d$n_samples), , drop = FALSE], limit)
+    ## 每个细胞系先留一份（样本多的），保证取到的几份尽量来自不同系——
+    ## 复现判定看的是细胞系数，不是数据集数。
+    d <- d[order(-d$n_samples), , drop = FALSE]
+    d <- d[!duplicated(d$cell_line), , drop = FALSE]
+    utils::head(d, limit)
 }
 
 #' Test enriched pathways against measured perturbation data
@@ -92,13 +96,19 @@
 #' @param min_support Minimum fraction of members moving the same way before a
 #'   pathway counts as moved at all.
 #' @param max_pathways How many pathways to report, taken in the result's own order.
+#' @param max_datasets_per_driver Cap on how many datasets are tested per driver.
+#'   Testing all of them is `n_drivers * n_datasets` calls and grows without
+#'   bound; six is enough to see two cell lines agree, which is all level A
+#'   needs. Datasets from distinct cell lines are preferred over extra replicates
+#'   of one line, because replication is what the grade turns on.
 #' @param n For `print()`, how many rows to show.
 #' @param ... Ignored, for method consistency.
 #' @return A `data.frame`, one row per pathway, with a `statement` column holding
 #'   a claim that a perturbation experiment could refute.
 #' @export
 pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
-                             min_support = 0.5, max_pathways = 20L) {
+                             min_support = 0.5, max_pathways = 20L,
+                             max_datasets_per_driver = 6L) {
     d <- if (is.data.frame(x)) x else as.data.frame(x)
     if (!nrow(d)) return(.pathway_evidence_empty())
     d <- utils::head(d, max_pathways)
@@ -107,7 +117,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     sets <- list()
     if (length(drivers)) {
         for (g in drivers) {
-            ds <- .pathway_datasets(g)
+            ds <- .pathway_datasets(g, limit = max_datasets_per_driver)
             if (!is.null(ds)) sets[[g]] <- ds[, c("dataset_id", "cell_line"), drop = FALSE]
         }
     }

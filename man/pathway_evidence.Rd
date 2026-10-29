@@ -11,7 +11,8 @@ pathway_evidence(
   signed = NULL,
   alpha = 0.05,
   min_support = 0.5,
-  max_pathways = 20L
+  max_pathways = 20L,
+  max_datasets_per_driver = 6L
 )
 
 \method{print}{pathway_evidence}(x, n = 10L, ...)
@@ -32,6 +33,12 @@ which way a pathway's members moved when the result does not say.}
 pathway counts as moved at all.}
 
 \item{max_pathways}{How many pathways to report, taken in the result's own order.}
+
+\item{max_datasets_per_driver}{Cap on how many datasets are tested per driver.
+Testing all of them is `n_drivers * n_datasets` calls and grows without
+bound; six is enough to see two cell lines agree, which is all level A
+needs. Datasets from distinct cell lines are preferred over extra replicates
+of one line, because replication is what the grade turns on.}
 
 \item{n}{For `print()`, how many rows to show.}
 
