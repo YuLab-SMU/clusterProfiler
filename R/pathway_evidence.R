@@ -70,11 +70,31 @@
 ## 但把用了哪一份记下来，因为"同一个基因在不同细胞系里表现不同"是真实存在的
 ## （第 0 期里 VHL 在 HK-2 上就不符合预期）。
 .pathway_datasets <- function(gene, limit = 5L) {
-    d <- tryCatch(as.data.frame(
-        gpsadb::gpsadb_search_datasets(perturbed_gene = gene, method = "knockdown",
-                                       limit = 50)[[1]]),
-        error = function(e) NULL)
-    if (is.null(d) || !nrow(d)) return(NULL)
+    ## 先用包里已有的别名表归一，再查。
+    ##
+    ## 不归一会**静默查空**：GPSAdb 里 `GR` 有 0 个敲低数据集，`NR3C1` 有 1 个；
+    ## 调用方写 `drivers = "GR"` 是自然的，得到的是"这个驱动者没有任何数据"，
+    ## 输出与"数据里确实不支持它"长得一模一样。这一条在 airway 上的实测就是这样：
+    ## 9 条通路全部 C，看不出是别名问题。
+    ## 别名表是**单向**的（`NR3C1 -> GR`），而调用方与数据库可能各站一端：
+    ## GPSAdb 里 `NR3C1` 有数据、`GR` 没有，而用户写 `drivers = "GR"` 最自然。
+    ## 所以双向都试，谁先查到用谁。
+    aliases <- tryCatch(mechanism_regulator_aliases(), error = function(e) character(0))
+    back <- if (length(aliases)) names(aliases)[aliases == gene] else character(0)
+    fwd <- tryCatch(mechanism_alias_regulator(gene), error = function(e) gene)
+    tries <- unique(c(gene, fwd, back))
+    tries <- tries[!is.na(tries) & nzchar(tries)]
+
+    look <- function(g) {
+        d <- tryCatch(as.data.frame(
+            gpsadb::gpsadb_search_datasets(perturbed_gene = g, method = "knockdown",
+                                           limit = 50)[[1]]),
+            error = function(e) NULL)
+        if (is.null(d) || !nrow(d)) NULL else d
+    }
+    d <- NULL
+    for (g in tries) { d <- look(g); if (!is.null(d)) break }
+    if (is.null(d)) return(NULL)
     d <- d[!is.na(d$in_reference) & d$in_reference, , drop = FALSE]
     if (!nrow(d)) return(NULL)
     ## 每个细胞系先留一份（样本多的），保证取到的几份尽量来自不同系——

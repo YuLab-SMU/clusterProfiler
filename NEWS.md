@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.039
+# clusterProfiler 4.21.4.040
 
 ## GO annotation cache
 
@@ -6,6 +6,8 @@
 
 ## pathway-level mechanism evidence
 
++ `pathway_evidence()` resolves driver aliases in both directions before querying. The alias table maps `NR3C1` to `GR` one way only, and GPSAdb holds a knockdown dataset under `NR3C1` but none under `GR`, so passing `drivers = "GR"` found nothing and looked identical to the data not supporting it (2026-10-30, Fri)
++ Note in the design document: Reactome-first was measured on the three pilot datasets and does not work, for a reason unrelated to identifier mapping. `test_gene_set` returns `NA` for pathways below roughly a dozen members, and Reactome pathways run 4 to 21, so Glycolysis with full coverage and an effect size of -0.985 is graded C while a 16-member pathway passes. GO biological processes are large enough to carry the test (2026-10-30, Fri)
 + Removed the `reactome` / `crossref` second-source arguments and the `cross_source` column. Checked before removing: with and without a second source the level, verdict, driver and padj were identical, and under the Reactome-first path the column was `no-crossref` for every pathway, since the IDs are already Reactome's. A column that is constant and empty reads as a check that was performed; three second sources were tried and none of them held (2026-10-30, Fri)
 + `pathway_evidence()` detects a numeric member space (ReactomePA returns Entrez) and translates to symbols itself, so a Reactome enrichment result can be passed straight in. Verified: "Metabolism of carbohydrates and carbohydrate derivatives" and `Glycolysis` reach level A on HIF1A from `enrichPathway` output with no manual conversion (2026-10-30, Fri)
 + `pathway_evidence()` refuses to run when no pathway member matches the `signed` gene list, instead of returning every pathway as untestable. Passing a ReactomePA result alongside symbol fold changes hit exactly this: Entrez members matched nothing, no network call was made, and the output looked like a normal empty finding. The message names the likely cause. A partial match is not an error -- a few members missing from the differential table is ordinary (2026-10-30, Fri)
