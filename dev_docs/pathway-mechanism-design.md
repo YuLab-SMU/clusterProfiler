@@ -536,6 +536,34 @@ Hypoxia-inducible Factor Alpha"，**机制上精确对应**；但 `GO:0001666`�
 **结论：跨源一致现在有实现、有判定，但在 GO 通路上覆盖只有 8%，作为常规证据太稀疏。**
 它适合作为"有就加分、没有不算数"的旁证，不适合当主判据。
 
+**2026-10-30 第四轮：直接用 ReactomePA 富集，消灭映射问题**
+
+建议是对的：**如果富集本身就用 Reactome，就不存在 GO→Reactome 的 8% 稀疏映射。**
+实测可行——`enrichPathway` 离线跑通，`geneID` 转成 Symbol 后
+`pathway_evidence()` 直接工作，结果：
+
+```
+Metabolism of carbohydrates and carbohydrate derivatives  up  16  支撑 1.00  HIF1A  padj 1.5e-08  A
+Interleukin-4 and Interleukin-13 signaling                up  10  支撑 1.00  -                 C
+Glycolysis                                                up   8  支撑 1.00  -                 C
+```
+
+HIF 驱动糖代谢拿到 A 级，生物学上对得上。
+
+**代价是标识空间翻转**：ReactomePA 输出 **Entrez**，而 GPSAdb 只认 **Symbol**。
+所以翻译没有消失，只是从"Reactome 边界"移到"富集输出边界"，一次 `bitr` 调用。
+
+**两相比较，Reactome-first 更好**：不再依赖稀疏映射，通路本身是机制形状的
+（反应、复合体），而不是 GO 的"生物学过程"这种宽泛描述。代价是一次 ID 转换。
+
+**顺带修了一个静默失败（本轮第三个）：** 直接传 ReactomePA 结果给
+`pathway_evidence()` 时，Entrez 成员与 Symbol 的 `signed` 一个都对不上，于是
+**方向全 NA、全判 untestable，0.8 秒跑完、一个网络调用都没发**——看起来像"跑通了、
+没有证据"，实际是标识空间错配。
+
+加了守卫：**一条通路都没匹配上就报错**，并指出最可能的原因。一条都没匹配到才是错配；
+少数匹配不到是正常的（成员不在差异表里）。
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据

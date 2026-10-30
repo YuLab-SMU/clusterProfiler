@@ -132,6 +132,29 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     if (!nrow(d)) return(.pathway_evidence_empty())
     d <- utils::head(d, max_pathways)
 
+    ## 标识空间守卫。
+    ##
+    ## ReactomePA 的 `geneID` 是 **Entrez**，而 GPSAdb 与多数差异表用的是 **Symbol**。
+    ## 两者对不上时，每个通路的成员一个都匹配不上 `signed`，方向推不出来、支持率是 NA，
+    ## 结果是**全部 untestable，但看起来像正常的空结论**——实测 0.8 秒跑完、一个网络
+    ## 调用都没发。这种"跑通了、什么都没发生"比报错危险得多。
+    ##
+    ## 判据用"一条通路都没匹配上"：只要有一条匹配到，就说明空间是通的，
+    ## 少数通路匹配不到是正常的（成员不在差异表里）。
+    if (!is.null(signed) && length(signed) && nrow(d)) {
+        any_hit <- any(vapply(seq_len(nrow(d)), function(i) {
+            m <- .pathway_members(d[i, ])
+            length(m) && any(m %in% names(signed))
+        }, TRUE))
+        if (!any_hit) {
+            rlang::abort(c(
+                "No pathway member matched the `signed` gene list.",
+                x = "Every pathway came back untestable, which usually means the two are in different identifier spaces.",
+                i = "ReactomePA returns Entrez IDs; pass symbols in both, or translate one side first."
+            ))
+        }
+    }
+
     ## 候选数据集只解析一次，不按通路重复查——同一个驱动者在几十条通路上是同一批数据集。
     sets <- list()
     if (length(drivers)) {
