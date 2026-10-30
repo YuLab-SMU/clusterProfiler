@@ -14,7 +14,8 @@ pathway_evidence(
   max_pathways = 20L,
   max_datasets_per_driver = 6L,
   reactome = NULL,
-  reactome_overlap = 0.3
+  reactome_overlap = 0.3,
+  crossref = TRUE
 )
 
 \method{print}{pathway_evidence}(x, n = 10L, ...)
@@ -51,8 +52,16 @@ rather than guessed: mapping Entrez to symbol inside the package would mean
 depending on an organism annotation package, and guessing wrong would compare
 two lists that share no identifiers and report agreement everywhere.}
 
-\item{reactome_overlap}{Share of the smaller pathway that must also be in the
-other before the two sources are said to agree.}
+\item{reactome_overlap}{Deprecated, ignored when `crossref` applies. Kept so
+callers passing it do not break; the overlap rule it configured produced a
+wrong answer and is superseded.}
+
+\item{crossref}{Use `reactome.db`'s official GO-to-Reactome mapping to decide
+agreement, instead of member overlap. Overlap picked IL-4/IL-13 signalling as
+the counterpart of every hypoxia pathway because that pathway happens to
+contain HIF1A and several glycolytic genes; a shared gene is not a matched
+pathway. With the cross-reference the pairing is curated rather than scored,
+so agreement cannot be manufactured. Set `FALSE` to fall back to overlap.}
 
 \item{n}{For `print()`, how many rows to show.}
 

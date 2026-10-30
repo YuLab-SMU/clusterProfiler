@@ -109,8 +109,15 @@
 #'   rather than guessed: mapping Entrez to symbol inside the package would mean
 #'   depending on an organism annotation package, and guessing wrong would compare
 #'   two lists that share no identifiers and report agreement everywhere.
-#' @param reactome_overlap Share of the smaller pathway that must also be in the
-#'   other before the two sources are said to agree.
+#' @param reactome_overlap Deprecated, ignored when `crossref` applies. Kept so
+#'   callers passing it do not break; the overlap rule it configured produced a
+#'   wrong answer and is superseded.
+#' @param crossref Use `reactome.db`'s official GO-to-Reactome mapping to decide
+#'   agreement, instead of member overlap. Overlap picked IL-4/IL-13 signalling as
+#'   the counterpart of every hypoxia pathway because that pathway happens to
+#'   contain HIF1A and several glycolytic genes; a shared gene is not a matched
+#'   pathway. With the cross-reference the pairing is curated rather than scored,
+#'   so agreement cannot be manufactured. Set `FALSE` to fall back to overlap.
 #' @param n For `print()`, how many rows to show.
 #' @param ... Ignored, for method consistency.
 #' @return A `data.frame`, one row per pathway, with a `statement` column holding
@@ -119,7 +126,8 @@
 pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                              min_support = 0.5, max_pathways = 20L,
                              max_datasets_per_driver = 6L,
-                             reactome = NULL, reactome_overlap = 0.3) {
+                             reactome = NULL, reactome_overlap = 0.3,
+                             crossref = TRUE) {
     d <- if (is.data.frame(x)) x else as.data.frame(x)
     if (!nrow(d)) return(.pathway_evidence_empty())
     d <- utils::head(d, max_pathways)
@@ -305,38 +313,78 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     out$cross_source <- NA_character_
     if (!is.null(reactome) && nrow(out)) {
         rm <- as.data.frame(reactome)
-        if (all(c("Description", "genes") %in% names(rm))) {
-            rlist <- lapply(rm$genes, function(g) {
-                unique(trimws(unlist(strsplit(as.character(g), "[/,;]"))))
-            })
-            names(rlist) <- as.character(rm$Description)
+        ## 两个机制要的东西不同，不能绑在一个守卫上：
+        ## 官方交叉引用只需要 `ID`（去 reactome.db 查映射），成员重叠才需要 `genes`。
+        ## 最初把两者写进同一个 `genes` 守卫，只给 `ID` 时整块静默跳过，cross_source 全 NA。
+        if ("Description" %in% names(rm)) {
+            rlist <- if ("genes" %in% names(rm)) {
+                rl <- lapply(rm$genes, function(g) {
+                    unique(trimws(unlist(strsplit(as.character(g), "[/,;]"))))
+                })
+                names(rl) <- as.character(rm$Description)
+                rl
+            } else character(0)
+            ## 官方交叉引用：GO 术语 -> Reactome 通路，由 Reactome 自己策展。
+            ##
+            ## 这是唯一能声称 agreement 的路径。成员重叠做过两版（分母取较小者、取 GO 自身），
+            ## 两版都把 IL-4/IL-13 报成每条缺氧通路的最佳对应物——它共享 HIF1A 与糖酵解基因，
+            ## 共享是真的，对应关系是假的。**共享基因不等于匹配的通路。**
+            go_ids <- as.character(d$ID)
+            cross <- vector("list", length(go_ids))
+            if (isTRUE(crossref) && requireNamespace("reactome.db", quietly = TRUE)) {
+                for (i in seq_along(go_ids)) {
+                    if (is.na(go_ids[i])) next
+                    m <- tryCatch(
+                        ## `reactome.db::reactome.db`：包的**对象**与包同名，
+                        ## 而 requireNamespace() 只加载命名空间、不把对象挂到搜索路径，
+                        ## 写成裸 `reactome.db` 会取不到对象——tryCatch 吞掉错误后
+                        ## 每一条通路都成了 no-crossref，看起来像"映射很稀疏"。
+                        suppressMessages(AnnotationDbi::select(
+                            reactome.db::reactome.db, keys = go_ids[i], keytype = "GO",
+                            columns = c("PATHID", "PATHNAME"))),
+                        error = function(e) NULL)
+                    if (!is.null(m) && nrow(m)) {
+                        ## 只收人类通路。reactome.db 混合了所有物种，实测
+                        ## `GO:0006096`（glycolytic process）会映射到
+                        ## **Gallus gallus: Glycolysis**——不过滤就会拿鸡的通路去印证人的结果。
+                        ## 人类通路 ID 一律以 R-HSA- 开头，这是可靠的判据。
+                        human <- grepl("^R-HSA-", as.character(m$PATHID))
+                        if (any(human)) {
+                            cross[[i]] <- unique(as.character(m$PATHID)[human])
+                            attr(cross[[i]], "name") <-
+                                as.character(m$PATHNAME[which(human)[1]])
+                        }
+                    }
+                }
+            }
+            hit_ids <- if ("ID" %in% names(rm)) as.character(rm$ID) else character(0)
+
             for (i in seq_len(nrow(out))) {
                 members <- .pathway_members(d[i, ])
                 if (!length(members)) next
-                ## 分母是**这条 GO 通路的成员数**，不是两者中的较小者，也不加最小绝对重叠。
-                ##
-                ## 第一版用 `min(length)`，理由是"宽泛的母通路可以包含具体子通路"。实测立刻翻车：
-                ## 七条通路的"最佳匹配"全是 Interleukin-4/IL-13 signaling——它在本次分析里
-                ## 只有 10 个基因，其中 4 个落在缺氧通路里就得到 0.4 的"重叠"，而生物学上
-                ## IL-4/IL-13 与缺氧无关。**分母取较小者会系统性奖励小集合。**
-                ##
-                ## 改问一个更该问的问题：**这条 Reactome 通路能覆盖我这批成员的多少**。
-                ## 覆盖不到就说明它没解释这条通路，而不是"两个来源对上了"。
-                shares <- vapply(rlist, function(g) {
-                    n_shared <- length(intersect(members, g))
-                    if (n_shared < 3L) return(0)
-                    n_shared / length(members)
-                }, numeric(1))
-                best <- which.max(shares)
-                if (!length(best) || is.na(shares[best])) next
-                out$reactome_best[i] <- names(rlist)[best]
-                out$reactome_overlap[i] <- shares[best]
-                if (!is.na(out$level[i]) && out$level[i] == "A") {
-                    ## 三档。有重叠但不高是**这个来源没提供额外信息**，不是矛盾——
-                    ## 与 PPI 那版同一个理由：打平与相反是不同的结论。
-                    out$cross_source[i] <- if (shares[best] >= reactome_overlap) "agrees"
-                        else if (shares[best] > 0) "partial"
-                        else "no-additional-signal"
+                mapped <- cross[[i]]
+                if (!is.null(mapped) && length(mapped)) {
+                    out$reactome_best[i] <- attr(mapped, "name")
+                    hit <- intersect(mapped, hit_ids)
+                    if (length(hit)) {
+                        out$reactome_best[i] <- as.character(
+                            rm$Description[match(hit[1], hit_ids)])
+                        out$cross_source[i] <- "agrees"
+                    } else {
+                        out$cross_source[i] <- "mapped-not-enriched"
+                    }
+                } else {
+                    out$cross_source[i] <- "no-crossref"
+                }
+                ## 重叠数值仍然算出来，供人看"差多远"，但**不再参与判定**。
+                if (length(rlist)) {
+                    shares <- vapply(rlist, function(g) {
+                        n_shared <- length(intersect(members, g))
+                        if (n_shared < 3L) return(0)
+                        n_shared / length(members)
+                    }, numeric(1))
+                    if (length(shares) && !is.na(shares[which.max(shares)]))
+                        out$reactome_overlap[i] <- max(shares)
                 }
             }
         }

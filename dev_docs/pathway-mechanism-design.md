@@ -506,6 +506,36 @@ Hypoxia-inducible Factor Alpha"，**机制上精确对应**；但 `GO:0001666`�
 没有交叉引用，说明这条路很稀疏。合理设计是"有交叉引用时用交叉引用，没有时才退回重叠"，
 并且**只对交叉引用命中声称 agrees**。这需要再一轮实现。
 
+**2026-10-30 第三轮：官方交叉引用（1+3 方案）**
+
+改用 `reactome.db` 的 GO→Reactome 官方映射判定 agreement，不再做成员重叠的 `which.max`。
+
+**顺带查了 ID 空间——这是本轮更重要的收获：**
+
+| 来源 | 基因 ID | 证据 |
+|---|---|---|
+| **GPSAdb** | **Symbol** | 返回 `BNIP3/HILPDA/HK2/CA9`；符号输入 31/33 命中，**Entrez 输入返回 NA** |
+| **Reactome** | **Entrez** | `reactome.db` 73530 个 Entrez，PATHID→ENTREZID |
+
+**没有单一主导空间，这个流程横跨两种。** 所以默认应保持 **Symbol**：主证据来源（GPSAdb）
+强制要求它，富集结果本身通常也是符号；Reactome 作为可选的第二来源，翻译只在
+**交叉引用边界**发生一次（调用方做，包不替它猜——§5 的 P1 原则）。
+
+**交叉引用覆盖率：8%（10/125 条显著通路能映射）。** 映射上的极准：
+`GO:0071456` → "Oxygen-dependent proline hydroxylation of HIF Alpha"。
+10 条命中里只有 **1 条 `agrees`**（对侧的 Reactome 通路本身也显著），其余 `mapped-not-enriched`。
+
+**本轮又一个静默失败（值得记）：** 包内写成 `AnnotationDbi::select(reactome.db, ...)`，
+而 `reactome.db` 是**包名**，对象要写 `reactome.db::reactome.db`。`requireNamespace()`
+只加载命名空间、不把对象挂到搜索路径，于是每次取对象都失败、`tryCatch` 吞掉错误，
+**每条通路都成了 `no-crossref`**——看起来像"映射很稀疏"，实际是根本没查。
+
+**同时修了一个物种 bug**：`GO:0006096`（glycolytic process）会映射到
+**`Gallus gallus: Glycolysis`**——不按 `^R-HSA-` 过滤就会拿鸡的通路印证人的结果。
+
+**结论：跨源一致现在有实现、有判定，但在 GO 通路上覆盖只有 8%，作为常规证据太稀疏。**
+它适合作为"有就加分、没有不算数"的旁证，不适合当主判据。
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据
