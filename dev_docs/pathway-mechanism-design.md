@@ -1011,6 +1011,62 @@ padj<0.05 只有 11 个，`|lfc|>=0.5` 后为 **0**。
 （例如要求至少 30 条 padj<0.05 的通路、且成员中位 ≥ 10），再纳入测试。这样每一份
 纳入的数据都先过了"信号集中"这一关，测的才是方法本身而不是数据质量。
 
+### 7.18 整体代码审核：四个必须修的缺陷（2026-10-30）
+
+对 `R/pathway_evidence.R`（534 行）与 `tests/testthat/test-pathway-evidence.R`（127 行）
+做了一轮完整审核。**四个必须修的缺陷，全部实测确认，全部已修并加了回归测试。**
+
+| # | 缺陷 | 触发条件 | 症状 |
+|---|---|---|---|
+| 1 | 陈述与数字矛盾 | 方向由成员推导且 support=100% | 印出 "100% of members moved up, below the support floor of 50%" |
+| 2 | 断网被报成"成员分散" | 所有 `test_gene_set` 调用失败 | `low-support`、`n_tests_run=0`、**零报警** |
+| 3 | `max_pathways = 0` 崩溃 | 参数边界 | `attempt to set an attribute on NULL` |
+| 4 | 空结果无 class | 富集结果为空 | 不走 print 方法，输出形态突变 |
+
+**缺陷 1 是最值得记的：它是我上一轮"修过"的。**
+
+上一轮的修法是加一个 `else` 分支处理"方向由成员推导"的情形。但那个分支**永远走不到**——
+`why_c` 的取值只有 `no-members / too-small / low-support / no-dataset / not-significant`，
+`low-support` 已经命中了 `support < min_support || identical(dsrc,"members")` 这个合并条件。
+于是 support=100% 时仍印出"低于 50% 的下限"。
+
+**根因是把两个不同的事实合并成一个枚举值。** 修法是拆开：
+
+```
+no-members  too-small  member-derived  low-support  no-test-completed  no-dataset  not-significant
+```
+
+每个值对应一句明确的 `statement`，用 `switch` 一一对应，**不留 `else` 兜底**——兜底正是上一轮
+让 bug 藏身的地方。
+
+**缺陷 2 与 7.16 的 warning 是同一件事的另一半。** 上一轮只修了"驱动者缺数据"的报警，
+没修"调用失败"。现在 `ask()` 分别计数尝试与失败：`n_attempt > 0 && n_fail == n_attempt`
+→ reason `no-test-completed`，并且排在最前（压过 `member-derived`），
+外加一次全局 warning：
+
+```
+All 4 GPSAdb calls failed. No perturbation evidence was collected;
+every grade below reflects an outage, not the data.
+```
+
+**修完的验证一律回到原始触发输入**，不是看代码：
+- 缺陷 1 → `reason: member-derived`，陈述改为"方向由这些成员自己推导"
+- 缺陷 2 → 1 条 warning，`reason: no-test-completed`，陈述含 "outage"
+- 缺陷 3 → 返回 1 行，无崩溃（夹到 1 而不是报错）
+- 缺陷 4 → `class: pathway_evidence,data.frame`
+
+**测试从 10 个增加到 15 个**，新增的关键一条是**断言两列之间的关系**：
+"support >= 下限时，陈述不得出现 below the support floor"。
+只测各列取值的话，缺陷 1 在"修过"之后照样活下来。
+
+**另修三处小问题**：`_pathway_warn_capped` 里一个恒假条件（`!any(level %in% c("A","B","C"))`
+只要 nrow>0 就为假）；`print()` 把 NA 印成 `NA` / `NA%`（`%||%` 接不住 NA）；
+`level <- if (!agrees) "B" else if (replicated) "A" else "B"` 简化为 `if (agrees && replicated) "A" else "B"`。
+
+**未排除的一条**：`.pathway_ids_to_symbols()` 里 `d[nzchar(d$geneID), ]` 理论上可能滤空全部行，
+导致与缺陷 3 相同的 NULL 崩溃。构造不出能触发它的真实输入（探测取前 5 条通路，只要它们能翻译，
+至少保留 5 行），**记录为未排除，不算发现**。
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据

@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.042
+# clusterProfiler 4.21.4.043
 
 ## GO annotation cache
 
@@ -6,6 +6,10 @@
 
 ## pathway-level mechanism evidence
 
++ A pathway whose direction came from its own members no longer reports "100% of members moved up, below the support floor of 50%". The two cases shared one label, so a member-derived direction fell through to the support-floor wording even at full support; `reason` now separates `member-derived` from `low-support` and each value maps to its own statement, with no fallback branch (2026-10-30, Fri)
++ A failed GPSAdb call is no longer reported as weak evidence. When every call fails, `reason` is `no-test-completed` and a warning states that the grades reflect an outage rather than the data; before this, an outage produced `low-support`, `n_tests_run = 0` and no warning at all (2026-10-30, Fri)
++ `max_pathways = 0` clamps to one instead of failing with "attempt to set an attribute on NULL", and an empty result carries the same class as a full one so `print()` dispatches in both cases (2026-10-30, Fri)
++ `print()` shows `?` and `-` for a missing direction and support instead of `NA` and `NA%` (2026-10-30, Fri)
 + `reason` now reports `too-small` ahead of `low-support` when a pathway has fewer than five members. A pathway of two genes can only have its direction inferred from those same genes, so it fell through to `low-support` and told the reader the members disagreed, when the useful message is that too few genes were supplied to begin with (2026-10-30, Fri)
 + An empty enrichment result now warns instead of returning silence. Two of nine pilot datasets stopped there, and the empty frame could not be told apart from a fault (2026-10-30, Fri)
 + `pathway_evidence()` gains a `reason` column recording why a pathway stopped short of level A -- `single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`, `not-significant` and the input-side cases. Previously all of these collapsed into `C unsupported`, so a reader could not tell "nothing found" from "nothing could be looked at" (2026-10-30, Fri)

@@ -125,3 +125,84 @@ test_that("the result carries a class so print.pathway_evidence is used", {
     expect_s3_class(out, "pathway_evidence")
     expect_true(is.data.frame(out))
 })
+
+test_that("the statement agrees with the numbers printed beside it", {
+    ## 审核发现的缺陷，而且是**修过一次仍然存在**的那种：`why_c` 把
+    ## "成员方向分散"与"方向由成员自己推导"合成一个 `low-support`，
+    ## 于是 support = 100% 的通路印出 "100% of members moved up, below the
+    ## support floor of 50%"。上一轮加的那条 `else` 分支永远走不到。
+    ##
+    ## 这条测试的价值在于它**断言两列之间的关系**，而不只是各自的取值——
+    ## 只测 level 和 support 的话，这个矛盾照样活下来。
+    ## 需要 >= 5 个成员，否则先命中 `too-small`，测不到这一支。
+    r <- pathway_fixture_result()[1, ]
+    r$geneID <- "A/B/C/D/E"
+    signed <- c(A = 2, B = 1.5, C = 3, D = 0.5, E = 1)
+    out <- pathway_evidence(r, signed = signed)
+
+    expect_equal(out$support, 1)
+    expect_false(grepl("below the support floor", out$statement))
+    expect_match(out$statement, "inferred from these same members")
+    expect_equal(out$reason, "member-derived")
+
+    ## 反向：支撑率真的低于下限时，才可以说"低于下限"。
+    r2 <- r
+    r2$pathway_direction <- "up"          # 方向来自外部，support 才是独立证据
+    signed2 <- c(A = 2, B = -1.5, C = -3, D = -0.5, E = -1)
+    out2 <- pathway_evidence(r2, signed = signed2)
+    expect_lt(out2$support, 0.5)
+    expect_match(out2$statement, "below the support floor")
+    expect_equal(out2$reason, "low-support")
+})
+
+test_that("max_pathways = 0 does not crash", {
+    ## 原来 `head(d, 0)` 之后没有守卫，do.call(rbind, list()) 返回 NULL，
+    ## 再 attr(out, ...) <- 就报 "attempt to set an attribute on NULL"。
+    r <- pathway_fixture_result()
+    out <- expect_no_error(pathway_evidence(r, max_pathways = 0L,
+                                            signed = c(A = 2, B = 1.5)))
+    ## 夹到 1 而不是报错，也不是返回 0 行——问"给我零条"没有有意义的答案。
+    expect_equal(nrow(out), 1)
+    expect_s3_class(out, "pathway_evidence")
+})
+
+test_that("an empty result carries the same class as a full one", {
+    ## 两种返回形态不一致时，空结果不走 print 方法，用户在同一函数上
+    ## 看到两种输出。
+    expect_s3_class(pathway_evidence(pathway_fixture_result()[0, ]), "pathway_evidence")
+})
+
+test_that("print shows a placeholder rather than NA for untestable rows", {
+    ## `%||%` 只接 NULL，接不住 NA，原来方向印成 "NA"、支撑率印成 "NA%"。
+    r <- pathway_fixture_result()[1, ]
+    out <- pathway_evidence(r)          # 没有 signed -> 方向是 NA
+    txt <- paste(utils::capture.output(print(out)), collapse = "\n")
+    expect_false(grepl("NA%", txt, fixed = TRUE))
+    expect_match(txt, "\\?")
+})
+
+test_that("a failed perturbation call is reported as an outage, not as weak evidence", {
+    ## 审核发现：`ask()` 把调用失败和"调用成功但没结果"都当成 next，
+    ## 于是一次断网让 `tested` 变空，再被解释成"成员方向不一致"。
+    ## 实测 HIF1A（4 个细胞系）在模拟断网下拿到 `low-support`、零报警。
+    ##
+    ## 需要网络先把驱动者解析成数据集，所以走同一道网络开关。
+    skip_on_cran()
+    skip_if_not(identical(Sys.getenv("CLUSTERPROFILER_NETWORK_TESTS"), "1"))
+
+    r <- pathway_fixture_result()[1, ]
+    r$geneID <- "A/B/C/D/E"
+    signed <- c(A = 2, B = 1.5, C = 3, D = 0.5, E = 1)
+
+    ns <- asNamespace("gpsadb")
+    orig <- get("gpsadb_test_gene_set", envir = ns)
+    on.exit(assignInNamespace("gpsadb_test_gene_set", orig, ns = "gpsadb"), add = TRUE)
+    assignInNamespace("gpsadb_test_gene_set",
+                      function(...) stop("simulated outage"), ns = "gpsadb")
+
+    expect_warning(out <- pathway_evidence(r, drivers = "HIF1A", signed = signed),
+                   "GPSAdb calls failed")
+    expect_equal(out$reason, "no-test-completed")
+    expect_equal(out$n_tests_run, 0)
+    expect_match(out$statement, "outage")
+})
