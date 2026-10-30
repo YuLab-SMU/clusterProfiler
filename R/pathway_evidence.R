@@ -439,11 +439,14 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     ## 不是方法判断的结果。读者看不出差别，就会把"没法看"读成"没有证据"。
     ## 全部调用失败时直接说，不看 reason 分布——这是一次调用层面的故障，
     ## 任何等级都不该被当真。
-    if (calls > 0L && fails == calls) {
+    outage <- calls > 0L && fails == calls
+    if (outage) {
         warning(sprintf("All %d GPSAdb calls failed. No perturbation evidence was collected; every grade below reflects an outage, not the data. Check the connection and rerun.", calls),
                 call. = FALSE)
     }
-    .pathway_warn_capped(out, drivers)
+    ## 断网时不再重复第二条：`_pathway_warn_capped` 那句说的正是同一件事。
+    ## 一次故障发两条同义 warning 只会让人以为是两个问题。
+    if (!outage) .pathway_warn_capped(out, drivers)
     ## 必须设 class，否则 `print.pathway_evidence` 永远不会被派发。
     ## 实测这份代码从写出来到现在**一次都没执行过**：返回的是裸 data.frame，
     ## 用户看到的是 20 列的原始表格，`reason` / `capped by` 那些行一个都没印。

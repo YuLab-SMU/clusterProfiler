@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.043
+# clusterProfiler 4.21.4.044
 
 ## GO annotation cache
 
@@ -6,6 +6,7 @@
 
 ## pathway-level mechanism evidence
 
++ A total GPSAdb outage now raises one warning rather than two saying the same thing (2026-10-31, Sat)
 + A pathway whose direction came from its own members no longer reports "100% of members moved up, below the support floor of 50%". The two cases shared one label, so a member-derived direction fell through to the support-floor wording even at full support; `reason` now separates `member-derived` from `low-support` and each value maps to its own statement, with no fallback branch (2026-10-30, Fri)
 + A failed GPSAdb call is no longer reported as weak evidence. When every call fails, `reason` is `no-test-completed` and a warning states that the grades reflect an outage rather than the data; before this, an outage produced `low-support`, `n_tests_run = 0` and no warning at all (2026-10-30, Fri)
 + `max_pathways = 0` clamps to one instead of failing with "attempt to set an attribute on NULL", and an empty result carries the same class as a full one so `print()` dispatches in both cases (2026-10-30, Fri)
