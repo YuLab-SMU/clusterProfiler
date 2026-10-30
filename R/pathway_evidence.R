@@ -130,7 +130,15 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                              min_support = 0.5, max_pathways = 20L,
                              max_datasets_per_driver = 6L) {
     d <- if (is.data.frame(x)) x else as.data.frame(x)
-    if (!nrow(d)) return(.pathway_evidence_empty())
+    if (!nrow(d)) {
+        ## 空输入也要出声。没有这句时，用户拿到一个空 data.frame，无法分辨
+        ## "富集本来就没结果"与"函数出问题了"——实测两个数据集（雌二醇、以及其他
+        ## 富集不到任何通路的条件实验）就停在这一步。
+        warning(paste("The enrichment result holds no pathways, so there is nothing to score.",
+                      "That is usually the condition experiment failing to concentrate its response,",
+                      "not a fault in pathway_evidence."), call. = FALSE)
+        return(.pathway_evidence_empty())
+    }
     d <- utils::head(d, max_pathways)
 
     ## 标识空间：**自动识别并翻译**，不让调用方每次自己 bitr。
@@ -351,7 +359,13 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         ##   * 检验跑了但一份都没给出 p 值  -> too-small（通路太小）
         ##   * 检验跑了、都不显著          -> not-significant
         ## 原来它们全是 `C unsupported`，读者无法分辨"没找到"与"没法找"。
+        ## 顺序有讲究：成员只有个位数时，**这才是要报的原因**。
+        ## 一个 2 成员的通路，方向只能从这 2 个基因自己推出来，于是必然落到
+        ## `low-support`——但读者看到"成员方向不一致"会去改方向策略，
+        ## 实际问题是他给的差异基因太少。实测 MCF-7（23 个上调）与 A549 依托泊苷
+        ## （16 个上调）都因此被误标成 low-support。
         why_c <- if (is.na(support)) "no-members"
+            else if (length(members) < 5L) "too-small"
             else if (support < min_support || identical(dsrc, "members")) "low-support"
             else if (!length(tested)) {
                 if (length(sets)) "too-small" else "no-dataset"
@@ -369,6 +383,9 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             ## 低于 50% 的下限"这种自相矛盾的话。实测 airway 上就这么印出来了。
             statement = if (identical(why_c, "no-members"))
                 "Members were not found in the signed gene list; the pathway's movement is unknown."
+            else if (identical(why_c, "too-small"))
+                sprintf("Only %d members reached this pathway, too few to establish its direction or test a driver; supply more differentially expressed genes.",
+                        length(members))
             else if (identical(why_c, "low-support"))
                 sprintf("%.0f%% of members moved %s, below the support floor of %.0f%%.",
                         100 * support, direction, 100 * min_support)

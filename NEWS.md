@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.041
+# clusterProfiler 4.21.4.042
 
 ## GO annotation cache
 
@@ -6,6 +6,8 @@
 
 ## pathway-level mechanism evidence
 
++ `reason` now reports `too-small` ahead of `low-support` when a pathway has fewer than five members. A pathway of two genes can only have its direction inferred from those same genes, so it fell through to `low-support` and told the reader the members disagreed, when the useful message is that too few genes were supplied to begin with (2026-10-30, Fri)
++ An empty enrichment result now warns instead of returning silence. Two of nine pilot datasets stopped there, and the empty frame could not be told apart from a fault (2026-10-30, Fri)
 + `pathway_evidence()` gains a `reason` column recording why a pathway stopped short of level A -- `single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`, `not-significant` and the input-side cases. Previously all of these collapsed into `C unsupported`, so a reader could not tell "nothing found" from "nothing could be looked at" (2026-10-30, Fri)
 + Emits a warning when level A is unreachable for structural reasons: when every driver has knockdown data in fewer than two cell lines, or when GPSAdb returns no dataset for any driver. The check is made on the drivers rather than inferred from the result rows, because a result whose reasons are mixed (three direction conflicts and five split pathways) hides a single-cell-line cap that is nonetheless real (2026-10-30, Fri)
 + `print.pathway_evidence()` now runs. The result had never been given a class, so the method was bypassed and the raw twenty-column data frame printed instead. It also lists the reasons in a `capped by:` line and tags each row (2026-10-30, Fri)

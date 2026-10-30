@@ -934,6 +934,42 @@ airway 上实际印出了"100% 的成员上调，低于 50% 的下限"。已按 
 缺氧（HIF1A/ARNT，4/3 细胞系）→ 不报警，3 条 A 正常输出。测试 10 通过 / 1 skip，
 `R CMD check` **0 / 0 / 0**。
 
+### 7.16 九个数据集用新代码重跑：报警与"能否到 A"严格一致（2026-10-30）
+
+`adjudicate-interpret/scripts/31_nine_with_reason.R`。
+
+| # | 数据集 | 通路 | A | B | C | 主要 reason | 报警 |
+|---|---|---|---|---|---|---|---|
+| 1 | 缺氧 GSE319526 | 12 | **9** | 0 | 3 | low-support(3) | 否 |
+| 2 | airway 地塞米松 | 12 | 0 | 3 | 9 | low-support(9) | **是** |
+| 3 | MCF-7 ESR1 敲除 | 7 | 0 | 0 | 7 | **too-small(7)** | **是** |
+| 4 | GSE286890 地塞米松 | 12 | 0 | 8 | 4 | **direction-conflict(8)** | **是** |
+| 5 | GSE311462 雌二醇 | **0** | 0 | 0 | 0 | no-enrichment | **是** |
+| 6 | GSE275316 舒拉芬 | 12 | **3** | 3 | 6 | low-support(6) | 否 |
+| 7 | GSE286515 DHT | 12 | **5** | 0 | 7 | low-support(6) | 否 |
+| 8 | GSE285498 依托泊苷 | 12 | 0 | 0 | 12 | **too-small(12)** | **是** |
+| 9 | GSE348245 IL-6 | 12 | **3** | 1 | 8 | low-support(7) | 否 |
+
+**报警与"能否到 A"严格一一对应**：5 个拿不到 A 的全部报警，4 个拿到 A 的全部不报警。
+这是一条可验证的性质，也是这套诊断该有的样子。
+
+**重跑过程中修了两个新问题：**
+
+**（a）`too-small` 的优先级错了。** 原来把"成员方向分散"排在"通路太小"前面，
+于是 MCF-7（2 成员通路）与依托泊苷（1–2 成员）都被标成 `low-support`。
+但 2 成员通路的方向**只能**从这 2 个基因自己推出来，必然落到 low-support——
+**真正要报的是"你给的差异基因太少"**，否则读者会去改方向策略而不是补数据。
+改成成员数 < 5 优先报 `too-small`，陈述也改成
+"Only N members reached this pathway, too few to establish its direction or test a driver"。
+
+**（b）空输入不报。** 富集结果为空时函数返回空 data.frame 且一声不响。
+现在报：`The enrichment result holds no pathways, so there is nothing to score.`
+
+**另有一处是我脚本的错，不是包的错：** 数据集 9 第一版跑出 0 条通路，因为我给
+`enrichGO` 的 `universe` 用了 `unique(mm$SYMBOL)`，而 `mm` 只映射了 156 个**差异基因**——
+**背景集等于差异集**。改为覆盖全部 28154 个转录本后恢复 A=3。
+**这与 GPSAdb 当 benchmark 那次的"把结果集当总体"是同一个错误**，第二次出现。
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据
