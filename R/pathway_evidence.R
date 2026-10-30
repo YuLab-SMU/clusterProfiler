@@ -132,6 +132,14 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     if (!nrow(d)) return(.pathway_evidence_empty())
     d <- utils::head(d, max_pathways)
 
+    ## 标识空间：**自动识别并翻译**，不让调用方每次自己 bitr。
+    ##
+    ## ReactomePA 吐 Entrez、GPSAdb 只认 Symbol，而这两个来源的组合正是主路径。
+    ## 早先要求调用方自己转，代价是有人忘了就得到一个"跑通了、什么都没发生"的结果
+    ## ——0.8 秒、零次网络调用、全部 untestable。识别成本很低（看成员是否像纯数字），
+    ## 让它自动做比让人记住更可靠。
+    d <- .pathway_ids_to_symbols(d, signed)
+
     ## 标识空间守卫。
     ##
     ## ReactomePA 的 `geneID` 是 **Entrez**，而 GPSAdb 与多数差异表用的是 **Symbol**。
@@ -459,4 +467,35 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
         cat("   ", a$statement[1], "\n")
     }
     invisible(x)
+}
+
+
+## 把通路结果里的成员 ID 统一到符号空间。
+##
+## 判定：取前若干通路的成员，若**全部**是纯数字，就认定是 Entrez 并翻译。
+## 只做这一种判定，因为 Entrez/RefSeq/Ensembl 之外没有常见的纯数字形态，
+## 而猜错的代价（静默全空）比不猜的代价（要求调用方自己转）大得多。
+##
+## 翻译失败时**原样返回**，让后面的守卫去报错——错误信息在那里更完整。
+.pathway_ids_to_symbols <- function(d, signed) {
+    if (is.null(d) || !nrow(d) || !"geneID" %in% names(d)) return(d)
+    probe <- utils::head(d$geneID, 5L)
+    toks <- unique(unlist(strsplit(as.character(probe), "/")))
+    toks <- toks[nzchar(toks) & !is.na(toks)]
+    if (!length(toks) || !all(grepl("^[0-9]+$", toks))) return(d)
+    ## 已经是数字、且 signed 也是数字时不用转，两者本来就同空间。
+    if (!is.null(signed) && length(signed) && all(grepl("^[0-9]+$", names(signed)))) return(d)
+    if (!requireNamespace("org.Hs.eg.db", quietly = TRUE)) return(d)
+
+    conv <- tryCatch(suppressMessages(
+        AnnotationDbi::select(org.Hs.eg.db::org.Hs.eg.db, keys = toks,
+                              keytype = "ENTREZID", columns = "SYMBOL")),
+        error = function(e) NULL)
+    if (is.null(conv) || !nrow(conv)) return(d)
+    map <- stats::setNames(as.character(conv$SYMBOL), as.character(conv$ENTREZID))
+    d$geneID <- vapply(strsplit(as.character(d$geneID), "/"), function(ids) {
+        sym <- unname(map[ids])
+        paste(stats::na.omit(sym), collapse = "/")
+    }, character(1))
+    d[nzchar(d$geneID), , drop = FALSE]
 }

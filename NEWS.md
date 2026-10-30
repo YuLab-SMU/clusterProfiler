@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.037
+# clusterProfiler 4.21.4.038
 
 ## GO annotation cache
 
@@ -6,6 +6,7 @@
 
 ## pathway-level mechanism evidence
 
++ `pathway_evidence()` detects a numeric member space (ReactomePA returns Entrez) and translates to symbols itself, so a Reactome enrichment result can be passed straight in. Verified: "Metabolism of carbohydrates and carbohydrate derivatives" and `Glycolysis` reach level A on HIF1A from `enrichPathway` output with no manual conversion (2026-10-30, Fri)
 + `pathway_evidence()` refuses to run when no pathway member matches the `signed` gene list, instead of returning every pathway as untestable. Passing a ReactomePA result alongside symbol fold changes hit exactly this: Entrez members matched nothing, no network call was made, and the output looked like a normal empty finding. The message names the likely cause. A partial match is not an error -- a few members missing from the differential table is ordinary (2026-10-30, Fri)
 + Reactome enrichment output can now be used directly once its `geneID` column is translated to symbols, which removes the GO-to-Reactome mapping step and its 8% coverage. Verified on the hypoxia pilot: "Metabolism of carbohydrates and carbohydrate derivatives" reaches level A on HIF1A at padj 1.5e-08 (2026-10-30, Fri)
 + `pathway_evidence(reactome = )` takes a second annotation source instead of the PPI comparison. `reactome.db` also carries an official GO cross-reference, and for `GO:0071456` that maps to "Oxygen-dependent proline hydroxylation of Hypoxia-inducible Factor Alpha" -- an exact mechanistic match where PPI density had nothing to say. Overlap scoring is reported in `reactome_overlap` with a three-way label; note that the member-overlap fallback picks IL-4/IL-13 signalling for every hypoxia pathway, because that pathway shares HIF1A and glycolytic genes, so the overlap alone is not corroboration and the threshold reflects that (2026-10-30, Fri)
