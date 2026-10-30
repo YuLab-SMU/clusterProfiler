@@ -12,10 +12,7 @@ pathway_evidence(
   alpha = 0.05,
   min_support = 0.5,
   max_pathways = 20L,
-  max_datasets_per_driver = 6L,
-  reactome = NULL,
-  reactome_overlap = 0.3,
-  crossref = TRUE
+  max_datasets_per_driver = 6L
 )
 
 \method{print}{pathway_evidence}(x, n = 10L, ...)
@@ -42,26 +39,6 @@ Testing all of them is `n_drivers * n_datasets` calls and grows without
 bound; six is enough to see two cell lines agree, which is all level A
 needs. Datasets from distinct cell lines are preferred over extra replicates
 of one line, because replication is what the grade turns on.}
-
-\item{reactome}{A second annotation source, as a `data.frame` with a
-`Description` column and a `genes` column holding the member genes of each
-pathway, **in the same identifier space as the enrichment result**. Typically
-`as.data.frame(ReactomePA::enrichPathway(...))` with `geneID` split and
-translated to whatever the GO result uses. The identifier space is required
-rather than guessed: mapping Entrez to symbol inside the package would mean
-depending on an organism annotation package, and guessing wrong would compare
-two lists that share no identifiers and report agreement everywhere.}
-
-\item{reactome_overlap}{Deprecated, ignored when `crossref` applies. Kept so
-callers passing it do not break; the overlap rule it configured produced a
-wrong answer and is superseded.}
-
-\item{crossref}{Use `reactome.db`'s official GO-to-Reactome mapping to decide
-agreement, instead of member overlap. Overlap picked IL-4/IL-13 signalling as
-the counterpart of every hypoxia pathway because that pathway happens to
-contain HIF1A and several glycolytic genes; a shared gene is not a matched
-pathway. With the cross-reference the pairing is curated rather than scored,
-so agreement cannot be manufactured. Set `FALSE` to fall back to overlap.}
 
 \item{n}{For `print()`, how many rows to show.}
 

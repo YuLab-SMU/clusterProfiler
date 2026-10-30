@@ -1,7 +1,7 @@
 Package: clusterProfiler
 Type: Package
 Title: A Universal Enrichment Tool for Interpreting Omics Data
-Version: 4.21.4.038
+Version: 4.21.4.039
 Authors@R: c(
     person(given = "Guangchuang", family = "Yu",        email = "guangchuangyu@gmail.com",   role  = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
     person(given = "Li-Gen",      family = "Wang",      email = "reeganwang020@gmail.com",   role  = "ctb"),
@@ -59,8 +59,7 @@ Suggests:
     readr,
     testthat,
     treeio,
-    withr,
-    reactome.db
+    withr
 VignetteBuilder: quarto
 ByteCompile: true
 License: Artistic-2.0
