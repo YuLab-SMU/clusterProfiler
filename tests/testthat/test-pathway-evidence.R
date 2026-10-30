@@ -101,3 +101,27 @@ test_that("level A requires two cell lines, and one dataset is not enough", {
         expect_equal(out$verdict, "single-dataset")
     }
 })
+
+test_that("every row says why it stopped short of level A", {
+    ## `reason` 存在的理由：`single-dataset` 与 `direction-conflict` 都落在 B，
+    ## 一个是证据不够多、一个是证据指向相反；三种 C（成员找不到、通路太小、
+    ## 测了不显著）也需要分开。否则读者无法区分"没找到"与"没法找"。
+    r <- pathway_fixture_result()
+    out <- pathway_evidence(r, drivers = NULL, signed = c(A = 2, B = 1.5, C = 3, D = 0.5))
+    expect_true("reason" %in% names(out))
+    ## 没有驱动者时，B 级只能来自"通路动了但没有扰动检验"。
+    if (any(out$level == "B")) {
+        expect_true(all(out$reason[out$level == "B"] %in% "no-perturbation-test"))
+    }
+    ## A 级不该带降级原因。
+    expect_true(all(is.na(out$reason[out$level == "A"])))
+})
+
+test_that("the result carries a class so print.pathway_evidence is used", {
+    ## 实测这份代码写了之后一次都没被派发过：没有 class，返回裸 data.frame，
+    ## 用户看到 20 列原始表格。是最难发现的一类"看起来有、其实没跑"。
+    r <- pathway_fixture_result()
+    out <- pathway_evidence(r, drivers = NULL, signed = c(A = 2, B = 1.5, C = 3, D = 0.5))
+    expect_s3_class(out, "pathway_evidence")
+    expect_true(is.data.frame(out))
+})

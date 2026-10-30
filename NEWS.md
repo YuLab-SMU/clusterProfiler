@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.040
+# clusterProfiler 4.21.4.041
 
 ## GO annotation cache
 
@@ -6,6 +6,10 @@
 
 ## pathway-level mechanism evidence
 
++ `pathway_evidence()` gains a `reason` column recording why a pathway stopped short of level A -- `single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`, `not-significant` and the input-side cases. Previously all of these collapsed into `C unsupported`, so a reader could not tell "nothing found" from "nothing could be looked at" (2026-10-30, Fri)
++ Emits a warning when level A is unreachable for structural reasons: when every driver has knockdown data in fewer than two cell lines, or when GPSAdb returns no dataset for any driver. The check is made on the drivers rather than inferred from the result rows, because a result whose reasons are mixed (three direction conflicts and five split pathways) hides a single-cell-line cap that is nonetheless real (2026-10-30, Fri)
++ `print.pathway_evidence()` now runs. The result had never been given a class, so the method was bypassed and the raw twenty-column data frame printed instead. It also lists the reasons in a `capped by:` line and tags each row (2026-10-30, Fri)
++ The `C`-level statement no longer contradicts its own numbers: a pathway whose direction was inferred from its own members read "100% of members moved up, below the support floor of 50%" (2026-10-30, Fri)
 + Comparison of GO and Reactome as the pathway source on the three pilot datasets. GO supplies far more testable pathways (125 against 6 for hypoxia) and its level-A grades land on the correct biology -- response to hypoxia on ARNT, cellular response to hypoxia on HIF1A -- where Reactome's single A fell on GPCR ligand binding. Reactome pathways are also smaller (median 9 against 9, but topping out well below GO's), so `test_gene_set` returns NA more often. GO is the main path; Reactome stays optional, suited to refining a pathway rather than carrying the analysis (2026-10-30, Fri)
 + `pathway_evidence()` resolves driver aliases in both directions before querying. The alias table maps `NR3C1` to `GR` one way only, and GPSAdb holds a knockdown dataset under `NR3C1` but none under `GR`, so passing `drivers = "GR"` found nothing and looked identical to the data not supporting it (2026-10-30, Fri)
 + Note in the design document: Reactome-first was measured on the three pilot datasets and does not work, for a reason unrelated to identifier mapping. `test_gene_set` returns `NA` for pathways below roughly a dozen members, and Reactome pathways run 4 to 21, so Glycolysis with full coverage and an effect size of -0.985 is graded C while a 16-member pathway passes. GO biological processes are large enough to carry the test (2026-10-30, Fri)

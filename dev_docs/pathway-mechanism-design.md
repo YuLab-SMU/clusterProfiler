@@ -887,6 +887,53 @@ GO 富集 0 条。**"显著基因多"与"信号集中"是两件事**——580 �
 这解释了为什么三个不同的 TF 家族（bHLH-PAS、CNC-bZIP、核受体、STAT）都能成功——
 **决定成败的不是驱动者类别，是刺激与程序之间的因果距离。**
 
+### 7.15 让降级可见：reason / warning / print（2026-10-30）
+
+九次实跑暴露的产品缺口：**五个失败读起来全是"C unsupported"，读者分不清"没找到"与"没法找"。**
+查代码确认——整个文件只有一处 `abort()`（标识空间）、**零个 `warning()`**，四种条件不满足全静默降级。
+
+**改了三处：**
+
+1. **`reason` 列**，把塌缩的结论分开：
+
+   | reason | 含义 |
+   |---|---|
+   | `single-cell-line` | 只有 1 个细胞系，A 级需 ≥2 |
+   | `direction-conflict` | 测了，方向相反 |
+   | `no-perturbation-test` | 通路动了，但没有驱动者数据 |
+   | `no-dataset` | GPSAdb 无该驱动者数据 |
+   | `too-small` | 通路太小，`test_gene_set` 算不出 p 值 |
+   | `not-significant` | 测了，不显著 |
+   | `no-members` / `low-support` / `no-direction` / `no-fold-changes` | 输入侧问题 |
+
+2. **结构性上限在驱动者层面就报 `warning()`。**
+
+   第一版写成"等结果出来看 reason 分布、若单一原因占多数则报警"，实测**漏报 airway**：
+   它 8 条里 3 条方向冲突、5 条成员分散，没有单一主导原因，于是明明 GR 只有一个细胞系却没报。
+   **判据改到驱动者层面更直接**：所有驱动者的细胞系数都 < 2 就报，不依赖结果形态。
+
+   实测输出：
+   ```
+   Warning: Level A is unreachable: `GR` (1) has knockdown data in a single
+   cell line, and level A requires two. Results here cannot exceed B.
+   ```
+
+3. **`print()` 增加 `capped by:` 行**，每行末尾标 `[reason]`。
+
+**顺带发现两个真 bug：**
+
+**（a）`print.pathway_evidence` 是死代码。** 返回对象从来没设 `class`，S3 派发不到，
+用户看到的是 20 列裸 data.frame。这个方法从写出来到现在**一次都没执行过**——
+又一个"看起来写好了、其实没跑"。加 `class(out) <- c("pathway_evidence", "data.frame")`。
+
+**（b）陈述与原因自相矛盾。** `support = 100%` 时也走"低于支持下限"那条文案，因为
+真正的原因是方向由成员自身推导（循环论证），而文案写死了"低于 50%"。
+airway 上实际印出了"100% 的成员上调，低于 50% 的下限"。已按 `reason` 分别写。
+
+**验证**：airway（GR，1 细胞系）→ 报警 + `capped by: direction-conflict 3, low-support 1`；
+缺氧（HIF1A/ARNT，4/3 细胞系）→ 不报警，3 条 A 正常输出。测试 10 通过 / 1 skip，
+`R CMD check` **0 / 0 / 0**。
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据

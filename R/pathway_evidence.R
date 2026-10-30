@@ -173,6 +173,25 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         }
     }
 
+    ## A 级不可达这件事在**驱动者层面**就能确定，不必从每个通路的 `reason` 去反推。
+    ##
+    ## 早先的写法是等结果出来看原因分布，实测漏报：airway 那批通路里一半是方向冲突、
+    ## 一半是成员分散，没有"单一主导原因"，于是明明 GR 只有一个细胞系却没报。
+    ## 判据放在这里更直接、也不会误报。
+    if (length(sets)) {
+        cells_each <- vapply(sets, function(z) length(unique(stats::na.omit(z$cell_line))), 0L)
+        if (all(cells_each < 2L)) {
+            warning(sprintf(
+                "Level A is unreachable: %s has knockdown data in a single cell line, and level A requires two. Results here cannot exceed B.",
+                paste(sprintf("`%s` (%d)", names(cells_each), cells_each), collapse = ", ")),
+                call. = FALSE)
+        }
+    } else if (length(drivers)) {
+        warning(sprintf(
+            "No knockdown data found in GPSAdb for %s; every pathway will be described without perturbation evidence.",
+            paste0("`", paste(drivers, collapse = "`, `"), "`")), call. = FALSE)
+    }
+
     ## 按 (数据集, 成员签名) 记忆化。
     ##
     ## 不能按通路缓存——测试结果取决于成员，换了通路就是另一次检验。但**不同通路
@@ -219,6 +238,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 effect = NA_character_, n_tests_run = n_tested,
                 n_cell_lines_supported = 0L, level = "C",
                 verdict = if (untested) "untestable" else "unsupported",
+                reason = if (untested) "no-fold-changes" else "no-direction",
                 statement = if (untested)
                     "No signed fold changes were supplied, so the pathway's movement is unknown."
                 else
@@ -297,7 +317,12 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 cell_line = best$cell_line, es = best$es, padj = best$padj,
                 effect = effect, n_tests_run = n_tested,
                 n_cell_lines_supported = length(cells_agree),
-                level = level, verdict = verdict, statement = statement,
+                level = level, verdict = verdict,
+                ## 降级原因要**写出来**。`single-dataset` 与 `direction-conflict` 都落在 B，
+                ## 但一个是"证据不够多"，一个是"证据指向相反"——读者必须能分开。
+                reason = if (level == "A") NA_character_
+                    else if (!agrees) "direction-conflict" else "single-cell-line",
+                statement = statement,
                 stringsAsFactors = FALSE))
         }
 
@@ -313,11 +338,24 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 cell_line = NA_character_, es = NA_real_, padj = NA_real_,
                 effect = NA_character_, n_tests_run = n_tested,
                 n_cell_lines_supported = 0L, level = "B", verdict = "coherent-untested",
+                reason = "no-perturbation-test",
                 statement = sprintf(
                     "%.0f%% of members moved %s, so the pathway moved; no perturbation test identified a driver.",
                     100 * support, direction),
                 stringsAsFactors = FALSE))
         }
+
+        ## 走到这里的 C 有三种完全不同的含义，必须分开写：
+        ##   * 成员不在差异表里            -> no-members
+        ##   * 成员对不上、方向无外部依据   -> low-support / member-derived
+        ##   * 检验跑了但一份都没给出 p 值  -> too-small（通路太小）
+        ##   * 检验跑了、都不显著          -> not-significant
+        ## 原来它们全是 `C unsupported`，读者无法分辨"没找到"与"没法找"。
+        why_c <- if (is.na(support)) "no-members"
+            else if (support < min_support || identical(dsrc, "members")) "low-support"
+            else if (!length(tested)) {
+                if (length(sets)) "too-small" else "no-dataset"
+            } else "not-significant"
 
         data.frame(
             pathway = desc, direction = direction, n_members = length(members),
@@ -325,10 +363,16 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             cell_line = NA_character_, es = NA_real_, padj = NA_real_,
             effect = NA_character_, n_tests_run = n_tested,
             n_cell_lines_supported = 0L, level = "C", verdict = "unsupported",
-            statement = if (is.na(support))
+            reason = why_c,
+            ## 陈述必须与 `why_c` 一致。原先只有一句"低于支持下限"，但 `support` 是 100%
+            ## 时也走这里（原因是方向由成员自身推导），于是输出"100% 的成员上调，
+            ## 低于 50% 的下限"这种自相矛盾的话。实测 airway 上就这么印出来了。
+            statement = if (identical(why_c, "no-members"))
                 "Members were not found in the signed gene list; the pathway's movement is unknown."
-            else sprintf("%.0f%% of members moved %s, below the support floor of %.0f%%.",
-                         100 * support, direction, 100 * min_support),
+            else if (identical(why_c, "low-support"))
+                sprintf("%.0f%% of members moved %s, below the support floor of %.0f%%.",
+                        100 * support, direction, 100 * min_support)
+            else "The pathway's direction was inferred from these same members, so majority agreement cannot serve as evidence for it.",
             stringsAsFactors = FALSE)
     })
 
@@ -341,7 +385,20 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     ## 要恢复，先有能成立的第二来源，而不是先有这一列。
 
     attr(out, "network_calls") <- calls
-    out[order(match(out$level, c("A", "B", "C")), -out$support), , drop = FALSE]
+    out <- out[order(match(out$level, c("A", "B", "C")), -out$support), , drop = FALSE]
+
+    ## 结构性上限要**说出来**，不能只体现在等级上。
+    ##
+    ## 没有这一段时，`全部 B` / `全部 C` 与"测了、不支持"完全同形——而实测九次里
+    ## 有五次的低等级来自外部缺数据（GR 只有 1 个细胞系、通路太小、差异基因太少），
+    ## 不是方法判断的结果。读者看不出差别，就会把"没法看"读成"没有证据"。
+    .pathway_warn_capped(out, drivers)
+    ## 必须设 class，否则 `print.pathway_evidence` 永远不会被派发。
+    ## 实测这份代码从写出来到现在**一次都没执行过**：返回的是裸 data.frame，
+    ## 用户看到的是 20 列的原始表格，`reason` / `capped by` 那些行一个都没印。
+    ## 又一个"看起来写好了、其实没跑"的例子。
+    class(out) <- c("pathway_evidence", "data.frame")
+    out
 }
 
 .pathway_evidence_empty <- function() {
@@ -350,8 +407,8 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                cell_line = character(), es = numeric(), padj = numeric(),
                effect = character(), n_tests_run = integer(),
                n_cell_lines_supported = integer(),
-               level = character(), verdict = character(), statement = character(),
-               stringsAsFactors = FALSE)
+               level = character(), verdict = character(), reason = character(),
+               statement = character(), stringsAsFactors = FALSE)
 }
 
 #' @rdname pathway_evidence
@@ -361,6 +418,14 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
     counts <- table(factor(x$level, levels = c("A", "B", "C")))
     cat("  levels:       ", paste0(names(counts), " ", as.integer(counts),
                                   collapse = "  "), "\n", sep = "")
+
+    ## 降级原因分行列出。等级只是结论，`reason` 才是"为什么停在这里"。
+    rs <- x$reason[!is.na(x$reason)]
+    if (length(rs)) {
+        rc <- sort(table(rs), decreasing = TRUE)
+        cat("  capped by:    ", paste0(names(rc), " ", as.integer(rc),
+                                       collapse = ", "), "\n", sep = "")
+    }
 
     shown <- utils::head(x, n)
     if (nrow(shown)) {
@@ -372,7 +437,8 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
             cat(sprintf("  [%s] %s (%s, %d members, %.0f%% together)\n",
                         row$level, substr(row$pathway, 1, 52), row$direction %||% "?",
                         row$n_members, 100 * (row$support %||% NA)))
-            cat(sprintf("      driver: %s\n", driver))
+            why <- if (!is.na(row$reason)) sprintf("  [%s]", row$reason) else ""
+            cat(sprintf("      driver: %s%s\n", driver, why))
         }
         if (nrow(x) > nrow(shown)) {
             cat(sprintf("  ... %d more\n", nrow(x) - nrow(shown)))
@@ -417,4 +483,35 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
         paste(stats::na.omit(sym), collapse = "/")
     }, character(1))
     d[nzchar(d$geneID), , drop = FALSE]
+}
+
+
+## 当一组通路的低等级**全部**来自同一个外部缺口时，发一次 warning 说清楚。
+##
+## 只在"没有任何 A"时触发：如果已经有 A，说明条件部分满足，逐行看 `reason` 就够了，
+## 再报一次只是噪音。
+.pathway_warn_capped <- function(out, drivers) {
+    if (!nrow(out) || !any(out$level %in% c("A", "B", "C"))) return(invisible(NULL))
+    if (any(out$level == "A", na.rm = TRUE)) return(invisible(NULL))
+
+    why <- c("single-cell-line", "no-dataset", "too-small")
+    rs <- out$reason[!is.na(out$reason) & out$reason %in% why]
+    if (!length(rs) || length(unique(rs)) != 1L) return(invisible(NULL))
+    ## 要占多数才报——零星几条小通路不够格解释整批结果。
+    if (length(rs) < max(1L, floor(0.5 * nrow(out)))) return(invisible(NULL))
+
+    who <- paste0("`", paste(drivers, collapse = "`, `"), "`")
+    msg <- switch(unique(rs),
+        "single-cell-line" = sprintf(
+            "level A is unreachable: %s has knockdown data in one cell line, and level A needs two. Everything is capped at B.",
+            who),
+        "no-dataset" = sprintf(
+            "level A is unreachable: GPSAdb returned no knockdown dataset for %s. The pathways are described, not tested.",
+            who),
+        "too-small" = paste(
+            "level A is unreachable: the pathways were too small for test_gene_set to produce a p-value,",
+            "so the perturbation evidence could not be evaluated at all.")
+    )
+    warning(msg, call. = FALSE)
+    invisible(NULL)
 }
