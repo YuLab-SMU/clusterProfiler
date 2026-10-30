@@ -652,6 +652,39 @@ enrichPathway(ReactomePA)  →  pathway_evidence() 自动转 ID  →  A/B/C + �
 **同时修了一个静默失败：** `drivers = "GR"` 在 GPSAdb 里查到 **0** 个数据集（只有 `NR3C1` 有），
 而输出与"数据不支持它"完全一样。别名表是**单向**的（`NR3C1 -> GR`），已改为双向查找。
 
+**2026-10-30 第八轮：GO 与 Reactome 在三个数据集上的完整对比，主路径定为 GO-first**
+
+`adjudicate-interpret/scripts/25_go_vs_reactome.R`。两边都跑完再下结论，不用单例推广。
+
+| 数据集 | 来源 | 通路数 | 成员中位 | A | B | C（算不出 p 值） | 有驱动者 |
+|---|---|---|---|---|---|---|---|
+| 缺氧 | Reactome | 6 | 9 | **1** | 0 | 5（5） | 1/6 |
+| 缺氧 | **GO** | **125** | 9 | **15** | 1 | 9（9） | **16/25** |
+| airway | Reactome | 15 | 7 | 0 | 0 | 9（9） | 0 |
+| airway | **GO** | 71 | 9 | 0 | **3** | 22（22） | **3/25** |
+| MCF-7 | Reactome | 2 | **2** | 0 | 0 | 2（2） | 0 |
+| MCF-7 | GO | 26 | **2** | 0 | 0 | 25（25） | 0 |
+
+**缺氧：GO 明显更好，而且不只是数量多。** GO 的 15 条 A 全部生物学正确——
+`response to hypoxia ← ARNT`、`cellular response to hypoxia ← HIF1A`、`vasculature development`、
+`pyruvate metabolic process`、`energy derivation by oxidation`。Reactome 唯一那条 A 落在
+`GPCR ligand binding`，与缺氧无关。
+
+**airway：两个来源都拿不到 A，但 GO 给出了更有用的东西。** GO 找到
+`extracellular matrix organization`（24 成员）← GR，padj 0.036，判 **`direction-conflict`**
+——GR 敲低把这条通路推向它本来就在走的方向（上调），读作**压制而非驱动**，所以不给 A。
+这比"什么都没找到"有信息：工具拒绝把方向不符的证据算成支持。
+Reactome 那边 15 条通路一条驱动者都没有。
+
+**MCF-7：两边都失败**，成员中位只有 2。原因是差异基因只有 23 个上调，与通路来源无关。
+
+**结论：主路径回归 GO-first。** 上一轮换 Reactome 的理由（消掉 8% 的映射缺口）成立，
+但代价是通路数量与规模都掉下来——**GO 125 条 vs Reactome 6 条**（缺氧）。
+Reactome 可作可选补充（通路小、贴反应与复合体），不当主骨架。
+
+**教训与前几轮同源**：用一个局部问题（映射覆盖）换掉一个整体性质（通路供给量），
+账要按整体算。
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据
