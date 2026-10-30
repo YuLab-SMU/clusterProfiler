@@ -1086,6 +1086,49 @@ every grade below reflects an outage, not the data.
 **最终状态**：`R CMD check` 0 / 0 / 0（13m35s），15 测试全过（0 skip），
 九个数据集回归结论不变（4/9、5 报警）。
 
+### 7.19 第二轮代码审核：又一个 print 崩溃与三处数字/文案错误（2026-10-31）
+
+第二轮审核，**专挑上一轮没测过的路径**。三个发现，都属于"输入稍微异常就出错"这一类。
+
+| # | 缺陷 | 触发条件 | 症状 |
+|---|---|---|---|
+| 1 | `print()` 崩溃 | 按列取子集后调用 | `argument is of length zero` |
+| 2 | 成员数多算 | `geneID` 带尾斜杠/连续斜杠 | `n_members` 多 1（6 而非 5） |
+| 3 | 三种情况共用一句话 | 0 成员 / 成员不在表里 / 真对半 | 都印 "Members split evenly" |
+
+**（1）`print.pathway_evidence` 在列子集后崩溃。**
+
+`[.data.frame` 会把自定义 class 一起带过去，于是 `out[, c("pathway","level")]` 仍然
+声称自己是 `pathway_evidence`，而 `print` 要读已经不在的 `driver` / `reason` 列，
+`is.na(NULL)` 是 `logical(0)`，`if` 收到长度 0 就报错。
+
+**按列取子集是极常见的操作**——本项目自己的脚本里到处都是 `out[, c(...)]`。
+修法是加 `[.pathway_evidence`：**列不全就退回普通 data.frame**，
+让 class 的存续条件绑在"schema 完整"上，而不是让 print 去猜。
+行子集保留全部列，class 照旧保留。
+
+**（2）成员解析把空 token 当成员。**
+
+`"A/B/C/D/E/"` 经 `strsplit` 后多出一个空串，`n_members` 变成 6，
+陈述里"these 6 members"也跟着错；`geneID = NA` 会得到一个叫 `"NA"` 的成员，
+把"没有成员"报成 1 个。两个都影响 `n_members < 5` 这个 `too-small` 判据的边界。
+修法是过滤空串与 NA。
+
+**（3）`no-direction` 分支把三个结论合成一句。**
+
+原来只有两档（没给 `signed` / 给了但没有方向），后者用 "Members split evenly"。
+但"给了 `signed`、成员却一个都不在里面"与"成员真的正负对半"是两回事，
+前者说"对半分"是错的。现在分三档：`no-fold-changes` / `no-members` / `no-direction`，
+每档一句自己的话。
+
+**这与 7.18 的缺陷 1 是同一个病**：把两个不同的事实塞进一个标签。
+上一轮在 `why_c` 上修过一次，这一轮在 `no-direction` 分支上又发现一次——
+说明这个错误不是孤例，而是**写代码时的默认倾向**：能共用的分支就共用。
+审核时应当专门去找"这个分支其实涵盖了几种情况"。
+
+**验证**：18 个测试（新增 3 个），`R CMD check` 0 / 0 / 0。
+新增测试覆盖：列子集丢 class、成员解析过滤空 token、三种无方向原因分开。
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据

@@ -16,7 +16,13 @@
 ## 两者都没有时方向为 NA——**不猜**。没有方向的通路无法检验，只能给 C 级。
 .pathway_members <- function(result) {
     if (is.null(result$geneID)) return(character(0))
-    unique(trimws(unlist(strsplit(as.character(result$geneID), "/"))))
+    tok <- trimws(unlist(strsplit(as.character(result$geneID), "/")))
+    ## 空 token 与 NA 都不是成员。不过滤的话：
+    ##   * `"A/B/C/D/E/"` 会数出 6 个成员，`n_members` 与陈述里的数字都多 1
+    ##     （实测带尾斜杠与空格时得到 6 而不是 5）；
+    ##   * `geneID = NA` 会得到一个叫 "NA" 的成员，于是"没有成员"被报成 1 个。
+    ## 两者都会影响 `n_members < 5` 这个 `too-small` 判据的边界。
+    unique(tok[!is.na(tok) & nzchar(tok)])
 }
 
 ## 方向从哪来，决定 `support` 能不能当证据用。
@@ -246,6 +252,17 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         ## 混成一句"没有方向"会把后者说成缺失，与 `absent` / `untested` 分开是同一条纪律。
         if (is.null(direction)) {
             untested <- is.null(signed) || !length(signed)
+            ## 这里其实是**三个**结论，不是一个：
+            ##   * 没给 `signed`            -> no-fold-changes（没测）
+            ##   * 给了但一个成员都不在里面  -> no-members（这批基因不在差异表里）
+            ##   * 给了、有成员、但正负对半  -> no-direction（测了，没有共同方向）
+            ## 原来后两者共用 "Members split evenly"，于是一条 0 成员的通路
+            ## （例如 `geneID` 为 NA 或全是不认识的名字）也说成"成员对半分"——
+            ## 与 `why_c` 那边把 member-derived 并进 low-support 是同一类错误。
+            hit <- if (untested) character(0) else members[members %in% names(signed)]
+            why <- if (untested) "no-fold-changes"
+                else if (!length(hit)) "no-members"
+                else "no-direction"
             return(data.frame(
                 pathway = desc, direction = NA_character_, n_members = length(members),
                 support = support, driver = NA_character_, dataset = NA_character_,
@@ -253,11 +270,11 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 effect = NA_character_, n_tests_run = n_tested,
                 n_cell_lines_supported = 0L, level = "C",
                 verdict = if (untested) "untestable" else "unsupported",
-                reason = if (untested) "no-fold-changes" else "no-direction",
-                statement = if (untested)
-                    "No signed fold changes were supplied, so the pathway's movement is unknown."
-                else
-                    "Members split evenly, so the pathway has no common direction to explain.",
+                reason = why,
+                statement = switch(why,
+                    "no-fold-changes" = "No signed fold changes were supplied, so the pathway's movement is unknown.",
+                    "no-members" = "None of this pathway's members appear in the signed gene list, so its movement is unknown.",
+                    "no-direction" = "Members split evenly, so the pathway has no common direction to explain."),
                 stringsAsFactors = FALSE))
         }
 
@@ -470,6 +487,26 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     out
 }
 
+## 列子集后必须退回普通 data.frame。
+##
+## `[.data.frame` 会把自定义 class 一起带过去，于是 `out[, c("pathway","level")]`
+## 仍然声称自己是 `pathway_evidence`，而 `print.pathway_evidence` 要读 `driver`、
+## `reason`、`support` 这些已经不在的列，`is.na(NULL)` 是 `logical(0)`，
+## `if` 收到长度 0 就报 "argument is of length zero"——一条指不出原因的错误。
+##
+## 按列取子集是极常见的操作（本项目自己的脚本里就到处都是），所以把 class 的
+## 存续条件绑在"列还全"上，而不是让 print 去猜。
+#' @export
+`[.pathway_evidence` <- function(x, i, j, drop = TRUE) {
+    needed <- c("pathway", "direction", "n_members", "support", "driver",
+                "cell_line", "es", "padj", "level", "reason", "statement")
+    out <- NextMethod()
+    if (is.data.frame(out) && !all(needed %in% names(out))) {
+        class(out) <- "data.frame"
+    }
+    out
+}
+
 #' @rdname pathway_evidence
 #' @export
 print.pathway_evidence <- function(x, n = 10L, ...) {
@@ -491,7 +528,7 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
         cat("\n")
         for (i in seq_len(nrow(shown))) {
             row <- shown[i, ]
-            driver <- if (is.na(row$driver)) "-" else
+            driver <- if (!length(row$driver) || is.na(row$driver)) "-" else
                 sprintf("%s/%s padj %.2g", row$driver, row$cell_line, row$padj)
             ## `%||%` 只接 NULL，接不住 NA；原来方向印成 "NA"、支撑率印成 "NA%"。
             dir_txt <- if (is.na(row$direction)) "?" else row$direction
@@ -499,7 +536,7 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
             cat(sprintf("  [%s] %s (%s, %d members, %s together)\n",
                         row$level, substr(row$pathway, 1, 52), dir_txt,
                         row$n_members, sup_txt))
-            why <- if (!is.na(row$reason)) sprintf("  [%s]", row$reason) else ""
+            why <- if (length(row$reason) && !is.na(row$reason)) sprintf("  [%s]", row$reason) else ""
             cat(sprintf("      driver: %s%s\n", driver, why))
         }
         if (nrow(x) > nrow(shown)) {

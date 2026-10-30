@@ -3,6 +3,12 @@
 ## 这些测的是**判断逻辑**，不是网络。`pathway_evidence()` 在有驱动者时会调 GPSAdb，
 ## 所以涉及网络的用例一律 skip；离线用例覆盖方向推导、成员一致性、分级与陈述。
 
+## 把若干行拼成一个富集结果，用于"一条匹配、一条不匹配"的混合输入。
+rbind_result <- function(...) {
+    parts <- lapply(list(...), function(z) as.data.frame(z, stringsAsFactors = FALSE))
+    do.call(rbind, parts)
+}
+
 pathway_fixture_result <- function() {
     data.frame(
         ID = c("GO:1", "GO:2", "GO:3"),
@@ -206,3 +212,59 @@ test_that("a failed perturbation call is reported as an outage, not as weak evid
     expect_equal(out$n_tests_run, 0)
     expect_match(out$statement, "outage")
 })
+
+test_that("subsetting columns drops the class so print keeps working", {
+    ## `[.data.frame` 会把自定义 class 一起带过去，于是 `out[, c("pathway","level")]`
+    ## 仍声称自己是 pathway_evidence，而 print 要读 driver/reason/support 这些
+    ## 已经不存在的列，`is.na(NULL)` 是 logical(0)，`if` 收到长度 0 就报
+    ## "argument is of length zero"。按列取子集太常见了，必须处理。
+    r <- pathway_fixture_result()
+    out <- pathway_evidence(r, signed = c(A = 2, B = 1.5, C = 3, D = 0.5))
+
+    sub <- out[, c("pathway", "level")]
+    expect_false(inherits(sub, "pathway_evidence"))
+    expect_no_error(print(sub))
+
+    ## 行子集保留全部列，class 应当留着。
+    expect_s3_class(out[1, ], "pathway_evidence")
+    ## 单列取子集是向量，不该被强加 class。
+    expect_false(inherits(out[, "level"], "pathway_evidence"))
+})
+
+test_that("empty separators and NA are not counted as members", {
+    ## `"A/B/C/D/E/"` 原来数出 6 个成员，`n_members` 与陈述里的数字都多 1；
+    ## `geneID = NA` 会得到一个叫 "NA" 的成员，把"没有成员"报成 1 个。
+    base <- pathway_fixture_result()[1, ]
+    mk <- function(g) { base$geneID <- g; base }
+
+    members <- function(g) clusterProfiler:::.pathway_members(mk(g))
+    expect_length(members("A/B/C/D/E"), 5)
+    expect_length(members(" A/B/C/D/E/ "), 5)
+    expect_length(members("A//B/C/D/E"), 5)
+    expect_length(clusterProfiler:::.pathway_members(mk(NA_character_)), 0)
+})
+
+test_that("no common direction names which of the three cases it is", {
+    ## 没给 signed / 成员不在差异表里 / 成员真的对半分 —— 三个不同结论。
+    ## 原来后两者共用 "Members split evenly"，一条 0 成员的通路也说成"对半分"。
+    base <- pathway_fixture_result()[1, ]
+
+    r1 <- base
+    expect_equal(pathway_evidence(r1)$reason, "no-fold-changes")
+
+    r2 <- base
+    r2$geneID <- "ZZZ/YYY"
+    r2$Description <- "members not in the differential table"
+    out2 <- pathway_evidence(rbind_result(r2, base), signed = c(A = 2, B = 1.5, C = 3, D = 0.5))
+    expect_equal(out2$reason[out2$pathway == r2$Description], "no-members")
+    expect_match(out2$statement[out2$pathway == r2$Description],
+                 "appear in the signed gene list")
+
+    r3 <- base
+    r3$geneID <- "A/B"
+    r3$pathway_direction <- NA
+    out3 <- pathway_evidence(r3, signed = c(A = 2, B = -1))
+    expect_equal(out3$reason, "no-direction")
+    expect_match(out3$statement, "split evenly")
+})
+

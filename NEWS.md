@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.044
+# clusterProfiler 4.21.4.045
 
 ## GO annotation cache
 
@@ -6,6 +6,9 @@
 
 ## pathway-level mechanism evidence
 
++ Subsetting columns of a `pathway_evidence` result no longer breaks `print()`. `[.data.frame` carried the class across, so a two-column subset still claimed to be a `pathway_evidence` object and the print method reached for columns that were gone, failing with "argument is of length zero". A `[` method now drops the class when the schema is no longer complete (2026-10-31, Sat)
++ Empty and `NA` tokens are no longer counted as pathway members: `"A/B/C/D/E/"` reported six members instead of five, and `geneID = NA` produced a member called `"NA"`. Both affected the `too-small` boundary (2026-10-31, Sat)
++ A pathway with no direction now distinguishes three cases instead of two -- no fold changes supplied, no members present in the list, and members genuinely split -- so a pathway whose members are absent no longer reports that they "split evenly" (2026-10-31, Sat)
 + A total GPSAdb outage now raises one warning rather than two saying the same thing (2026-10-31, Sat)
 + A pathway whose direction came from its own members no longer reports "100% of members moved up, below the support floor of 50%". The two cases shared one label, so a member-derived direction fell through to the support-floor wording even at full support; `reason` now separates `member-derived` from `low-support` and each value maps to its own statement, with no fallback branch (2026-10-30, Fri)
 + A failed GPSAdb call is no longer reported as weak evidence. When every call fails, `reason` is `no-test-completed` and a warning states that the grades reflect an outage rather than the data; before this, an outage produced `low-support`, `n_tests_run = 0` and no warning at all (2026-10-30, Fri)
