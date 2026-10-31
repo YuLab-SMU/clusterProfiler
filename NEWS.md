@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.045
+# clusterProfiler 4.21.4.046
 
 ## GO annotation cache
 
@@ -6,6 +6,7 @@
 
 ## pathway-level mechanism evidence
 
++ An `evidence()` bundle's `$pathways` table can now be passed as `x` and keeps its pathway names. That table names its columns `pathway` and `pathway_description`, not `ID` and `Description`, so every row came back with `pathway = NA` and no error -- the second input the documentation advertises was quietly losing its labels (2026-10-31, Sat)
 + Subsetting columns of a `pathway_evidence` result no longer breaks `print()`. `[.data.frame` carried the class across, so a two-column subset still claimed to be a `pathway_evidence` object and the print method reached for columns that were gone, failing with "argument is of length zero". A `[` method now drops the class when the schema is no longer complete (2026-10-31, Sat)
 + Empty and `NA` tokens are no longer counted as pathway members: `"A/B/C/D/E/"` reported six members instead of five, and `geneID = NA` produced a member called `"NA"`. Both affected the `too-small` boundary (2026-10-31, Sat)
 + A pathway with no direction now distinguishes three cases instead of two -- no fold changes supplied, no members present in the list, and members genuinely split -- so a pathway whose members are absent no longer reports that they "split evenly" (2026-10-31, Sat)

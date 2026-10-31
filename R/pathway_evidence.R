@@ -129,8 +129,15 @@
 #'   of one line, because replication is what the grade turns on.
 #' @param n For `print()`, how many rows to show.
 #' @param ... Ignored, for method consistency.
-#' @return A `data.frame`, one row per pathway, with a `statement` column holding
-#'   a claim that a perturbation experiment could refute.
+#' @return A `data.frame`, one row per pathway, classed `pathway_evidence` so it
+#'   prints as a short summary rather than twenty columns. Two columns carry the
+#'   interpretation: `statement` holds a claim a perturbation experiment could
+#'   refute, and `reason` says why a row stopped short of level A
+#'   (`single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`,
+#'   `not-significant`, `member-derived` and the input-side cases). Level A leaves
+#'   `reason` as `NA`. When the answer cannot reach A for a structural reason the
+#'   call also warns, because an all-`C` table otherwise reads the same as a
+#'   tested-and-refuted one.
 #' @export
 pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                              min_support = 0.5, max_pathways = 20L,
@@ -241,7 +248,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         dsrc <- .pathway_direction_source(d[i, ], signed)
         direction <- .pathway_direction(d[i, ], members, signed)
         support <- .pathway_support(members, signed, direction)
-        desc <- d$Description[i] %||% d$ID[i] %||% NA_character_
+        desc <- .pathway_label(d[i, ])
         ## 先给默认值：下面的"无方向"分支会提前 return，那时检验还没跑，
         ## 但已经要填 `n_tests_run` 这一列。
         n_tested <- 0L
@@ -618,4 +625,24 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
     )
     warning(msg, call. = FALSE)
     invisible(NULL)
+}
+
+
+## 通路名字从哪来。
+##
+## 文档允许两种输入：`enrichResult`（有 `Description` / `ID`）与 `evidence()` 的
+## `$pathways` 表（有 `pathway_description` / `pathway`）。只认前一套列名时，
+## 后一条入口的每一行都得到 `NA` —— 实测确实如此，而且不报错，只是表格里
+## 通路名一栏空着。
+##
+## 两种列名都试，都没有才回退到 `NA`。这不是猜：`evidence_pathway.R` 里写的就是
+## `pathway_description`，是同一个包内的**既定契约**。
+.pathway_label <- function(row, i = 1L) {
+    for (nm in c("Description", "pathway_description", "ID", "pathway")) {
+        if (!is.null(row[[nm]])) {
+            v <- as.character(row[[nm]][1])
+            if (!is.na(v) && nzchar(v)) return(v)
+        }
+    }
+    NA_character_
 }

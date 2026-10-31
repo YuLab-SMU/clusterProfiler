@@ -268,3 +268,36 @@ test_that("no common direction names which of the three cases it is", {
     expect_match(out3$statement, "split evenly")
 })
 
+
+test_that("the documented evidence() pathway table keeps its names", {
+    ## 文档允许 `x` 是 `evidence()` bundle 的 `$pathways` 表，而那张表用的是
+    ## `pathway` / `pathway_description` 两个列名，不是 `ID` / `Description`。
+    ## 只认后者时每行通路名都是 NA——不报错，只是名字空了。
+    pw <- data.frame(
+        pathway = "R-HSA-1234176",
+        pathway_description = "Oxygen-dependent proline hydroxylation of HIF Alpha",
+        pathway_direction = "up", n_pathway_genes = 5L, pathway_padj = 1e-8,
+        regulator = "VHL", source = "reactome", term = "R-HSA-1234176",
+        Count = 5L, setSize = 40L, padj_within_pathway = 1e-5,
+        geneID = "A/B/C/D/E", stringsAsFactors = FALSE)
+
+    out <- pathway_evidence(pw, signed = c(A = 2, B = 1.5, C = 3, D = 0.5, E = 1))
+    expect_false(is.na(out$pathway))
+    expect_equal(out$pathway, "Oxygen-dependent proline hydroxylation of HIF Alpha")
+})
+
+test_that("a GSEA result takes its direction from NES, which beats the members", {
+    ## `gseaResult` 自带 NES，方向应当来自它；成员多数方向只在没有 NES 时才用。
+    g <- data.frame(ID = "GO:1", Description = "response to hypoxia",
+                    setSize = 5L, enrichmentScore = 0.8, NES = -2.0,
+                    pvalue = 0.001, p.adjust = 0.01, qvalue = 0.01,
+                    rank = 100, leading_edge = "tags=50%",
+                    core_enrichment = "A/B/C/D/E", geneID = "A/B/C/D/E",
+                    stringsAsFactors = FALSE)
+    ## 成员全部上调，但 NES 说这条通路是 down —— 方向应当听 NES。
+    out <- pathway_evidence(g, signed = c(A = 2, B = 1.5, C = 3, D = 0.5, E = 1))
+    expect_equal(out$direction, "down")
+    ## 方向与成员相反时，支持率是 0，不能当证据。
+    expect_equal(out$support, 0)
+    expect_equal(out$reason, "low-support")
+})

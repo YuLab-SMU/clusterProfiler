@@ -45,8 +45,15 @@ of one line, because replication is what the grade turns on.}
 \item{...}{Ignored, for method consistency.}
 }
 \value{
-A `data.frame`, one row per pathway, with a `statement` column holding
-  a claim that a perturbation experiment could refute.
+A `data.frame`, one row per pathway, classed `pathway_evidence` so it
+  prints as a short summary rather than twenty columns. Two columns carry the
+  interpretation: `statement` holds a claim a perturbation experiment could
+  refute, and `reason` says why a row stopped short of level A
+  (`single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`,
+  `not-significant`, `member-derived` and the input-side cases). Level A leaves
+  `reason` as `NA`. When the answer cannot reach A for a structural reason the
+  call also warns, because an all-`C` table otherwise reads the same as a
+  tested-and-refuted one.
 }
 \description{
 Test enriched pathways against measured perturbation data

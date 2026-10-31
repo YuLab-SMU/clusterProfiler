@@ -1129,6 +1129,44 @@ every grade below reflects an outage, not the data.
 **验证**：18 个测试（新增 3 个），`R CMD check` 0 / 0 / 0。
 新增测试覆盖：列子集丢 class、成员解析过滤空 token、三种无方向原因分开。
 
+### 7.20 第三轮审核：文档承诺的第二个入口一直在产出空名字（2026-10-31）
+
+第三轮，这一轮系统扫"分支把多种情况压成一句"这个模式，并**逐条测文档里承诺过的入口**。
+
+| # | 缺陷 | 触发条件 | 症状 |
+|---|---|---|---|
+| 1 | `bundle$pathways` 入口通路名为 NA | 按文档传 `evidence()` 的 `$pathways` 表 | 每行 `pathway` 都是 `NA`，不报错 |
+
+**文档写着 `x` 可以是 `enrichResult` / `gseaResult` / `evidence()` 的 `$pathways` 表，
+但后两者的列名各不相同：**
+
+| 输入 | 名字列 | 标识列 |
+|---|---|---|
+| `enrichResult` | `Description` | `ID` |
+| `$pathways`（`evidence_pathway.R` 产出） | **`pathway_description`** | **`pathway`** |
+
+代码只认前一套，于是第二条入口的每一行都拿到 `NA`。**实测确认**：构造一行符合
+`evidence_pathway.R` 输出格式的表，`pathway` 列返回 `NA`。
+
+修法是加 `.pathway_label()`，按 `Description` → `pathway_description` → `ID` → `pathway`
+依次取。这不是猜列名——`evidence_pathway.R` 里写的就是 `pathway_description`，
+**同一个包内的既定契约**。
+
+**这一轮还逐条验证了此前没测过的入口与参数：**
+
+| 检查项 | 结果 |
+|---|---|
+| `gseaResult` 的 NES 方向 | ✅ 正确，且 NES 优先于成员推导 |
+| NES 说 down、成员却上调 | ✅ support=0，判 `low-support`（不一致就该报不一致） |
+| `max_datasets_per_driver` 1/2/4/6 | ✅ 分别 1/2/4/4 次检验，细胞系数 1/2/3/3 |
+| 多驱动者时按驱动者计 | ✅ 2 驱动者 × k=2 → 4 次 |
+| `min_support` 0.5/0.4/0.3 | ✅ 0.33 的支撑率在 0.3 处才升 B |
+
+**顺带发现一处代码复用机会**：`.mechanism_pathway_layer()`（`evidence_pathway.R:198`）
+里**早就写着** `pgenes[!is.na(pgenes) & nzchar(pgenes)]`，与上一轮给 `.pathway_members()`
+补的过滤是同一句。**同一个包里有正确实现、新代码却漏了**——这类问题在审核时应当搜一遍
+同样的逻辑是否已经存在过。
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据
