@@ -51,7 +51,9 @@ A `data.frame`, one row per pathway, classed `pathway_evidence` so it
   refute, and `reason` says why a row stopped short of level A
   (`single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`,
   `not-significant`, `member-derived` and the input-side cases). Level A leaves
-  `reason` as `NA`. When the answer cannot reach A for a structural reason the
+  `reason` as `NA`. A level-B row distinguishes `coherent-untested` (no test
+  could run) from `coherent-refuted` (tests ran and none moved it), because
+  "untested" is untrue once the test has been done. When the answer cannot reach A for a structural reason the
   call also warns, because an all-`C` table otherwise reads the same as a
   tested-and-refuted one.
 }

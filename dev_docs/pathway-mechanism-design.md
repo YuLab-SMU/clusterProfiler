@@ -1167,6 +1167,39 @@ every grade below reflects an outage, not the data.
 补的过滤是同一句。**同一个包里有正确实现、新代码却漏了**——这类问题在审核时应当搜一遍
 同样的逻辑是否已经存在过。
 
+### 7.21 第四轮审核：穷举 (level, verdict, reason) 组合，暴露两处"检验跑过却说没跑"（2026-10-31）
+
+第四轮换了个查法：**不逐行读代码，而是穷举函数能产出的 `(level, verdict, reason)` 组合**，
+看有没有该出现的没出现。
+
+| # | 缺陷 | 触发条件 | 症状 |
+|---|---|---|---|
+| 1 | 断网被 B 分支盖住 | 外部方向 + 支撑率够 + 调用全失败 | 报 `no-perturbation-test`，看不出是网络 |
+| 2 | `no-dataset` 被 B 分支盖住 | 同上，驱动者无数据 | 同上 |
+| 3 | 测过却叫 `untested` | 检验跑了、全不显著 | `coherent-untested` 这个词是错的 |
+
+**共同根因**：B 分支（`coherent-untested`）排在 `why_c` 之前，只要"方向来自外部且支撑率够"
+就先命中，把后面三种**外部阻断**全吃了。
+
+**修法**：在检验循环之后先算一个 `blocked` 状态（调用全失败 → `no-test-completed`；
+给了驱动者但一个数据集都没解析到 → `no-dataset`），B 分支遇到 `blocked` 就让位。
+另外把"检验跑了但都不显著"从 `coherent-untested` 里分出来，新增
+**`coherent-refuted`** —— 因为 `untested` 在测过之后是**事实错误**，不只是措辞不佳：
+
+| 情形 | verdict | reason |
+|---|---|---|
+| 检验跑不起来（断网） | C `unsupported` | `no-test-completed` |
+| 驱动者无数据 | C `unsupported` | `no-dataset` |
+| 没给驱动者 | B `coherent-untested` | `no-perturbation-test` |
+| 测了、全不显著 | B **`coherent-refuted`** | `not-significant` |
+
+**穷举结果**：12 个 `reason` 现在全部可达且组合一致（A 级必无 reason、B/C 必有 reason、
+`unsupported` 必为 C）。
+
+**方法论收获**：前三轮都是"读代码找可疑分支"，这一轮是"枚举输出空间找缺失"。后者更有效——
+它不需要猜，缺什么直接就露出来了。**如果某个 `reason` 在穷举里从不出现，
+要么那条路真的走不到（bug），要么测试没覆盖到（盲区），两者都该查。**
+
 **旧记录（跨源一致为什么一开始没做）：**
 
 设计文档 §6.4 要求"扰动证据、通路数据库注解、PPI 拓扑三者指向一致"。三者中只有扰动证据

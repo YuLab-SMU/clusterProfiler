@@ -135,7 +135,9 @@
 #'   refute, and `reason` says why a row stopped short of level A
 #'   (`single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`,
 #'   `not-significant`, `member-derived` and the input-side cases). Level A leaves
-#'   `reason` as `NA`. When the answer cannot reach A for a structural reason the
+#'   `reason` as `NA`. A level-B row distinguishes `coherent-untested` (no test
+#'   could run) from `coherent-refuted` (tests ran and none moved it), because
+#'   "untested" is untrue once the test has been done. When the answer cannot reach A for a structural reason the
 #'   call also warns, because an all-`C` table otherwise reads the same as a
 #'   tested-and-refuted one.
 #' @export
@@ -321,6 +323,17 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             if (is.null(best) || cand$padj < best$padj) best <- cand
         }
         n_tested <- length(tested)
+
+        ## 检验没能跑起来有两种外部原因，都要**盖过** `no-perturbation-test`：
+        ##   * 调用全失败（断网、上游挂了）—— 这是临时故障，不是数据性质；
+        ##   * 驱动者在 GPSAdb 里没有任何数据集 —— 这是数据供给问题，用户能去补。
+        ## 原来这两种情况在"方向来自外部且支撑率够"的通路上会被 B 分支抢先命中，
+        ## 一律说成 "no perturbation test identified a driver"——实测断网时
+        ## 就是这句话，看不出是网络问题。
+        blocked <- if (n_attempt > 0L && n_fail == n_attempt) "no-test-completed"
+            else if (length(drivers) && !length(sets)) "no-dataset"
+            else NA_character_
+
         cells_agree <- character(0)
         if (!is.null(best)) {
             want <- sign(best$es)
@@ -378,16 +391,26 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         ## 方向若由成员多数推导，`support` 就是恒真的（多数必然 >= 50%），拿它当证据
         ## 等于用同一批基因既定方向又证方向。这是审核时发现的：`min_support = 0.5`
         ## 永远成立，B 级因此没有信息量。
-        if (!is.na(support) && support >= min_support && dsrc != "members") {
+        if (is.na(blocked) && !is.na(support) && support >= min_support && dsrc != "members") {
+            ## 检验**跑过**但都不显著，与**没跑过**是两件事。
+            ## 原来两者共用 `coherent-untested` / `no-perturbation-test`，
+            ## 于是一次跑了 4 个数据集、全不显著的通路报告"没有检验能指出驱动者"——
+            ## 读者分不清"测了不支持"与"根本没测"，`untested` 这个词在测过之后
+            ## 本身就是错的。
+            ran <- length(tested) > 0L
             return(data.frame(
                 pathway = desc, direction = direction, n_members = length(members),
                 support = support, driver = NA_character_, dataset = NA_character_,
                 cell_line = NA_character_, es = NA_real_, padj = NA_real_,
                 effect = NA_character_, n_tests_run = n_tested,
-                n_cell_lines_supported = 0L, level = "B", verdict = "coherent-untested",
-                reason = "no-perturbation-test",
-                statement = sprintf(
-                    "%.0f%% of members moved %s, so the pathway moved; no perturbation test identified a driver.",
+                n_cell_lines_supported = 0L, level = "B",
+                verdict = if (ran) "coherent-refuted" else "coherent-untested",
+                reason = if (ran) "not-significant" else "no-perturbation-test",
+                statement = if (ran) sprintf(
+                    "%.0f%% of members moved %s, so the pathway moved; the %d perturbation test(s) run against it found no significant movement.",
+                    100 * support, direction, n_tested)
+                else sprintf(
+                    "%.0f%% of members moved %s, so the pathway moved; no perturbation test could be run.",
                     100 * support, direction),
                 stringsAsFactors = FALSE))
         }
@@ -412,7 +435,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         ## 的输入有问题，实际是网络。实测断网时逐条 reason 曾显示 `member-derived`，
         ## 只有全局 warning 说得出真相，两层信息不一致。
         why_c <- if (is.na(support)) "no-members"
-            else if (n_attempt > 0L && n_fail == n_attempt) "no-test-completed"
+            else if (!is.na(blocked)) blocked
             else if (length(members) < 5L) "too-small"
             else if (identical(dsrc, "members")) "member-derived"
             else if (support < min_support) "low-support"

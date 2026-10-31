@@ -301,3 +301,60 @@ test_that("a GSEA result takes its direction from NES, which beats the members",
     expect_equal(out$support, 0)
     expect_equal(out$reason, "low-support")
 })
+
+test_that("an outage is not hidden behind 'no perturbation test identified a driver'", {
+    ## 方向来自外部且支撑率够时，B 分支会先命中，把"检验全失败"说成
+    ## "没有检验能指出驱动者"。实测断网就是这句话，看不出是网络问题。
+    ##
+    ## 需要网络解析数据集，走同一道开关。
+    skip_on_cran()
+    skip_if_not(identical(Sys.getenv("CLUSTERPROFILER_NETWORK_TESTS"), "1"))
+
+    r <- pathway_fixture_result()[1, ]
+    r$geneID <- "A/B/C/D/E"
+    r$pathway_direction <- "up"
+    signed <- c(A = 2, B = 1.5, C = 3, D = 0.5, E = 1)
+
+    ns <- asNamespace("gpsadb")
+    orig <- get("gpsadb_test_gene_set", envir = ns)
+    on.exit(assignInNamespace("gpsadb_test_gene_set", orig, ns = "gpsadb"), add = TRUE)
+    assignInNamespace("gpsadb_test_gene_set",
+                      function(...) stop("simulated outage"), ns = "gpsadb")
+
+    out <- suppressWarnings(pathway_evidence(r, drivers = "HIF1A", signed = signed))
+    expect_equal(out$reason, "no-test-completed")
+    expect_equal(out$level, "C")
+})
+
+test_that("a driver that was tested and refuted is not called untested", {
+    ## 检验跑了、全不显著，与根本没跑是两件事。原来两者共用
+    ## `coherent-untested`，一个跑了 4 个数据集全不显著的通路会说成"没测"——
+    ## `untested` 这个词本身就是错的。
+    skip_on_cran()
+    skip_if_not(identical(Sys.getenv("CLUSTERPROFILER_NETWORK_TESTS"), "1"))
+
+    r <- pathway_fixture_result()[1, ]
+    r$geneID <- "A/B/C/D/E"
+    r$pathway_direction <- "up"
+    signed <- c(A = 2, B = 1.5, C = 3, D = 0.5, E = 1)
+
+    ns <- asNamespace("gpsadb")
+    orig <- get("gpsadb_test_gene_set", envir = ns)
+    on.exit(assignInNamespace("gpsadb_test_gene_set", orig, ns = "gpsadb"), add = TRUE)
+    assignInNamespace("gpsadb_test_gene_set", function(id, genes) {
+        list(data.frame(dataset_id = id, n_genes = length(genes),
+                        n_in_dataset = length(genes), padj = 0.5, es = -0.9,
+                        stringsAsFactors = FALSE))
+    }, ns = "gpsadb")
+
+    out <- suppressWarnings(pathway_evidence(r, drivers = "HIF1A", signed = signed))
+    expect_gt(out$n_tests_run, 0)
+    expect_equal(out$verdict, "coherent-refuted")
+    expect_equal(out$reason, "not-significant")
+    expect_match(out$statement, "found no significant movement")
+
+    ## 没给驱动者时仍然是"没测"，两者不能混。
+    out2 <- pathway_evidence(r, signed = signed)
+    expect_equal(out2$verdict, "coherent-untested")
+    expect_equal(out2$reason, "no-perturbation-test")
+})
