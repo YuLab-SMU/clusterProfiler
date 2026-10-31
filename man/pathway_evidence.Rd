@@ -32,7 +32,13 @@ which way a pathway's members moved when the result does not say.}
 \item{min_support}{Minimum fraction of members moving the same way before a
 pathway counts as moved at all.}
 
-\item{max_pathways}{How many pathways to report, taken in the result's own order.}
+\item{max_pathways}{How many pathways to report, taken in the result's own order.
+This also caps the run: every pathway is tested against every driver dataset
+over the network, so the wall time grows with `max_pathways * drivers *
+datasets`. Measured on the hypoxia pilot, 25 pathways took 96 calls and about
+a minute, 60 took 210 calls and about three. Results are memoised by
+(dataset, member set), which helps when pathways share members and not
+otherwise, so pick this deliberately rather than leaving it high.}
 
 \item{max_datasets_per_driver}{Cap on how many datasets are tested per driver.
 Testing all of them is `n_drivers * n_datasets` calls and grows without
