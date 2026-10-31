@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.048
+# clusterProfiler 4.21.4.049
 
 ## GO annotation cache
 
@@ -6,6 +6,7 @@
 
 ## pathway-level mechanism evidence
 
++ The level-A statement now says what the grade does not establish. Tested on the hypoxia pathway, four of thirty background drivers also reached level A -- all essential genes whose knockdown disturbs transcription broadly -- so an A row means the pathway moved, not that this driver is responsible. The statement ends with "Consistent with drive, but not evidence that X is the driver." (2026-10-31, Sat)
 + A failed GPSAdb call and a driver with no data are no longer reported as "no perturbation test identified a driver". Both were masked by the level-B coherent branch whenever the pathway had an external direction and enough support, which hid an outage behind wording that suggests there was nothing to test (2026-10-31, Sat)
 + A level-B row now separates `coherent-refuted` (tests ran and none moved the pathway, reason `not-significant`) from `coherent-untested` (no test could run). Calling a tested pathway "untested" was wrong, not just vague (2026-10-31, Sat)
 + An `evidence()` bundle's `$pathways` table can now be passed as `x` and keeps its pathway names. That table names its columns `pathway` and `pathway_description`, not `ID` and `Description`, so every row came back with `pathway = NA` and no error -- the second input the documentation advertises was quietly losing its labels (2026-10-31, Sat)

@@ -358,3 +358,44 @@ test_that("a driver that was tested and refuted is not called untested", {
     expect_equal(out2$verdict, "coherent-untested")
     expect_equal(out2$reason, "no-perturbation-test")
 })
+
+test_that("the level-A statement admits what it does not establish", {
+    ## 实测：同一条缺氧通路上，从库里随机取 30 个驱动者，有 4 个（全是必需基因）
+    ## 同样拿到 A。所以 A 只说明"敲掉它这条路会动"，不说明"它就是驱动者"。
+    ## 陈述里必须有这句话，否则读者会把"一致"读成"认定"。
+    ##
+    ## 打桩造出一个真正的 A 级（两份细胞系、同向、显著），不依赖网络。
+    ## 先前写的版本用 3 个成员的通路，永远拿不到 A，于是整条测试被 skip 掉了——
+    ## 跳过等于没有覆盖，所以改成打桩。
+    ns <- asNamespace("gpsadb")
+    orig_s <- get("gpsadb_search_datasets", envir = ns)
+    orig_t <- get("gpsadb_test_gene_set", envir = ns)
+    on.exit({
+        assignInNamespace("gpsadb_search_datasets", orig_s, ns = "gpsadb")
+        assignInNamespace("gpsadb_test_gene_set", orig_t, ns = "gpsadb")
+    }, add = TRUE)
+
+    assignInNamespace("gpsadb_search_datasets", function(perturbed_gene, ...) {
+        list(data.frame(perturbed_gene = rep(perturbed_gene, 2),
+                        method = "knockdown",
+                        cell_line = c("HeLa", "A-498"),
+                        n_samples = c(4L, 4L), in_reference = c(TRUE, TRUE),
+                        dataset_id = c("D001", "D002"), stringsAsFactors = FALSE))
+    }, ns = "gpsadb")
+    assignInNamespace("gpsadb_test_gene_set", function(id, genes) {
+        list(data.frame(dataset_id = id, n_genes = length(genes),
+                        n_in_dataset = length(genes), padj = 1e-6, es = -0.9,
+                        stringsAsFactors = FALSE))
+    }, ns = "gpsadb")
+
+    r <- pathway_fixture_result()[1, ]
+    r$geneID <- "A/B/C/D/E"
+    r$pathway_direction <- "up"          # 方向来自外部，es < 0 即 activator
+    out <- suppressWarnings(pathway_evidence(r, drivers = "HIF1A",
+                                             signed = c(A = 2, B = 1.5, C = 3,
+                                                        D = 0.5, E = 1)))
+
+    expect_equal(out$level, "A")
+    expect_match(out$statement, "Consistent with drive")
+    expect_match(out$statement, "not evidence that")
+})

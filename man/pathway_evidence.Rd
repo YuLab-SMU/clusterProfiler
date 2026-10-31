@@ -57,7 +57,11 @@ A `data.frame`, one row per pathway, classed `pathway_evidence` so it
   refute, and `reason` says why a row stopped short of level A
   (`single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`,
   `not-significant`, `member-derived` and the input-side cases). Level A leaves
-  `reason` as `NA`. A level-B row distinguishes `coherent-untested` (no test
+  `reason` as `NA`. Level A is weaker than its name suggests: a knockdown that
+  moves the pathway also moves it if the knockdown is unrelated but perturbs
+  transcription broadly, and four of thirty background drivers reached A on the
+  hypoxia pilot. Read A as consistency worth following up, not as identification
+  of the driver; the statement says as much. A level-B row distinguishes `coherent-untested` (no test
   could run) from `coherent-refuted` (tests ran and none moved it), because
   "untested" is untrue once the test has been done. When the answer cannot reach A for a structural reason the
   call also warns, because an all-`C` table otherwise reads the same as a

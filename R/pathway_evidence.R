@@ -141,7 +141,11 @@
 #'   refute, and `reason` says why a row stopped short of level A
 #'   (`single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`,
 #'   `not-significant`, `member-derived` and the input-side cases). Level A leaves
-#'   `reason` as `NA`. A level-B row distinguishes `coherent-untested` (no test
+#'   `reason` as `NA`. Level A is weaker than its name suggests: a knockdown that
+#'   moves the pathway also moves it if the knockdown is unrelated but perturbs
+#'   transcription broadly, and four of thirty background drivers reached A on the
+#'   hypoxia pilot. Read A as consistency worth following up, not as identification
+#'   of the driver; the statement says as much. A level-B row distinguishes `coherent-untested` (no test
 #'   could run) from `coherent-refuted` (tests ran and none moved it), because
 #'   "untested" is untrue once the test has been done. When the answer cannot reach A for a structural reason the
 #'   call also warns, because an all-`C` table otherwise reads the same as a
@@ -368,9 +372,13 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             verdict <- if (!agrees) "direction-conflict"
                        else if (replicated) "perturbation-supported"
                        else "single-dataset"
+            ## A 级的陈述必须点到它**没**建立的东西。实测：同一条缺氧通路上，
+            ## 从库里随机取 30 个驱动者，有 4 个（全是剪接/RNA 加工/多梳这类必需基因）
+            ## 同样拿到 A——必需基因敲低造成转录组大乱，任何十几到几十个成员的通路都会跟着动。
+            ## 所以"敲掉它会动"是真的，"它就是驱动者"不是。
             statement <- if (agrees && replicated) sprintf(
-                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g) and %d cell lines agree.",
-                best$gene, length(members), best$dataset, best$padj, length(cells_agree))
+                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g) and %d cell lines agree. Consistent with drive, but not evidence that %s is the driver.",
+                best$gene, length(members), best$dataset, best$padj, length(cells_agree), best$gene)
             else if (agrees) sprintf(
                 "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g), but only one cell line supports it.",
                 best$gene, length(members), best$dataset, best$padj)
