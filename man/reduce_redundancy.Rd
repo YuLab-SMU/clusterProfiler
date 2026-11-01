@@ -14,8 +14,8 @@ reduce_redundancy(
 \arguments{
 \item{x}{An \code{enrichResult}, \code{gseaResult} or \code{compareClusterResult}.}
 
-\item{threshold}{Similarity above which a term joins the group of a more significant
-term. \code{NULL} (default) uses 0.5 for both measures.}
+\item{threshold}{Similarity above which the less significant of two terms is removed.
+\code{NULL} (default) uses 0.7, the default of \code{\link[=simplify]{simplify()}}, for both measures.}
 
 \item{method}{\code{"auto"} (default) uses \code{"Wang"} when every term is a GO term and
 \code{"jaccard"} otherwise; either can be forced. Wang on non-GO terms falls back to Jaccard.}
@@ -29,14 +29,13 @@ term. \code{NULL} (default) uses 0.5 for both measures.}
 and the legacy \verb{rrvgo_*} names read by earlier analysis scripts.
 }
 \description{
-Keeps one representative for each group of near-duplicate significant terms, so that
-every significant theme of a long result can be shown to the model without repeating
-its near-synonyms. GO results are grouped by Wang semantic similarity over the GO DAG
-(GOSemSim); every other gene-set collection (KEGG, Reactome, WikiPathways, MSigDB,
-custom \code{TERM2GENE}) by the Jaccard overlap of the member genes the result reports
-(\code{geneID}, or \code{core_enrichment} for GSEA). Groups are formed greedily in order of
-adjusted p-value: the most significant remaining term is kept and every remaining term
-more similar to it than \code{threshold} is dropped. Only terms that pass the object's
+Removes near-duplicate significant terms with \code{\link[=simplify]{simplify()}}, so that a long result can be
+shown to the model without repeating its near-synonyms. GO results are compared by Wang
+semantic similarity over the GO DAG (GOSemSim); every other gene-set collection (KEGG,
+Reactome, WikiPathways, MSigDB, custom \code{TERM2GENE}) by the Jaccard overlap of the member
+genes the result reports (\code{geneID}, or \code{core_enrichment} for GSEA). For each term, of the
+terms more similar to it than \code{threshold}, the one with the smallest adjusted p-value is
+kept and the others are removed. A lower \code{threshold} removes more. Only terms that pass the object's
 cutoffs are considered; a \code{compareClusterResult} is reduced within each cluster, and a
 GO result spanning several ontologies within each ontology. Deterministic, and makes no
 model call. \code{\link[=interpret]{interpret()}} and \code{\link[=interpret_agent]{interpret_agent()}} call it by default (\code{reduce = TRUE}).
@@ -44,9 +43,9 @@ model call. \code{\link[=interpret]{interpret()}} and \code{\link[=interpret_age
 \examples{
 \dontrun{
 ego <- enrichGO(gene = genes, OrgDb = org.Hs.eg.db, ont = "BP")
-reduce_redundancy(ego)                 # Wang, 0.5
+reduce_redundancy(ego)                 # Wang, 0.7
 kk <- enrichKEGG(gene = genes, organism = "hsa")
-reduce_redundancy(kk)                  # Jaccard on member genes, 0.5
+reduce_redundancy(kk)                  # Jaccard on member genes, 0.7
 }
 }
 \seealso{

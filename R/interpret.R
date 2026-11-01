@@ -463,7 +463,7 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   (e.g., "scRNA-seq of mouse myocardial infarction at day 3").
 #' @param n_pathways Maximum number of terms (per cluster) sent to the model, taken in order
 #'   of adjusted p-value after reduction. `NULL` (default) sends every term that passes the
-#'   object's cutoffs; with `reduce = TRUE` that is one representative per theme. On five
+#'   object's cutoffs; with `reduce = TRUE`, those left after [reduce_redundancy()]. On five
 #'   public lists a cap below the number of representatives named fewer themes of the full
 #'   result; for a model with a short context, lower `reduce_threshold` (for example 0.3)
 #'   before setting a cap.
@@ -501,7 +501,7 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   overlap of member genes for KEGG and other gene-set collections. Default `TRUE`; a
 #'   no-op for data frames and lists.
 #' @param reduce_threshold Similarity threshold passed to [reduce_redundancy()]. `NULL`
-#'   (default) uses its default of 0.5.
+#'   (default) uses its default of 0.7.
 #' @param reasoning Optional reasoning/thinking configuration passed through to the
 #'   provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL}
 #'   the request is byte-identical to one made before this argument existed. Whatever is
@@ -531,7 +531,7 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   model = "deepseek:deepseek-chat",
 #'   context = "Cancer proliferation study"
 #' )
-#' # Every significant term, one representative per theme (the default)
+#' # Every significant term left after reduce_redundancy() (the default)
 #' ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
 #' res <- interpret(ego)
 #' # A shorter prompt for a model with a short context: merge more terms per theme
@@ -822,7 +822,7 @@ interpret <- function(x,
 #'   assessable) and `prior_rationale`.
 #' @param n_pathways Maximum number of terms (per cluster) the Cleaner starts from, taken in
 #'   order of adjusted p-value after reduction. `NULL` (default) uses every term that passes
-#'   the object's cutoffs; with `reduce = TRUE` that is one representative per theme.
+#'   the object's cutoffs; with `reduce = TRUE`, those left after [reduce_redundancy()].
 #' @param model Optional LLM model. When `NULL` (default), uses the aisdk
 #'   package-wide default model configured via `aisdk::set_model()`. You can
 #'   also supply a model ID in `provider:model` format or a `LanguageModelV1`
@@ -852,7 +852,7 @@ interpret <- function(x,
 #'   [interpret()] does: Wang similarity for GO results, Jaccard overlap of member genes
 #'   for other gene-set collections. Deterministic and makes no model call. Default `TRUE`.
 #' @param reduce_threshold Similarity threshold passed to [reduce_redundancy()]. `NULL`
-#'   (default) uses its default of 0.5.
+#'   (default) uses its default of 0.7.
 #' @param reasoning Optional reasoning/thinking configuration passed through to the
 #'   provider, e.g. `list(type = "enabled", budget_tokens = 4096)`. Left `NULL` the
 #'   request is byte-identical to one made before this argument existed. Whatever is
@@ -1244,7 +1244,7 @@ interpret_agent <- function(x,
 #' @param max_tokens Maximum tokens. Default 8192.
 #' @param temperature Sampling temperature. Default 0.3.
 #' @param n_pathways,reduce,reduce_threshold Passed to both levels, as in \code{interpret()}:
-#'   by default every significant term, one representative per theme.
+#'   by default every significant term left after [reduce_redundancy()].
 #' @return An `interpretation_list` object with a cell-type label (`cell_type`, `confidence`,
 #'   `reasoning`, `markers`) per sub-cluster.
 #' @export
@@ -2290,21 +2290,20 @@ print.interpretation_list <- function(x, ...) {
 
 #' Reduce redundant terms in an enrichment result before interpretation
 #'
-#' Keeps one representative for each group of near-duplicate significant terms, so that
-#' every significant theme of a long result can be shown to the model without repeating
-#' its near-synonyms. GO results are grouped by Wang semantic similarity over the GO DAG
-#' (GOSemSim); every other gene-set collection (KEGG, Reactome, WikiPathways, MSigDB,
-#' custom `TERM2GENE`) by the Jaccard overlap of the member genes the result reports
-#' (`geneID`, or `core_enrichment` for GSEA). Groups are formed greedily in order of
-#' adjusted p-value: the most significant remaining term is kept and every remaining term
-#' more similar to it than `threshold` is dropped. Only terms that pass the object's
+#' Removes near-duplicate significant terms with [simplify()], so that a long result can be
+#' shown to the model without repeating its near-synonyms. GO results are compared by Wang
+#' semantic similarity over the GO DAG (GOSemSim); every other gene-set collection (KEGG,
+#' Reactome, WikiPathways, MSigDB, custom `TERM2GENE`) by the Jaccard overlap of the member
+#' genes the result reports (`geneID`, or `core_enrichment` for GSEA). For each term, of the
+#' terms more similar to it than `threshold`, the one with the smallest adjusted p-value is
+#' kept and the others are removed. A lower `threshold` removes more. Only terms that pass the object's
 #' cutoffs are considered; a `compareClusterResult` is reduced within each cluster, and a
 #' GO result spanning several ontologies within each ontology. Deterministic, and makes no
 #' model call. [interpret()] and [interpret_agent()] call it by default (`reduce = TRUE`).
 #'
 #' @param x An `enrichResult`, `gseaResult` or `compareClusterResult`.
-#' @param threshold Similarity above which a term joins the group of a more significant
-#'   term. `NULL` (default) uses 0.5 for both measures.
+#' @param threshold Similarity above which the less significant of two terms is removed.
+#'   `NULL` (default) uses 0.7, the default of [simplify()], for both measures.
 #' @param method `"auto"` (default) uses `"Wang"` when every term is a GO term and
 #'   `"jaccard"` otherwise; either can be forced. Wang on non-GO terms falls back to Jaccard.
 #' @param semData Optional `GOSemSimDATA` for the Wang measure; built with
@@ -2317,9 +2316,9 @@ print.interpretation_list <- function(x, ...) {
 #' @examples
 #' \dontrun{
 #' ego <- enrichGO(gene = genes, OrgDb = org.Hs.eg.db, ont = "BP")
-#' reduce_redundancy(ego)                 # Wang, 0.5
+#' reduce_redundancy(ego)                 # Wang, 0.7
 #' kk <- enrichKEGG(gene = genes, organism = "hsa")
-#' reduce_redundancy(kk)                  # Jaccard on member genes, 0.5
+#' reduce_redundancy(kk)                  # Jaccard on member genes, 0.7
 #' }
 #' @seealso [simplify()], which does the actual reduction.
 reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "jaccard"), semData = NULL) {
@@ -2332,7 +2331,7 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
   # rows without an ID (all-NA padding some result tables carry) are not terms
   df <- df[!is.na(df$ID), , drop = FALSE]
   if (nrow(df) < 2) return(x)
-  threshold <- threshold %||% 0.5
+  threshold <- threshold %||% 0.7
   gcol <- intersect(c("geneID", "core_enrichment"), names(df))[1]
   is_go <- all(grepl("^GO:[0-9]{7}$", df$ID))
   if (method == "auto") method <- if (is_go) "Wang" else "jaccard"
