@@ -404,6 +404,21 @@ process_enrichment_input <- function(x, n_pathways) {
   paste0(sys, "\n\n", system_extra)
 }
 
+## What interpret() adds to the system prompt when `prior` is supplied. The verdict rules are
+## those of the Synthesizer in interpret_agent(), so the two entry points judge another tool's
+## answer the same way.
+.prior_instruction <- function() {
+  paste0(
+    "OTHER TOOLS' RESULTS:\n",
+    "- The input ends with results of other tools. They are claims to check, not evidence.\n",
+    "- Judge them against the enriched terms and the input genes: Confirmed if the evidence ",
+    "supports them as given, Refined if it supports a more specific or partly different answer, ",
+    "Corrected if it contradicts them, Not assessable if the evidence cannot decide.\n",
+    "- Conclusion: answer the question the context poses in a few words, from the evidence. ",
+    "Your conclusion follows the evidence, not the tools."
+  )
+}
+
 .annotation_system_prompt <- function(cluster_id) {
   base <- paste0(
     "You are an expert cell biologist analyzing cluster ", cluster_id,
@@ -471,6 +486,12 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   with log fold change and FDR, and the most significant up- and down-regulated genes are
 #'   added, so that the genes the model names are read from the data rather than from the term
 #'   names. It also supplies `gene_fold_change` when that is `NULL`.
+#' @param prior Optional results of other tools to be checked against the enrichment
+#'   evidence (a SingleR or scGPT label, a TF-activity ranking): a string, or a named list or
+#'   vector with one element per cluster. They are sent as claims to check, not as evidence,
+#'   and the result gains `conclusion` (the answer to the question the context poses),
+#'   `prior_verdict` (Confirmed, Refined, Corrected or Not assessable) and `prior_rationale`.
+#'   Left `NULL` (default), the request is the one made before this argument existed.
 #' @param max_tokens Maximum tokens for the LLM response. Default 8192.
 #'   Some models (especially reasoning models) may need much higher values
 #'   (e.g., 16384 or more) to produce complete structured output.
@@ -492,10 +513,8 @@ process_enrichment_input <- function(x, n_pathways) {
 #' @param reduce_go,go_reduction_threshold Earlier names of `reduce` and `reduce_threshold`,
 #'   still accepted; a call that passes `reduce_go` keeps its earlier default threshold of 0.7.
 #' @return An `interpretation` object (list): overview, regulatory_drivers, key_mechanisms,
-#'   crosstalk, hypothesis, narrative, refined_network and network_evidence. `interpret()`
-#'   interprets the enrichment result and nothing else; to combine it with the results of
-#'   other tools (a SingleR label, a TF-activity ranking, a complex enrichment) and reach a
-#'   conclusion, use [interpret_agent()] with `prior`.
+#'   crosstalk, hypothesis, narrative, refined_network and network_evidence; with `prior`,
+#'   also `conclusion`, `prior_verdict` and `prior_rationale`.
 #' @md
 #' @export
 #' @examples
@@ -529,6 +548,7 @@ interpret <- function(x,
                       add_ppi = FALSE,
                       gene_fold_change = NULL,
                       gene_stats = NULL,
+                      prior = NULL,
                       max_tokens = 8192,
                       temperature = 0.3,
                       reduce = TRUE,
@@ -540,7 +560,8 @@ interpret <- function(x,
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
   .interpret_run(
     x, context = context, n_pathways = n_pathways, model = model, task = "interpretation",
-    add_ppi = add_ppi, gene_fold_change = gene_fold_change, gene_stats = gene_stats, max_tokens = max_tokens,
+    add_ppi = add_ppi, gene_fold_change = gene_fold_change, gene_stats = gene_stats, prior = prior,
+    max_tokens = max_tokens,
     temperature = temperature, reduce = reduce, reduce_threshold = reduce_threshold,
     reasoning = reasoning, verbose = verbose, reduce_go = reduce_go,
     go_reduction_threshold = go_reduction_threshold
@@ -558,6 +579,7 @@ interpret <- function(x,
                            add_ppi = FALSE,
                            gene_fold_change = NULL,
                            gene_stats = NULL,
+                           prior = NULL,
                            max_tokens = 8192,
                            temperature = 0.3,
                            reduce = TRUE,
@@ -681,6 +703,16 @@ interpret <- function(x,
       pathway_context = pathway_context
     )
 
+    # Another tool's answer is appended after the evidence, labelled as a claim to check.
+    current_prior <- .resolve_prior(prior, name)
+    if (!is.null(current_prior)) current_prior <- paste(unlist(current_prior), collapse = "\n")
+    has_prior <- identical(task, "interpretation") && !is.null(current_prior) && nzchar(current_prior)
+    if (has_prior) {
+      user_prompt <- paste0(user_prompt,
+        "\n\nResults of other tools (claims to check against the evidence above, not evidence):\n",
+        current_prior)
+    }
+
     res <- .call_generate_object(
       model = model,
       task = task,
@@ -691,7 +723,8 @@ interpret <- function(x,
       temperature = temperature,
       reasoning = reasoning,
       collector = .prov,
-      stage = paste0("interpret:", name)
+      stage = paste0("interpret:", name),
+      has_prior = has_prior
     )
 
     res$cluster <- name
@@ -699,7 +732,8 @@ interpret <- function(x,
   })
 
   names(results) <- names(res_list)
-  .p <- .prov_finalize(.prov, "interpret", .ev_sha)
+  .p <- .prov_finalize(.prov, "interpret", .ev_sha,
+                       extra = if (!is.null(prior)) list(prior_supplied = TRUE) else list())
 
   if (length(results) == 1 && names(results)[1] == "Default") {
     return(.attach_evidence(.attach_provenance(results[[1]], .p), bundle,
@@ -1909,11 +1943,15 @@ print.interpret_provenance <- function(x, ...) {
                                   max_tokens = 8192,
                                   temperature = 0.3, collector = NULL,
                                   stage = "interpret", reasoning = NULL,
-                                  system_extra = NULL) {
+                                  system_extra = NULL, has_prior = FALSE) {
   if (identical(task, "cell_type")) {
     sys <- .annotation_system_prompt(cluster_id)
     schema <- .annotation_schema()
     schema_name <- "annotation_result"
+  } else if (isTRUE(has_prior)) {
+    sys <- paste0(.interpretation_system_prompt_for(system_extra), "\n\n", .prior_instruction())
+    schema <- .synthesis_schema(has_prior = TRUE)
+    schema_name <- "interpretation_prior_result"
   } else {
     sys <- .interpretation_system_prompt_for(system_extra)
     schema <- .interpretation_schema()
