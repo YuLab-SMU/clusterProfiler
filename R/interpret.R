@@ -404,6 +404,21 @@ process_enrichment_input <- function(x, n_pathways) {
   paste0(sys, "\n\n", system_extra)
 }
 
+## What interpret() adds to the system prompt when `prior` is supplied. The verdict rules are
+## those of the Synthesizer in interpret_agent(), so the two entry points judge another tool's
+## answer the same way.
+.prior_instruction <- function() {
+  paste0(
+    "OTHER TOOLS' RESULTS:\n",
+    "- The input ends with results of other tools. They are claims to check, not evidence.\n",
+    "- Judge them against the enriched terms and the input genes: Confirmed if the evidence ",
+    "supports them as given, Refined if it supports a more specific or partly different answer, ",
+    "Corrected if it contradicts them, Not assessable if the evidence cannot decide.\n",
+    "- Conclusion: answer the question the context poses in a few words, from the evidence. ",
+    "Your conclusion follows the evidence, not the tools."
+  )
+}
+
 .annotation_system_prompt <- function(cluster_id) {
   base <- paste0(
     "You are an expert cell biologist analyzing cluster ", cluster_id,
@@ -448,7 +463,7 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   (e.g., "scRNA-seq of mouse myocardial infarction at day 3").
 #' @param n_pathways Maximum number of terms (per cluster) sent to the model, taken in order
 #'   of adjusted p-value after reduction. `NULL` (default) sends every term that passes the
-#'   object's cutoffs; with `reduce = TRUE` that is one representative per theme. On five
+#'   object's cutoffs; with `reduce = TRUE`, those left after [reduce_redundancy()]. On five
 #'   public lists a cap below the number of representatives named fewer themes of the full
 #'   result; for a model with a short context, lower `reduce_threshold` (for example 0.3)
 #'   before setting a cap.
@@ -471,6 +486,12 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   with log fold change and FDR, and the most significant up- and down-regulated genes are
 #'   added, so that the genes the model names are read from the data rather than from the term
 #'   names. It also supplies `gene_fold_change` when that is `NULL`.
+#' @param prior Optional results of other tools to be checked against the enrichment
+#'   evidence (a SingleR or scGPT label, a TF-activity ranking): a string, or a named list or
+#'   vector with one element per cluster. They are sent as claims to check, not as evidence,
+#'   and the result gains `conclusion` (the answer to the question the context poses),
+#'   `prior_verdict` (Confirmed, Refined, Corrected or Not assessable) and `prior_rationale`.
+#'   Left `NULL` (default), the request is the one made before this argument existed.
 #' @param max_tokens Maximum tokens for the LLM response. Default 8192.
 #'   Some models (especially reasoning models) may need much higher values
 #'   (e.g., 16384 or more) to produce complete structured output.
@@ -480,7 +501,7 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   overlap of member genes for KEGG and other gene-set collections. Default `TRUE`; a
 #'   no-op for data frames and lists.
 #' @param reduce_threshold Similarity threshold passed to [reduce_redundancy()]. `NULL`
-#'   (default) uses its default of 0.5.
+#'   (default) uses its default of 0.7.
 #' @param reasoning Optional reasoning/thinking configuration passed through to the
 #'   provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL}
 #'   the request is byte-identical to one made before this argument existed. Whatever is
@@ -492,10 +513,8 @@ process_enrichment_input <- function(x, n_pathways) {
 #' @param reduce_go,go_reduction_threshold Earlier names of `reduce` and `reduce_threshold`,
 #'   still accepted; a call that passes `reduce_go` keeps its earlier default threshold of 0.7.
 #' @return An `interpretation` object (list): overview, regulatory_drivers, key_mechanisms,
-#'   crosstalk, hypothesis, narrative, refined_network and network_evidence. `interpret()`
-#'   interprets the enrichment result and nothing else; to combine it with the results of
-#'   other tools (a SingleR label, a TF-activity ranking, a complex enrichment) and reach a
-#'   conclusion, use [interpret_agent()] with `prior`.
+#'   crosstalk, hypothesis, narrative, refined_network and network_evidence; with `prior`,
+#'   also `conclusion`, `prior_verdict` and `prior_rationale`.
 #' @md
 #' @export
 #' @examples
@@ -512,7 +531,7 @@ process_enrichment_input <- function(x, n_pathways) {
 #'   model = "deepseek:deepseek-chat",
 #'   context = "Cancer proliferation study"
 #' )
-#' # Every significant term, one representative per theme (the default)
+#' # Every significant term left after reduce_redundancy() (the default)
 #' ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
 #' res <- interpret(ego)
 #' # A shorter prompt for a model with a short context: merge more terms per theme
@@ -529,6 +548,7 @@ interpret <- function(x,
                       add_ppi = FALSE,
                       gene_fold_change = NULL,
                       gene_stats = NULL,
+                      prior = NULL,
                       max_tokens = 8192,
                       temperature = 0.3,
                       reduce = TRUE,
@@ -540,7 +560,8 @@ interpret <- function(x,
   if (missing(x)) rlang::abort("Enrichment result 'x' is required.")
   .interpret_run(
     x, context = context, n_pathways = n_pathways, model = model, task = "interpretation",
-    add_ppi = add_ppi, gene_fold_change = gene_fold_change, gene_stats = gene_stats, max_tokens = max_tokens,
+    add_ppi = add_ppi, gene_fold_change = gene_fold_change, gene_stats = gene_stats, prior = prior,
+    max_tokens = max_tokens,
     temperature = temperature, reduce = reduce, reduce_threshold = reduce_threshold,
     reasoning = reasoning, verbose = verbose, reduce_go = reduce_go,
     go_reduction_threshold = go_reduction_threshold
@@ -558,6 +579,7 @@ interpret <- function(x,
                            add_ppi = FALSE,
                            gene_fold_change = NULL,
                            gene_stats = NULL,
+                           prior = NULL,
                            max_tokens = 8192,
                            temperature = 0.3,
                            reduce = TRUE,
@@ -681,6 +703,16 @@ interpret <- function(x,
       pathway_context = pathway_context
     )
 
+    # Another tool's answer is appended after the evidence, labelled as a claim to check.
+    current_prior <- .resolve_prior(prior, name)
+    if (!is.null(current_prior)) current_prior <- paste(unlist(current_prior), collapse = "\n")
+    has_prior <- identical(task, "interpretation") && !is.null(current_prior) && nzchar(current_prior)
+    if (has_prior) {
+      user_prompt <- paste0(user_prompt,
+        "\n\nResults of other tools (claims to check against the evidence above, not evidence):\n",
+        current_prior)
+    }
+
     res <- .call_generate_object(
       model = model,
       task = task,
@@ -691,7 +723,8 @@ interpret <- function(x,
       temperature = temperature,
       reasoning = reasoning,
       collector = .prov,
-      stage = paste0("interpret:", name)
+      stage = paste0("interpret:", name),
+      has_prior = has_prior
     )
 
     res$cluster <- name
@@ -699,7 +732,8 @@ interpret <- function(x,
   })
 
   names(results) <- names(res_list)
-  .p <- .prov_finalize(.prov, "interpret", .ev_sha)
+  .p <- .prov_finalize(.prov, "interpret", .ev_sha,
+                       extra = if (!is.null(prior)) list(prior_supplied = TRUE) else list())
 
   if (length(results) == 1 && names(results)[1] == "Default") {
     return(.attach_evidence(.attach_provenance(results[[1]], .p), bundle,
@@ -788,7 +822,7 @@ interpret <- function(x,
 #'   assessable) and `prior_rationale`.
 #' @param n_pathways Maximum number of terms (per cluster) the Cleaner starts from, taken in
 #'   order of adjusted p-value after reduction. `NULL` (default) uses every term that passes
-#'   the object's cutoffs; with `reduce = TRUE` that is one representative per theme.
+#'   the object's cutoffs; with `reduce = TRUE`, those left after [reduce_redundancy()].
 #' @param model Optional LLM model. When `NULL` (default), uses the aisdk
 #'   package-wide default model configured via `aisdk::set_model()`. You can
 #'   also supply a model ID in `provider:model` format or a `LanguageModelV1`
@@ -818,7 +852,7 @@ interpret <- function(x,
 #'   [interpret()] does: Wang similarity for GO results, Jaccard overlap of member genes
 #'   for other gene-set collections. Deterministic and makes no model call. Default `TRUE`.
 #' @param reduce_threshold Similarity threshold passed to [reduce_redundancy()]. `NULL`
-#'   (default) uses its default of 0.5.
+#'   (default) uses its default of 0.7.
 #' @param reasoning Optional reasoning/thinking configuration passed through to the
 #'   provider, e.g. `list(type = "enabled", budget_tokens = 4096)`. Left `NULL` the
 #'   request is byte-identical to one made before this argument existed. Whatever is
@@ -1210,7 +1244,7 @@ interpret_agent <- function(x,
 #' @param max_tokens Maximum tokens. Default 8192.
 #' @param temperature Sampling temperature. Default 0.3.
 #' @param n_pathways,reduce,reduce_threshold Passed to both levels, as in \code{interpret()}:
-#'   by default every significant term, one representative per theme.
+#'   by default every significant term left after [reduce_redundancy()].
 #' @return An `interpretation_list` object with a cell-type label (`cell_type`, `confidence`,
 #'   `reasoning`, `markers`) per sub-cluster.
 #' @export
@@ -1909,11 +1943,15 @@ print.interpret_provenance <- function(x, ...) {
                                   max_tokens = 8192,
                                   temperature = 0.3, collector = NULL,
                                   stage = "interpret", reasoning = NULL,
-                                  system_extra = NULL) {
+                                  system_extra = NULL, has_prior = FALSE) {
   if (identical(task, "cell_type")) {
     sys <- .annotation_system_prompt(cluster_id)
     schema <- .annotation_schema()
     schema_name <- "annotation_result"
+  } else if (isTRUE(has_prior)) {
+    sys <- paste0(.interpretation_system_prompt_for(system_extra), "\n\n", .prior_instruction())
+    schema <- .synthesis_schema(has_prior = TRUE)
+    schema_name <- "interpretation_prior_result"
   } else {
     sys <- .interpretation_system_prompt_for(system_extra)
     schema <- .interpretation_schema()
@@ -2252,21 +2290,20 @@ print.interpretation_list <- function(x, ...) {
 
 #' Reduce redundant terms in an enrichment result before interpretation
 #'
-#' Keeps one representative for each group of near-duplicate significant terms, so that
-#' every significant theme of a long result can be shown to the model without repeating
-#' its near-synonyms. GO results are grouped by Wang semantic similarity over the GO DAG
-#' (GOSemSim); every other gene-set collection (KEGG, Reactome, WikiPathways, MSigDB,
-#' custom `TERM2GENE`) by the Jaccard overlap of the member genes the result reports
-#' (`geneID`, or `core_enrichment` for GSEA). Groups are formed greedily in order of
-#' adjusted p-value: the most significant remaining term is kept and every remaining term
-#' more similar to it than `threshold` is dropped. Only terms that pass the object's
+#' Removes near-duplicate significant terms with [simplify()], so that a long result can be
+#' shown to the model without repeating its near-synonyms. GO results are compared by Wang
+#' semantic similarity over the GO DAG (GOSemSim); every other gene-set collection (KEGG,
+#' Reactome, WikiPathways, MSigDB, custom `TERM2GENE`) by the Jaccard overlap of the member
+#' genes the result reports (`geneID`, or `core_enrichment` for GSEA). For each term, of the
+#' terms more similar to it than `threshold`, the one with the smallest adjusted p-value is
+#' kept and the others are removed. A lower `threshold` removes more. Only terms that pass the object's
 #' cutoffs are considered; a `compareClusterResult` is reduced within each cluster, and a
 #' GO result spanning several ontologies within each ontology. Deterministic, and makes no
 #' model call. [interpret()] and [interpret_agent()] call it by default (`reduce = TRUE`).
 #'
 #' @param x An `enrichResult`, `gseaResult` or `compareClusterResult`.
-#' @param threshold Similarity above which a term joins the group of a more significant
-#'   term. `NULL` (default) uses 0.5 for both measures.
+#' @param threshold Similarity above which the less significant of two terms is removed.
+#'   `NULL` (default) uses 0.7, the default of [simplify()], for both measures.
 #' @param method `"auto"` (default) uses `"Wang"` when every term is a GO term and
 #'   `"jaccard"` otherwise; either can be forced. Wang on non-GO terms falls back to Jaccard.
 #' @param semData Optional `GOSemSimDATA` for the Wang measure; built with
@@ -2279,9 +2316,9 @@ print.interpretation_list <- function(x, ...) {
 #' @examples
 #' \dontrun{
 #' ego <- enrichGO(gene = genes, OrgDb = org.Hs.eg.db, ont = "BP")
-#' reduce_redundancy(ego)                 # Wang, 0.5
+#' reduce_redundancy(ego)                 # Wang, 0.7
 #' kk <- enrichKEGG(gene = genes, organism = "hsa")
-#' reduce_redundancy(kk)                  # Jaccard on member genes, 0.5
+#' reduce_redundancy(kk)                  # Jaccard on member genes, 0.7
 #' }
 #' @seealso [simplify()], which does the actual reduction.
 reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "jaccard"), semData = NULL) {
@@ -2294,7 +2331,7 @@ reduce_redundancy <- function(x, threshold = NULL, method = c("auto", "Wang", "j
   # rows without an ID (all-NA padding some result tables carry) are not terms
   df <- df[!is.na(df$ID), , drop = FALSE]
   if (nrow(df) < 2) return(x)
-  threshold <- threshold %||% 0.5
+  threshold <- threshold %||% 0.7
   gcol <- intersect(c("geneID", "core_enrichment"), names(df))[1]
   is_go <- all(grepl("^GO:[0-9]{7}$", df$ID))
   if (method == "auto") method <- if (is_go) "Wang" else "jaccard"

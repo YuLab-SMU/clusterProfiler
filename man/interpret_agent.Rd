@@ -40,7 +40,7 @@ assessable) and \code{prior_rationale}.}
 
 \item{n_pathways}{Maximum number of terms (per cluster) the Cleaner starts from, taken in
 order of adjusted p-value after reduction. \code{NULL} (default) uses every term that passes
-the object's cutoffs; with \code{reduce = TRUE} that is one representative per theme.}
+the object's cutoffs; with \code{reduce = TRUE}, those left after \code{\link[=reduce_redundancy]{reduce_redundancy()}}.}
 
 \item{model}{Optional LLM model. When \code{NULL} (default), uses the aisdk
 package-wide default model configured via \code{aisdk::set_model()}. You can
@@ -78,7 +78,7 @@ Synthesizer returned nothing it has been observed to return \code{pass} with a
 for other gene-set collections. Deterministic and makes no model call. Default \code{TRUE}.}
 
 \item{reduce_threshold}{Similarity threshold passed to \code{\link[=reduce_redundancy]{reduce_redundancy()}}. \code{NULL}
-(default) uses its default of 0.5.}
+(default) uses its default of 0.7.}
 
 \item{reasoning}{Optional reasoning/thinking configuration passed through to the
 provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL} the
