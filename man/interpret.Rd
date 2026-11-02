@@ -12,6 +12,7 @@ interpret(
   add_ppi = FALSE,
   gene_fold_change = NULL,
   gene_stats = NULL,
+  prior = NULL,
   max_tokens = 8192,
   temperature = 0.3,
   reduce = TRUE,
@@ -59,6 +60,13 @@ with log fold change and FDR, and the most significant up- and down-regulated ge
 added, so that the genes the model names are read from the data rather than from the term
 names. It also supplies \code{gene_fold_change} when that is \code{NULL}.}
 
+\item{prior}{Optional results of other tools to be checked against the enrichment
+evidence (a SingleR or scGPT label, a TF-activity ranking): a string, or a named list or
+vector with one element per cluster. They are sent as claims to check, not as evidence,
+and the result gains \code{conclusion} (the answer to the question the context poses),
+\code{prior_verdict} (Confirmed, Refined, Corrected or Not assessable) and \code{prior_rationale}.
+Left \code{NULL} (default), the request is the one made before this argument existed.}
+
 \item{max_tokens}{Maximum tokens for the LLM response. Default 8192.
 Some models (especially reasoning models) may need much higher values
 (e.g., 16384 or more) to produce complete structured output.}
@@ -88,10 +96,8 @@ still accepted; a call that passes \code{reduce_go} keeps its earlier default th
 }
 \value{
 An \code{interpretation} object (list): overview, regulatory_drivers, key_mechanisms,
-crosstalk, hypothesis, narrative, refined_network and network_evidence. \code{interpret()}
-interprets the enrichment result and nothing else; to combine it with the results of
-other tools (a SingleR label, a TF-activity ranking, a complex enrichment) and reach a
-conclusion, use \code{\link[=interpret_agent]{interpret_agent()}} with \code{prior}.
+crosstalk, hypothesis, narrative, refined_network and network_evidence; with \code{prior},
+also \code{conclusion}, \code{prior_verdict} and \code{prior_rationale}.
 }
 \description{
 Functions for interpreting functional enrichment analysis results using

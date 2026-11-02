@@ -33,7 +33,7 @@ object. Bare model names are supported with a warning.}
 \item{temperature}{Sampling temperature. Default 0.3.}
 
 \item{n_pathways, reduce, reduce_threshold}{Passed to both levels, as in \code{interpret()}:
-by default every significant term left after \code{\link[=reduce_redundancy]{reduce_redundancy()}}.}
+by default every significant term left after [reduce_redundancy()].}
 }
 \value{
 An `interpretation_list` object with a cell-type label (`cell_type`, `confidence`,
