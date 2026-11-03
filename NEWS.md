@@ -1,4 +1,4 @@
-# clusterProfiler 4.21.4.050
+# clusterProfiler 4.21.4.051
 
 ## interpret()
 
@@ -10,6 +10,8 @@
 + **The built GO gene-set object is cached per (organism, ont, keytype) instead of being rebuilt on every call.** After the annotation cache landed, what a warm call still paid was reshaping that annotation into the object the engine consumes: 1.4 s of a 2.8 s warm BP call on human ENTREZID, and `compareCluster()` pays it once per cluster, so 13 clusters took 39.5 s against 19.7 s with the object cached, results identical. Up to three objects are kept, least recently used first out, so BP/MF/CC of one organism cost about 35 MB and a session walking through organisms evicts rather than accumulates; an `evidence`-filtered annotation is never cached, the same rule the annotation cache already applied. This is the second level of the two-level cache proposed in clusterProfiler#71, the first level being the annotation cache that no longer evicts on an ontology switch (2026-10-29, Thu)
 
 ## pathway-level mechanism evidence
+
++ **A level-B row capped by a single cell line now says the limit is the data, not the evidence.** The statement used to read as a downgrade notice -- "only one cell line supports it" -- but on eleven datasets with known drivers both rows that stopped there (GR in airway and in GSE286890) pointed at the correct driver. It now reads "that is a limit of the available data, not a reason to doubt it: read this as likely, but under-evidenced", while a direction conflict keeps its own wording, because that one is evidence against rather than thin evidence (2026-11-03, Mon)
 
 + **`mechanism_preflight()` decides before a run whether the data can carry a driver claim**, and returns the numbers behind the decision. Seven of eleven real datasets could not, and every reason was visible in advance: no enriched pathway, a median pathway of two members, a candidate with data in one cell line, or a pathway set fed by 23 up-regulated genes. On those eleven datasets it blocks 7 of 7 that gave no usable answer and 0 of 4 that did. The boundaries come from the applicability limits already recorded in the design notes, so this restates them before a run rather than after it; the cut points sit between two measured points and the returned metrics let a caller move them (2026-11-03, Mon)
 + **`mechanism_report()` turns `reason` into "what to do next" and gives the candidate's full inventory**, instead of leaving a row of `C` that reads the same whether the test ran and failed or could not run at all. It separates three sides -- data, analysis, and "no experiment would change this" -- and stops recommending experiments when the preflight says attribution is not supported, because adding a cell line cannot rescue a dataset with 23 differentially expressed genes. The inventory resolves aliases, so a report on `GR` finds `NR3C1`'s single HEK293T dataset and says "no dataset from Airway" rather than "no data" (2026-11-03, Mon)

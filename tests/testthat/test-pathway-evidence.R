@@ -399,3 +399,66 @@ test_that("the level-A statement admits what it does not establish", {
     expect_match(out$statement, "Consistent with drive")
     expect_match(out$statement, "not evidence that")
 })
+
+test_that("a single-cell-line row says the cap is the data, not the evidence", {
+    ## B 级里有两类：方向冲突（真的相反）与单细胞系（只是不够）。
+    ## 后者实测在 11 个已知真值的数据集上指向全对，措辞不能把它写成次品。
+    ns <- asNamespace("gpsadb")
+    orig_s <- get("gpsadb_search_datasets", envir = ns)
+    orig_t <- get("gpsadb_test_gene_set", envir = ns)
+    on.exit({
+        assignInNamespace("gpsadb_search_datasets", orig_s, ns = "gpsadb")
+        assignInNamespace("gpsadb_test_gene_set", orig_t, ns = "gpsadb")
+    }, add = TRUE)
+    ## 只给一个细胞系——这正是"够不到 A"的那种数据。
+    assignInNamespace("gpsadb_search_datasets", function(perturbed_gene, ...) {
+        list(data.frame(perturbed_gene = perturbed_gene, method = "knockdown",
+                        cell_line = "HeLa", n_samples = 4L, in_reference = TRUE,
+                        dataset_id = "D001", stringsAsFactors = FALSE))
+    }, ns = "gpsadb")
+    assignInNamespace("gpsadb_test_gene_set", function(id, genes) {
+        list(data.frame(dataset_id = id, n_genes = length(genes),
+                        n_in_dataset = length(genes), padj = 1e-6, es = -0.9,
+                        stringsAsFactors = FALSE))
+    }, ns = "gpsadb")
+
+    r <- pathway_fixture_result()[1, ]
+    r$geneID <- "A/B/C/D/E"
+    r$pathway_direction <- "up"
+    out <- suppressWarnings(pathway_evidence(r, drivers = "HIF1A",
+                                             signed = c(A = 2, B = 1.5, C = 3, D = 2, E = 1)))
+    expect_equal(out$level[1], "B")
+    expect_equal(out$reason[1], "single-cell-line")
+    expect_match(out$statement[1], "limit of the available data")
+    expect_match(out$statement[1], "likely, but under-evidenced")
+})
+
+test_that("a direction conflict is not described as thin data", {
+    ## 两类 B 的措辞必须能分开：方向冲突是证据反对，单细胞系是数据不够。
+    ns <- asNamespace("gpsadb")
+    orig_s <- get("gpsadb_search_datasets", envir = ns)
+    orig_t <- get("gpsadb_test_gene_set", envir = ns)
+    on.exit({
+        assignInNamespace("gpsadb_search_datasets", orig_s, ns = "gpsadb")
+        assignInNamespace("gpsadb_test_gene_set", orig_t, ns = "gpsadb")
+    }, add = TRUE)
+    assignInNamespace("gpsadb_search_datasets", function(perturbed_gene, ...) {
+        list(data.frame(perturbed_gene = perturbed_gene, method = "knockdown",
+                        cell_line = "HeLa", n_samples = 4L, in_reference = TRUE,
+                        dataset_id = "D001", stringsAsFactors = FALSE))
+    }, ns = "gpsadb")
+    ## 通路 up、es 也 > 0 —— 敲低把它推得更高，读作压制而不是驱动。
+    assignInNamespace("gpsadb_test_gene_set", function(id, genes) {
+        list(data.frame(dataset_id = id, n_genes = length(genes),
+                        n_in_dataset = length(genes), padj = 1e-6, es = 0.9,
+                        stringsAsFactors = FALSE))
+    }, ns = "gpsadb")
+    r <- pathway_fixture_result()[1, ]
+    r$geneID <- "A/B/C/D/E"
+    r$pathway_direction <- "up"
+    out <- suppressWarnings(pathway_evidence(r, drivers = "HIF1A",
+                                             signed = c(A = 2, B = 1.5, C = 3, D = 2, E = 1)))
+    expect_equal(out$verdict[1], "direction-conflict")
+    expect_match(out$statement[1], "repression")
+    expect_false(grepl("limit of the available data", out$statement[1]))
+})

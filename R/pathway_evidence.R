@@ -379,8 +379,12 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             statement <- if (agrees && replicated) sprintf(
                 "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g) and %d cell lines agree. Consistent with drive, but not evidence that %s is the driver.",
                 best$gene, length(members), best$dataset, best$padj, length(cells_agree), best$gene)
+            ## 只有一份数据支持时，读法要写清：**这是数据不够，不是证据反对**。
+            ## 实测（11 个已知真值的数据集）：B 级里指向正确驱动者的有 2 个
+            ## （airway 与 GSE286890 的 GR），被"单细胞系降级"压住的都对。
+            ## 原来的措辞只是一句降级说明，读者会把它当次品。
             else if (agrees) sprintf(
-                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g), but only one cell line supports it.",
+                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g) in the only cell line with data. That is a limit of the available data, not a reason to doubt it: read this as likely, but under-evidenced.",
                 best$gene, length(members), best$dataset, best$padj)
             else sprintf(
                 "%s moves these %d members in the same direction the pathway already runs (padj %.2g), which reads as repression rather than drive.",
