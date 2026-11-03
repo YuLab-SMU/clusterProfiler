@@ -1,5 +1,10 @@
 # clusterProfiler 4.21.4.050
 
+## interpret()
+
++ `interpret()` takes `prior`: another tool's answer (a SingleR or scGPT label, a TF-activity ranking), sent after the evidence as a claim to check, not as evidence. The record then adds `conclusion`, `prior_verdict` (Confirmed, Refined, Corrected or Not assessable) and `prior_rationale`, judged by the same rules as the Synthesizer of `interpret_agent()`. Without `prior` the request is unchanged. On PBMC 10k with SingleR labels (`gpt-6-luna`, two runs), 12 of 14 verdicts on misassigned subtypes were Corrected and 1 of 14 on correct ones (2026-11-02, Mon)
++ `reduce_redundancy()` now defaults to a threshold of 0.7, the default of `simplify()`, which it calls; its documentation described the earlier greedy selection and now says what `simplify()` does. Cisplatin GO ORA keeps 81 of 141 terms (0.5: 40), geneList GO ORA 76 of 195; KEGG lists are kept whole (2026-11-02, Mon)
+
 ## GO annotation cache
 
 + **The built GO gene-set object is cached per (organism, ont, keytype) instead of being rebuilt on every call.** After the annotation cache landed, what a warm call still paid was reshaping that annotation into the object the engine consumes: 1.4 s of a 2.8 s warm BP call on human ENTREZID, and `compareCluster()` pays it once per cluster, so 13 clusters took 39.5 s against 19.7 s with the object cached, results identical. Up to three objects are kept, least recently used first out, so BP/MF/CC of one organism cost about 35 MB and a session walking through organisms evicts rather than accumulates; an `evidence`-filtered annotation is never cached, the same rule the annotation cache already applied. This is the second level of the two-level cache proposed in clusterProfiler#71, the first level being the annotation cache that no longer evicts on an ontology switch (2026-10-29, Thu)

@@ -31,10 +31,11 @@ mock_agent_calls <- function(env) {
   )
 }
 
-test_that("interpret() no longer takes task or prior, and sends every reduced term by default", {
+test_that("interpret() takes prior but not task, and sends every reduced term by default", {
   f <- formals(clusterProfiler::interpret)
   expect_false("task" %in% names(f))
-  expect_false("prior" %in% names(f))
+  expect_true("prior" %in% names(f))
+  expect_null(f$prior)
   expect_null(f$n_pathways)
   expect_false("task" %in% names(formals(clusterProfiler::interpret_hierarchical)))
   expect_null(formals(clusterProfiler::interpret_hierarchical)$n_pathways)
@@ -77,4 +78,35 @@ test_that("a named prior is matched to its cluster", {
   expect_equal(rp(c(C1 = "B cell", C2 = "NK cell"), "C2"), "NK cell")
   expect_null(rp(c(C1 = "B cell"), "C3"))
   expect_equal(rp("T cell", "anything"), "T cell")
+})
+
+test_that("interpret() sends prior after the evidence as a claim to check, and returns a verdict on it", {
+  env <- new.env(); env$calls <- list()
+  local_mocked_bindings(
+    .gen_object_stamped = function(reasoning, collector, stage, model, prompt, schema, schema_name,
+                                   system, temperature, max_tokens) {
+      env$calls[[length(env$calls) + 1]] <- list(prompt = prompt, schema = schema, system = system)
+      list(object = list(overview = "CD4 T cells", conclusion = "naive CD4 T cell",
+                         prior_verdict = "Refined", prior_rationale = "CCR7 and IL7R"),
+           finish_reason = "stop", raw_text = "{}")
+    },
+    .package = "clusterProfiler"
+  )
+  res <- clusterProfiler::interpret(
+    agent_input(), context = "PBMC; which cell type is this cluster?",
+    prior = "SingleR (HPCA): T_cell:CD4+_central_memory", model = "openai:gpt-4o-mini"
+  )
+  call <- env$calls[[1]]
+  expect_match(call$prompt, "Results of other tools (claims to check", fixed = TRUE)
+  expect_match(call$prompt, "T_cell:CD4+_central_memory", fixed = TRUE)
+  expect_match(call$system, "OTHER TOOLS' RESULTS", fixed = TRUE)
+  expect_true(all(c("conclusion", "prior_verdict", "prior_rationale") %in% names(call$schema$properties)))
+  expect_equal(res$prior_verdict, "Refined")
+
+  # without prior the request is the one made before the argument existed
+  env$calls <- list()
+  clusterProfiler::interpret(agent_input(), context = "PBMC; which cell type is this cluster?", model = "openai:gpt-4o-mini")
+  expect_false(grepl("Results of other tools", env$calls[[1]]$prompt, fixed = TRUE))
+  expect_false(grepl("OTHER TOOLS' RESULTS", env$calls[[1]]$system, fixed = TRUE))
+  expect_false("prior_verdict" %in% names(env$calls[[1]]$schema$properties))
 })

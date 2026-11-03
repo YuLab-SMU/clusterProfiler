@@ -12,6 +12,7 @@ interpret(
   add_ppi = FALSE,
   gene_fold_change = NULL,
   gene_stats = NULL,
+  prior = NULL,
   max_tokens = 8192,
   temperature = 0.3,
   reduce = TRUE,
@@ -31,7 +32,7 @@ interpret(
 
 \item{n_pathways}{Maximum number of terms (per cluster) sent to the model, taken in order
 of adjusted p-value after reduction. \code{NULL} (default) sends every term that passes the
-object's cutoffs; with \code{reduce = TRUE} that is one representative per theme. On five
+object's cutoffs; with \code{reduce = TRUE}, those left after \code{\link[=reduce_redundancy]{reduce_redundancy()}}. On five
 public lists a cap below the number of representatives named fewer themes of the full
 result; for a model with a short context, lower \code{reduce_threshold} (for example 0.3)
 before setting a cap.}
@@ -59,6 +60,13 @@ with log fold change and FDR, and the most significant up- and down-regulated ge
 added, so that the genes the model names are read from the data rather than from the term
 names. It also supplies \code{gene_fold_change} when that is \code{NULL}.}
 
+\item{prior}{Optional results of other tools to be checked against the enrichment
+evidence (a SingleR or scGPT label, a TF-activity ranking): a string, or a named list or
+vector with one element per cluster. They are sent as claims to check, not as evidence,
+and the result gains \code{conclusion} (the answer to the question the context poses),
+\code{prior_verdict} (Confirmed, Refined, Corrected or Not assessable) and \code{prior_rationale}.
+Left \code{NULL} (default), the request is the one made before this argument existed.}
+
 \item{max_tokens}{Maximum tokens for the LLM response. Default 8192.
 Some models (especially reasoning models) may need much higher values
 (e.g., 16384 or more) to produce complete structured output.}
@@ -71,7 +79,7 @@ overlap of member genes for KEGG and other gene-set collections. Default \code{T
 no-op for data frames and lists.}
 
 \item{reduce_threshold}{Similarity threshold passed to \code{\link[=reduce_redundancy]{reduce_redundancy()}}. \code{NULL}
-(default) uses its default of 0.5.}
+(default) uses its default of 0.7.}
 
 \item{reasoning}{Optional reasoning/thinking configuration passed through to the
 provider, e.g. \code{list(type = "enabled", budget_tokens = 4096)}. Left \code{NULL}
@@ -88,10 +96,8 @@ still accepted; a call that passes \code{reduce_go} keeps its earlier default th
 }
 \value{
 An \code{interpretation} object (list): overview, regulatory_drivers, key_mechanisms,
-crosstalk, hypothesis, narrative, refined_network and network_evidence. \code{interpret()}
-interprets the enrichment result and nothing else; to combine it with the results of
-other tools (a SingleR label, a TF-activity ranking, a complex enrichment) and reach a
-conclusion, use \code{\link[=interpret_agent]{interpret_agent()}} with \code{prior}.
+crosstalk, hypothesis, narrative, refined_network and network_evidence; with \code{prior},
+also \code{conclusion}, \code{prior_verdict} and \code{prior_rationale}.
 }
 \description{
 Functions for interpreting functional enrichment analysis results using
@@ -123,7 +129,7 @@ res <- interpret(df,
   model = "deepseek:deepseek-chat",
   context = "Cancer proliferation study"
 )
-# Every significant term, one representative per theme (the default)
+# Every significant term left after reduce_redundancy() (the default)
 ego <- enrichGO(gene = genes, OrgDb = org.Mm.eg.db, ont = "BP")
 res <- interpret(ego)
 # A shorter prompt for a model with a short context: merge more terms per theme
