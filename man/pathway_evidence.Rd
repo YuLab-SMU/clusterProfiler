@@ -12,7 +12,8 @@ pathway_evidence(
   alpha = 0.05,
   min_support = 0.5,
   max_pathways = 20L,
-  max_datasets_per_driver = 6L
+  max_datasets_per_driver = 6L,
+  reproduction = NULL
 )
 
 \method{print}{pathway_evidence}(x, n = 10L, ...)
@@ -45,6 +46,12 @@ Testing all of them is `n_drivers * n_datasets` calls and grows without
 bound; six is enough to see two cell lines agree, which is all level A
 needs. Datasets from distinct cell lines are preferred over extra replicates
 of one line, because replication is what the grade turns on.}
+
+\item{reproduction}{Optional data frame from [mechanism_reproduction()]. When
+given, a level-B row whose only support is a single cell line is worded
+according to how many independent perturbation datasets agree: a pair that
+reproduces says so, a pair that does not reproduce is labelled unverified,
+and a pair with no second dataset stays "likely, but under-evidenced".}
 
 \item{n}{For `print()`, how many rows to show.}
 

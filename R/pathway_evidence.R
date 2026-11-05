@@ -110,6 +110,36 @@
     utils::head(d, limit)
 }
 
+## 单细胞系那一路的措辞。抽成函数是为了**能单独测**：三个分支（复现 / 不复现 /
+## 无第二份数据）必须彼此可区分，内联在 `pathway_evidence()` 里就只能靠跑真数据验证。
+##
+## 分级来自 `mechanism_reproduction()`（spec §4.3）：
+##   reproduces      → 说清复现了几份独立数据
+##   consistent      → 保持原措辞
+##   not-reproduced  → 明确写成未验证
+##   not-computable  → 与 not-reproduced 同口径，不能默认算通过
+.pe_single_line_statement <- function(gene, n_members, dataset, padj, row) {
+    base <- sprintf(
+        "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g) in the only cell line with data.",
+        gene, n_members, dataset, padj)
+    grade <- if (is.null(row) || !nrow(row)) NA_character_ else as.character(row$grade[1])
+    if (!is.na(grade) && grade == "reproduces") {
+        agree <- as.integer(round(row$concordance[1] * row$k[1]))
+        sprintf("%s It also reproduces across %d independent datasets (%d/%d agree).",
+                base, as.integer(row$n_biosamples[1]), agree, as.integer(row$k[1]))
+    } else if (!is.na(grade) && grade == "not-reproduced") {
+        agree <- as.integer(round(row$concordance[1] * row$k[1]))
+        sprintf("%s The available perturbation data do not reproduce that shift (%d/%d agree), so treat this as unverified.",
+                base, agree, as.integer(row$k[1]))
+    } else if (!is.na(grade) && grade == "not-computable") {
+        sprintf("%s No independent reproduction is available, so read this as likely, but under-evidenced.",
+                base)
+    } else {
+        sprintf("%s That is a limit of the available data, not a reason to doubt it: read this as likely, but under-evidenced.",
+                base)
+    }
+}
+
 #' Test enriched pathways against measured perturbation data
 #'
 #' @param x An `enrichResult` or `gseaResult` from [enrichGO()], [enrichKEGG()]
@@ -128,6 +158,11 @@
 #'   a minute, 60 took 210 calls and about three. Results are memoised by
 #'   (dataset, member set), which helps when pathways share members and not
 #'   otherwise, so pick this deliberately rather than leaving it high.
+#' @param reproduction Optional data frame from [mechanism_reproduction()]. When
+#'   given, a level-B row whose only support is a single cell line is worded
+#'   according to how many independent perturbation datasets agree: a pair that
+#'   reproduces says so, a pair that does not reproduce is labelled unverified,
+#'   and a pair with no second dataset stays "likely, but under-evidenced".
 #' @param max_datasets_per_driver Cap on how many datasets are tested per driver.
 #'   Testing all of them is `n_drivers * n_datasets` calls and grows without
 #'   bound; six is enough to see two cell lines agree, which is all level A
@@ -153,7 +188,8 @@
 #' @export
 pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                              min_support = 0.5, max_pathways = 20L,
-                             max_datasets_per_driver = 6L) {
+                             max_datasets_per_driver = 6L,
+                             reproduction = NULL) {
     d <- if (is.data.frame(x)) x else as.data.frame(x)
     if (!nrow(d)) {
         ## 空输入也要出声。没有这句时，用户拿到一个空 data.frame，无法分辨
@@ -383,9 +419,11 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             ## 实测（11 个已知真值的数据集）：B 级里指向正确驱动者的有 2 个
             ## （airway 与 GSE286890 的 GR），被"单细胞系降级"压住的都对。
             ## 原来的措辞只是一句降级说明，读者会把它当次品。
-            else if (agrees) sprintf(
-                "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g) in the only cell line with data. That is a limit of the available data, not a reason to doubt it: read this as likely, but under-evidenced.",
-                best$gene, length(members), best$dataset, best$padj)
+            else if (agrees) .pe_single_line_statement(
+                best$gene, length(members), best$dataset, best$padj,
+                if (is.null(reproduction)) NULL else
+                    reproduction[reproduction$driver == best$gene &
+                                 reproduction$pathway == desc, , drop = FALSE])
             else sprintf(
                 "%s moves these %d members in the same direction the pathway already runs (padj %.2g), which reads as repression rather than drive.",
                 best$gene, length(members), best$padj)

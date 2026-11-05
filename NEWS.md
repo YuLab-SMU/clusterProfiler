@@ -1,3 +1,10 @@
+# clusterProfiler 4.21.4.052
+
+## pathway-level mechanism evidence
+
++ `mechanism_reproduction()` reports, for each driver and pathway, how many of that driver's independent perturbation datasets move the pathway the same way, and `pathway_evidence()` takes that table as `reproduction` so a level-B row supported by a single cell line is worded by how well it reproduces: a pair with three or more datasets from two or more biosamples says so, a pair that disagrees is labelled unverified, and a pair with no second dataset keeps the earlier "likely, but under-evidenced". Concordance is measured against the majority sign, not against the pathway direction: a knocked-down activator should move its programme down, so judging by the pathway direction scored HIF1A at 0.00 on the hypoxia programme where the majority-sign reading gives 1.00 (2026-11-05, Wed)
++ On the eleven benchmark datasets the new table changes nothing, and that is the finding: the four drivers with two or more usable datasets are HIF1A, AR, STAT3 and TP53, while GR (the driver behind both level-B rows) has one dataset in KnockTF and none surviving a -1 log2 fold change floor, so it is `not-computable` and keeps the neutral wording. A pathway also needs three measured members to count, which leaves the etoposide dataset's one- and two-member terms out (2026-11-05, Wed)
+
 # clusterProfiler 4.21.4.051
 
 ## interpret()
