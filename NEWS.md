@@ -1,3 +1,10 @@
+# clusterProfiler 4.21.4.053
+
+## pathway-level mechanism evidence
+
++ `mechanism_discover()` ranks candidate transcription factors for a differential expression profile, so `pathway_evidence()` gets a shortlist instead of being asked to search 265 candidates at 1-2 s per perturbation query. It correlates each factor's signed target weights against the whole measured profile (the `ulm` formulation) and returns the score, the direction and how many targets were measured. On 17 condition experiments the true driver ranked first in 35%, the top five in 65% and the top ten in 76% (2026-11-07, Sat)
++ The shortlist is not a verdict, and the gap is measured: verifying the top five candidates with `pathway_evidence()` let 70% of true drivers through but also 40% of the decoys, a positive predictive value near 19%. The decoys that pass are the driver's neighbours - ATF4 and ATF6 beside ER stress, EPAS1 beside HIF1A, IRF1 downstream of STAT1 - because a perturbation test rewards exactly the correlation that discovery selected for. Requiring level A instead of A or B does not help (15%), and dropping candidates whose own gene is differentially expressed does not help either (14%): 40% of the true drivers move their own gene too (2026-11-07, Sat)
+
 # clusterProfiler 4.21.4.052
 
 ## pathway-level mechanism evidence
