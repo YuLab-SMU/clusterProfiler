@@ -26,10 +26,11 @@
 #'
 #' The score is the t-value of that correlation. **A positive score means the
 #' factor looks active in this experiment, a negative one means repressed.**
-#' The ranking is not a verdict: on 17 benchmark condition experiments the true
-#' driver was ranked first 35% of the time, in the top five 65%, and in the top
-#' ten 76% (median rank 2). These are for this implementation on that corpus;
-#' they are not a stable accuracy estimate -- there was no independent test set.
+#' The ranking is not a verdict. On 17 benchmark condition experiments, 14 of
+#' the drivers are present in a typical network; among those the true driver was
+#' ranked first 43% of the time, in the top five 71%, and in the top ten 93%
+#' (median rank 2). The other three drivers are absent from CollecTRI, which is
+#' the honest limit of this stage: a network without the factor cannot rank it.
 #' Treat the output as a shortlist to verify, never as an answer.
 #'
 #' @param signed Named numeric vector of log2 fold changes, names are gene

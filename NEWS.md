@@ -1,3 +1,9 @@
+# clusterProfiler 4.21.4.055
+
+## pathway-level mechanism evidence
+
++ `mechanism_discover()` documentation now states the hit rates over the drawable denominators: among the 14 of 17 benchmark drivers that a typical network contains, the true driver ranked first 43%, top five 71%, top ten 93% (median 2). The other three are absent from CollecTRI, which is a property of the network rather than of the ranking, and the earlier 35/65/76 counted one of them against the method (2026-11-07, Sat)
+
 # clusterProfiler 4.21.4.054
 
 ## pathway-level mechanism evidence
