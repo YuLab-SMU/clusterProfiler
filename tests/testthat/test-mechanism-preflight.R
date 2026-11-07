@@ -107,3 +107,14 @@ test_that("one under-covered candidate does not block the whole run", {
     expect_equal(pf$metrics$min_cell_lines, 1L)
     expect_equal(pf$metrics$n_cell_lines, 2L)
 })
+
+test_that("min_cell_lines is not inherited from the global environment", {
+    ## 旧实现用 exists("n_cell_lines_min") 做控制流，全局里恰好有个同名变量
+    ## 就会被写进输出。改成显式 NA 初始化后，没算过就是没有这一列。
+    assign("n_cell_lines_min", 999L, envir = globalenv())
+    on.exit(rm("n_cell_lines_min", envir = globalenv()), add = TRUE)
+    ego <- .make_ego()
+    signed <- stats::setNames(rep(2, 100), sprintf("G%03d", seq_len(100)))
+    pf <- mechanism_preflight(ego, signed = signed)
+    expect_false("min_cell_lines" %in% names(pf$metrics))
+})

@@ -32,7 +32,10 @@
         list("not-significant", "concept", "nothing to add: the test ran and the driver did not move this pathway", FALSE),
         list("coherent-refuted", "concept", "nothing to add: the tests ran and none moved this pathway", FALSE),
         list("no-perturbation-test", "analysis", "no test could run without a driver and its data", FALSE),
-        list("direction-conflict", "data", "the contexts disagree in sign; a third, tissue-matched context would separate biology from cell-line artefact", TRUE),
+        ## direction-conflict 是**证据反对**（敲低后通路同向移动，读作压制），
+        ## 不是"数据不够"。归 data 侧且 unlocks=TRUE 会承诺"再补一份数据就能救"，
+        ## 与判决书允许"没有实验能救"的设计原则相悖。
+        list("direction-conflict", "concept", "nothing to add here: the perturbation moved this pathway with the condition, so the candidate reads as repression rather than drive", FALSE),
         list("supported", "concept", "validate the driver in an independent perturbation; an A row is consistency worth following up, not proof", FALSE))
     data.frame(
         reason = vapply(rows, function(z) z[[1]], character(1)),
@@ -48,8 +51,11 @@
     if (is.na(key) || !nzchar(key)) {
         ## 等级 A 与 `specific` 是同一种"已建立"，下一步也应当是同一句：
         ## 在独立扰动里验证。只给其中一个写动作，读者会以为另一个不需要验证。
+        ## `verdict == "too-small"` 在 pathway_evidence 里目前不可达，但键必须是
+        ## 补救表里有的那一个：原来写 `"too-small-decomp"`（全仓只此一处），
+        ## match 落空后静默返回 action = NA，那一行就没有下一步了。
         key <- if (identical(verdict, "perturbation-supported")) "supported"
-            else if (identical(verdict, "too-small")) "too-small-decomp"
+            else if (identical(verdict, "too-small")) "too-small"
             else NA_character_
     }
     hit <- tab[match(key, tab$reason), , drop = FALSE]

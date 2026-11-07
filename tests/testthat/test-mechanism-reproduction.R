@@ -93,3 +93,49 @@ test_that("the level-B wording has three distinguishable branches", {
     expect_false(identical(st_rep, st_unrep))
     expect_false(identical(st_unrep, st_nocov))
 })
+
+test_that("the majority sign is the mode of signs, not the sign of the sum", {
+    ## 一份效应量特别大的数据不能翻掉两份较小但同向的。
+    ## 旧实现用 sign(sum(shift))：sum(c(-0.1,-0.1,+5)) > 0，于是把
+    ## "2/3 同向"判成 not-reproduced。
+    prof <- matrix(0, nrow = 3, ncol = 3,
+                   dimnames = list(c("g1", "g2", "g3"), c("d1", "d2", "d3")))
+    prof[1, ] <- c(-0.1, -0.1, 5)
+    meta <- data.frame(dataset = c("d1", "d2", "d3"), driver = "TF1",
+                       biosample = c("A", "B", "C"))
+    out <- mechanism_reproduction(prof, meta, list(pw = c("g1", "g2", "g3")))
+    expect_equal(out$majority_sign, -1L)
+    expect_equal(out$concordance, 2 / 3)
+    expect_equal(out$grade, "consistent")
+})
+
+test_that("datasets with no measured members do not inflate k", {
+    prof <- matrix(0, nrow = 3, ncol = 3,
+                   dimnames = list(c("g1", "g2", "g3"), c("a", "b", "c")))
+    prof[1, ] <- c(-1, -1, -1)
+    prof[, 3] <- NA_real_
+    meta <- data.frame(dataset = c("a", "b", "c"), driver = "TF1",
+                       biosample = c("A", "B", "C"))
+    out <- mechanism_reproduction(prof, meta, list(pw = c("g1", "g2", "g3")))
+    expect_equal(out$k, 2L)
+    expect_equal(out$n_biosamples, 2L)
+    expect_equal(out$grade, "consistent")   # k < 3，不能判 reproduces
+})
+
+test_that("reproduction rows are matched through driver aliases", {
+    ## GPSAdb 返回 NR3C1，用户的表可能用别名 GR 建成。不解析会静默退回默认措辞，
+    ## 而这恰好是 P4 里两个 B 级案例（airway / GSE286890）的驱动者。
+    rep <- data.frame(driver = "GR", pathway = "pw", k = 3L,
+                      n_biosamples = 3L, n_genes = 5L, concordance = 1,
+                      majority_sign = -1L, grade = "reproduces",
+                      stringsAsFactors = FALSE)
+    hit <- .pe_reproduction_row("NR3C1", "pw", rep)
+    expect_equal(nrow(hit), 1L)
+    st <- .pe_single_line_statement("NR3C1", 5L, "D1", 0.01, hit)
+    expect_match(st, "reproduces across 3 independent datasets", fixed = TRUE)
+    ## 反方向也要通
+    rep2 <- rep; rep2$driver <- "NR3C1"
+    expect_equal(nrow(.pe_reproduction_row("GR", "pw", rep2)), 1L)
+    expect_error(.pe_reproduction_row("NR3C1", "pw", data.frame(x = 1)),
+                 "driver")
+})

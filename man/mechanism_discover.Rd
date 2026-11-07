@@ -47,8 +47,9 @@ percentage points of ranking performance.}
 \value{
 A data frame with one row per candidate: `rank`, `source`, `score`
   (the t-value), `r` (the correlation), `direction` (`"activates"` or
-  `"represses"`), `n_targets` and `share` (the fraction of the measured
-  network genes that the factor's targets cover).
+  `"represses"`), `n_targets`, and `share` (the fraction of all measured
+  genes that are targets of this factor; the denominator is `length(signed)`,
+  not the number of genes in the network).
 }
 \description{
 This is the cheap first stage. It ranks transcription factors by correlating
@@ -60,8 +61,10 @@ named candidate against measured perturbation data.
 The score is the t-value of that correlation. **A positive score means the
 factor looks active in this experiment, a negative one means repressed.**
 The ranking is not a verdict: on 17 benchmark condition experiments the true
-driver was ranked first 35% of the time, in the top five 59%, and in the top
-ten 76%. Treat the output as a shortlist to verify, never as an answer.
+driver was ranked first 35% of the time, in the top five 65%, and in the top
+ten 76% (median rank 2). These are for this implementation on that corpus;
+they are not a stable accuracy estimate -- there was no independent test set.
+Treat the output as a shortlist to verify, never as an answer.
 }
 \examples{
 set.seed(2)

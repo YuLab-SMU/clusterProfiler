@@ -6,9 +6,14 @@
 ##
 ## 方法不是我们发明的，是 `ulm`（decoupler）：把某个 TF 的靶基因权重向量（靶 = ±1，
 ## 非靶 = 0）与整条 log2FC 谱求 Pearson 相关，再用样本量换成 t 值。
-## 我们试过 12 个组合（集成、跨网络、viper、按绝对值排序），没有一个超过它：
+## 我们试过 12 个组合（集成、跨网络、viper、按绝对值排序），没有一个超过它。
 ##
-##   ulm @ CollecTRI、有向排序   hit@1 35.3%  hit@5 58.8%  hit@10 76.5%  中位排名 3
+## 命中率有**两套数，别混用**：
+##   * decoupler 的 ulm 在 17 份上（脚本 58）：hit@1 35.3%、hit@5 58.8%、
+##     hit@10 76.5%、中位排名 3。这是"方法比较"那次测的。
+##   * 本实现（基因域取整条测量谱，脚本 59）：hit@1 35.3%、hit@5 **64.7%**、
+##     hit@10 76.5%、中位排名 **2**。写在下面 roxygen 里的是这一套。
+## 差别来自基因域口径，不是两套方法。
 ##
 ## 所以这里不"改进"它，只做三件它没有的事：**去自环、给方向、说清覆盖多少**。
 
@@ -22,8 +27,10 @@
 #' The score is the t-value of that correlation. **A positive score means the
 #' factor looks active in this experiment, a negative one means repressed.**
 #' The ranking is not a verdict: on 17 benchmark condition experiments the true
-#' driver was ranked first 35% of the time, in the top five 59%, and in the top
-#' ten 76%. Treat the output as a shortlist to verify, never as an answer.
+#' driver was ranked first 35% of the time, in the top five 65%, and in the top
+#' ten 76% (median rank 2). These are for this implementation on that corpus;
+#' they are not a stable accuracy estimate -- there was no independent test set.
+#' Treat the output as a shortlist to verify, never as an answer.
 #'
 #' @param signed Named numeric vector of log2 fold changes, names are gene
 #'   symbols. The whole vector is used, not just the significant genes: the
@@ -52,8 +59,9 @@
 #'
 #' @return A data frame with one row per candidate: `rank`, `source`, `score`
 #'   (the t-value), `r` (the correlation), `direction` (`"activates"` or
-#'   `"represses"`), `n_targets` and `share` (the fraction of the measured
-#'   network genes that the factor's targets cover).
+#'   `"represses"`), `n_targets`, and `share` (the fraction of all measured
+#'   genes that are targets of this factor; the denominator is `length(signed)`,
+#'   not the number of genes in the network).
 #'
 #' @seealso [pathway_evidence()] to test the shortlist against perturbation
 #'   data, and [mechanism_preflight()] to decide whether the profile can carry
@@ -74,6 +82,15 @@ mechanism_discover <- function(signed, network, top = 10L, min_targets = 5L,
     if (!is.numeric(signed) || is.null(names(signed)))
         stop("`signed` must be a named numeric vector (gene symbol to log2 fold change).",
              call. = FALSE)
+    ## 重复基因名会让 `w[match()]`（只填第一个位置）与 `x`（每个重复位置都有值）
+    ## 错位，相关分数静默给错。同包的 `finish()` 早就按 |lfc| 最大去重，这里照做。
+    if (anyDuplicated(names(signed))) {
+        n_dup <- sum(duplicated(names(signed)))
+        ord <- order(-abs(signed))
+        signed <- signed[ord]
+        signed <- signed[!duplicated(names(signed))]
+        message(sprintf("Dropped %d duplicated gene name(s), keeping the largest |log2FC|.", n_dup))
+    }
     net <- as.data.frame(network, stringsAsFactors = FALSE)
     if (!all(c("source", "target") %in% names(net)))
         stop("`network` must have `source` and `target` columns.", call. = FALSE)
@@ -150,6 +167,9 @@ mechanism_discover <- function(signed, network, top = 10L, min_targets = 5L,
     if (is.null(out) || !nrow(out))
         stop("No factor had enough measured targets. Lower `min_targets` or widen the network.",
              call. = FALSE)
+    ## 实际参与评分的因子数，不是网络里有边的因子数。后者会把因 `min_targets`
+    ## 被跳过的也算进去，用户看到 "tested 1176" 会以为全都评了。
+    n_scored <- sum(!vapply(rows, is.null, logical(1)))
     out <- out[order(if (rank_by == "abs") -abs(out$score) else -out$score), ,
                drop = FALSE]
     out$rank <- seq_len(nrow(out))
@@ -159,7 +179,8 @@ mechanism_discover <- function(signed, network, top = 10L, min_targets = 5L,
     rownames(out) <- NULL
     ## 属性在取子集之后设置：`[.data.frame` 会丢掉它们，放在前面就白设了。
     attr(out, "n_genes") <- length(genes)
-    attr(out, "n_factors_tested") <- length(split_idx)
+    attr(out, "n_factors_tested") <- n_scored
+    attr(out, "n_factors_in_network") <- length(split_idx)
     class(out) <- c("mechanism_discovery", "data.frame")
     out
 }
@@ -168,7 +189,8 @@ mechanism_discover <- function(signed, network, top = 10L, min_targets = 5L,
 print.mechanism_discovery <- function(x, n = 10L, ...) {
     cat("<mechanism discovery>\n")
     cat("  genes used:  ", attr(x, "n_genes"), "\n", sep = "")
-    cat("  factors tested:", attr(x, "n_factors_tested"), "\n", sep = "")
+    cat("  factors tested:", attr(x, "n_factors_tested"),
+        " (of ", attr(x, "n_factors_in_network"), " in network)\n", sep = "")
     show <- utils::head(as.data.frame(x), n)
     print(show[, c("rank", "source", "score", "direction", "n_targets")],
           row.names = FALSE)

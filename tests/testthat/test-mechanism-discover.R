@@ -87,3 +87,40 @@ test_that("the shortlist is capped and ordered", {
     expect_equal(out$rank, 1:3)
     expect_true(all(diff(out$score) <= 0))
 })
+
+test_that("rank_by = abs puts the strongest negative score first", {
+    genes <- paste0("g", 1:40)
+    signed <- stats::setNames(c(rep(-1.2, 6), rep(0, 34)), genes)
+    net <- data.frame(source = c(rep("TF_down", 6), rep("TF_up", 6)),
+                      target = c(genes[1:6], genes[7:12]),
+                      weight = c(rep(1, 6), rep(-1, 6)),
+                      stringsAsFactors = FALSE)
+    by_score <- mechanism_discover(signed, net, top = 2, rank_by = "score")
+    by_abs <- mechanism_discover(signed, net, top = 2, rank_by = "abs")
+    expect_equal(by_score$source[1], "TF_up")
+    expect_equal(by_abs$source[1], "TF_down")
+})
+
+test_that("share uses the whole measured vector and tested counts are honest", {
+    genes <- paste0("g", 1:40)
+    signed <- stats::setNames(stats::rnorm(40), genes)
+    net <- data.frame(source = rep(c("TF1", "TF2", "TF3"), c(6, 6, 2)),
+                      target = c(genes[1:6], genes[7:12], genes[13:14]),
+                      weight = 1, stringsAsFactors = FALSE)
+    out <- mechanism_discover(signed, net, top = 5, min_targets = 5)
+    ## TF3 只有 2 个靶基因，被 min_targets 跳过：tested 应是 2 而不是 3
+    expect_equal(attr(out, "n_factors_tested"), 2L)
+    expect_equal(attr(out, "n_factors_in_network"), 3L)
+    expect_equal(attr(out, "n_genes"), 40L)
+    expect_equal(out$share[out$source == "TF1"], 6 / 40)
+})
+
+test_that("duplicated gene names are collapsed by largest |log2FC|", {
+    genes <- c(paste0("g", 1:39), "g1")
+    signed <- stats::setNames(c(2, rep(0, 39)), genes)
+    signed[40] <- 0.1
+    net <- data.frame(source = "TF1", target = paste0("g", 1:6), weight = 1,
+                      stringsAsFactors = FALSE)
+    expect_message(out <- mechanism_discover(signed, net, top = 1), "duplicated")
+    expect_equal(attr(out, "n_genes"), 39L)
+})

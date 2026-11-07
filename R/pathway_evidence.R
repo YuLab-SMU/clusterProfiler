@@ -110,6 +110,19 @@
     utils::head(d, limit)
 }
 
+## 单细胞系那一路取复现行。**别名要在两侧都解析**：GPSAdb 返回的是
+## `NR3C1`，而用户的 `mechanism_reproduction()` 表可能用别名 `GR` 建成。
+## 不解析时匹配静默返回 0 行，措辞悄悄退回默认——GR 恰好是 P4 里两个
+## B 级案例的驱动者，这个洞就是在那里被发现的。
+.pe_reproduction_row <- function(gene, pathway, reproduction) {
+    if (is.null(reproduction) || !nrow(reproduction)) return(NULL)
+    if (!all(c("driver", "pathway") %in% names(reproduction)))
+        stop("`reproduction` must have `driver` and `pathway` columns.", call. = FALSE)
+    aliases <- .mechanism_driver_names(gene)
+    reproduction[reproduction$driver %in% aliases &
+                 as.character(reproduction$pathway) == pathway, , drop = FALSE]
+}
+
 ## 单细胞系那一路的措辞。抽成函数是为了**能单独测**：三个分支（复现 / 不复现 /
 ## 无第二份数据）必须彼此可区分，内联在 `pathway_evidence()` 里就只能靠跑真数据验证。
 ##
@@ -421,9 +434,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             ## 原来的措辞只是一句降级说明，读者会把它当次品。
             else if (agrees) .pe_single_line_statement(
                 best$gene, length(members), best$dataset, best$padj,
-                if (is.null(reproduction)) NULL else
-                    reproduction[reproduction$driver == best$gene &
-                                 reproduction$pathway == desc, , drop = FALSE])
+                .pe_reproduction_row(best$gene, desc, reproduction))
             else sprintf(
                 "%s moves these %d members in the same direction the pathway already runs (padj %.2g), which reads as repression rather than drive.",
                 best$gene, length(members), best$padj)

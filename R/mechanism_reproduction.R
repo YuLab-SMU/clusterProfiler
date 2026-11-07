@@ -17,7 +17,11 @@
 #'
 #' For each (driver, pathway) pair, takes the mean log2 fold change of the
 #' pathway members in every available perturbation dataset of that driver, and
-#' reports how many of them move the pathway the same way.
+#' reports how many of them move the pathway the same way. The majority sign is
+#' the **mode of the signs**, not the sign of the sum: one dataset with a very
+#' large effect must not overturn two smaller ones that agree with each other.
+#' Datasets with no measured members are dropped before counting, so `k` is the
+#' number that actually contributed, not the number declared in `meta`.
 #'
 #' This is the input [pathway_evidence()] needs to decide how strongly a
 #' single-cell-line level-B row may be worded.
@@ -44,9 +48,9 @@
 #'   column, datasets weaker than this knockdown are dropped before scoring.
 #'
 #' @return A data frame with one row per (driver, pathway): `driver`, `pathway`,
-#'   `k` (datasets used), `n_biosamples`, `n_genes` (members found in
-#'   `profiles`), `concordance`, `majority_sign`, and `grade` which is one of
-#'   `reproduces`, `consistent`, `not-reproduced` or `not-computable`.
+#'   `k` (datasets with usable measurements), `n_biosamples`, `n_genes` (members
+#'   found in `profiles`), `concordance`, `majority_sign`, and `grade` which is
+#'   one of `reproduces`, `consistent`, `not-reproduced` or `not-computable`.
 #'
 #' @examples
 #' set.seed(1)
@@ -93,11 +97,11 @@ mechanism_reproduction <- function(profiles, meta, pathways, drivers = NULL,
         for (dr in drivers) {
             n <- n + 1L
             sel <- meta[meta$driver == dr, , drop = FALSE]
-            k <- nrow(sel)
+            k_declared <- nrow(sel)
             nb <- if (has_bio) length(unique(sel$biosample)) else NA_integer_
-            if (k < min_datasets || length(members) < min_genes) {
+            if (k_declared < min_datasets || length(members) < min_genes) {
                 rows[[n]] <- data.frame(
-                    driver = dr, pathway = p, k = k, n_biosamples = nb,
+                    driver = dr, pathway = p, k = k_declared, n_biosamples = nb,
                     n_genes = length(members), concordance = NA_real_,
                     majority_sign = NA_integer_, grade = "not-computable",
                     stringsAsFactors = FALSE)
@@ -105,14 +109,34 @@ mechanism_reproduction <- function(profiles, meta, pathways, drivers = NULL,
             }
             sub <- profiles[members, sel$dataset, drop = FALSE]
             shift <- colMeans(sub, na.rm = TRUE)
-            shift <- shift[is.finite(shift)]
-            maj <- if (!length(shift)) NA_integer_ else sign(sum(shift))
-            if (is.na(maj) || maj == 0) {
+            ## 一列在该通路上全为 NA 时 colMeans 给 NaN/Inf，必须连同它的元数据
+            ## 一起丢掉。否则 k 会虚高，而 `reproduces` 的 k >= 3 判据用的是虚高的数
+            ## ——实测 3 列里 1 列全 NA 会仍被判 reproduces。
+            ok <- is.finite(shift)
+            shift <- shift[ok]
+            sel <- sel[ok, , drop = FALSE]
+            k <- nrow(sel)                       # 真正参与评分的数据集数
+            nb <- if (has_bio) length(unique(sel$biosample)) else NA_integer_
+            if (k < min_datasets) {
+                rows[[n]] <- data.frame(
+                    driver = dr, pathway = p, k = k, n_biosamples = nb,
+                    n_genes = length(members), concordance = NA_real_,
+                    majority_sign = NA_integer_, grade = "not-computable",
+                    stringsAsFactors = FALSE)
+                next
+            }
+            ## 多数派 = **符号的众数**，不是 sum(shift) 的符号。
+            ## 后者在效应量不均时会翻：shift = c(-0.1, -0.1, +5) 有 2/3 为负，
+            ## sum 却为正，于是把"多数同向"判成 not-reproduced。
+            s <- sign(shift)
+            npos <- sum(s > 0); nneg <- sum(s < 0)
+            maj <- if (npos == nneg) NA_integer_
+                   else if (npos > nneg) 1L else -1L
+            if (is.na(maj)) {
                 conc <- NA_real_
                 grade <- "not-computable"
-                maj <- NA_integer_
             } else {
-                conc <- mean(sign(shift) == maj)
+                conc <- mean(s == maj)
                 grade <- if (conc >= 0.9 && k >= 3L &&
                              (is.na(nb) || nb >= min_biosamples)) "reproduces"
                          else if (conc >= 0.5) "consistent"

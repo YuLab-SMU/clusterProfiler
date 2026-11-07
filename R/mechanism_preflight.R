@@ -87,6 +87,9 @@ mechanism_preflight <- function(x, signed = NULL, reference = NULL, drivers = NU
     med_members <- stats::median(sz, na.rm = TRUE)
 
     n_cell_lines <- NA_integer_
+    ## 显式初始化：`exists()` 会继承父环境，全局里恰好有个同名变量就会污染输出。
+    ## 用真实的状态（NA = 没算过）做控制流，不用"变量是否存在"。
+    n_cell_lines_min <- NA_integer_
     if (length(drivers)) {
         ## 有参考矩阵就从矩阵里数；没有就现场查一次库存（每个驱动者一次调用）。
         ## 没有这一步，旧实现的用户（不建矩阵）永远拿不到"单细胞系"这条判据——
@@ -129,7 +132,7 @@ mechanism_preflight <- function(x, signed = NULL, reference = NULL, drivers = NU
     }
     if (!is.na(n_cell_lines) && n_cell_lines < min_cell_lines) {
         reasons <- c(reasons, sprintf(
-            "single-cell-line: the least-covered candidate has data in %d cell line(s); below %d it cannot be separated from an artefact of that line.",
+            "single-cell-line: even the best-covered candidate has data in only %d cell line(s); below %d it cannot be separated from an artefact of that line.",
             n_cell_lines, min_cell_lines))
     }
     if (!is.null(reference) && inherits(reference, "mechanismReference")) {
@@ -143,7 +146,7 @@ mechanism_preflight <- function(x, signed = NULL, reference = NULL, drivers = NU
 
     tier <- if (length(reasons)) "description" else "attribution"
     out <- .mechanism_preflight_out(tier, reasons, cnt, med_members, n_cell_lines, cnt$n_up)
-    if (exists("n_cell_lines_min")) out$metrics$min_cell_lines <- n_cell_lines_min
+    if (!is.na(n_cell_lines_min)) out$metrics$min_cell_lines <- n_cell_lines_min
     out
 }
 

@@ -46,14 +46,18 @@ column, datasets weaker than this knockdown are dropped before scoring.}
 }
 \value{
 A data frame with one row per (driver, pathway): `driver`, `pathway`,
-  `k` (datasets used), `n_biosamples`, `n_genes` (members found in
-  `profiles`), `concordance`, `majority_sign`, and `grade` which is one of
-  `reproduces`, `consistent`, `not-reproduced` or `not-computable`.
+  `k` (datasets with usable measurements), `n_biosamples`, `n_genes` (members
+  found in `profiles`), `concordance`, `majority_sign`, and `grade` which is
+  one of `reproduces`, `consistent`, `not-reproduced` or `not-computable`.
 }
 \description{
 For each (driver, pathway) pair, takes the mean log2 fold change of the
 pathway members in every available perturbation dataset of that driver, and
-reports how many of them move the pathway the same way.
+reports how many of them move the pathway the same way. The majority sign is
+the **mode of the signs**, not the sign of the sum: one dataset with a very
+large effect must not overturn two smaller ones that agree with each other.
+Datasets with no measured members are dropped before counting, so `k` is the
+number that actually contributed, not the number declared in `meta`.
 }
 \details{
 This is the input [pathway_evidence()] needs to decide how strongly a

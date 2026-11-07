@@ -116,3 +116,18 @@ test_that("print covers the three sections and the inventory", {
     expect_true(any(grepl("driver inventory", out)))
     expect_true(any(grepl("next experiment", out)))
 })
+
+test_that("a bare too-small verdict still gets an action", {
+    ## 键必须落在补救表里：原来写 "too-small-decomp"（全仓只此一处），
+    ## match 落空后那一行会静默没有下一步。
+    hit <- clusterProfiler:::.mechanism_remedy_for(NA_character_, "too-small")
+    expect_false(is.na(hit$side))
+    expect_false(is.na(hit$action))
+})
+
+test_that("direction-conflict is not sold as a data gap", {
+    ## 它是证据反对（读作压制），不能承诺"再补一份数据就能救"。
+    hit <- clusterProfiler:::.mechanism_remedy_for("direction-conflict", "direction-conflict")
+    expect_equal(hit$side, "concept")
+    expect_false(isTRUE(hit$unlocks))
+})

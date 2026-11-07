@@ -1,3 +1,11 @@
+# clusterProfiler 4.21.4.054
+
+## pathway-level mechanism evidence
+
++ Fixed two logic errors in `mechanism_reproduction()` found in review. The majority sign is now the mode of the per-dataset signs instead of `sign(sum(shift))`: one dataset with a large effect could previously overturn two smaller ones that agreed, grading a 2/3-consistent pair as `not-reproduced`. And datasets whose pathway members are all NA are dropped before counting, so `k` and `n_biosamples` reflect the datasets that actually contributed rather than the ones declared in `meta`; previously a third, empty column could satisfy the `k >= 3` requirement for `reproduces`. Ties (equal numbers of positive and negative shifts) are now `not-computable` instead of being broken by effect size (2026-11-07, Sat)
++ `pathway_evidence(reproduction = )` now resolves driver aliases on both sides of the match, so a table built with `GR` is found when GPSAdb returns `NR3C1`; the unresolved case used to fall back to the default wording silently. `mechanism_discover()` drops duplicated gene names by largest |log2FC|, reports how many factors were actually scored, and its documentation now states that `share` uses the whole measured vector and that the quoted hit rates belong to this implementation (2026-11-07, Sat)
++ `mechanism_report()` gives `direction-conflict` a concept-side action with no promised unlock (it is evidence against, not a data gap), and a bare `too-small` verdict now resolves to a real action instead of the orphan `too-small-decomp` key. `mechanism_preflight()` initialises `min_cell_lines` explicitly rather than testing `exists()`, which inherited the caller's environment, and its single-cell-line message now says "best-covered" to match the maximum it reports (2026-11-07, Sat)
+
 # clusterProfiler 4.21.4.053
 
 ## pathway-level mechanism evidence
