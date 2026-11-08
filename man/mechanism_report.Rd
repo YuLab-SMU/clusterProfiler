@@ -10,7 +10,10 @@ mechanism_report(
   drivers = NULL,
   inventory = NULL,
   context = list(),
-  preflight = NULL
+  preflight = NULL,
+  network = NULL,
+  min_overlap = 0.1,
+  global_effect_de = 3000L
 )
 
 \method{print}{mechanismReport}(x, n = 6L, ...)
@@ -36,6 +39,25 @@ the honest answer is that no experiment would change these rows, and saying
 "add another cell line" to a dataset with 23 genes is advice that cannot pay
 off.}
 
+\item{network}{Optional regulator-target table (`source`, `target`, optional
+`weight`) used to group the drivers into modules. Two drivers land in the
+same module when their target sets overlap (Jaccard >= `min_overlap`).
+Genes that share a module -- paralogues, subunits of one complex, parallel
+arms of a pathway -- cannot be told apart by an expression experiment, and
+reporting them separately is what made neighbours look like false claims.
+When omitted, `module` is `NA` and nothing else changes.}
+
+\item{min_overlap}{Jaccard overlap required to put two drivers in one module.
+Defaults to `0.10`. Lower values make larger modules: coverage rises but so
+does the chance that any candidate lands in the same module as the answer.}
+
+\item{global_effect_de}{Perturbation breadth, in differentially expressed
+genes, above which a driver is flagged as a possible global effect.
+Defaults to `3000`. A factor whose knockdown moves thousands of genes will
+drag any pathway of a few dozen members with it, so a supported verdict on
+it says "this is a large perturbation", not "this is the specific driver".
+The flag never changes a class; it adds a reason to read the row that way.}
+
 \item{n}{Number of rows to show.}
 
 \item{...}{Ignored.}
@@ -44,7 +66,12 @@ off.}
 A `mechanismReport`: a list with `verdicts` (one row per pathway with
   `class` in established/excluded/undecided and the action that follows),
   `gaps` (one row per driver), `next_steps` (actions ranked by how many rows
-  they would unlock) and `summary` (two sentences).
+  they would unlock) and `summary` (two sentences). `verdicts` also carries
+  `module` (comma-separated drivers that cannot be separated from this one,
+  including itself), `module_size`, and `global_effect_reason` (text when the
+  driver's knockdown was broad, `NA` otherwise). `gaps` also carries `module`
+  and `module_size`, so the clustering is visible even when every row is
+  undetermined and no driver is named.
 }
 \description{
 Report what has been established, what has been ruled out, and what is simply

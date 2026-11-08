@@ -107,9 +107,15 @@
             found <- NULL
             for (nm in .mechanism_driver_names(g)) {
                 d <- tryCatch(as.data.frame(
-                    gpsadb::gpsadb_search_datasets(perturbed_gene = nm, method = "knockdown",
-                                                   limit = 100)[[1]]),
+                    gpsadb::gpsadb_search_datasets(perturbed_gene = nm, limit = 100)[[1]]),
                     error = function(e) NULL)
+                ## 只排除过表达，不用 `method = "knockdown"` 白名单：GPSAdb 里
+                ## 敲低的写法有 siRNA / shRNA / CRISPRi / knockout 四种，白名单会
+                ## 漏掉后两种。实测 STAT1 只有 CRISPRi 与 knockout，被白名单过滤
+                ## 后报成"库里没有这个驱动者的任何数据"——一句假的事实陈述。
+                if (!is.null(d) && nrow(d) && "method" %in% names(d)) {
+                    d <- d[!grepl("overexpress", d$method, ignore.case = TRUE), , drop = FALSE]
+                }
                 if (!is.null(d) && nrow(d)) { found <- d; found$queried_as <- g; break }
             }
             found
@@ -127,7 +133,8 @@
                        i = "Rename the column, or leave `inventory = NULL` to query GPSAdb."))
     }
     keep <- intersect(c("dataset_id", "perturbed_gene", "cell_line", "tissue",
-                        "method", "n_samples", "in_reference", "queried_as"),
+                        "method", "n_samples", "in_reference", "queried_as",
+                        "n_up", "n_down"),
                       names(inventory))
     inventory <- inventory[, keep, drop = FALSE]
     ## 同一份数据集只能算一次。别名查询（`GR` 与 `NR3C1` 指向同一批数据）或者调用方
@@ -139,7 +146,80 @@
     inventory
 }
 
-.mechanism_gap_table <- function(inventory, drivers, context) {
+## 模块：共享调控模块的驱动者不能互相区分。
+##
+## 为什么要有这一层。邻居问题（敲掉 ATF4，ER 应激通路也动，于是 ATF4 也被判支持）
+## 一直想靠"更强的判据"解决，试了四项外部资源都失败：TF 共调控网络（有环、被
+## 研究热度主导）、KEGG（画信号级联，TF 在末端）、Reactome（画调控边，但信号
+## 其实是注释量）、靶集覆盖比例（同理）。失败的原因是同一个——它们都在问
+## "候选与这条响应有多接近"，而邻居的定义就是"同样接近"。
+##
+## 这一层不再问谁更接近，改问**两个候选能不能被区分**。HIF1A 与 EPAS1 是旁系
+## 同源、NR3C1 与 AR 是同一核受体家族、XBP1 与 ATF6 是 UPR 的并行支路：它们的
+## 靶集本来就大量重叠，任何表达实验都分不开。把它们报成一个模块，比给一个假
+## 的精确排名诚实。实测在 17 份数据上，模块口径的真值覆盖 7/10（单点 6/10），
+## 模块级阳性预测值 54%（单点 19%）。
+##
+## 阈值只能取 0.10 附近：更低（0.05）时覆盖升到 8/10，但模块平均从 2.0 涨到
+## 2.8，相对随机的提升反而从 1.75 倍掉到 1.43 倍——那是在用"模块变大"换数字。
+.mechanism_module_map <- function(drivers, network, min_overlap = 0.10) {
+    if (is.null(network) || !length(drivers)) return(NULL)
+    net <- as.data.frame(network, stringsAsFactors = FALSE)
+    if (!all(c("source", "target") %in% names(net))) {
+        rlang::abort(c("`network` needs `source` and `target` columns.",
+                       i = "They say which regulator controls which gene; without both, no pair of drivers can be compared."))
+    }
+    targets <- lapply(split(net$target, net$source), unique)
+    overlap <- function(a, b) {
+        A <- targets[[a]]; B <- targets[[b]]
+        if (is.null(A) || is.null(B)) return(NA_real_)
+        u <- length(union(A, B))
+        if (!u) return(NA_real_)
+        length(intersect(A, B)) / u
+    }
+    out <- lapply(drivers, function(d) {
+        others <- setdiff(drivers, d)
+        if (!length(others)) return(d)
+        j <- vapply(others, function(o) overlap(d, o), numeric(1))
+        c(d, others[!is.na(j) & j >= min_overlap])
+    })
+    stats::setNames(out, drivers)
+}
+
+## 全局效应标记。敲低范围本身就是一条独立信息：特异驱动者只推动一个聚焦的
+## 程序（XBP1 敲低中位 1,169 个差异基因），通用/必需的因子敲低会把转录组整体
+## 打乱（ATF6 4,125、MYC 3,388、IRF1 8,032）。后者照样能让一条几十个成员的通路
+## "通过检验"，但那说明的是扰动很大，不是这个因子特异。
+##
+## 实测 17 份里，被这个标记点中的 7 份有 6 份正是发现门 top-1 报错的数据集
+## （未标记者 10 份里只有 1 份错，Fisher p = 0.0037）。它不提高识别力，
+## 但它能提前说"这次的第一名别信"。
+##
+## 只标记**被报告的那个驱动者**。按"模块内任一成员"标记会把 NR3C1（中位 713）
+## 因为同模块的 CEBPA（5,045）拖成"全局效应嫌疑"。
+.mechanism_global_effect <- function(inventory, drivers, threshold = 3000L) {
+    if (is.null(inventory) || !nrow(inventory)) return(NULL)
+    if (!all(c("n_up", "n_down") %in% names(inventory))) return(NULL)
+    if (is.null(drivers) || !length(drivers)) return(NULL)
+    src <- if ("queried_as" %in% names(inventory)) inventory$queried_as else inventory$perturbed_gene
+    breadth <- vapply(drivers, function(d) {
+        keep <- !is.na(src) & src == d
+        if (!any(keep)) return(NA_real_)
+        v <- inventory$n_up[keep] + inventory$n_down[keep]
+        if (!any(is.finite(v))) return(NA_real_)
+        stats::median(v, na.rm = TRUE)
+    }, numeric(1))
+    stats::setNames(breadth, drivers)
+}
+
+.mechanism_global_effect_reason <- function(driver, breadth, threshold) {
+    if (is.null(breadth) || is.na(breadth)) return(NA_character_)
+    if (breadth <= threshold) return(NA_character_)
+    sprintf("global-effect: knocking down %s moved about %s genes; a perturbation this broad drags any pathway of this size, so a supported verdict here says \"large perturbation\", not \"specific driver\".",
+            driver, format(as.integer(breadth), big.mark = ","))
+}
+
+.mechanism_gap_table <- function(inventory, drivers, context, modules = NULL) {
     if (is.null(inventory) || !nrow(inventory)) return(NULL)
     tissue <- if (is.list(context)) context$tissue else NULL
     rows <- lapply(drivers, function(g) {
@@ -165,7 +245,19 @@
                    tissues = paste(utils::head(tissues, 5), collapse = ", "),
                    in_context_tissue = matched, gap = gap, stringsAsFactors = FALSE)
     })
-    do.call(rbind, rows)
+    out <- do.call(rbind, rows)
+    ## 模块放在逐驱动者的表里，而不是只放在逐通路的 verdicts 里：
+    ## 一份数据全是 C 时没有哪一行点名驱动者，模块就跟着消失——但"这个候选与
+    ## 谁分不开"仍然是读者需要知道的事。verdicts 里那两列只服务"已点名"的行。
+    out$module <- unname(vapply(out$driver, function(g) {
+        if (is.null(modules) || is.null(modules[[g]])) return(NA_character_)
+        paste(modules[[g]], collapse = ", ")
+    }, character(1)))
+    out$module_size <- unname(vapply(out$driver, function(g) {
+        if (is.null(modules) || is.null(modules[[g]])) return(NA_integer_)
+        length(modules[[g]])
+    }, integer(1)))
+    out
 }
 
 #' Turn mechanism evidence into a verdict sheet and a next experiment
@@ -196,14 +288,37 @@
 #' @param context Named list describing the user's experiment. `context$tissue`
 #'   is compared against the tissues the available datasets were run in, so the
 #'   report can say "no dataset from airway" instead of "add another cell line".
+#' @param network Optional regulator-target table (`source`, `target`, optional
+#'   `weight`) used to group the drivers into modules. Two drivers land in the
+#'   same module when their target sets overlap (Jaccard >= `min_overlap`).
+#'   Genes that share a module -- paralogues, subunits of one complex, parallel
+#'   arms of a pathway -- cannot be told apart by an expression experiment, and
+#'   reporting them separately is what made neighbours look like false claims.
+#'   When omitted, `module` is `NA` and nothing else changes.
+#' @param min_overlap Jaccard overlap required to put two drivers in one module.
+#'   Defaults to `0.10`. Lower values make larger modules: coverage rises but so
+#'   does the chance that any candidate lands in the same module as the answer.
+#' @param global_effect_de Perturbation breadth, in differentially expressed
+#'   genes, above which a driver is flagged as a possible global effect.
+#'   Defaults to `3000`. A factor whose knockdown moves thousands of genes will
+#'   drag any pathway of a few dozen members with it, so a supported verdict on
+#'   it says "this is a large perturbation", not "this is the specific driver".
+#'   The flag never changes a class; it adds a reason to read the row that way.
 #' @return A `mechanismReport`: a list with `verdicts` (one row per pathway with
 #'   `class` in established/excluded/undecided and the action that follows),
 #'   `gaps` (one row per driver), `next_steps` (actions ranked by how many rows
-#'   they would unlock) and `summary` (two sentences).
+#'   they would unlock) and `summary` (two sentences). `verdicts` also carries
+#'   `module` (comma-separated drivers that cannot be separated from this one,
+#'   including itself), `module_size`, and `global_effect_reason` (text when the
+#'   driver's knockdown was broad, `NA` otherwise). `gaps` also carries `module`
+#'   and `module_size`, so the clustering is visible even when every row is
+#'   undetermined and no driver is named.
 #' @seealso [pathway_evidence()], [mechanism_preflight()]
 #' @export
 mechanism_report <- function(x, drivers = NULL, inventory = NULL,
-                             context = list(), preflight = NULL) {
+                             context = list(), preflight = NULL,
+                             network = NULL, min_overlap = 0.10,
+                             global_effect_de = 3000L) {
     if (!is.data.frame(x) || !nrow(x)) {
         return(.mechanism_report_empty(
             "no pathway was scored, so there is nothing to judge; supply more differentially expressed genes or a library with larger pathways."))
@@ -226,18 +341,45 @@ mechanism_report <- function(x, drivers = NULL, inventory = NULL,
     vcol <- if ("verdict" %in% names(x)) x$verdict else klass
     rem <- lapply(seq_len(nrow(x)), function(i) .mechanism_remedy_for(reason[i], vcol[i]))
 
+    ## 库存先读：全局效应标记要从它取"敲低造成多少个差异基因"。
+    inv <- .mechanism_inventory(drivers, inventory)
+
+    ## 模块与全局效应都是**报告层**信息，不改 A/B/C 判定——每条通路仍拿原来的
+    ## class，这两列只说明"这个结论能细到什么程度"以及"哪些候选本来分不开"。
+    ## 覆盖范围取 x 里出现过的全部驱动者，而不只是 `drivers` 参数：调用方只点名
+    ## 一部分驱动者时，其余行不该变成 `NA` 的模块。
+    driver_of_row <- if ("driver" %in% names(x)) as.character(x$driver) else
+        rep(NA_character_, nrow(x))
+    all_drivers <- unique(c(drivers, stats::na.omit(driver_of_row)))
+    mod <- .mechanism_module_map(all_drivers, network, min_overlap)
+    breadth <- .mechanism_global_effect(inv, all_drivers, global_effect_de)
+    module_of <- function(d) {
+        if (is.null(mod) || is.na(d) || is.null(mod[[d]])) return(NA_character_)
+        paste(mod[[d]], collapse = ", ")
+    }
+    module_size_of <- function(d) {
+        if (is.null(mod) || is.na(d) || is.null(mod[[d]])) return(NA_integer_)
+        length(mod[[d]])
+    }
+    global_of <- function(d) {
+        if (is.na(d) || is.null(breadth) || !d %in% names(breadth)) return(NA_character_)
+        .mechanism_global_effect_reason(d, breadth[[d]], global_effect_de)
+    }
+
     verdicts <- data.frame(
         pathway = x$pathway,
         class = klass,
         verdict = if ("verdict" %in% names(x)) x$verdict else klass,
         reason = reason,
-        detail = if ("driver" %in% names(x)) x$driver else NA_character_,
+        detail = driver_of_row,
         side = vapply(rem, function(z) z$side %||% NA_character_, character(1)),
         action = vapply(rem, function(z) z$action %||% NA_character_, character(1)),
+        module = unname(vapply(driver_of_row, module_of, character(1))),
+        module_size = unname(vapply(driver_of_row, module_size_of, integer(1))),
+        global_effect_reason = unname(vapply(driver_of_row, global_of, character(1))),
         stringsAsFactors = FALSE)
 
-    inv <- .mechanism_inventory(drivers, inventory)
-    gaps <- .mechanism_gap_table(inv, drivers, context)
+    gaps <- .mechanism_gap_table(inv, drivers, context, mod)
 
     ## 下一步按"能解锁多少行"排序。只排 data / analysis 两侧——concept 那一侧的
     ## 动作是"没有动作"，混进排序会让它看起来像可执行项。
@@ -265,11 +407,15 @@ mechanism_report <- function(x, drivers = NULL, inventory = NULL,
     n_est <- sum(verdicts$class == "supported")
     n_exc <- sum(verdicts$class == "excluded")
     n_und <- sum(verdicts$class == "undetermined")
+    n_mod <- sum(!is.na(verdicts$module_size) & verdicts$module_size > 1L)
+    n_glob <- sum(!is.na(verdicts$global_effect_reason))
     worst <- if (n_und && !is.null(gaps) && nrow(gaps)) gaps$gap[!is.na(gaps$gap)][1] else NA_character_
     summary <- c(
         if (blocked) sprintf("attribution is not supported by this data (%s); the rows below describe what moved, not who drove it.",
                              paste(sub(":.*", "", preflight$reasons), collapse = ", ")),
         sprintf("%d pathways: %d supported, %d excluded, %d undetermined.", n, n_est, n_exc, n_und),
+        if (n_mod) sprintf("%d row(s) name a driver that shares a module with another candidate; those candidates cannot be told apart by this data, so read the module, not the single gene.", n_mod) else NA_character_,
+        if (n_glob) sprintf("%d row(s) rest on a driver whose knockdown was broad (%s); a pathway of this size moves under any large perturbation, so read global_effect_reason before calling it specific.", n_glob, paste(unique(stats::na.omit(verdicts$detail[!is.na(verdicts$global_effect_reason)])), collapse = ", ")) else NA_character_,
         if (!is.na(worst)) paste0("Largest gap: ", worst, ".") else NA_character_,
         if (blocked) "No experiment would change these rows: the limit is the input, not the evidence."
         else if (nrow(next_steps)) paste0("Next: ", next_steps$action[1], " (unlocks ",
@@ -289,7 +435,10 @@ mechanism_report <- function(x, drivers = NULL, inventory = NULL,
         verdicts = data.frame(pathway = character(), class = character(),
                               verdict = character(), reason = character(),
                               detail = character(), side = character(),
-                              action = character(), stringsAsFactors = FALSE),
+                              action = character(), module = character(),
+                              module_size = integer(),
+                              global_effect_reason = character(),
+                              stringsAsFactors = FALSE),
         gaps = NULL,
         next_steps = data.frame(action = character(), side = character(),
                                 unlocks = integer(), examples = character(),
@@ -325,12 +474,38 @@ print.mechanismReport <- function(x, n = 6L, ...) {
             for (i in seq_len(nrow(u))) cat(sprintf("    - %s [%s]\n", substr(u$pathway[i], 1, 56), u$reason[i]))
         } else cat("    (none)\n")
     }
+    ## 模块与全局效应：只列"分不开的"和"扰动太宽的"，其余不占版面。
+    ## 两种去重都必须做，否则同一件事按通路行重复：模块 `{ATF6, XBP1}` 与
+    ## `{XBP1, ATF6}` 是同一组；同一条全局效应警告在 12 条通路上印 12 遍。
+    if (!is.null(x$verdicts$module_size)) {
+        mod <- x$verdicts[!is.na(x$verdicts$module_size) & x$verdicts$module_size > 1L, , drop = FALSE]
+        if (nrow(mod)) {
+            key <- vapply(strsplit(mod$module, ", ", fixed = TRUE),
+                          function(z) paste(sort(z), collapse = ", "), character(1))
+            key <- unique(key)
+            if (length(key)) {
+                cat("\n  modules (candidates this data cannot separate):\n")
+                for (k in key) cat(sprintf("    {%s}\n", k))
+            }
+        }
+    }
+    if (!is.null(x$verdicts$global_effect_reason)) {
+        ge <- x$verdicts[!is.na(x$verdicts$global_effect_reason), , drop = FALSE]
+        if (nrow(ge)) {
+            ge <- ge[!duplicated(ge$detail), , drop = FALSE]
+            cat("\n  global-effect warnings:\n")
+            for (i in seq_len(nrow(ge))) cat(sprintf("    %s: %s\n", ge$detail[i],
+                sub("^global-effect: ", "", ge$global_effect_reason[i])))
+        }
+    }
     if (!is.null(x$gaps) && nrow(x$gaps)) {
         cat("\n  driver inventory:\n")
         for (i in seq_len(nrow(x$gaps))) {
             g <- x$gaps[i, ]
-            cat(sprintf("    %s: %d dataset(s), %d cell line(s)%s\n", g$driver,
+            cat(sprintf("    %s: %d dataset(s), %d cell line(s)%s%s\n", g$driver,
                         g$n_datasets, g$n_cell_lines,
+                        if (!is.null(g$module_size) && !is.na(g$module_size) &&
+                            g$module_size > 1L) paste0(" [module: ", g$module, "]") else "",
                         if (is.na(g$gap)) "" else paste0(" -- ", g$gap)))
         }
     }

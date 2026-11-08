@@ -131,3 +131,90 @@ test_that("direction-conflict is not sold as a data gap", {
     expect_equal(hit$side, "concept")
     expect_false(isTRUE(hit$unlocks))
 })
+
+test_that("drivers whose target sets overlap are put in one module", {
+    ## 旁系同源 / 同复合物 / 并行支路本来就不能用表达实验分开。
+    ## 报一个模块比给一个假的精确排名诚实。
+    net <- data.frame(
+        source = c(rep("HIF1A", 5), rep("EPAS1", 4), rep("ATF4", 5)),
+        target = c("a","b","c","d","e", "a","b","c","f", "g","h","i","j","k"),
+        stringsAsFactors = FALSE)
+    m <- clusterProfiler:::.mechanism_module_map(c("HIF1A","EPAS1","ATF4"), net, 0.10)
+    expect_setequal(m$HIF1A, c("HIF1A","EPAS1"))
+    expect_setequal(m$EPAS1, c("EPAS1","HIF1A"))
+    expect_equal(m$ATF4, "ATF4")          # 靶集不重叠，自己一组
+    ## 阈值调高就分开
+    m2 <- clusterProfiler:::.mechanism_module_map(c("HIF1A","EPAS1","ATF4"), net, 0.9)
+    expect_equal(m2$HIF1A, "HIF1A")
+})
+
+test_that("the module columns are filled only when a network is supplied", {
+    x <- data.frame(pathway = c("p1","p2"), level = c("B","B"),
+                    verdict = c("single-dataset","single-dataset"),
+                    reason = NA_character_, driver = c("HIF1A","EPAS1"),
+                    es = c(-1,-1), padj = c(0.01,0.01), stringsAsFactors = FALSE)
+    net <- data.frame(source = c(rep("HIF1A",5), rep("EPAS1",4)),
+                      target = c("a","b","c","d","e","a","b","c","f"),
+                      stringsAsFactors = FALSE)
+    inv <- data.frame(perturbed_gene = c("HIF1A","EPAS1"),
+                      cell_line = c("A","B"), tissue = c("T","T"),
+                      dataset_id = c("d1","d2"), stringsAsFactors = FALSE)
+    none <- mechanism_report(x, inventory = inv)
+    expect_true(all(is.na(none$verdicts$module)))
+    with_net <- mechanism_report(x, inventory = inv, network = net)
+    expect_equal(with_net$verdicts$module[1], "HIF1A, EPAS1")
+    expect_equal(with_net$verdicts$module_size[1], 2L)
+})
+
+test_that("a broad knockdown is flagged without changing the class", {
+    x <- data.frame(pathway = c("p1","p2"), level = c("B","B"),
+                    verdict = c("single-dataset","single-dataset"),
+                    reason = NA_character_, driver = c("ATF4","XBP1"),
+                    es = c(-1,-1), padj = c(0.01,0.01), stringsAsFactors = FALSE)
+    inv <- data.frame(perturbed_gene = c("ATF4","XBP1"),
+                      n_up = c(2000, 600), n_down = c(2000, 500),
+                      cell_line = c("A","B"), tissue = c("T","T"),
+                      dataset_id = c("d1","d2"), stringsAsFactors = FALSE)
+    r <- mechanism_report(x, inventory = inv, global_effect_de = 3000L)
+    expect_match(r$verdicts$global_effect_reason[1], "global-effect")
+    expect_true(is.na(r$verdicts$global_effect_reason[2]))
+    ## 判定档位不受影响
+    expect_equal(r$verdicts$class, c("undetermined","undetermined"))
+    expect_true(any(grepl("global_effect_reason", r$summary)))
+})
+
+test_that("module and global-effect never change the verdict class", {
+    x <- data.frame(pathway = "p1", level = "A",
+                    verdict = "perturbation-supported", reason = NA_character_,
+                    driver = "HIF1A", es = -1, padj = 0.01, stringsAsFactors = FALSE)
+    net <- data.frame(source = c(rep("HIF1A",5), rep("EPAS1",4)),
+                      target = c("a","b","c","d","e","a","b","c","f"),
+                      stringsAsFactors = FALSE)
+    inv <- data.frame(perturbed_gene = "HIF1A", n_up = 5000, n_down = 5000,
+                      cell_line = "A", tissue = "T", dataset_id = "d1",
+                      stringsAsFactors = FALSE)
+    base <- mechanism_report(x, inventory = inv)
+    full <- mechanism_report(x, inventory = inv, network = net)
+    expect_equal(base$verdicts$class, full$verdicts$class)
+    expect_equal(base$verdicts$verdict, full$verdicts$verdict)
+    expect_equal(full$verdicts$class, "supported")
+})
+
+test_that("modules and warnings are printed once each, not once per pathway", {
+    ## 同一件事按通路行重复：12 条通路会印 12 遍同一条警告；
+    ## `{ATF6, XBP1}` 与 `{XBP1, ATF6}` 是同一组，不能印两次。
+    x <- data.frame(pathway = paste0("p", 1:6), level = rep("B", 6),
+                    verdict = rep("single-dataset", 6), reason = NA_character_,
+                    driver = c("ATF6","XBP1","ATF6","XBP1","ATF6","XBP1"),
+                    es = rep(-1, 6), padj = rep(0.01, 6), stringsAsFactors = FALSE)
+    net <- data.frame(source = c(rep("ATF6", 6), rep("XBP1", 5)),
+                      target = c("a","b","c","d","e","f","a","b","c","d","g"),
+                      stringsAsFactors = FALSE)
+    inv <- data.frame(perturbed_gene = c("ATF6","XBP1"),
+                      n_up = c(2000, 600), n_down = c(2000, 500),
+                      cell_line = c("A","B"), tissue = c("T","T"),
+                      dataset_id = c("d1","d2"), stringsAsFactors = FALSE)
+    out <- capture.output(print(mechanism_report(x, inventory = inv, network = net)))
+    expect_equal(sum(grepl("^    \\{", out)), 1L)          # 只有一组
+    expect_equal(sum(grepl("^    ATF6: knocking down", out)), 1L)
+})

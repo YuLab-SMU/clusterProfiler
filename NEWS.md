@@ -1,3 +1,10 @@
+# clusterProfiler 4.21.4.056
+
+## pathway-level mechanism evidence
+
++ `mechanism_report()` gains `network`, `min_overlap` and `global_effect_de`, and two new fields. `module` groups drivers whose regulator-target sets overlap (Jaccard >= `min_overlap`, default 0.10): paralogues, subunits of one complex and parallel pathway arms cannot be told apart by an expression experiment, and reporting them as separate claims is what made neighbours look like false positives. On the 17 benchmark datasets the module reading covers the true driver 7/10 (single top-1: 6/10) and raises module-level positive predictive value from 19% to 54%, recovering HIF1A-EPAS1, STAT1-IRF1, XBP1-ATF6, TP53-TP73 and NR3C1-AR without any prior annotation. `global_effect_reason` marks a driver whose knockdown moved more than `global_effect_de` genes (default 3000): such a perturbation drags any pathway of a few dozen members, so a supported verdict on it says "large perturbation", not "specific driver". Neither field changes the A/B/C class (2026-11-08, Sat)
++ `mechanism_report()` now reads the full GPSAdb inventory instead of asking for `method = "knockdown"`. GPSAdb spells knockdown four ways (siRNA, shRNA, CRISPRi, knockout) and the whitelist dropped the last two, so a driver whose only datasets were CRISPRi or knockout was reported as having no data at all -- a false factual claim. Overexpression datasets are still excluded (2026-11-08, Sat)
+
 # clusterProfiler 4.21.4.055
 
 ## pathway-level mechanism evidence
