@@ -33,6 +33,17 @@
 #' the honest limit of this stage: a network without the factor cannot rank it.
 #' Treat the output as a shortlist to verify, never as an answer.
 #'
+#' The score rises with the number of annotated targets, and not only for the
+#' real driver: among candidates that are not the driver, the correlation
+#' between score and target count is still about 0.24. A large target set
+#' captures broad transcriptional programmes, so a pleiotropic factor scores
+#' well whether or not it caused this response. `n_targets` and `share` are
+#' reported so that this can be judged; it is deliberately not corrected. We
+#' tried weighting the score by target count in both directions: rewarding it
+#' lifts the benchmarks only because their true drivers are the heavily studied
+#' genes, and penalising it demotes real drivers whose target set is small
+#' (XBP1 has 41 targets here and fell from rank 3 to 6).
+#'
 #' @param signed Named numeric vector of log2 fold changes, names are gene
 #'   symbols. The whole vector is used, not just the significant genes: the
 #'   correlation is what separates a factor's targets from everything else.

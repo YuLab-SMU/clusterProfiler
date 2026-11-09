@@ -1,3 +1,9 @@
+# clusterProfiler 4.21.4.057
+
+## pathway-level mechanism evidence
+
++ `mechanism_discover()` documentation now states that the score rises with the number of annotated targets, including among candidates that are not the driver (correlation about 0.24), because a large target set captures broad transcriptional programmes. `n_targets` and `share` are reported so this can be judged; it is deliberately not corrected -- weighting the score by target count was tried in both directions and rejected, since rewarding it only lifts benchmarks whose true drivers are the heavily studied genes, and penalising it demotes real drivers with small target sets (2026-11-09, Sun)
+
 # clusterProfiler 4.21.4.056
 
 ## pathway-level mechanism evidence
