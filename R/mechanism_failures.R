@@ -124,8 +124,6 @@ print.mechanismFailures <- function(x, ...) {
     invisible(x)
 }
 
-#' @rdname mechanism-failures
-#' @keywords internal
 ## Is this row significant?
 ##
 ## Not every source reports a p-value. A biotrigger hit carries an enrichment
