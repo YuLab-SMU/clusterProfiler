@@ -65,8 +65,9 @@
 #'   `measured_direction`, `perturbation_effect` and `writable` (the sentence
 #'   the evidence permits; see [mechanism_writable()]).
 #'
-#'   `$provenance$evidence_sha` fingerprints the genes, the background, the
-#'   collections and their release -- and deliberately not the time, so two runs
+#'   `$provenance$evidence_sha` fingerprints the genes, background, normalized
+#'   evidence rows, coverage, design, decision parameters and collection release
+#'   -- and deliberately not the time, so two runs
 #'   over the same evidence hash alike and a comparison means "same evidence"
 #'   rather than "same moment".
 #'
@@ -109,7 +110,8 @@ adjudicate <- function(x, min_independent = 2, coverage_floor = NULL) {
     ## A source that never examined these genes cannot report an absence.
     counts <- x$diagnostics$counts
     untested_source <- counts$source[
-        !is.na(counts$coverage_floor) & counts$coverage_tested < counts$coverage_floor
+        !is.na(counts$coverage_tested) &
+            counts$coverage_tested < (coverage_floor %||% -Inf)
     ]
 
     significant <- r[mechanism_significant(r), , drop = FALSE]
@@ -175,17 +177,13 @@ adjudicate <- function(x, min_independent = 2, coverage_floor = NULL) {
         ## the server agreeing with itself, and 17 of this package's `supported`
         ## verdicts were exactly that -- `C22orf46P` was level A supported on the
         ## strength of D25689 counted twice.
-        datasets <- unique(mine$term[!is.na(mine$term) &
-                                        mine$source %in% c("perturbagen", "biotrigger")])
-        ## Distinct datasets, unless the sources name none (a collection term is
-        ## not a dataset, so those do not collapse).
-        n_witness <- if (length(datasets)) max(length(datasets), n) else n
-        ## Overlapping dataset ids mean the sources are not independent even
-        ## when they are different sources.
-        shared_dataset <- length(datasets) < n &&
-            all(mine$source %in% c("perturbagen", "biotrigger"))
+        measured <- mine$source %in% c("perturbagen", "biotrigger") &
+            !is.na(mine$term) & nzchar(mine$term)
+        witnesses <- ifelse(measured, paste0("dataset:", mine$term),
+                            paste0("source:", mine$source))
+        n_witness <- length(unique(witnesses))
 
-        corroborated <- !shared_dataset && n_witness >= min_independent &&
+        corroborated <- n_witness >= min_independent &&
             n_measured >= 1L &&
             n_measured >= min(n_witness, 1L) &&
             any(mine$level %in% c("A", "B"))
@@ -481,11 +479,22 @@ sources_source <- function(src) {
 ## `called_at` and every other timestamp, so the same input hashes the same way
 ## on two runs and a SHA comparison means "same evidence", not "same moment".
 .adjudication <- function(verdicts, bundle, min_independent, coverage_floor) {
+    diagnostics <- bundle$diagnostics
+    counts <- diagnostics$counts
+    if (!is.null(counts) && nrow(counts)) {
+        counts$coverage_floor <- coverage_floor %||% NA_real_
+        if (is.null(counts$status)) counts$status <- rep("graded", nrow(counts))
+        tested <- !is.na(counts$coverage_tested) & counts$status %in% c("graded", "untested")
+        counts$status[tested] <- ifelse(
+            counts$coverage_tested[tested] < (coverage_floor %||% -Inf),
+            "untested", "graded")
+        diagnostics$counts <- counts
+    }
     structure(
         list(
             verdicts    = verdicts,
             evidence    = bundle,
-            diagnostics = bundle$diagnostics,
+            diagnostics = diagnostics,
             ## What was asked, so a reader can reproduce the decision without
             ## reading the call that made it.
             parameters  = list(
@@ -495,7 +504,7 @@ sources_source <- function(src) {
                 design          = bundle$input$design
             ),
             provenance  = list(
-                evidence_sha = .adjudication_sha(bundle),
+                evidence_sha = .adjudication_sha(bundle, min_independent, coverage_floor),
                 call         = deparse(sys.call(-1L))[1],
                 time         = as.character(Sys.time())
             )
@@ -506,10 +515,19 @@ sources_source <- function(src) {
 
 ## A fingerprint of the evidence, not of the run.
 ##
-## Everything in this list changes only when the input or the collections
-## change. `bundles` are in a fixed order after the sort, so two runs over the
-## same list hash identically however they were invoked.
-.adjudication_sha <- function(bundle) {
+## Normalized evidence rows and decision parameters matter as well as the input:
+## the same genes can produce a different answer when the evidence changes.
+.adjudication_sha <- function(bundle, min_independent = 2,
+                              coverage_floor = bundle$input$design$coverage_floor) {
+    canonical_rows <- function(x) {
+        if (is.null(x)) return(NULL)
+        x <- x[, sort(names(x)), drop = FALSE]
+        rownames(x) <- NULL
+        keys <- vapply(seq_len(nrow(x)), function(i) rlang::hash(as.list(x[i, , drop = FALSE])), "")
+        x <- x[order(keys), , drop = FALSE]
+        rownames(x) <- NULL
+        x
+    }
     stable <- list(
         genes    = sort(bundle$input$genes),
         universe = sort(bundle$input$universe),
@@ -520,7 +538,12 @@ sources_source <- function(src) {
         up       = sort(bundle$input$up %||% character(0)),
         down     = sort(bundle$input$down %||% character(0)),
         upstream = sort(bundle$provenance$upstream),
-        release  = sort(bundle$provenance$release)
+        release  = sort(bundle$provenance$release),
+        regulators = canonical_rows(bundle$regulators),
+        coverage = canonical_rows(bundle$diagnostics$counts),
+        design = bundle$input$design,
+        min_independent = min_independent,
+        coverage_floor = coverage_floor
     )
     rlang::hash(stable)
 }

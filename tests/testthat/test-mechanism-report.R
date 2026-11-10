@@ -40,12 +40,12 @@ test_that("no concept-side failure is turned into an experiment", {
     expect_true(all(!concept$unlocks))
 })
 
-test_that("verdict classes split supported, excluded and undetermined", {
+test_that("verdict classes split supported, conflicting and undetermined", {
     pe <- rbind(.make_pe("A", "perturbation-supported", NA),
                 .make_pe("B", "direction-conflict", "direction-conflict"),
                 .make_pe("C", "unsupported", "too-small"))
     expect_equal(clusterProfiler:::.mechanism_verdict_class(pe),
-                 c("supported", "excluded", "undetermined"))
+                 c("supported", "conflicting", "undetermined"))
 })
 
 test_that("a single cell line is reported as a gap, with the tissue when known", {
@@ -57,7 +57,7 @@ test_that("a single cell line is reported as a gap, with the tissue when known",
     g <- clusterProfiler:::.mechanism_gap_table(inv, "GR", list(tissue = "Airway"))
     expect_equal(g$n_datasets[1], 1L)
     expect_equal(g$n_cell_lines[1], 1L)
-    expect_match(g$gap[1], "no dataset from Airway")
+    expect_match(g$gap[1], "no available dataset from Airway")
     expect_match(g$gap[1], "Kidney")
 })
 
@@ -75,15 +75,17 @@ test_that("the report ranks only fixable actions and keeps concept rows out", {
     expect_s3_class(rep, "mechanismReport")
     expect_equal(rep$next_steps$unlocks[1], 2L)
     expect_true(all(rep$next_steps$side %in% c("data", "analysis")))
-    expect_equal(sum(rep$verdicts$class == "undetermined"), 2L)
-    expect_equal(sum(rep$verdicts$class == "excluded"), 1L)
+    expect_equal(sum(rep$verdicts$class == "undetermined"), 3L)
+    expect_equal(sum(rep$verdicts$class == "conflicting"), 0L)
 })
 
-test_that("the report says plainly when nothing would change the verdicts", {
+test_that("the report does not mistake nonsignificance for exclusion", {
     pe <- .make_pe("C", "coherent-refuted", "not-significant")
     rep <- mechanism_report(pe, drivers = character(0))
     expect_equal(nrow(rep$next_steps), 0L)
-    expect_match(rep$summary[length(rep$summary)], "No experiment")
+    expect_equal(rep$verdicts$class, "undetermined")
+    expect_match(rep$summary[length(rep$summary)], "does not rule out")
+    expect_false(any(grepl("No experiment would change", rep$summary)))
 })
 
 test_that("a blocked preflight stops the report from recommending experiments", {
@@ -98,7 +100,8 @@ test_that("a blocked preflight stops the report from recommending experiments", 
     rep <- mechanism_report(pe, drivers = character(0), preflight = pf)
     expect_equal(nrow(rep$next_steps), 0L)
     expect_match(paste(rep$summary, collapse = " "), "attribution is not supported")
-    expect_match(paste(rep$summary, collapse = " "), "No experiment would change")
+    expect_match(paste(rep$summary, collapse = " "), "present evidence limit")
+    expect_false(any(grepl("No experiment would change", rep$summary)))
     rep2 <- mechanism_report(pe, drivers = character(0))
     expect_gt(nrow(rep2$next_steps), 0L)
 })
@@ -111,7 +114,7 @@ test_that("print covers the three sections and the inventory", {
         tissue = "Kidney", n_samples = 3, stringsAsFactors = FALSE))
     out <- capture.output(print(rep))
     expect_true(any(grepl("mechanism report", out)))
-    expect_true(any(grepl("excluded", out)))
+    expect_true(any(grepl("conflicting", out)))
     expect_true(any(grepl("undetermined", out)))
     expect_true(any(grepl("driver inventory", out)))
     expect_true(any(grepl("next experiment", out)))
@@ -133,8 +136,7 @@ test_that("direction-conflict is not sold as a data gap", {
 })
 
 test_that("drivers whose target sets overlap are put in one module", {
-    ## 旁系同源 / 同复合物 / 并行支路本来就不能用表达实验分开。
-    ## 报一个模块比给一个假的精确排名诚实。
+    ## Unsigned overlap is a descriptive neighbourhood, not indistinguishability.
     net <- data.frame(
         source = c(rep("HIF1A", 5), rep("EPAS1", 4), rep("ATF4", 5)),
         target = c("a","b","c","d","e", "a","b","c","f", "g","h","i","j","k"),
@@ -216,5 +218,102 @@ test_that("modules and warnings are printed once each, not once per pathway", {
                       dataset_id = c("d1","d2"), stringsAsFactors = FALSE)
     out <- capture.output(print(mechanism_report(x, inventory = inv, network = net)))
     expect_equal(sum(grepl("^    \\{", out)), 1L)          # 只有一组
-    expect_equal(sum(grepl("^    ATF6: knocking down", out)), 1L)
+    expect_equal(sum(grepl("^    ATF6: available perturbations", out)), 1L)
+})
+
+test_that("support does not promise that future experiments are useless", {
+    pe <- .make_pe("A", "perturbation-supported", NA, driver = "TF")
+    inv <- data.frame(perturbed_gene = "TF", dataset_id = "d", cell_line = "A")
+    out <- mechanism_report(pe, inventory = inv)
+    expect_equal(out$verdicts$class, "supported")
+    expect_false(any(grepl("No experiment would change|cannot be told apart|drags any pathway", out$summary)))
+    expect_match(paste(out$summary, collapse = " "), "not identification")
+    expect_match(out$next_steps$action, "independent perturbation")
+})
+
+test_that("all candidates retain supporting, conflicting and failed tests", {
+    pe <- .make_pe("A", "perturbation-supported", NA, driver = "TF1")
+    tests <- data.frame(pathway = "p", driver = c(rep("TF1", 4), "TF2", "TF3"),
+        dataset = paste0("d", 1:6), cell_line = c("A", "B", "C", NA, "D", ""),
+        es = c(-1, -1, 1, NA, 0.1, NA), padj = c(.01, .01, .01, NA, .8, NA),
+        status = c("supports", "supports", "conflicts", "failed", "not-significant", "not-computable"),
+        direction = "up", stringsAsFactors = FALSE)
+    attr(pe, "perturbation_tests") <- tests
+    inv <- data.frame(perturbed_gene = c("TF1", "TF2", "TF3"), dataset_id = paste0("i", 1:3), cell_line = "A")
+    out <- mechanism_report(pe, inventory = inv)
+    expect_identical(out$perturbation_tests, tests)
+    expect_equal(out$candidate_evidence$driver, c("TF1", "TF2", "TF3"))
+    expect_equal(out$candidate_evidence$n_support, c(2L, 0L, 0L))
+    expect_equal(out$candidate_evidence$n_conflict, c(1L, 0L, 0L))
+    expect_equal(out$candidate_evidence$n_failed, c(1L, 0L, 0L))
+    expect_equal(out$candidate_evidence$assessment, c("mixed", "no-significant-support", "unavailable"))
+    expect_equal(out$candidate_evidence$supporting_cells[1], "A, B")
+    expect_match(paste(out$summary, collapse = " "), "both supporting and conflicting")
+    expect_match(paste(capture.output(print(out)), collapse = " "), "support / conflict / failed")
+    expect_setequal(out$gaps$driver, c("TF1", "TF2", "TF3"))
+})
+
+test_that("neighbourhood and breadth flags do not claim causal equivalence", {
+    pe <- .make_pe("A", "perturbation-supported", NA, driver = "A")
+    inv <- data.frame(perturbed_gene = c("A", "B"), dataset_id = c("d1", "d2"),
+                      n_up = c(2000, 1), n_down = c(2000, 1))
+    net <- data.frame(source = rep(c("A", "B"), each = 5), target = rep(letters[1:5], 2),
+                      weight = rep(c(1, -1), each = 5))
+    out <- mechanism_report(pe, drivers = c("A", "B"), inventory = inv, network = net)
+    expect_equal(out$verdicts$module_size, 2L)
+    expect_match(out$verdicts$global_effect_reason, "not proof of essentiality")
+    expect_match(paste(out$summary, collapse = " "), "do not establish indistinguishability")
+    expect_false(any(grepl("drags any pathway|cannot be told apart", out$summary)))
+    expect_error(mechanism_report(pe, inventory = inv, network = net, min_overlap = NA_real_), "min_overlap")
+    expect_error(mechanism_report(pe, inventory = inv, global_effect_de = -1), "global_effect_de")
+})
+
+test_that("breadth lookup resolves driver aliases", {
+    inv <- data.frame(perturbed_gene = "NR3C1", n_up = 2000, n_down = 2000)
+    x <- clusterProfiler:::.mechanism_global_effect(inv, c("GR", "NR3C1"))
+    expect_equal(unname(x), c(4000, 4000))
+})
+
+test_that("unknown inventories cannot be reported as globally absent", {
+    inv <- data.frame(perturbed_gene = character(), dataset_id = character(), cell_line = character())
+    attr(inv, "query_status") <- data.frame(driver = c("A", "B"), status = c("failed", "empty"), message = c("outage", ""))
+    pe <- .make_pe("C", "unsupported", "no-dataset")
+    out <- mechanism_report(pe, drivers = c("A", "B"), inventory = inv)
+    expect_true(is.na(out$gaps$n_datasets[1]))
+    expect_equal(out$gaps$n_datasets[2], 0L)
+    expect_match(out$gaps$gap[1], "coverage unknown")
+    expect_match(out$gaps$gap[2], "resolved by this query")
+    attr(inv, "query_status") <- NULL
+    supplied <- mechanism_report(pe, drivers = "A", inventory = inv[0, ])
+    expect_match(supplied$gaps$gap, "supplied inventory")
+})
+
+test_that("unresolved requested drivers remain visible in report gaps", {
+    pe <- .make_pe("C", "unsupported", "no-dataset")
+    attr(pe, "drivers") <- c("TF1", "TF2")
+    attr(pe, "perturbation_tests") <- clusterProfiler:::.pathway_perturbation_tests_empty()
+    inv <- data.frame(perturbed_gene = character(), dataset_id = character(), cell_line = character())
+    out <- mechanism_report(pe, inventory = inv)
+    expect_equal(out$gaps$driver, c("TF1", "TF2"))
+    expect_equal(out$gaps$n_datasets, c(0L, 0L))
+    expect_true(all(grepl("supplied inventory", out$gaps$gap)))
+})
+
+test_that("a row subset cannot import unrelated pathway conflicts", {
+    pe <- .make_pe("A", "perturbation-supported", NA, driver = "TF1", pathway = "p1")
+    attr(pe, "perturbation_tests") <- data.frame(pathway = c("p1", "p2", "p2"),
+        driver = c("TF1", "TF2", "TF2"), dataset = c("d1", "d2", "d3"),
+        cell_line = c("A", "B", "C"), status = c("supports", "supports", "conflicts"))
+    inv <- data.frame(perturbed_gene = c("TF1", "TF2"))
+    out <- mechanism_report(pe, inventory = inv)
+    expect_equal(out$candidate_evidence$driver, "TF1")
+    expect_equal(out$perturbation_tests$pathway, "p1")
+    expect_false(any(grepl("both supporting and conflicting", out$summary)))
+})
+
+test_that("empty report exposes a stable candidate evidence schema", {
+    out <- mechanism_report(data.frame())
+    expect_equal(nrow(out$candidate_evidence), 0L)
+    expect_true(all(c("pathway", "driver", "n_support", "n_conflict", "assessment") %in% names(out$candidate_evidence)))
+    expect_false(any(grepl("No experiment would change", out$summary)))
 })

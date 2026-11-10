@@ -21,7 +21,9 @@ correlation is what separates a factor's targets from everything else.}
 \item{network}{Data frame of transcription factor targets with columns
 `source` (factor), `target` (gene symbol) and optionally `weight`
 (positive for activation targets, negative for repression targets; 1 when
-absent). CollecTRI and DoRothEA can be exported in this shape.}
+absent). CollecTRI and DoRothEA can be exported in this shape. Identical
+repeated edges are deduplicated; conflicting weights for the same
+source-target pair are rejected rather than resolved by row order.}
 
 \item{top}{Integer. How many candidates to return.}
 
@@ -60,23 +62,21 @@ named candidate against measured perturbation data.
 \details{
 The score is the t-value of that correlation. **A positive score means the
 factor looks active in this experiment, a negative one means repressed.**
-The ranking is not a verdict. On 17 benchmark condition experiments, 14 of
-the drivers are present in a typical network; among those the true driver was
-ranked first 43% of the time, in the top five 71%, and in the top ten 93%
-(median rank 2). The other three drivers are absent from CollecTRI, which is
-the honest limit of this stage: a network without the factor cannot rank it.
-Treat the output as a shortlist to verify, never as an answer.
+The ranking is not a verdict. In a frozen exploratory corpus of 17 profiles,
+all 17 expected drivers were present and scorable with CollecTRI. Using the
+default signed ranking, expected-label hit counts were 6/17 at rank one,
+10/17 in the top five and 13/17 in the top ten. The corpus includes one
+knockout and repeated studies/drivers; these are not independent validation
+estimates or proof of unique causal identification. A rank outside the first
+twenty must not be counted as network absence. Treat the output as a shortlist.
 
-The score rises with the number of annotated targets, and not only for the
-real driver: among candidates that are not the driver, the correlation
-between score and target count is still about 0.24. A large target set
-captures broad transcriptional programmes, so a pleiotropic factor scores
-well whether or not it caused this response. `n_targets` and `share` are
-reported so that this can be judged; it is deliberately not corrected. We
-tried weighting the score by target count in both directions: rewarding it
-lifts the benchmarks only because their true drivers are the heavily studied
-genes, and penalising it demotes real drivers whose target set is small
-(XBP1 has 41 targets here and fell from rank 3 to 6).
+In the truncated top-twenty candidate pool, score and measured target count
+were positively associated, including among non-reference candidates
+(Spearman correlation about 0.24). This selected-pool observation does not
+establish a general size bias or show whether annotation depth, correlated
+targets or biology explains it. `n_targets` and `share` disclose coverage.
+No target-count weight is applied: exploratory adjustments have not been
+independently validated.
 }
 \examples{
 set.seed(2)

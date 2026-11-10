@@ -122,6 +122,50 @@ test_that("datasets with no measured members do not inflate k", {
     expect_equal(out$grade, "consistent")   # k < 3，不能判 reproduces
 })
 
+test_that("finite member floors apply separately to every dataset", {
+    prof <- matrix(c(-1, NA, Inf), 3, 3,
+                   dimnames = list(c("g1", "g2", "g3"), c("a", "b", "c")))
+    meta <- data.frame(dataset = c("a", "b", "c"), driver = "TF1",
+                       biosample = c("A", "B", "C"))
+    out <- mechanism_reproduction(prof, meta, list(pw = rownames(prof)))
+    expect_equal(out$k, 0L)
+    expect_equal(out$n_biosamples, 0L)
+    expect_equal(out$grade, "not-computable")
+    prof[, 1] <- -1
+    out <- mechanism_reproduction(prof, meta, list(pw = rownames(prof)))
+    expect_equal(out$k, 1L)
+    expect_equal(out$grade, "not-computable")
+})
+
+test_that("missing biosamples never demonstrate independent reproduction", {
+    prof <- matrix(-1, 3, 3,
+                   dimnames = list(c("g1", "g2", "g3"), c("a", "b", "c")))
+    meta <- data.frame(dataset = c("a", "b", "c"), driver = "TF1")
+    out <- mechanism_reproduction(prof, meta, list(pw = rownames(prof)))
+    expect_true(is.na(out$n_biosamples))
+    expect_equal(out$grade, "consistent")
+    for (bio in list(c("A", NA, NA), c("A", "", "  "), rep(NA_character_, 3))) {
+        meta$biosample <- bio
+        out <- mechanism_reproduction(prof, meta, list(pw = rownames(prof)))
+        expect_lte(out$n_biosamples, 1L)
+        expect_equal(out$grade, "consistent")
+    }
+})
+
+test_that("dataset identities cannot inflate reproduction counts", {
+    prof <- matrix(-1, 3, 2,
+                   dimnames = list(c("g1", "g2", "g3"), c("a", "b")))
+    meta <- data.frame(dataset = c("a", "b"), driver = "TF1", biosample = c("A", "B"))
+    out <- mechanism_reproduction(prof, rbind(meta, meta[1, ]), list(pw = rownames(prof)))
+    expect_equal(out$k, 2L)
+    expect_equal(out$grade, "consistent")
+    conflict <- meta[1, ]; conflict$biosample <- "C"
+    expect_error(mechanism_reproduction(prof, rbind(meta, conflict), list(pw = rownames(prof))),
+                 "inconsistent duplicate")
+    colnames(prof) <- c("a", "a")
+    expect_error(mechanism_reproduction(prof, meta, list(pw = rownames(prof))), "unique")
+})
+
 test_that("reproduction rows are matched through driver aliases", {
     ## GPSAdb 返回 NR3C1，用户的表可能用别名 GR 建成。不解析会静默退回默认措辞，
     ## 而这恰好是 P4 里两个 B 级案例（airway / GSE286890）的驱动者。

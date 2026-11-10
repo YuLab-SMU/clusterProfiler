@@ -1,5 +1,30 @@
 library(testthat)
 
+test_that("measured-only admitted evidence reaches the prompt without enrichment objects", {
+  r <- data.frame(regulator = "FOXO3", source = "perturbagen", term = "D1",
+                  named = TRUE, level = "A", padj_within_source = 1e-6,
+                  setSize = 8L, Count = 5L, family = FALSE,
+                  evidence_kind = "measured", direction = "down", method = "knockout")
+  ev <- structure(list(regulators = r, perturbagen = r,
+                       provenance = list(upstream = "perturbagen")),
+                  class = c("evidenceBundle", "list"))
+  cv <- data.frame(regulator = "FOXO3", verdict = "single_source", max_level = "A",
+                   sources = "perturbagen")
+  expect_equal(nrow(evidence_admitted(ev, verdicts = cv)), 1L)
+  prompt_input <- .process_evidence_input(ev, verdicts = cv)
+  expect_named(prompt_input, "perturbagen")
+  expect_match(prompt_input$perturbagen$Description, "FOXO3.*D1.*direction down")
+  expect_equal(nrow(process_enrichment_input(prompt_input, n_pathways = 20)[[1]]$df), 1L)
+  rejected <- r
+  rejected$regulator <- "MYC"
+  ev$regulators <- ev$perturbagen <- rbind(r, rejected)
+  cv <- rbind(cv, transform(cv, regulator = "MYC", verdict = "absent"))
+  expect_equal(nrow(.process_evidence_input(ev, verdicts = cv)$perturbagen), 1L)
+  expect_identical(evidence_excluded(ev, verdicts = cv)$regulator, "MYC")
+  cv$verdict <- "absent"
+  expect_null(.process_evidence_input(ev, verdicts = cv))
+})
+
 make_entrez_enrich <- function() {
   df <- data.frame(
     ID = c("GO:0006915", "GO:0008284"),

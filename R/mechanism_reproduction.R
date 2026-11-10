@@ -39,11 +39,11 @@
 #'   (one dataset is trivially concordant), so the pair is reported as
 #'   `not-computable`.
 #' @param min_biosamples Integer. A row only counts as reproduced when the
-#'   supporting datasets come from at least this many distinct biosamples.
-#' @param min_genes Integer. A pathway with fewer measured members than this is
-#'   reported as `not-computable`: the mean of one or two genes is noise, not a
-#'   shift. The etoposide dataset in our own benchmark has pathways of 1-2
-#'   members, which is exactly why this floor exists.
+#'   supporting datasets come from at least this many distinct known biosamples.
+#'   Missing or blank biosamples do not establish independent replication.
+#' @param min_genes Integer. Datasets with fewer finite pathway members than this
+#'   are excluded before counting `k` or computing concordance. A pair with fewer
+#'   than `min_datasets` remaining is reported as `not-computable`.
 #' @param max_log2fc Optional numeric. When given and `meta` has a `logFC`
 #'   column, datasets weaker than this knockdown are dropped before scoring.
 #'
@@ -75,8 +75,13 @@ mechanism_reproduction <- function(profiles, meta, pathways, drivers = NULL,
         stop("`meta` must have `dataset` and `driver` columns.", call. = FALSE)
     if (!is.list(pathways) || is.null(names(pathways)))
         stop("`pathways` must be a named list of gene vectors.", call. = FALSE)
+    if (anyDuplicated(rownames(profiles)) || anyDuplicated(colnames(profiles)))
+        stop("`profiles` must have unique gene and dataset names.", call. = FALSE)
     meta$dataset <- as.character(meta$dataset)
     meta$driver <- as.character(meta$driver)
+    meta <- unique(meta)
+    if (anyDuplicated(meta$dataset))
+        stop("`meta` has inconsistent duplicate dataset identities.", call. = FALSE)
     meta <- meta[meta$dataset %in% colnames(profiles), , drop = FALSE]
     ## 敲低强度过滤。放在取子集之前，否则 k 会把弱敲低的实验算进去——
     ## 实测 12 个驱动者里有 3 个（ARNT / ESR1 / NR3C1）全部实验都弱于 −1，
@@ -97,26 +102,17 @@ mechanism_reproduction <- function(profiles, meta, pathways, drivers = NULL,
         for (dr in drivers) {
             n <- n + 1L
             sel <- meta[meta$driver == dr, , drop = FALSE]
-            k_declared <- nrow(sel)
-            nb <- if (has_bio) length(unique(sel$biosample)) else NA_integer_
-            if (k_declared < min_datasets || length(members) < min_genes) {
-                rows[[n]] <- data.frame(
-                    driver = dr, pathway = p, k = k_declared, n_biosamples = nb,
-                    n_genes = length(members), concordance = NA_real_,
-                    majority_sign = NA_integer_, grade = "not-computable",
-                    stringsAsFactors = FALSE)
-                next
-            }
             sub <- profiles[members, sel$dataset, drop = FALSE]
+            finite <- is.finite(sub)
+            sub[!finite] <- NA_real_
             shift <- colMeans(sub, na.rm = TRUE)
-            ## 一列在该通路上全为 NA 时 colMeans 给 NaN/Inf，必须连同它的元数据
-            ## 一起丢掉。否则 k 会虚高，而 `reproduces` 的 k >= 3 判据用的是虚高的数
-            ## ——实测 3 列里 1 列全 NA 会仍被判 reproduces。
-            ok <- is.finite(shift)
+            ## The member floor applies to each contributing dataset, not matrix rows.
+            ok <- colSums(finite) >= min_genes & is.finite(shift)
             shift <- shift[ok]
             sel <- sel[ok, , drop = FALSE]
-            k <- nrow(sel)                       # 真正参与评分的数据集数
-            nb <- if (has_bio) length(unique(sel$biosample)) else NA_integer_
+            k <- nrow(sel)
+            bio <- if (has_bio) trimws(as.character(sel$biosample)) else character(0)
+            nb <- if (has_bio) length(unique(bio[!is.na(bio) & nzchar(bio)])) else NA_integer_
             if (k < min_datasets) {
                 rows[[n]] <- data.frame(
                     driver = dr, pathway = p, k = k, n_biosamples = nb,
@@ -138,7 +134,7 @@ mechanism_reproduction <- function(profiles, meta, pathways, drivers = NULL,
             } else {
                 conc <- mean(s == maj)
                 grade <- if (conc >= 0.9 && k >= 3L &&
-                             (is.na(nb) || nb >= min_biosamples)) "reproduces"
+                             !is.na(nb) && nb >= min_biosamples) "reproduces"
                          else if (conc >= 0.5) "consistent"
                          else "not-reproduced"
             }

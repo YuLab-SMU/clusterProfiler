@@ -23,8 +23,9 @@ An S3 object of class `adjudication` with `verdicts`, `evidence`,
   `measured_direction`, `perturbation_effect` and `writable` (the sentence
   the evidence permits; see [mechanism_writable()]).
 
-  `$provenance$evidence_sha` fingerprints the genes, the background, the
-  collections and their release -- and deliberately not the time, so two runs
+  `$provenance$evidence_sha` fingerprints the genes, background, normalized
+  evidence rows, coverage, design, decision parameters and collection release
+  -- and deliberately not the time, so two runs
   over the same evidence hash alike and a comparison means "same evidence"
   rather than "same moment".
 

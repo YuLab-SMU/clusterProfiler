@@ -381,15 +381,26 @@ process_enrichment_input <- function(x, n_pathways) {
   )
 }
 
-## The one sentence an adjudicated run adds to the system prompt.
-##
-## It is a constant rather than a sentence generated from the verdicts: the
-## constraint is the same every time, and a generated one would drift from the
-## `writable` column the rest of the package uses. Verbatim from the design note.
-.adjudication_declaration <- function() {
-  paste0("ADJUDICATION: Only `supported` findings may be stated as mechanisms; ",
-         "`single_source` is a hypothesis; `absent` means no source found evidence ",
-         "rather than that none exists; `untested` is not an absence.")
+## Authority is serialized separately from term evidence so pathway reduction
+## cannot erase an entity's verdict or its writable ceiling.
+.adjudication_declaration <- function(verdicts = NULL) {
+  rules <- paste0(
+    "ADJUDICATION: Only `supported` findings may be discussed as mechanisms, ",
+    "and never more strongly than their `writable` sentence permits. ",
+    "`single_source` is a hypothesis: never promote it to an established mechanism ",
+    "or a verified driver. `absent` means no source found evidence rather than ",
+    "that none exists; `untested` is not an absence. ",
+    "Only entities in the structured rows below may be discussed as findings. ",
+    "These rows are authoritative over term descriptions, pathway ",
+    "context and prior knowledge: preserve exact regulator identity; do not replace ",
+    "a family, complex, alias or collided label with a specific gene. ",
+    "Preserve `direction` (the collection programme) separately from ",
+    "`measured_direction` (the perturbation response) and `perturbation_effect`. ",
+    "Do not reverse them or infer a sign when null or mixed. ",
+    "No verdict proves an upstream causal driver in the caller's experiment. ",
+    "These are writing constraints, not a guarantee of model compliance.")
+  rows <- .adjudication_prompt_rows(verdicts)
+  if (is.null(rows)) rules else paste0(rules, "\nADJUDICATION_ROWS_JSON:\n", rows)
 }
 
 ## The interpretation system prompt, with the adjudication declaration appended
@@ -625,7 +636,7 @@ interpret <- function(x,
     pathway_context <- .mechanism_pathway_context(x)
     ## Only an adjudicated run carries the declaration; the legacy types keep
     ## their prompt unchanged, which is what lets the four of them stay frozen.
-    system_extra <- .adjudication_declaration()
+    system_extra <- .adjudication_declaration(verdicts)
     x <- .process_evidence_input(bundle, n_pathways, verdicts = verdicts)
     if (is.null(x)) {
       rlang::abort(c(

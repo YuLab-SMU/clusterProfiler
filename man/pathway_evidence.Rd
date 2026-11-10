@@ -51,7 +51,7 @@ of one line, because replication is what the grade turns on.}
 given, a level-B row whose only support is a single cell line is worded
 according to how many independent perturbation datasets agree: a pair that
 reproduces says so, a pair that does not reproduce is labelled unverified,
-and a pair with no second dataset stays "likely, but under-evidenced".}
+and a pair with no second dataset remains consistent but under-evidenced.}
 
 \item{n}{For `print()`, how many rows to show.}
 
@@ -69,10 +69,19 @@ A `data.frame`, one row per pathway, classed `pathway_evidence` so it
   transcription broadly, and four of thirty background drivers reached A on the
   hypoxia pilot. Read A as consistency worth following up, not as identification
   of the driver; the statement says as much. A level-B row distinguishes `coherent-untested` (no test
-  could run) from `coherent-refuted` (tests ran and none moved it), because
-  "untested" is untrue once the test has been done. When the answer cannot reach A for a structural reason the
-  call also warns, because an all-`C` table otherwise reads the same as a
-  tested-and-refuted one.
+  could run) from the legacy key `coherent-refuted` (tests ran but none reached
+  significance; this is not evidence of falsity). When the answer cannot reach A
+  for a structural reason the call also warns.
+  The `perturbation_tests` attribute is a data frame with character columns
+  `pathway`, `driver`, `dataset`, `cell_line`, `status`, `direction` and double
+  columns `es`, `padj`. It retains each candidate/dataset outcome, including
+  `supports` (significant, opposite the pathway direction), `conflicts`
+  (significant, same direction), `not-significant`, `failed`, and
+  `not-computable` (missing direction, missing/nonfinite statistics or zero ES).
+  These statuses describe consistency, not unique causal identification.
+  A known member support at or above `min_support` is required for promotion
+  based on significant perturbation evidence. Replication is counted within
+  the selected candidate only; contradictory datasets remain in the attribute.
 }
 \description{
 Test enriched pathways against measured perturbation data

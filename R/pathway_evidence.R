@@ -103,6 +103,17 @@
     if (is.null(d)) return(NULL)
     d <- d[!is.na(d$in_reference) & d$in_reference, , drop = FALSE]
     if (!nrow(d)) return(NULL)
+    d$cell_line <- trimws(as.character(d$cell_line))
+    d$cell_line[!is.na(d$cell_line) & !nzchar(d$cell_line)] <- NA_character_
+    identities <- split(d$cell_line, as.character(d$dataset_id))
+    conflicting <- names(identities)[vapply(identities, function(z) length(unique(z)) > 1L, TRUE)]
+    if (length(conflicting)) {
+        warning(sprintf("Ignoring GPSAdb dataset(s) with conflicting cell-line identities: %s.",
+                        paste(conflicting, collapse = ", ")), call. = FALSE)
+        d <- d[!d$dataset_id %in% conflicting, , drop = FALSE]
+    }
+    if (!nrow(d)) return(NULL)
+    d <- d[!duplicated(d$dataset_id), , drop = FALSE]
     ## 每个细胞系先留一份（样本多的），保证取到的几份尽量来自不同系——
     ## 复现判定看的是细胞系数，不是数据集数。
     d <- d[order(-d$n_samples), , drop = FALSE]
@@ -133,7 +144,7 @@
 ##   not-computable  → 与 not-reproduced 同口径，不能默认算通过
 .pe_single_line_statement <- function(gene, n_members, dataset, padj, row) {
     base <- sprintf(
-        "If %s drives this programme, knocking it down should move these %d members; %s does (padj %.2g) in the only cell line with data.",
+        "Knocking down candidate %s moves these %d members opposite the observed pathway direction in %s (padj %.2g), with one supporting cell line.",
         gene, n_members, dataset, padj)
     grade <- if (is.null(row) || !nrow(row)) NA_character_ else as.character(row$grade[1])
     if (!is.na(grade) && grade == "reproduces") {
@@ -145,10 +156,10 @@
         sprintf("%s The available perturbation data do not reproduce that shift (%d/%d agree), so treat this as unverified.",
                 base, agree, as.integer(row$k[1]))
     } else if (!is.na(grade) && grade == "not-computable") {
-        sprintf("%s No independent reproduction is available, so read this as likely, but under-evidenced.",
+        sprintf("%s No independent reproduction is available; this is consistent perturbation evidence, but under-evidenced, not identification of a driver.",
                 base)
     } else {
-        sprintf("%s That is a limit of the available data, not a reason to doubt it: read this as likely, but under-evidenced.",
+        sprintf("%s This is a limit of the available data: consistent perturbation evidence, but under-evidenced, not identification of a driver.",
                 base)
     }
 }
@@ -175,7 +186,7 @@
 #'   given, a level-B row whose only support is a single cell line is worded
 #'   according to how many independent perturbation datasets agree: a pair that
 #'   reproduces says so, a pair that does not reproduce is labelled unverified,
-#'   and a pair with no second dataset stays "likely, but under-evidenced".
+#'   and a pair with no second dataset remains consistent but under-evidenced.
 #' @param max_datasets_per_driver Cap on how many datasets are tested per driver.
 #'   Testing all of them is `n_drivers * n_datasets` calls and grows without
 #'   bound; six is enough to see two cell lines agree, which is all level A
@@ -194,10 +205,19 @@
 #'   transcription broadly, and four of thirty background drivers reached A on the
 #'   hypoxia pilot. Read A as consistency worth following up, not as identification
 #'   of the driver; the statement says as much. A level-B row distinguishes `coherent-untested` (no test
-#'   could run) from `coherent-refuted` (tests ran and none moved it), because
-#'   "untested" is untrue once the test has been done. When the answer cannot reach A for a structural reason the
-#'   call also warns, because an all-`C` table otherwise reads the same as a
-#'   tested-and-refuted one.
+#'   could run) from the legacy key `coherent-refuted` (tests ran but none reached
+#'   significance; this is not evidence of falsity). When the answer cannot reach A
+#'   for a structural reason the call also warns.
+#'   The `perturbation_tests` attribute is a data frame with character columns
+#'   `pathway`, `driver`, `dataset`, `cell_line`, `status`, `direction` and double
+#'   columns `es`, `padj`. It retains each candidate/dataset outcome, including
+#'   `supports` (significant, opposite the pathway direction), `conflicts`
+#'   (significant, same direction), `not-significant`, `failed`, and
+#'   `not-computable` (missing direction, missing/nonfinite statistics or zero ES).
+#'   These statuses describe consistency, not unique causal identification.
+#'   A known member support at or above `min_support` is required for promotion
+#'   based on significant perturbation evidence. Replication is counted within
+#'   the selected candidate only; contradictory datasets remain in the attribute.
 #' @export
 pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                              min_support = 0.5, max_pathways = 20L,
@@ -211,14 +231,14 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         warning(paste("The enrichment result holds no pathways, so there is nothing to score.",
                       "That is usually the condition experiment failing to concentrate its response,",
                       "not a fault in pathway_evidence."), call. = FALSE)
-        return(.pathway_evidence_empty())
+        return(.pathway_evidence_empty(drivers))
     }
     ## 守卫放在 `head()` **之后**。只放在前面时，`max_pathways = 0L` 会得到 0 行的 d，
     ## 后面的 `do.call(rbind, list())` 返回 NULL，`attr(out, ...)` 就报
     ## "attempt to set an attribute on NULL"——一条指不出原因的错误。
     max_pathways <- max(1L, as.integer(max_pathways)[1])
     d <- utils::head(d, max_pathways)
-    if (!nrow(d)) return(.pathway_evidence_empty())
+    if (!nrow(d)) return(.pathway_evidence_empty(drivers))
 
     ## 标识空间：**自动识别并翻译**，不让调用方每次自己 bitr。
     ##
@@ -266,7 +286,10 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     ## 一半是成员分散，没有"单一主导原因"，于是明明 GR 只有一个细胞系却没报。
     ## 判据放在这里更直接、也不会误报。
     if (length(sets)) {
-        cells_each <- vapply(sets, function(z) length(unique(stats::na.omit(z$cell_line))), 0L)
+        cells_each <- vapply(sets, function(z) {
+            cells <- trimws(as.character(z$cell_line))
+            length(unique(cells[!is.na(cells) & nzchar(cells)]))
+        }, 0L)
         if (all(cells_each < 2L)) {
             warning(sprintf(
                 "Level A is unreachable: %s has knockdown data in a single cell line, and level A requires two. Results here cannot exceed B.",
@@ -288,17 +311,32 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     memo <- new.env(parent = emptyenv())
     calls <- 0L
     fails <- 0L
+    perturbation_tests <- list()
+    record_test <- function(pathway, gene, id, cell, direction, got = NULL) {
+        es <- if (is.null(got$es)) NA_real_ else got$es
+        padj <- if (is.null(got$padj)) NA_real_ else got$padj
+        status <- if (isTRUE(got$.failed)) "failed"
+            else if (is.null(direction) || !is.finite(es) || !is.finite(padj) || es == 0) "not-computable"
+            else if (padj >= alpha) "not-significant"
+            else if ((direction == "up" && es < 0) ||
+                     (direction == "down" && es > 0)) "supports" else "conflicts"
+        perturbation_tests[[length(perturbation_tests) + 1L]] <<- data.frame(
+            pathway = pathway, driver = gene, dataset = id, cell_line = cell,
+            es = as.double(es), padj = as.double(padj), status = status,
+            direction = if (is.null(direction)) NA_character_ else direction,
+            stringsAsFactors = FALSE)
+    }
     ask <- function(id, members) {
         key <- paste0(id, "|", paste(sort(members), collapse = ","))
         if (!is.null(memo[[key]])) return(memo[[key]])
         calls <<- calls + 1L
-        r <- tryCatch(gpsadb::gpsadb_test_gene_set(id, members),
-                      error = function(e) NULL)
-        val <- if (is.null(r)) list(.failed = TRUE) else {
-            t <- as.data.frame(r[[1]])
-            if (!nrow(t)) list(.failed = TRUE) else
-                list(padj = as.numeric(t$padj[1]), es = as.numeric(t$es[1]))
-        }
+        val <- tryCatch({
+            r <- gpsadb::gpsadb_test_gene_set(id, members)
+            t <- if (length(r)) as.data.frame(r[[1]]) else data.frame()
+            if (!nrow(t)) list(padj = NA_real_, es = NA_real_) else
+                list(padj = if (length(t$padj)) as.numeric(t$padj[1]) else NA_real_,
+                     es = if (length(t$es)) as.numeric(t$es[1]) else NA_real_)
+        }, error = function(e) list(.failed = TRUE))
         if (isTRUE(val$.failed)) fails <<- fails + 1L
         memo[[key]] <- val
         val
@@ -319,6 +357,12 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         ##   * `signed` 给了但成员对半分 —— 测过了，它们没有共同方向，这是**测了不成立**。
         ## 混成一句"没有方向"会把后者说成缺失，与 `absent` / `untested` 分开是同一条纪律。
         if (is.null(direction)) {
+            for (g in names(sets)) {
+                for (j in seq_len(nrow(sets[[g]]))) {
+                    record_test(desc, g, as.character(sets[[g]]$dataset_id[j]),
+                                as.character(sets[[g]]$cell_line[j]), direction)
+                }
+            }
             untested <- is.null(signed) || !length(signed)
             ## 这里其实是**三个**结论，不是一个：
             ##   * 没给 `signed`            -> no-fold-changes（没测）
@@ -358,13 +402,14 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             for (j in seq_len(nrow(sets[[g]]))) {
                 id <- as.character(sets[[g]]$dataset_id[j])
                 got <- ask(id, members)
+                record_test(desc, g, id, as.character(sets[[g]]$cell_line[j]), direction, got)
                 n_attempt <- n_attempt + 1L
                 ## 调用失败与"调用成功但没结果"必须分开。
                 ## 原来两者都是 `next`，于是一次断网会让 `tested` 变空，
                 ## 再被解释成"成员方向不一致"——实测 HIF1A（4 个细胞系）在
                 ## 模拟断网下得到 `low-support`、零报警，用户看不出是网络问题。
                 if (isTRUE(got$.failed)) { n_fail <- n_fail + 1L; next }
-                if (is.na(got$padj)) next
+                if (!is.finite(got$padj) || !is.finite(got$es) || got$es == 0) next
                 ## 同一个数据集可能被两个驱动者指向同一个基因的别名，只记一次。
                 already <- vapply(tested, function(z) identical(z$dataset, id) &&
                                   identical(z$gene, g), TRUE)
@@ -397,15 +442,18 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         if (!is.null(best)) {
             want <- sign(best$es)
             cells_agree <- unique(vapply(tested, function(cand) {
+                if (!identical(cand$gene, best$gene)) return(NA_character_)
                 if (is.na(cand$padj) || cand$padj >= alpha) return(NA_character_)
                 if (is.na(cand$es) || sign(cand$es) != want) return(NA_character_)
                 cand$cell_line
             }, character(1)))
-            cells_agree <- cells_agree[!is.na(cells_agree)]
+            cells_agree <- trimws(cells_agree)
+            cells_agree <- unique(cells_agree[!is.na(cells_agree) & nzchar(cells_agree)])
         }
         replicated <- length(cells_agree) >= 2L
 
-        if (!is.null(best) && best$padj < alpha) {
+        if (!is.null(best) && best$padj < alpha &&
+            (!is.na(support) && support >= min_support)) {
             ## 显著性还不够：**方向必须对得上**。
             ## 通路往上走、驱动者被敲低，那这条通路应当**回落**（es < 0）——这说明
             ## 该因子在启动它。若敲低后通路反而**更往上**（es > 0），那它是在压制，
@@ -436,8 +484,14 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 best$gene, length(members), best$dataset, best$padj,
                 .pe_reproduction_row(best$gene, desc, reproduction))
             else sprintf(
-                "%s moves these %d members in the same direction the pathway already runs (padj %.2g), which reads as repression rather than drive.",
+                "%s moves these %d members in the same direction the pathway already runs (padj %.2g), consistent with repression rather than drive, not identification of a causal role.",
                 best$gene, length(members), best$padj)
+            conflicts <- sum(vapply(tested, function(cand) {
+                identical(cand$gene, best$gene) && cand$padj < alpha &&
+                    sign(cand$es) != sign(best$es)
+            }, TRUE))
+            if (conflicts > 0L) statement <- paste0(statement, sprintf(
+                " However, %d significant dataset(s) for this same candidate have the opposite effect; the evidence is contradictory across datasets.", conflicts))
             return(data.frame(
                 pathway = desc, direction = direction, n_members = length(members),
                 support = support, driver = best$gene, dataset = best$dataset,
@@ -504,8 +558,8 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         why_c <- if (is.na(support)) "no-members"
             else if (!is.na(blocked)) blocked
             else if (length(members) < 5L) "too-small"
-            else if (identical(dsrc, "members")) "member-derived"
             else if (support < min_support) "low-support"
+            else if (identical(dsrc, "members")) "member-derived"
             else if (!length(tested)) {
                 if (length(sets)) "too-small" else "no-dataset"
             } else "not-significant"
@@ -529,7 +583,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                                         100 * support, direction, 100 * min_support),
                 "no-test-completed" = "Every perturbation call for this pathway failed, so the absence of evidence may be an outage rather than a result.",
                 "no-dataset" = "No knockdown dataset was available for the candidate drivers, so the pathway was described but not tested.",
-                "not-significant" = sprintf("The drivers were tested against these %d members and none reached significance, so no driver is supported here.",
+                "not-significant" = sprintf("The candidates were tested against these %d members and none reached significance; this does not establish that their effects are absent.",
                                             length(members)),
                 "unsupported"),
             stringsAsFactors = FALSE)
@@ -543,8 +597,11 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     ## 以为做过一次验证。**一个恒定的空结论比没有这一列更误导。**
     ## 要恢复，先有能成立的第二来源，而不是先有这一列。
 
-    attr(out, "network_calls") <- calls
     out <- out[order(match(out$level, c("A", "B", "C")), -out$support), , drop = FALSE]
+    attr(out, "drivers") <- drivers
+    attr(out, "network_calls") <- calls
+    attr(out, "perturbation_tests") <- if (length(perturbation_tests))
+        do.call(rbind, perturbation_tests) else .pathway_perturbation_tests_empty()
 
     ## 结构性上限要**说出来**，不能只体现在等级上。
     ##
@@ -556,6 +613,9 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     outage <- calls > 0L && fails == calls
     if (outage) {
         warning(sprintf("All %d GPSAdb calls failed. No perturbation evidence was collected; every grade below reflects an outage, not the data. Check the connection and rerun.", calls),
+                call. = FALSE)
+    } else if (fails > 0L) {
+        warning(sprintf("%d of %d GPSAdb calls failed; perturbation evidence is incomplete. Inspect attr(result, 'perturbation_tests') and rerun.", fails, calls),
                 call. = FALSE)
     }
     ## 断网时不再重复第二条：`_pathway_warn_capped` 那句说的正是同一件事。
@@ -569,7 +629,13 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     out
 }
 
-.pathway_evidence_empty <- function() {
+.pathway_perturbation_tests_empty <- function() {
+    data.frame(pathway = character(), driver = character(), dataset = character(),
+               cell_line = character(), es = double(), padj = double(),
+               status = character(), direction = character(), stringsAsFactors = FALSE)
+}
+
+.pathway_evidence_empty <- function(drivers = NULL) {
     out <- data.frame(
         pathway = character(), direction = character(), n_members = integer(),
         support = numeric(), driver = character(), dataset = character(),
@@ -578,6 +644,9 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         n_cell_lines_supported = integer(),
         level = character(), verdict = character(), reason = character(),
         statement = character(), stringsAsFactors = FALSE)
+    attr(out, "drivers") <- drivers
+    attr(out, "network_calls") <- 0L
+    attr(out, "perturbation_tests") <- .pathway_perturbation_tests_empty()
     ## 与正常返回保持同一 class。不设的话空结果不走 print.pathway_evidence，
     ## 用户在同一函数上看到两种输出形态。
     class(out) <- c("pathway_evidence", "data.frame")
@@ -598,6 +667,15 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     needed <- c("pathway", "direction", "n_members", "support", "driver",
                 "cell_line", "es", "padj", "level", "reason", "statement")
     out <- NextMethod()
+    if (is.data.frame(out)) {
+        attr(out, "drivers") <- attr(x, "drivers", exact = TRUE)
+        ledger <- attr(x, "perturbation_tests", exact = TRUE)
+        row_subset <- !missing(i) && (nargs() - !missing(drop) >= 3L)
+        if (is.data.frame(ledger) && row_subset) {
+            pathways <- if ("pathway" %in% names(out)) out$pathway else x$pathway[i]
+            attr(out, "perturbation_tests") <- ledger[ledger$pathway %in% pathways, , drop = FALSE]
+        }
+    }
     if (is.data.frame(out) && !all(needed %in% names(out))) {
         class(out) <- "data.frame"
     }
@@ -653,15 +731,14 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
 
 ## 把通路结果里的成员 ID 统一到符号空间。
 ##
-## 判定：取前若干通路的成员，若**全部**是纯数字，就认定是 Entrez 并翻译。
+## 判定：取全部待报告通路的成员，若**全部**是纯数字，就认定是 Entrez 并翻译。
 ## 只做这一种判定，因为 Entrez/RefSeq/Ensembl 之外没有常见的纯数字形态，
 ## 而猜错的代价（静默全空）比不猜的代价（要求调用方自己转）大得多。
 ##
 ## 翻译失败时**原样返回**，让后面的守卫去报错——错误信息在那里更完整。
 .pathway_ids_to_symbols <- function(d, signed) {
     if (is.null(d) || !nrow(d) || !"geneID" %in% names(d)) return(d)
-    probe <- utils::head(d$geneID, 5L)
-    toks <- unique(unlist(strsplit(as.character(probe), "/")))
+    toks <- unique(trimws(unlist(strsplit(as.character(d$geneID), "/"))))
     toks <- toks[nzchar(toks) & !is.na(toks)]
     if (!length(toks) || !all(grepl("^[0-9]+$", toks))) return(d)
     ## 已经是数字、且 signed 也是数字时不用转，两者本来就同空间。
@@ -675,7 +752,7 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
     if (is.null(conv) || !nrow(conv)) return(d)
     map <- stats::setNames(as.character(conv$SYMBOL), as.character(conv$ENTREZID))
     d$geneID <- vapply(strsplit(as.character(d$geneID), "/"), function(ids) {
-        sym <- unname(map[ids])
+        sym <- unname(map[trimws(ids)])
         paste(stats::na.omit(sym), collapse = "/")
     }, character(1))
     d[nzchar(d$geneID), , drop = FALSE]
@@ -701,7 +778,7 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
     who <- paste0("`", paste(drivers, collapse = "`, `"), "`")
     msg <- switch(unique(rs),
         "single-cell-line" = sprintf(
-            "level A is unreachable: %s has knockdown data in one cell line, and level A needs two. Everything is capped at B.",
+            "level A was not reached: %s has direction-consistent significant evidence in only one cell line for the selected candidate; level A needs two for that same candidate.",
             who),
         "no-dataset" = sprintf(
             "level A is unreachable: GPSAdb returned no knockdown dataset for %s. The pathways are described, not tested.",

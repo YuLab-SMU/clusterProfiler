@@ -34,12 +34,12 @@ driver present in `meta`.}
 `not-computable`.}
 
 \item{min_biosamples}{Integer. A row only counts as reproduced when the
-supporting datasets come from at least this many distinct biosamples.}
+supporting datasets come from at least this many distinct known biosamples.
+Missing or blank biosamples do not establish independent replication.}
 
-\item{min_genes}{Integer. A pathway with fewer measured members than this is
-reported as `not-computable`: the mean of one or two genes is noise, not a
-shift. The etoposide dataset in our own benchmark has pathways of 1-2
-members, which is exactly why this floor exists.}
+\item{min_genes}{Integer. Datasets with fewer finite pathway members than this
+are excluded before counting `k` or computing concordance. A pair with fewer
+than `min_datasets` remaining is reported as `not-computable`.}
 
 \item{max_log2fc}{Optional numeric. When given and `meta` has a `logFC`
 column, datasets weaker than this knockdown are dropped before scoring.}

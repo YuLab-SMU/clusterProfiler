@@ -43,8 +43,6 @@ NULL
     sources <- intersect(x$provenance$upstream, names(x))
     sources <- sources[vapply(sources, function(s) inherits(x[[s]], c("enrichResult",
                                                                      "gseaResult")), TRUE)]
-    if (!length(sources)) return(NULL)
-
     admitted <- evidence_admitted(x, verdicts = verdicts)
     out <- vector("list", length(sources))
     names(out) <- sources
@@ -76,7 +74,9 @@ mechanism_measured_prompt_rows <- function(x, admitted) {
     if (!length(keep)) return(mechanism_empty_rows())
 
     m <- x$perturbagen
-    m <- m[m$term %in% keep, , drop = FALSE]
+    allowed <- admitted[admitted$source == "perturbagen", , drop = FALSE]
+    m <- m[paste(m$regulator, m$term) %in%
+               paste(allowed$regulator, allowed$term), , drop = FALSE]
     if (!is.null(m$padj_within_source) && nrow(m)) {
         m <- m[mechanism_significant(m), , drop = FALSE]
     }
@@ -118,6 +118,19 @@ mechanism_measured_prompt_rows_cols <- function(n) {
     )
 }
 
+## Structured authority travels in the system declaration, outside pathway
+## truncation/reduction. This constrains the request, not the model's compliance.
+.adjudication_prompt_rows <- function(verdicts = NULL) {
+    if (is.null(verdicts) || !nrow(verdicts)) return(NULL)
+    verdicts <- verdicts[verdicts$verdict %in% c("supported", "single_source") &
+                             verdicts$max_level %in% c("A", "B"), , drop = FALSE]
+    fields <- intersect(c("regulator", "verdict", "max_level", "sources", "family",
+                          "evidence_kind", "direction", "measured_direction",
+                          "perturbation_effect", "writable"), names(verdicts))
+    as.character(jsonlite::toJSON(verdicts[, fields, drop = FALSE],
+                                  dataframe = "rows", na = "null", auto_unbox = TRUE))
+}
+
 ## The rows adjudicate() supports and the level allows.
 evidence_admitted <- function(x, min_independent = 2, verdicts = NULL) {
     r <- x$regulators
@@ -132,9 +145,16 @@ evidence_admitted <- function(x, min_independent = 2, verdicts = NULL) {
         !is.na(cv$max_level) & cv$max_level %in% c("A", "B")
     admitted_regulators <- cv$regulator[keep]
 
-    r[r$regulator %in% admitted_regulators &
-          r$named &
-          mechanism_significant(r), , drop = FALSE]
+    keep_rows <- r$regulator %in% admitted_regulators & r$named & mechanism_significant(r)
+    ## A live source admitting an entity must not smuggle in its excluded source.
+    if (!is.null(cv$sources)) {
+        allowed <- vapply(seq_len(nrow(r)), function(i) {
+            src <- cv$sources[match(r$regulator[i], cv$regulator)]
+            !is.na(src) && r$source[i] %in% strsplit(src, ",", fixed = TRUE)[[1]]
+        }, TRUE)
+        keep_rows <- keep_rows & allowed
+    }
+    r[keep_rows, , drop = FALSE]
 }
 
 ## Abbreviations that a regulator narrative uses as words. Kept local to this
@@ -176,14 +196,20 @@ evidence_excluded <- function(x, min_independent = 2, verdicts = NULL) {
     ## here would put the exclusion reason and the admitted set in disagreement.
     admitted <- evidence_admitted(x, min_independent = min_independent,
                                  verdicts = cv)
-    left <- r[!r$term %in% admitted$term, , drop = FALSE]
+    row_key <- function(z) paste(z$source, z$regulator, z$term, sep = "\r")
+    left <- r[!row_key(r) %in% row_key(admitted), , drop = FALSE]
     if (!nrow(left)) return(cbind(left, reason = character(0)))
 
-    reason <- vapply(left$regulator, function(one) {
+    reason <- vapply(seq_len(nrow(left)), function(i) {
+        one <- left$regulator[i]
         v <- cv$verdict[cv$regulator == one]
         lv <- cv$max_level[cv$regulator == one]
         if (!length(v)) return("not graded")
         if (!v %in% c("supported", "single_source")) return(v)
+        src <- cv$sources[cv$regulator == one]
+        if (length(src) && !left$source[i] %in% strsplit(src, ",", fixed = TRUE)[[1]]) {
+            return("source excluded by adjudication")
+        }
         if (is.na(lv)) return("no level")
         paste0("level ", lv)
     }, "")

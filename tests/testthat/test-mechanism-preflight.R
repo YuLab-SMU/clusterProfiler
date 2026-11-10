@@ -108,6 +108,67 @@ test_that("one under-covered candidate does not block the whole run", {
     expect_equal(pf$metrics$n_cell_lines, 2L)
 })
 
+test_that("absent reference candidates have known zero coverage and aliases resolve", {
+    ref <- .make_preflight_ref()
+    signed <- setNames(rep(2, 100), sprintf("G%03d", seq_len(100)))
+    pf <- mechanism_preflight(.make_ego(), signed, ref, drivers = "ABSENT")
+    expect_equal(pf$metrics$n_cell_lines, 0L)
+    expect_equal(pf$tier, "description")
+    expect_false(any(grepl("coverage-unknown", pf$reasons)))
+    ref$meta$perturbed_gene[ref$meta$perturbed_gene == "TF01"] <- "NR3C1"
+    pf <- mechanism_preflight(.make_ego(), signed, ref, drivers = "GR")
+    expect_equal(pf$metrics$n_cell_lines, 2L)
+    expect_equal(pf$tier, "attribution")
+})
+
+test_that("inventory lookup failures are unknown rather than absent", {
+    signed <- setNames(rep(2, 100), sprintf("G%03d", seq_len(100)))
+    for (lookup in list(function(...) NULL, function(...) stop("offline"))) {
+        testthat::local_mocked_bindings(.mechanism_inventory = lookup)
+        pf <- mechanism_preflight(.make_ego(), signed, drivers = "TF01")
+        expect_true(is.na(pf$metrics$n_cell_lines))
+        expect_equal(pf$tier, "description")
+        expect_true(any(grepl("coverage-unknown", pf$reasons)))
+    }
+})
+
+test_that("known empty inventory and unknown context are distinct", {
+    signed <- setNames(rep(2, 100), sprintf("G%03d", seq_len(100)))
+    for (query in c("empty", "failed", "unavailable", "unchecked")) {
+        testthat::local_mocked_bindings(.mechanism_inventory = function(...) {
+            inv <- data.frame(perturbed_gene = character(), cell_line = character())
+            if (query != "unchecked") attr(inv, "query_status") <-
+                data.frame(driver = "TF01", status = query, message = "")
+            inv
+        })
+        pf <- mechanism_preflight(.make_ego(), signed, drivers = "TF01")
+        expect_equal(pf$tier, "description")
+        if (query == "empty") {
+            expect_equal(pf$metrics$n_cell_lines, 0L)
+            expect_false(any(grepl("coverage-unknown", pf$reasons)))
+        } else {
+            expect_true(is.na(pf$metrics$n_cell_lines))
+            expect_true(any(grepl("coverage-unknown", pf$reasons)))
+        }
+    }
+    ref <- .make_preflight_ref()
+    ref$meta$cell_line[ref$meta$perturbed_gene == "TF01"] <- c("A", NA)
+    pf <- mechanism_preflight(.make_ego(), signed, ref, "TF01")
+    expect_true(is.na(pf$metrics$n_cell_lines))
+    expect_true(any(grepl("coverage-unknown", pf$reasons)))
+})
+
+test_that("unchecked gene counts and candidate coverage cannot approve attribution", {
+    signed <- setNames(rep(2, 100), sprintf("G%03d", seq_len(100)))
+    ref <- .make_preflight_ref()
+    pf <- mechanism_preflight(.make_ego(), signed, ref)
+    expect_equal(pf$tier, "description")
+    expect_true(any(grepl("coverage-unknown", pf$reasons)))
+    pf <- mechanism_preflight(.make_ego(), reference = ref, drivers = "TF01")
+    expect_equal(pf$tier, "description")
+    expect_true(any(grepl("up-genes-unknown", pf$reasons)))
+})
+
 test_that("min_cell_lines is not inherited from the global environment", {
     ## 旧实现用 exists("n_cell_lines_min") 做控制流，全局里恰好有个同名变量
     ## 就会被写进输出。改成显式 NA 初始化后，没算过就是没有这一列。

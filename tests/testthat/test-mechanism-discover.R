@@ -124,3 +124,22 @@ test_that("duplicated gene names are collapsed by largest |log2FC|", {
     expect_message(out <- mechanism_discover(signed, net, top = 1), "duplicated")
     expect_equal(attr(out, "n_genes"), 39L)
 })
+
+test_that("conflicting duplicate weights cannot be resolved by row order", {
+    signed <- setNames(c(rep(1, 5), rep(0, 15)), paste0("g", 1:20))
+    net <- data.frame(source = "TF", target = c(paste0("g", 1:5), "g1"),
+                      weight = c(rep(1, 5), -1))
+    expect_error(mechanism_discover(signed, net), "Conflicting weights")
+    expect_error(mechanism_discover(signed, net[nrow(net):1, ]), "Conflicting weights")
+    clean <- net[1:5, ]
+    expect_equal(mechanism_discover(signed, rbind(clean, clean)),
+                 mechanism_discover(signed, clean))
+})
+
+test_that("non-finite measurements do not contaminate the correlation", {
+    signed <- setNames(c(1, 2, 3, 4, 5, rep(0, 14), Inf), paste0("g", 1:20))
+    net <- data.frame(source = "TF", target = paste0("g", 1:5), weight = 1)
+    expect_message(out <- mechanism_discover(signed, net), "non-finite")
+    expect_equal(attr(out, "n_genes"), 19L)
+    expect_true(is.finite(out$score))
+})

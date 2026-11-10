@@ -2,6 +2,103 @@
 ##
 ## Offline: the fixtures are hand-written GMT files, so nothing here downloads.
 
+adjudication_contract_bundle <- function() {
+    r <- data.frame(regulator = "FOXO3", source = c("tf", "perturbagen"),
+                    term = c("FOXO3_TARGETS", "D1"), named = TRUE,
+                    level = c("B", "A"), padj_within_source = 1e-6,
+                    setSize = 8L, Count = 5L, family = FALSE,
+                    evidence_kind = c("predicted", "measured"),
+                    direction = c("up", "down"), method = c(NA, "knockout"),
+                    stringsAsFactors = FALSE)
+    structure(list(regulators = r, perturbagen = r[2, , drop = FALSE],
+                   diagnostics = list(counts = data.frame(
+                       source = c("tf", "perturbagen"), coverage_tested = c(0.4, 1),
+                       coverage_floor = NA_real_, status = "graded")),
+                   input = list(genes = paste0("g", 1:5), universe = paste0("g", 1:8),
+                                up = paste0("g", 1:5), down = character(),
+                                design = list(coverage_floor = NULL, species = "Homo sapiens")),
+                   provenance = list(upstream = c("tf", "perturbagen"), release = "fixture")),
+              class = c("evidenceBundle", "list"))
+}
+
+test_that("explicit coverage floors control verdicts and admitted source rows", {
+    ev <- adjudication_contract_bundle()
+    expect_identical(adjudicate(ev)$verdicts$verdict, "supported")
+    legacy <- ev
+    legacy$diagnostics$counts$status <- NULL
+    expect_identical(adjudicate(legacy)$verdicts$verdict, "supported")
+    strict <- adjudicate(ev, coverage_floor = 0.8)
+    expect_identical(strict$verdicts$verdict, "single_source")
+    expect_identical(strict$verdicts$sources, "perturbagen")
+    expect_identical(strict$diagnostics$counts$status, c("untested", "graded"))
+    expect_identical(evidence_admitted(ev, verdicts = strict$verdicts)$source, "perturbagen")
+    excluded <- evidence_excluded(ev, verdicts = strict$verdicts)
+    expect_identical(excluded$source, "tf")
+    expect_identical(excluded$reason, "source excluded by adjudication")
+    ev$input$design$coverage_floor <- 0.8
+    ev$diagnostics$counts$coverage_floor <- 0.8
+    expect_identical(adjudicate(ev)$verdicts$verdict, "single_source")
+    expect_identical(adjudicate(ev, coverage_floor = 0)$verdicts$verdict, "supported")
+    ev$diagnostics$counts$coverage_tested <- 0.1
+    expect_identical(adjudicate(ev, coverage_floor = 0.8)$verdicts$verdict, "untested")
+})
+
+test_that("fingerprints include actual evidence and decision parameters but not row order", {
+    ev <- adjudication_contract_bundle()
+    sha <- adjudicate(ev)$provenance$evidence_sha
+    changed <- ev
+    changed$regulators$padj_within_source <- 0.9
+    expect_identical(adjudicate(changed)$verdicts$verdict, "absent")
+    expect_false(identical(sha, adjudicate(changed)$provenance$evidence_sha))
+    for (field in c("direction", "method", "level", "term")) {
+        changed <- ev
+        changed$regulators[[field]][1] <- "changed"
+        expect_false(identical(sha, .adjudication_sha(changed)), info = field)
+    }
+    expect_false(identical(sha, adjudicate(ev, min_independent = 3)$provenance$evidence_sha))
+    expect_false(identical(sha, adjudicate(ev, coverage_floor = 0.8)$provenance$evidence_sha))
+    changed <- ev
+    changed$regulators <- changed$regulators[2:1, rev(names(changed$regulators))]
+    changed$diagnostics$counts <- changed$diagnostics$counts[2:1, ]
+    changed$provenance$called_at <- "a different moment"
+    expect_identical(sha, adjudicate(changed)$provenance$evidence_sha)
+})
+
+test_that("two views of D1 plus a TF collection are only two witnesses", {
+    ev <- adjudication_contract_bundle()
+    row <- ev$regulators[2, , drop = FALSE]
+    row$source <- "biotrigger"
+    ev$regulators <- rbind(ev$regulators, row)
+    expect_identical(adjudicate(ev)$verdicts$verdict, "supported")
+    expect_identical(adjudicate(ev, min_independent = 3)$verdicts$verdict, "single_source")
+})
+
+test_that("adjudication authority retains identity direction and writable strength", {
+    cv <- adjudicate(adjudication_contract_bundle(), min_independent = 3)$verdicts
+    rows <- jsonlite::fromJSON(.adjudication_prompt_rows(cv))
+    fields <- c("regulator", "verdict", "direction", "measured_direction",
+                "perturbation_effect", "writable")
+    expect_equal(rows[, fields], cv[, fields])
+    expect_identical(rows$verdict, "single_source")
+    rejected <- cv
+    rejected$regulator <- "MYC"
+    rejected$verdict <- "absent"
+    expect_equal(jsonlite::fromJSON(.adjudication_prompt_rows(rbind(cv, rejected))), rows)
+    mixed <- cv
+    mixed$direction <- "mixed"
+    mixed$measured_direction <- NA_character_
+    serialized <- jsonlite::fromJSON(.adjudication_prompt_rows(mixed))
+    expect_identical(serialized$direction, "mixed")
+    expect_true(is.na(serialized$measured_direction))
+    prompt <- .adjudication_declaration(cv)
+    expect_match(prompt, "never promote")
+    expect_match(prompt, "preserve exact regulator identity")
+    expect_match(prompt, "No verdict proves an upstream causal driver")
+    expect_match(prompt, "ADJUDICATION_ROWS_JSON")
+    expect_match(prompt, cv$writable, fixed = TRUE)
+    expect_match(prompt, "not a guarantee of model compliance", fixed = TRUE)
+})
+
 test_that("adjudicate() returns an adjudication whose columns are the frozen set", {
     use_fixture_cache()
     de <- data.frame(gene = c(paste0("g", 1:5), paste0("f", 1:5)),
@@ -229,13 +326,12 @@ test_that("network evidence is reference material and changes no verdict", {
                      stringsAsFactors = FALSE)
     without <- suppressWarnings(evidence(de, universe = universe, upstream = "tf",
                                          design = list(treatment = "none")))
-    ## STRING is a network call, so the comparison is made only where it can run.
-    with_net <- tryCatch(
-        suppressWarnings(evidence(de, universe = universe, upstream = "tf",
-                                  network = TRUE,
-                                  design = list(treatment = "none"))),
-        error = function(e) NULL)
-    skip_if(is.null(with_net), "STRING unreachable")
+    ## Exercise the network branch without depending on STRING availability.
+    local_mocked_bindings(evidence_ppi = function(...) mechanism_empty_ppi(),
+                          .package = "clusterProfiler")
+    with_net <- suppressWarnings(evidence(de, universe = universe, upstream = "tf",
+                                         network = TRUE,
+                                         design = list(treatment = "none")))
     expect_identical(without$regulators, with_net$regulators)
     expect_identical(adjudicate(without)$verdicts, adjudicate(with_net)$verdicts)
 })

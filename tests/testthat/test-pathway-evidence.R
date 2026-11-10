@@ -430,7 +430,7 @@ test_that("a single-cell-line row says the cap is the data, not the evidence", {
     expect_equal(out$level[1], "B")
     expect_equal(out$reason[1], "single-cell-line")
     expect_match(out$statement[1], "limit of the available data")
-    expect_match(out$statement[1], "likely, but under-evidenced")
+    expect_match(out$statement[1], "consistent perturbation evidence, but under-evidenced")
 })
 
 test_that("a direction conflict is not described as thin data", {
@@ -461,4 +461,235 @@ test_that("a direction conflict is not described as thin data", {
     expect_equal(out$verdict[1], "direction-conflict")
     expect_match(out$statement[1], "repression")
     expect_false(grepl("limit of the available data", out$statement[1]))
+})
+
+## Namespace stubs are restored even when an assertion fails; no network calls.
+with_pathway_stubs <- function(datasets, outcomes, code) {
+    ns <- asNamespace("gpsadb")
+    old_search <- get("gpsadb_search_datasets", ns)
+    old_test <- get("gpsadb_test_gene_set", ns)
+    on.exit({
+        assignInNamespace("gpsadb_search_datasets", old_search, ns = "gpsadb")
+        assignInNamespace("gpsadb_test_gene_set", old_test, ns = "gpsadb")
+    }, add = TRUE)
+    assignInNamespace("gpsadb_search_datasets", function(perturbed_gene, ...) {
+        z <- datasets[datasets$driver == perturbed_gene, , drop = FALSE]
+        z$n_samples <- rep(4L, nrow(z))
+        z$in_reference <- rep(TRUE, nrow(z))
+        list(z)
+    }, ns = "gpsadb")
+    assignInNamespace("gpsadb_test_gene_set", function(id, genes) {
+        z <- outcomes[[id]]
+        if (inherits(z, "error")) stop(z)
+        list(z)
+    }, ns = "gpsadb")
+    force(code)
+}
+
+pathway_test_input <- function() {
+    data.frame(Description = "programme", geneID = "A/B/C/D/E",
+               pathway_direction = "up", stringsAsFactors = FALSE)
+}
+
+pathway_test_signed <- c(A = 1, B = 2, C = 3, D = 4, E = 5)
+
+test_that("replication never pools cell lines across candidates", {
+    ds <- data.frame(driver = c("TF1", "TF2"), dataset_id = c("D1", "D2"),
+                     cell_line = c("cellA", "cellB"))
+    got <- list(D1 = data.frame(es = -1, padj = 0.001),
+                D2 = data.frame(es = -1, padj = 0.002))
+    with_pathway_stubs(ds, got, {
+        out <- suppressWarnings(pathway_evidence(pathway_test_input(),
+            drivers = c("TF1", "TF2"), signed = pathway_test_signed))
+        expect_equal(out$level, "B")
+        expect_equal(out$n_cell_lines_supported, 1L)
+        expect_equal(out$driver, "TF1")
+        ledger <- attr(out, "perturbation_tests")
+        expect_equal(ledger$driver, c("TF1", "TF2"))
+        expect_equal(ledger$status, c("supports", "supports"))
+    })
+})
+
+test_that("significance cannot bypass measurable member support", {
+    ds <- data.frame(driver = "TF1", dataset_id = c("D1", "D2"),
+                     cell_line = c("cellA", "cellB"))
+    got <- list(D1 = data.frame(es = -1, padj = 0.001),
+                D2 = data.frame(es = -1, padj = 0.002))
+    with_pathway_stubs(ds, got, {
+        out <- suppressWarnings(pathway_evidence(pathway_test_input(), drivers = "TF1",
+            signed = c(A = 1, B = -2, C = -3, D = -4, E = -5)))
+        expect_equal(out$level, "C")
+        expect_equal(out$reason, "low-support")
+        expect_match(out$statement, "below the support floor")
+        expect_equal(attr(out, "perturbation_tests")$status, rep("supports", 2))
+        inferred <- pathway_test_input()
+        inferred$pathway_direction <- NULL
+        strict <- suppressWarnings(pathway_evidence(inferred, drivers = "TF1",
+            min_support = 0.8, signed = c(A = 1, B = 2, C = 3, D = -4, E = -5)))
+        expect_equal(strict$level, "C")
+        expect_equal(strict$reason, "low-support")
+        unknown <- suppressWarnings(pathway_evidence(pathway_test_input(), drivers = "TF1"))
+        expect_equal(unknown$level, "C")
+        expect_equal(unknown$reason, "no-members")
+    })
+})
+
+test_that("the ledger retains all outcomes and warns about partial failures", {
+    ds <- data.frame(driver = "TF1", dataset_id = paste0("D", 1:6),
+                     cell_line = paste0("cell", 1:6))
+    got <- list(D1 = data.frame(es = -1, padj = 0.001),
+                D2 = data.frame(es = -1, padj = 0.002),
+                D3 = data.frame(es = 1, padj = 0.003),
+                D4 = data.frame(es = -1, padj = 0.5),
+                D5 = simpleError("offline failure"),
+                D6 = data.frame(es = NA_real_, padj = NA_real_))
+    with_pathway_stubs(ds, got, {
+        expect_warning(out <- pathway_evidence(pathway_test_input(), drivers = "TF1",
+            signed = pathway_test_signed), "1 of 6 GPSAdb calls failed")
+        ledger <- attr(out, "perturbation_tests")
+        expect_identical(ledger$status, c("supports", "supports", "conflicts",
+                                         "not-significant", "failed", "not-computable"))
+        expect_identical(ledger$direction, rep("up", 6))
+        expect_type(ledger$es, "double")
+        expect_type(ledger$padj, "double")
+        expect_equal(out$n_tests_run, 4L)
+        expect_equal(out$n_cell_lines_supported, 2L)
+        expect_equal(out$level, "A")
+        expect_match(out$statement, "contradictory across datasets")
+        expect_equal(attr(out, "network_calls"), 6L)
+    })
+})
+
+test_that("empty and untestable results retain a typed ledger", {
+    empty <- suppressWarnings(pathway_evidence(pathway_test_input()[0, ]))
+    ledger <- attr(empty, "perturbation_tests")
+    expect_identical(names(ledger), c("pathway", "driver", "dataset", "cell_line",
+                                     "es", "padj", "status", "direction"))
+    expect_equal(nrow(ledger), 0L)
+    expect_type(ledger$es, "double")
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    with_pathway_stubs(ds, list(D1 = simpleError("must not call")), {
+        x <- pathway_test_input()
+        x$pathway_direction <- NULL
+        out <- suppressWarnings(pathway_evidence(x, drivers = "TF1"))
+        expect_equal(attr(out, "network_calls"), 0L)
+        expect_equal(attr(out, "perturbation_tests")$status, "not-computable")
+    })
+})
+
+test_that("memoisation preserves each pathway outcome and outage status", {
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    with_pathway_stubs(ds, list(D1 = simpleError("offline failure")), {
+        x <- rbind(pathway_test_input(), pathway_test_input())
+        x$Description <- c("first", "second")
+        warnings <- character()
+        out <- withCallingHandlers(pathway_evidence(x, drivers = "TF1",
+            signed = pathway_test_signed), warning = function(w) {
+                warnings <<- c(warnings, conditionMessage(w))
+                invokeRestart("muffleWarning")
+            })
+        expect_true(any(grepl("All 1 GPSAdb calls failed", warnings)))
+        expect_equal(attr(out, "network_calls"), 1L)
+        expect_equal(attr(out, "perturbation_tests")$pathway, c("first", "second"))
+        expect_equal(attr(out, "perturbation_tests")$status, rep("failed", 2))
+        expect_equal(out$reason, rep("no-test-completed", 2))
+    })
+})
+
+test_that("non-significance is not described as proof of falsity", {
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    with_pathway_stubs(ds, list(D1 = data.frame(es = -1, padj = 0.5)), {
+        out <- suppressWarnings(pathway_evidence(pathway_test_input(), drivers = "TF1",
+            signed = pathway_test_signed))
+        expect_equal(out$verdict, "coherent-refuted") # legacy API key
+        expect_equal(out$reason, "not-significant")
+        expect_equal(attr(out, "perturbation_tests")$status, "not-significant")
+        expect_match(out$statement, "found no significant movement")
+    })
+})
+
+test_that("requested candidates survive unresolved datasets and empty results", {
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    requested <- c("TF1", "UNRESOLVED")
+    with_pathway_stubs(ds, list(D1 = data.frame(es = -1, padj = 0.001)), {
+        out <- suppressWarnings(pathway_evidence(pathway_test_input(),
+            drivers = requested, signed = pathway_test_signed))
+        expect_identical(attr(out, "drivers"), requested)
+        empty <- suppressWarnings(pathway_evidence(pathway_test_input()[0, ], drivers = requested))
+        expect_identical(attr(empty, "drivers"), requested)
+        expect_null(attr(.pathway_evidence_empty(), "drivers"))
+    })
+})
+
+test_that("row subsets scope the ledger without losing requested candidates", {
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    with_pathway_stubs(ds, list(D1 = data.frame(es = -1, padj = 0.001)), {
+        x <- rbind(pathway_test_input(), pathway_test_input())
+        x$Description <- c("first", "second")
+        out <- suppressWarnings(pathway_evidence(x, drivers = c("TF1", "UNRESOLVED"),
+            signed = pathway_test_signed))
+        expect_equal(attr(out[1, ], "perturbation_tests")$pathway, "first")
+        expect_equal(attr(out[2, , drop = FALSE], "perturbation_tests")$pathway, "second")
+        expect_equal(nrow(attr(out[FALSE, ], "perturbation_tests")), 0L)
+        expect_identical(attr(out[FALSE, ], "drivers"), c("TF1", "UNRESOLVED"))
+        expect_equal(attr(out[1, "level", drop = FALSE], "perturbation_tests")$pathway, "first")
+        expect_equal(nrow(attr(out["pathway"], "perturbation_tests")), 2L)
+    })
+})
+
+test_that("blank missing or padded cell lines cannot fabricate replication", {
+    for (other in c("", " ", NA_character_, " cellA ")) {
+        ds <- data.frame(driver = "TF1", dataset_id = c("D1", "D2"),
+                         cell_line = c("cellA", other))
+        got <- list(D1 = data.frame(es = -1, padj = 0.001),
+                    D2 = data.frame(es = -1, padj = 0.002))
+        with_pathway_stubs(ds, got, {
+            warnings <- character()
+            out <- withCallingHandlers(pathway_evidence(pathway_test_input(), drivers = "TF1",
+                signed = pathway_test_signed), warning = function(w) {
+                    warnings <<- c(warnings, conditionMessage(w))
+                    invokeRestart("muffleWarning")
+                })
+            expect_equal(out$level, "B")
+            expect_equal(out$n_cell_lines_supported, 1L)
+            expect_true(any(grepl("Level A is unreachable", warnings)))
+        })
+    }
+})
+
+test_that("conflicting identities for a dataset key are rejected", {
+    ds <- data.frame(driver = "TF1", dataset_id = c("D1", "D1", "D2"),
+                     cell_line = c("cellA", "cellB", "cellC"))
+    got <- list(D1 = simpleError("ambiguous dataset must not run"),
+                D2 = data.frame(es = -1, padj = 0.001))
+    with_pathway_stubs(ds, got, {
+        warnings <- character()
+        out <- withCallingHandlers(pathway_evidence(pathway_test_input(), drivers = "TF1",
+            signed = pathway_test_signed), warning = function(w) {
+                warnings <<- c(warnings, conditionMessage(w))
+                invokeRestart("muffleWarning")
+            })
+        expect_true(any(grepl("conflicting cell-line identities: D1", warnings)))
+        expect_equal(out$level, "B")
+        expect_equal(out$n_cell_lines_supported, 1L)
+        expect_equal(attr(out, "network_calls"), 1L)
+        expect_equal(attr(out, "perturbation_tests")$dataset, "D2")
+    })
+})
+
+test_that("Entrez conversion includes IDs beyond the fifth pathway", {
+    skip_if_not_installed("org.Hs.eg.db")
+    ns <- asNamespace("AnnotationDbi")
+    original <- get("select", ns)
+    on.exit(assignInNamespace("select", original, ns = "AnnotationDbi"), add = TRUE)
+    seen <- NULL
+    assignInNamespace("select", function(x, keys, ...) {
+        seen <<- keys
+        data.frame(ENTREZID = keys, SYMBOL = paste0("G", keys))
+    }, ns = "AnnotationDbi")
+    x <- data.frame(Description = paste0("path", 1:6), geneID = as.character(1:6))
+    out <- .pathway_ids_to_symbols(x, c(G1 = 1))
+    expect_identical(seen, as.character(1:6))
+    expect_equal(nrow(out), 6L)
+    expect_identical(out$geneID, paste0("G", 1:6))
 })

@@ -29,12 +29,12 @@
     list(n_pathways = nrow(d), n_up = n_up, d = d)
 }
 
-#' Decide whether a dataset can support driver attribution at all
+#' Screen input completeness and reference coverage before driver comparison
 #'
-#' Run this before [mechanism_decompose()] or [pathway_evidence()]. It returns a
-#' tier rather than a verdict: `attribution` when the data can carry a candidate
-#' driver claim, `description` when it can only describe what moved, and `none`
-#' when even that is not possible.
+#' Run this before [pathway_evidence()]. It returns a heuristic tier, not evidence
+#' of causation: `attribution` means the checked input and coverage floors pass;
+#' `description` means a floor failed or a required check is unknown; `none`
+#' means there are no pathways to describe.
 #'
 #' The boundaries are the ones already written down in the pathway-mechanism
 #' design (differential genes, pathway size, driver coverage), not thresholds
@@ -46,25 +46,26 @@
 #'
 #' @param x An enrichment result, or a data.frame of pathways.
 #' @param signed Named numeric of log fold changes for every gene measured.
-#' @param reference Optional `mechanismReference`; needed to judge whether the
-#'   pathways have enough covered members and whether the candidates have data in
-#'   more than one cell line.
-#' @param drivers Optional candidate drivers. When given, a candidate with data
-#'   in a single cell line caps the whole run at `description`, because a driver
-#'   that cannot be seen in a second context cannot be separated from an artefact
-#'   of the first.
+#'   If neither these measurements nor the enrichment input gene count are
+#'   available, the gene-count check is unknown and the tier is `description`.
+#' @param reference Optional `mechanismReference`; used to count candidate cell
+#'   lines and background programmes. Without it, candidate coverage is queried
+#'   from the inventory.
+#' @param drivers Optional candidate drivers. At least one must meet the coverage
+#'   floor for `attribution`. Omitted candidates or failed inventory lookups leave
+#'   coverage unknown and cap the tier at `description`. A driver absent from a
+#'   supplied reference has known zero coverage in that reference.
 #' @param min_up Up-regulated genes required before attribution is offered.
 #' @param min_members Median pathway size required. This is the pathway's own
 #'   size, not how many of its members the reference happens to cover: the
 #'   12-member floor recorded in the design belongs to the perturbation test's
-#'   p-value, and applying it here blocked three datasets that the decomposition
-#'   handled fine.
+#'   p-value, not to this descriptive input screen.
 #' @param min_cell_lines Cell lines a driver needs before attribution is offered.
 #' @param min_background Comparable reference programmes required for the
 #'   specificity percentile to mean anything.
 #' @return A `mechanismPreflight` list with `tier`, `reasons`, `metrics` and
 #'   `counts`.
-#' @seealso [mechanism_decompose()], [mechanism_report()]
+#' @seealso [pathway_evidence()], [mechanism_report()]
 #' @export
 mechanism_preflight <- function(x, signed = NULL, reference = NULL, drivers = NULL,
                                 min_up = 50L, min_members = 5L,
@@ -90,34 +91,39 @@ mechanism_preflight <- function(x, signed = NULL, reference = NULL, drivers = NU
     ## 显式初始化：`exists()` 会继承父环境，全局里恰好有个同名变量就会污染输出。
     ## 用真实的状态（NA = 没算过）做控制流，不用"变量是否存在"。
     n_cell_lines_min <- NA_integer_
-    if (length(drivers)) {
-        ## 有参考矩阵就从矩阵里数；没有就现场查一次库存（每个驱动者一次调用）。
-        ## 没有这一步，旧实现的用户（不建矩阵）永远拿不到"单细胞系"这条判据——
-        ## 而它恰恰是 11 个数据集里两个失败的唯一原因。
-        per <- if (!is.null(reference) && inherits(reference, "mechanismReference")) {
-            meta <- reference$meta
-            prog <- stats::setNames(as.character(meta$perturbed_gene), meta$dataset_id)
-            ## 别名要落到真有数据的基因上：`NFE2L2` 的别名 `NRF2` 没有数据集，
-            ## 不剔除会得到 0 个细胞系，把舒拉芬误判成单细胞系。
-            present <- intersect(drivers, unique(prog))
-            vapply(present, function(g) {
-                ids <- names(prog)[prog %in% g]
-                length(unique(stats::na.omit(meta$cell_line[match(ids, meta$dataset_id)])))
-            }, 0L)
-        } else {
-            inv <- tryCatch(.mechanism_inventory(drivers, NULL), error = function(e) NULL)
-            if (is.null(inv) || !nrow(inv)) integer(0) else
-                vapply(drivers, function(g) {
-                    d <- inv[inv$perturbed_gene %in% .mechanism_driver_names(g), , drop = FALSE]
-                    length(unique(stats::na.omit(d$cell_line)))
-                }, 0L)
+    per <- vapply(drivers, function(g) {
+        supplied <- inherits(reference, "mechanismReference")
+        inv <- if (supplied) reference$meta else
+            tryCatch(.mechanism_inventory(g, NULL), error = function(e) NULL)
+        if (is.null(inv) || !"perturbed_gene" %in% names(inv)) return(NA_integer_)
+        d <- inv[inv$perturbed_gene %in% .mechanism_driver_names(g), , drop = FALSE]
+        if (!nrow(d)) {
+            if (supplied) return(0L)
+            status <- attr(inv, "query_status")
+            ## Only a successful empty lookup establishes zero inventory coverage.
+            if (!is.null(status) && all(c("driver", "status") %in% names(status)) &&
+                any(status$driver %in% g & status$status %in% "empty")) return(0L)
+            return(NA_integer_)
         }
-        ## 用**最好的那个候选**的细胞系数，不用最差的：一个候选覆盖不足只说明
-        ## 它自己不该被认领，不代表整份数据不能归属。
-        if (length(per)) {
-            n_cell_lines <- max(per)
-            n_cell_lines_min <- min(per)
-        }
+        if (!"cell_line" %in% names(d)) return(NA_integer_)
+        cell <- trimws(as.character(d$cell_line))
+        if (anyNA(cell) || any(!nzchar(cell))) return(NA_integer_)
+        length(unique(cell))
+    }, 0L)
+    ## A covered candidate can pass even when other candidates cannot be assessed.
+    known <- per[!is.na(per)]
+    if (length(known)) {
+        n_cell_lines <- max(known)
+        n_cell_lines_min <- min(known)
+    }
+    if (!length(per) || (anyNA(per) &&
+        (is.na(n_cell_lines) || n_cell_lines < min_cell_lines))) {
+        reasons <- c(reasons,
+            "coverage-unknown: candidate cell-line coverage could not be checked; attribution is not approved.")
+    }
+    if (is.na(cnt$n_up)) {
+        reasons <- c(reasons,
+            "up-genes-unknown: no enrichment input gene count or signed measurements were supplied; the gene-count floor is unchecked.")
     }
 
     if (!is.na(cnt$n_up) && cnt$n_up < min_up) {
@@ -132,7 +138,7 @@ mechanism_preflight <- function(x, signed = NULL, reference = NULL, drivers = NU
     }
     if (!is.na(n_cell_lines) && n_cell_lines < min_cell_lines) {
         reasons <- c(reasons, sprintf(
-            "single-cell-line: even the best-covered candidate has data in only %d cell line(s); below %d it cannot be separated from an artefact of that line.",
+            "single-cell-line: the best known candidate coverage is %d cell line(s); below the heuristic floor of %d.",
             n_cell_lines, min_cell_lines))
     }
     if (!is.null(reference) && inherits(reference, "mechanismReference")) {

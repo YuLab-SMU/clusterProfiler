@@ -8,12 +8,8 @@
 ## 非靶 = 0）与整条 log2FC 谱求 Pearson 相关，再用样本量换成 t 值。
 ## 我们试过 12 个组合（集成、跨网络、viper、按绝对值排序），没有一个超过它。
 ##
-## 命中率有**两套数，别混用**：
-##   * decoupler 的 ulm 在 17 份上（脚本 58）：hit@1 35.3%、hit@5 58.8%、
-##     hit@10 76.5%、中位排名 3。这是"方法比较"那次测的。
-##   * 本实现（基因域取整条测量谱，脚本 59）：hit@1 35.3%、hit@5 **64.7%**、
-##     hit@10 76.5%、中位排名 **2**。写在下面 roxygen 里的是这一套。
-## 差别来自基因域口径，不是两套方法。
+## Full-universe benchmark and frozen inputs: dev_docs/mechanism-benchmark-4215.R.
+## A missing top-20 rank is a ranking miss, not evidence of network absence.
 ##
 ## 所以这里不"改进"它，只做三件它没有的事：**去自环、给方向、说清覆盖多少**。
 
@@ -26,23 +22,21 @@
 #'
 #' The score is the t-value of that correlation. **A positive score means the
 #' factor looks active in this experiment, a negative one means repressed.**
-#' The ranking is not a verdict. On 17 benchmark condition experiments, 14 of
-#' the drivers are present in a typical network; among those the true driver was
-#' ranked first 43% of the time, in the top five 71%, and in the top ten 93%
-#' (median rank 2). The other three drivers are absent from CollecTRI, which is
-#' the honest limit of this stage: a network without the factor cannot rank it.
-#' Treat the output as a shortlist to verify, never as an answer.
+#' The ranking is not a verdict. In a frozen exploratory corpus of 17 profiles,
+#' all 17 expected drivers were present and scorable with CollecTRI. Using the
+#' default signed ranking, expected-label hit counts were 6/17 at rank one,
+#' 10/17 in the top five and 13/17 in the top ten. The corpus includes one
+#' knockout and repeated studies/drivers; these are not independent validation
+#' estimates or proof of unique causal identification. A rank outside the first
+#' twenty must not be counted as network absence. Treat the output as a shortlist.
 #'
-#' The score rises with the number of annotated targets, and not only for the
-#' real driver: among candidates that are not the driver, the correlation
-#' between score and target count is still about 0.24. A large target set
-#' captures broad transcriptional programmes, so a pleiotropic factor scores
-#' well whether or not it caused this response. `n_targets` and `share` are
-#' reported so that this can be judged; it is deliberately not corrected. We
-#' tried weighting the score by target count in both directions: rewarding it
-#' lifts the benchmarks only because their true drivers are the heavily studied
-#' genes, and penalising it demotes real drivers whose target set is small
-#' (XBP1 has 41 targets here and fell from rank 3 to 6).
+#' In the truncated top-twenty candidate pool, score and measured target count
+#' were positively associated, including among non-reference candidates
+#' (Spearman correlation about 0.24). This selected-pool observation does not
+#' establish a general size bias or show whether annotation depth, correlated
+#' targets or biology explains it. `n_targets` and `share` disclose coverage.
+#' No target-count weight is applied: exploratory adjustments have not been
+#' independently validated.
 #'
 #' @param signed Named numeric vector of log2 fold changes, names are gene
 #'   symbols. The whole vector is used, not just the significant genes: the
@@ -50,7 +44,9 @@
 #' @param network Data frame of transcription factor targets with columns
 #'   `source` (factor), `target` (gene symbol) and optionally `weight`
 #'   (positive for activation targets, negative for repression targets; 1 when
-#'   absent). CollecTRI and DoRothEA can be exported in this shape.
+#'   absent). CollecTRI and DoRothEA can be exported in this shape. Identical
+#'   repeated edges are deduplicated; conflicting weights for the same
+#'   source-target pair are rejected rather than resolved by row order.
 #' @param top Integer. How many candidates to return.
 #' @param min_targets Integer. Factors with fewer measured targets than this are
 #'   skipped: a correlation over three genes is noise.
@@ -109,8 +105,8 @@ mechanism_discover <- function(signed, network, top = 10L, min_targets = 5L,
     if (!"weight" %in% names(net)) net$weight <- 1
     net$source <- as.character(net$source)
     net$target <- as.character(net$target)
-    net$weight <- as.numeric(net$weight)
-    net <- net[!is.na(net$source) & !is.na(net$target) & !is.na(net$weight), ,
+    net$weight <- as.numeric(as.character(net$weight))
+    net <- net[!is.na(net$source) & !is.na(net$target) & is.finite(net$weight), ,
                drop = FALSE]
 
     ## 自环：靶基因里含 TF 自己。不删的话，敲低/敲除实验里 TF 自身的 log2FC
@@ -128,16 +124,18 @@ mechanism_discover <- function(signed, network, top = 10L, min_targets = 5L,
 
     ## NA 的处理：`signed` 里可能有没算出来的基因。留着会让整列相关变成 NA，
     ## 而"这条基因没测出 fold change"与"它没变化"是两件事，所以直接剔除并说明。
-    if (anyNA(signed)) {
-        n_na <- sum(is.na(signed))
-        message(sprintf("Dropped %d gene(s) with NA log2 fold change.", n_na))
-        signed <- signed[!is.na(signed)]
+    if (any(!is.finite(signed))) {
+        n_na <- sum(!is.finite(signed))
+        message(sprintf("Dropped %d gene(s) with non-finite log2 fold change.", n_na))
+        signed <- signed[is.finite(signed)]
     }
     if (!length(signed)) stop("`signed` holds no finite values.", call. = FALSE)
 
-    ## 同一个 TF 的同一个靶基因只留一条边：重复边会让权重被覆盖，
-    ## 结果依赖行的先后顺序。
-    net <- net[!duplicated(net[, c("source", "target")]), , drop = FALSE]
+    ## Resolve exact duplicates only; conflicting evidence must not depend on row order.
+    net <- net[!duplicated(net[, c("source", "target", "weight")]), , drop = FALSE]
+    if (anyDuplicated(net[, c("source", "target")]))
+        stop("Conflicting weights for the same source-target pair in `network`; resolve them before scoring.",
+             call. = FALSE)
     net <- net[net$target %in% names(signed), , drop = FALSE]
     if (!nrow(net))
         stop("None of the network targets are measured in `signed`.", call. = FALSE)

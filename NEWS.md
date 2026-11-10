@@ -1,3 +1,13 @@
+# clusterProfiler 4.21.5.001
+
+## mechanism evidence: correctness and limits
+
++ `pathway_evidence()` counts supporting cell lines within a driver, applies the member-support floor before promotion, maps all Entrez members, and retains every candidate/dataset outcome in `attr(x, "perturbation_tests")`, including conflicts and failures (2026-11-10, Tue)
++ `mechanism_reproduction()` requires enough finite members per dataset, rejects conflicting experiment identities and does not count unknown biosamples as independent replication; `mechanism_preflight()` distinguishes zero coverage from unavailable coverage (2026-11-10, Tue)
++ `mechanism_report()` exposes `perturbation_tests` and per-candidate support/conflict summaries; its classes are now `supported`, `conflicting` and `undetermined` rather than `excluded`. Nonsignificance is not disproof; target-overlap neighbourhoods and perturbation breadth are descriptive flags, not causal equivalence or specificity tests (2026-11-10, Tue)
++ `adjudicate()` honours explicit coverage overrides and fingerprints actual evidence and decision settings; measured-only evidence reaches `interpret()`, whose adjudicated prompt now carries exact identity, direction and writable-strength constraints. These constraints do not guarantee model compliance or establish causality (2026-11-10, Tue)
++ Corrected the 4.21.5 benchmark claims: all 17 expected drivers were scorable, with default signed hit counts 6/17, 10/17 and 13/17 at ranks 1/5/10. Earlier 14-driver denominators and module PPV gains were invalid; the frozen, study/driver-stratified audit reports set size with module coverage and keeps historical verification separate from current grading. No target-count weight is introduced; conflicting duplicate network weights now error (2026-11-10, Tue)
+
 # clusterProfiler 4.21.5
 
 ## interpret()

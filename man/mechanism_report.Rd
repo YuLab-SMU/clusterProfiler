@@ -3,7 +3,7 @@
 \name{mechanism_report}
 \alias{mechanism_report}
 \alias{print.mechanismReport}
-\title{Turn mechanism evidence into a verdict sheet and a next experiment}
+\title{Report candidate consistency, conflicts, and evidence gaps}
 \usage{
 mechanism_report(
   x,
@@ -19,72 +19,57 @@ mechanism_report(
 \method{print}{mechanismReport}(x, n = 6L, ...)
 }
 \arguments{
-\item{x}{A table from [pathway_evidence()].}
+\item{x}{A table from [pathway_evidence()]. Its `perturbation_tests` attribute
+retains all candidate/dataset outcomes, not just the best result per pathway.}
 
-\item{drivers}{Drivers to inventory. Defaults to the drivers named in `x`.}
+\item{drivers}{Drivers to inventory. Defaults to the drivers requested in `x`
+and those named in its rows or retained tests.}
 
-\item{inventory}{Optional data.frame of available datasets, with columns like
-`perturbed_gene`, `cell_line`, `tissue`. When omitted the whole inventory is
-read from GPSAdb, which is the point: the tested rows are a sample of six
-datasets per driver, so they can say "not enough" but never "what is
-missing".}
+\item{inventory}{Optional available-dataset table with `perturbed_gene` and
+optionally `dataset_id`, `cell_line`, `tissue`, `n_up` and `n_down`. Without
+it GPSAdb is queried (up to 100 rows per resolved spelling). A failed lookup
+is unknown coverage, not evidence that no datasets exist. A supplied table
+describes only its own scope, not an exhaustive database inventory.}
 
-\item{context}{Named list describing the user's experiment. `context$tissue`
-is compared against the tissues the available datasets were run in, so the
-report can say "no dataset from airway" instead of "add another cell line".}
+\item{context}{Named list. `context$tissue` is compared with available tissues.}
 
-\item{preflight}{Optional result of [mechanism_preflight()]. When it says
-attribution is not supported, the report stops recommending experiments:
-the honest answer is that no experiment would change these rows, and saying
-"add another cell line" to a dataset with 23 genes is advice that cannot pay
-off.}
+\item{preflight}{Optional [mechanism_preflight()] result. If the input screen
+does not support attribution, additional experiments are not automatically
+ranked; the report explains the current limit without claiming that future
+experiments could never change the evidence.}
 
-\item{network}{Optional regulator-target table (`source`, `target`, optional
-`weight`) used to group the drivers into modules. Two drivers land in the
-same module when their target sets overlap (Jaccard >= `min_overlap`).
-Genes that share a module -- paralogues, subunits of one complex, parallel
-arms of a pathway -- cannot be told apart by an expression experiment, and
-reporting them separately is what made neighbours look like false claims.
-When omitted, `module` is `NA` and nothing else changes.}
+\item{network}{Optional regulator-target table with `source` and `target`.
+`module` is an unsigned pairwise Jaccard neighbourhood among the requested
+candidates. It ignores edge weights and is not a disjoint clustering,
+proof of biological equivalence, or evidence that expression experiments
+cannot distinguish its members. No module accuracy gain is assumed.}
 
-\item{min_overlap}{Jaccard overlap required to put two drivers in one module.
-Defaults to `0.10`. Lower values make larger modules: coverage rises but so
-does the chance that any candidate lands in the same module as the answer.}
+\item{min_overlap}{Jaccard threshold in [0, 1], default `0.10`. Lower thresholds
+enlarge neighbourhoods and their chance coverage; this is descriptive.}
 
-\item{global_effect_de}{Perturbation breadth, in differentially expressed
-genes, above which a driver is flagged as a possible global effect.
-Defaults to `3000`. A factor whose knockdown moves thousands of genes will
-drag any pathway of a few dozen members with it, so a supported verdict on
-it says "this is a large perturbation", not "this is the specific driver".
-The flag never changes a class; it adds a reason to read the row that way.}
+\item{global_effect_de}{Median DE gene count above which perturbation breadth
+is flagged, default `3000`. Counts depend on tissue, method, sample size and
+DE thresholds. The flag does not prove essentiality or pathway nonspecificity,
+and does not change a grade or score.}
 
-\item{n}{Number of rows to show.}
+\item{n}{Number of rows to show per section.}
 
 \item{...}{Ignored.}
 }
 \value{
-A `mechanismReport`: a list with `verdicts` (one row per pathway with
-  `class` in established/excluded/undecided and the action that follows),
-  `gaps` (one row per driver), `next_steps` (actions ranked by how many rows
-  they would unlock) and `summary` (two sentences). `verdicts` also carries
-  `module` (comma-separated drivers that cannot be separated from this one,
-  including itself), `module_size`, and `global_effect_reason` (text when the
-  driver's knockdown was broad, `NA` otherwise). `gaps` also carries `module`
-  and `module_size`, so the clustering is visible even when every row is
-  undetermined and no driver is named.
+A `mechanismReport` list with `verdicts` (classes `supported`,
+  `conflicting`, `undetermined`), `gaps`, `next_steps`, `summary`, `context`,
+  `inventory`, `perturbation_tests` and `candidate_evidence`. The last two
+  expose all retained tests and counts of supporting/conflicting results per
+  pathway/candidate. `next_steps$unlocks` is retained for compatibility and
+  counts rows addressed by an action, not promised grade upgrades. The legacy
+  `coherent-refuted` verdict is treated as undetermined, not disproved.
 }
 \description{
-Report what has been established, what has been ruled out, and what is simply
-unknown -- and, for each gap, the cheapest thing that would close it.
-}
-\details{
-The asymmetry this is built around is measured, not assumed: on the hypoxia
-pilot the perturbation test ruled out the right candidates five times out of
-five and admitted an unrelated essential gene thirteen per cent of the time.
-A tool with that profile is a good exclusion instrument. Reporting a row per
-pathway with a letter grade hides it, because a table of `C` reads the same
-whether the test ran and failed or could never run at all -- and in eleven
-real datasets seven were the second case.
+Summarise measured evidence without treating a nonsignificant test as causal
+exclusion. A supported row is consistency with a directional explanation,
+not identification of a unique upstream driver. Significant conflicting tests
+remain visible even when other datasets support that candidate.
 }
 \seealso{
 [pathway_evidence()], [mechanism_preflight()]

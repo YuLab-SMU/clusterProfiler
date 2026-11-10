@@ -3,7 +3,7 @@
 \name{mechanism_preflight}
 \alias{mechanism_preflight}
 \alias{print.mechanismPreflight}
-\title{Decide whether a dataset can support driver attribution at all}
+\title{Screen input completeness and reference coverage before driver comparison}
 \usage{
 mechanism_preflight(
   x,
@@ -21,24 +21,25 @@ mechanism_preflight(
 \arguments{
 \item{x}{An enrichment result, or a data.frame of pathways.}
 
-\item{signed}{Named numeric of log fold changes for every gene measured.}
+\item{signed}{Named numeric of log fold changes for every gene measured.
+If neither these measurements nor the enrichment input gene count are
+available, the gene-count check is unknown and the tier is `description`.}
 
-\item{reference}{Optional `mechanismReference`; needed to judge whether the
-pathways have enough covered members and whether the candidates have data in
-more than one cell line.}
+\item{reference}{Optional `mechanismReference`; used to count candidate cell
+lines and background programmes. Without it, candidate coverage is queried
+from the inventory.}
 
-\item{drivers}{Optional candidate drivers. When given, a candidate with data
-in a single cell line caps the whole run at `description`, because a driver
-that cannot be seen in a second context cannot be separated from an artefact
-of the first.}
+\item{drivers}{Optional candidate drivers. At least one must meet the coverage
+floor for `attribution`. Omitted candidates or failed inventory lookups leave
+coverage unknown and cap the tier at `description`. A driver absent from a
+supplied reference has known zero coverage in that reference.}
 
 \item{min_up}{Up-regulated genes required before attribution is offered.}
 
 \item{min_members}{Median pathway size required. This is the pathway's own
 size, not how many of its members the reference happens to cover: the
 12-member floor recorded in the design belongs to the perturbation test's
-p-value, and applying it here blocked three datasets that the decomposition
-handled fine.}
+p-value, not to this descriptive input screen.}
 
 \item{min_cell_lines}{Cell lines a driver needs before attribution is offered.}
 
@@ -52,10 +53,10 @@ A `mechanismPreflight` list with `tier`, `reasons`, `metrics` and
   `counts`.
 }
 \description{
-Run this before [mechanism_decompose()] or [pathway_evidence()]. It returns a
-tier rather than a verdict: `attribution` when the data can carry a candidate
-driver claim, `description` when it can only describe what moved, and `none`
-when even that is not possible.
+Run this before [pathway_evidence()]. It returns a heuristic tier, not evidence
+of causation: `attribution` means the checked input and coverage floors pass;
+`description` means a floor failed or a required check is unknown; `none`
+means there are no pathways to describe.
 }
 \details{
 The boundaries are the ones already written down in the pathway-mechanism
@@ -67,5 +68,5 @@ The numbers behind the tier are returned with it, so a caller can move the
 cut points and see which datasets change tier.
 }
 \seealso{
-[mechanism_decompose()], [mechanism_report()]
+[pathway_evidence()], [mechanism_report()]
 }
