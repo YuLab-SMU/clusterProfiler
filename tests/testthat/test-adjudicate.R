@@ -358,3 +358,32 @@ test_that("the adjudication declaration is appended and never substituted", {
     ## Annotation prompts are built elsewhere and never carry the declaration.
     expect_false(grepl("ADJUDICATION", .annotation_system_prompt("c1")))
 })
+
+test_that("measured rows are read independently of their order", {
+    ## Two measured datasets for one regulator used to be resolved by taking the
+    ## first row: reversing the bundle flipped perturbation_effect between
+    ## activator and repressor while the evidence fingerprint stayed identical.
+    ev <- adjudication_contract_bundle()
+    p <- ev$regulators[2, , drop = FALSE]
+    b <- p
+    b$source <- "biotrigger"; b$term <- "D2"; b$method <- "overexpression"
+    bundle <- ev
+    bundle$regulators <- rbind(ev$regulators[1, , drop = FALSE], p, b)
+    fwd <- adjudicate(bundle)
+    bundle$regulators <- bundle$regulators[3:1, , drop = FALSE]
+    rev <- adjudicate(bundle)
+    expect_identical(fwd$provenance$evidence_sha, rev$provenance$evidence_sha)
+    expect_identical(fwd$verdicts, rev$verdicts)
+    ## knockout+down is an activator, overexpression+down is a repressor: the
+    ## measured evidence disagrees, so no single effect is claimed.
+    expect_true(is.na(fwd$verdicts$perturbation_effect))
+
+    ## When the two measured rows agree, the effect is still reported.
+    agree <- bundle
+    agree$regulators <- rbind(ev$regulators[1, , drop = FALSE], p, b)
+    agree$regulators$direction[3] <- "up"
+    both <- adjudicate(agree)
+    expect_identical(both$verdicts$perturbation_effect, "activator")
+    agree$regulators <- agree$regulators[3:1, , drop = FALSE]
+    expect_identical(adjudicate(agree)$verdicts$perturbation_effect, "activator")
+})

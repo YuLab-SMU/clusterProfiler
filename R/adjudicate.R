@@ -425,7 +425,7 @@ sources_source <- function(src) {
 ## the database reproduced exactly.
 .consensus_measuring <- function(mine) {
     empty <- list(direction = NA_character_, measured = NA_character_,
-                  sign = NA_character_)
+                  sign = NA_character_, effect = NA_character_)
     if (is.null(mine) || !nrow(mine)) return(empty)
 
     coll <- mine$direction[!mine$source %in% c("perturbagen", "biotrigger")]
@@ -438,23 +438,36 @@ sources_source <- function(src) {
 
     pert <- mine[mine$source %in% c("perturbagen", "biotrigger"), , drop = FALSE]
     if (!nrow(pert)) return(empty)
-    sign <- mechanism_method_sign(pert$method[1])
-    if (is.na(sign)) return(empty)
 
-    ## Read the half the collection layer's direction refers to. The up half was
-    ## tested into `direction` by the perturbation layer; the down half's verdict
-    ## is derivable from the counts it stored.
-    measured <- if (identical(direction, "up")) {
-        pert$direction[1]
-    } else {
-        .mechanism_half_direction(list(rise = pert$down_rise[1],
-                                       fall = pert$down_fall[1],
-                                       padj = pert$down_sign_padj[1]))
-    }
-    if (is.null(measured) || is.na(measured) || !measured %in% c("up", "down")) {
-        measured <- NA_character_
-    }
-    list(direction = direction, measured = measured, sign = sign)
+    ## Read every measured row, then collapse. Taking the first row made the
+    ## answer depend on row order: the same bundle with its measured rows
+    ## reversed reported activator or repressor while the evidence fingerprint
+    ## stayed identical. Disagreement is reported as `mixed` (measured) and no
+    ## effect, rather than silently resolved by whichever dataset came first.
+    one <- lapply(seq_len(nrow(pert)), function(i) {
+        r <- pert[i, , drop = FALSE]
+        sign <- mechanism_method_sign(r$method[1])
+        measured <- if (identical(direction, "up")) {
+            r$direction[1]
+        } else {
+            .mechanism_half_direction(list(rise = r$down_rise[1],
+                                           fall = r$down_fall[1],
+                                           padj = r$down_sign_padj[1]))
+        }
+        if (is.null(measured) || is.na(measured) || !measured %in% c("up", "down"))
+            measured <- NA_character_
+        expected <- mechanism_expected_measured(sign)
+        effect <- if (is.na(measured) || is.na(expected)) NA_character_
+                  else if (identical(measured, expected)) "activator" else "repressor"
+        list(measured = measured, sign = sign, effect = effect)
+    })
+    measured <- unique(stats::na.omit(vapply(one, `[[`, character(1), "measured")))
+    signs <- unique(stats::na.omit(vapply(one, `[[`, character(1), "sign")))
+    effects <- unique(stats::na.omit(vapply(one, `[[`, character(1), "effect")))
+    list(direction = direction,
+         measured = if (length(measured) == 1L) measured else if (length(measured)) "mixed" else NA_character_,
+         sign = if (length(signs) == 1L) signs else NA_character_,
+         effect = if (length(effects) == 1L) effects else NA_character_)
 }
 
 ## What the measured perturbation says the regulator does to the programme.
@@ -471,10 +484,7 @@ sources_source <- function(src) {
 ## different answers.
 .consensus_perturbation_effect <- function(mine) {
     m <- .consensus_measuring(mine)
-    if (is.na(m$measured)) return(NA_character_)
-    expected <- mechanism_expected_measured(m$sign)
-    if (is.na(expected)) return(NA_character_)
-    if (identical(m$measured, expected)) "activator" else "repressor"
+    if (is.null(m$effect) || is.na(m$effect)) NA_character_ else m$effect
 }
 ## `called_at` and every other timestamp, so the same input hashes the same way
 ## on two runs and a SHA comparison means "same evidence", not "same moment".

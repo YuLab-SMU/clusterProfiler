@@ -530,7 +530,9 @@ test_that("significance cannot bypass measurable member support", {
         expect_equal(strict$reason, "low-support")
         unknown <- suppressWarnings(pathway_evidence(pathway_test_input(), drivers = "TF1"))
         expect_equal(unknown$level, "C")
-        expect_equal(unknown$reason, "no-members")
+        ## Direction is given, but no fold changes: the missing input is the
+        ## measurements, not the identifiers.
+        expect_equal(unknown$reason, "no-fold-changes")
     })
 })
 
@@ -722,4 +724,132 @@ test_that("unusable dataset tables are empty, not fabricated data", {
     out <- .pathway_usable_datasets(blank)
     expect_equal(nrow(out), 2L)
     expect_true(is.na(out$cell_line[2]))
+})
+
+test_that("a failed dataset lookup is not reported as absent data", {
+    ns <- asNamespace("gpsadb")
+    original <- get("gpsadb_search_datasets", ns)
+    on.exit(assignInNamespace("gpsadb_search_datasets", original, ns = "gpsadb"),
+            add = TRUE)
+    assignInNamespace("gpsadb_search_datasets",
+                      function(...) stop("simulated outage"), ns = "gpsadb")
+    warnings <- character()
+    out <- withCallingHandlers(
+        pathway_evidence(pathway_test_input(), drivers = "TF1",
+                         signed = pathway_test_signed),
+        warning = function(w) {
+            warnings <<- c(warnings, conditionMessage(w))
+            invokeRestart("muffleWarning")
+        })
+    expect_equal(out$reason, "lookup-failed")
+    expect_match(out$statement, "lookup failure, not evidence")
+    expect_true(any(grepl("lookup failure", warnings)))
+    expect_false(any(grepl("No usable perturbation data found", warnings)))
+    lookup <- attr(out, "dataset_lookup")
+    expect_equal(lookup$driver, "TF1")
+    expect_equal(lookup$status, "failed")
+})
+
+test_that("an empty lookup stays distinguishable from a failed one", {
+    ns <- asNamespace("gpsadb")
+    original <- get("gpsadb_search_datasets", ns)
+    on.exit(assignInNamespace("gpsadb_search_datasets", original, ns = "gpsadb"),
+            add = TRUE)
+    assignInNamespace("gpsadb_search_datasets",
+                      function(...) list(data.frame(dataset_id = character(),
+                          cell_line = character(), method = character(),
+                          in_reference = logical(), n_samples = integer())),
+                      ns = "gpsadb")
+    warnings <- character()
+    out <- withCallingHandlers(
+        pathway_evidence(pathway_test_input(), drivers = "TF1",
+                         signed = pathway_test_signed),
+        warning = function(w) {
+            warnings <<- c(warnings, conditionMessage(w))
+            invokeRestart("muffleWarning")
+        })
+    expect_equal(out$reason, "no-dataset")
+    expect_true(any(grepl("No usable perturbation data found", warnings)))
+    expect_false(any(grepl("lookup failure", warnings)))
+    expect_equal(attr(out, "dataset_lookup")$status, "empty")
+})
+
+test_that("a partial lookup failure is disclosed even when another driver resolves", {
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    got <- list(D1 = data.frame(es = -1, padj = 0.001))
+    ns <- asNamespace("gpsadb")
+    original <- get("gpsadb_search_datasets", ns)
+    on.exit(assignInNamespace("gpsadb_search_datasets", original, ns = "gpsadb"),
+            add = TRUE)
+    assignInNamespace("gpsadb_search_datasets", function(perturbed_gene, ...) {
+        if (identical(perturbed_gene, "TF2")) stop("simulated outage for TF2")
+        z <- ds[ds$driver == perturbed_gene, , drop = FALSE]
+        z$n_samples <- 4L
+        z$in_reference <- TRUE
+        list(z)
+    }, ns = "gpsadb")
+    original_test <- get("gpsadb_test_gene_set", ns)
+    on.exit(assignInNamespace("gpsadb_test_gene_set", original_test, ns = "gpsadb"),
+            add = TRUE)
+    assignInNamespace("gpsadb_test_gene_set", function(id, genes) list(got[[id]]),
+                      ns = "gpsadb")
+    warnings <- character()
+    out <- withCallingHandlers(
+        pathway_evidence(pathway_test_input(), drivers = c("TF1", "TF2"),
+                         signed = pathway_test_signed),
+        warning = function(w) {
+            warnings <<- c(warnings, conditionMessage(w))
+            invokeRestart("muffleWarning")
+        })
+    expect_true(any(grepl("could not be queried for `TF2`", warnings)))
+    expect_true(any(grepl("lookup failure", warnings)))
+    ## The single-cell-line warning must name the resolved candidate only: TF2
+    ## was never queried, so it cannot have evidence in one cell line.
+    single <- warnings[grepl("single cell line", warnings)]
+    expect_true(length(single) >= 1L)
+    expect_true(any(grepl("TF1", single)))
+    expect_false(any(grepl("TF2", single)))
+    lookup <- attr(out, "dataset_lookup")
+    expect_equal(lookup$status[lookup$driver == "TF1"], "available")
+    expect_equal(lookup$status[lookup$driver == "TF2"], "failed")
+})
+
+test_that("missing fold changes are not blamed on the identifier space", {
+    ## A documented call: direction from pathway_direction/NES, no `signed`.
+    ## The perturbation tests run and support the direction, but member support
+    ## is unknown, so the row cannot pass the support floor. It must say the
+    ## fold changes are missing, not that the members are.
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    got <- list(D1 = data.frame(es = -1, padj = 0.001))
+    with_pathway_stubs(ds, got, {
+        out <- suppressWarnings(pathway_evidence(pathway_test_input(), drivers = "TF1"))
+        expect_equal(out$level, "C")
+        expect_equal(out$reason, "no-fold-changes")
+        expect_match(out$statement, "No signed fold changes")
+        expect_false(grepl("signed gene list", out$statement))
+        expect_true(is.na(out$support))
+        expect_equal(attr(out, "perturbation_tests")$status, "supports")
+    })
+})
+
+test_that("a column-only subset keeps the retained ledger", {
+    two <- data.frame(Description = c("p1", "p2"), geneID = "A/B/C/D/E",
+                      pathway_direction = "up", stringsAsFactors = FALSE)
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    got <- list(D1 = data.frame(es = -1, padj = 0.001))
+    with_pathway_stubs(ds, got, {
+        pe <- suppressWarnings(pathway_evidence(two, drivers = "TF1",
+            signed = pathway_test_signed))
+        reordered <- pe[, rev(names(pe))]
+        expect_s3_class(reordered, "pathway_evidence")
+        expect_equal(nrow(attr(reordered, "perturbation_tests")), 2L)
+        expect_identical(attr(reordered, "perturbation_tests"),
+                         attr(pe, "perturbation_tests"))
+        rep <- mechanism_report(reordered, inventory = data.frame(perturbed_gene = "TF1"))
+        expect_equal(nrow(rep$perturbation_tests), 2L)
+        expect_equal(nrow(rep$candidate_evidence), 2L)
+        ## Dropping a required column still falls back to a plain data.frame.
+        slim <- pe[, c("pathway", "level")]
+        expect_false(inherits(slim, "pathway_evidence"))
+    })
 })

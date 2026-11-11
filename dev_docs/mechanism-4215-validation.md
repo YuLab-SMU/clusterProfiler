@@ -1,6 +1,6 @@
 # Mechanism evidence: three-stage completion record
 
-Development version **4.21.5.001**, formal baseline **4.21.5**. Completed 2026-11-11.
+Development version **4.21.5.003**, formal baseline **4.21.5**. Completed 2026-11-11.
 This is a correctness, reproducibility and disclosure change, not a new causal
 identification algorithm or a validated accuracy improvement.
 
@@ -30,18 +30,43 @@ unrelated pathway ledgers; blank cell identities falsely established replication
 Conflicting dataset/cell identities are also rejected with a warning. A bounded
 live replicate then exposed one more false negative: dataset resolution required
 the literal method `"knockdown"`, so a factor recorded only as CRISPRi or knockout
-(`STAT1`) read as "no dataset" while the report inventory listed its data. Removal
-is now recognised in all four spellings with overexpression still excluded, and the
-same profile moved from zero calls to five real non-significant tests.
+(`STAT1`) read as "no dataset" while the report inventory listed its data. The
+resolver now falls back to the other recorded spellings when the literal
+`"knockdown"` query is empty (it stops at the first spelling that yields datasets,
+so methods are not united), overexpression stays excluded, and the same profile
+moved from zero calls to five real non-significant tests.
+
+A second, independent review of both commits found three more defects, all fixed
+here: the lookup error above; a row with direction supplied but no `signed` list
+claiming its members were missing from that list (reason `no-members`) when the
+missing input was the fold changes (now `no-fold-changes`, again with the ledger
+retained); and a pure column reorder (`pe[, rev(names(pe))]`) silently stripping
+the retained ledger while keeping the class, so `mechanism_report()` saw no
+candidate evidence. The review also found a pre-existing order dependence in
+`adjudicate()`: with two measured rows for one regulator, the first row alone
+decided `perturbation_effect`, so reversing the same bundle flipped activator to
+repressor while the fingerprint stayed identical. Every measured row is now read
+and disagreement is reported as `mixed` with no single effect. The same review
+confirmed that a failed lookup produced
+byte-identical output to a successful empty one at the previous commit, which is
+the P1 fixed by `dataset_lookup`/`lookup-failed`.
+
+Reviewing that change exposed the mirror-image error it could amplify: the resolver
+swallowed every lookup error, so a network outage or a machine without the suggested
+`gpsadb` package produced "No usable perturbation data found in GPSAdb" and reason
+`no-dataset` -- a false statement about the database. Resolution now reports
+`available`, `empty` or `failed` per candidate (retained as the `dataset_lookup`
+attribute); failures produce reason `lookup-failed` and an explicit warning, and a
+partial failure is disclosed even when another candidate resolves.
 
 ## Actual validation
 
 | Gate | Observed result |
 |---|---|
 | Project documentation | `make rd` completed; Rd generated from R/roxygen, not hand-edited |
-| Seven focused test files | **482 passed, 0 failures, 0 errors**; 8 existing structural warning records and 4 pre-existing network-gated skips |
-| Full project check | `make check`: **0 errors, 0 warnings, 1 NOTE**, 17m18.5s; tests, examples and vignettes passed |
-| Remaining NOTE | `Unable to verify current time` in future-file-timestamp check |
+| Eight focused test files | **559 passed, 0 failures, 0 errors**; 4 pre-existing network-gated skips (recorded warnings are the expected empty-input warnings) |
+| Full project check | `make check`: **0 errors, 0 warnings, 0 notes**, 15m30.4s; tests, examples and vignettes passed |
+| Earlier check | A prior tree (4.21.5.001) reported one NOTE, `Unable to verify current time`; the final tree did not |
 | Frozen benchmark | `--self-test` passed; complete expected-label ranks and denominators asserted |
 | Standalone reproduction | Archive extracted separately; base-R rerun produced byte-identical output manifest `ba060060f4776ff9ba5626a2f5f031aa` |
 | Real-data/live-service smoke | Hypoxia profile, HIF1A/EPAS1, two pathways, maximum two datasets per candidate; **8 retained outcomes, 4 test calls**, report/ledger agreement asserted |
@@ -97,14 +122,20 @@ five. These rows are not evidence that the old grades were right; they are evide
 that a two-dataset cap cannot adjudicate them. Only a full re-scan under the fixed
 logic could, and that has not been run.
 
-One earlier attempt of this same run recorded 10 failed calls in the hypoxia
-profile after 482 s; an immediate retry of that profile returned the same A/B
-pattern as the successful run (7 supports, 0 failed). The live service is therefore
-intermittently unreliable, which is why the report keeps failed and unknown
-outcomes separate from negative ones. The stored artifact is the clean final run.
+Live data availability is not guaranteed. The stored clean run has no failed
+calls, but an earlier attempt of this replicate returned no usable statistics for
+the hypoxia profile in any of its ten calls; that attempt was not retained, and
+the stored artifact is the clean rerun. Back-to-back repeats of the same profile in
+one session now reproduce exactly (8 supporting outcomes, A3/B2, minimum padj
+7.30e-08; `live_repeat.tsv`), whereas the stored run graded that profile A2/B3
+with minimum padj 1.27e-08. The two observations differ in code version as well as
+time, so the difference cannot be attributed to the service alone. What the
+artifacts establish is narrower: a stored live grade is one sample, not a
+reproducibility guarantee, and the historical table must not be replaced by it.
 
 Artifacts: [summary](<../../adjudicate-interpret/results/mechanism-4215-regrade/summary.tsv>),
 [retained tests](<../../adjudicate-interpret/results/mechanism-4215-regrade/perturbation-tests.tsv>),
+[back-to-back repeat](<../../adjudicate-interpret/results/mechanism-4215-regrade/live_repeat.tsv>),
 [script](<../../adjudicate-interpret/scripts/64_regrade_4215.R>).
 
 ## Reproduce and inspect

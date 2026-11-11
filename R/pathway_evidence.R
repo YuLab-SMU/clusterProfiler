@@ -76,6 +76,17 @@
 ## 但把用了哪一份记下来，因为"同一个基因在不同细胞系里表现不同"是真实存在的
 ## （第 0 期里 VHL 在 HK-2 上就不符合预期）。
 .pathway_datasets <- function(gene, limit = 5L) {
+    .pathway_dataset_lookup(gene, limit)$data
+}
+
+## Resolve one candidate and say which of three things happened: data was found,
+## the lookup succeeded but returned nothing usable, or the lookup itself failed.
+##
+## The third case used to be indistinguishable from the second. `pathway_evidence()`
+## then printed "No usable perturbation data found in GPSAdb" for a network outage
+## or a machine without the suggested `gpsadb` package -- a false statement about
+## the database, and the same confusion the inventory lookup was fixed for.
+.pathway_dataset_lookup <- function(gene, limit = 5L) {
     ## 先用包里已有的别名表归一，再查。
     ##
     ## 不归一会**静默查空**：GPSAdb 里 `GR` 有 0 个敲低数据集，`NR3C1` 有 1 个；
@@ -91,32 +102,45 @@
     tries <- unique(c(gene, fwd, back))
     tries <- tries[!is.na(tries) & nzchar(tries)]
 
-    ## "knockdown" first because it is the common spelling and the narrow query
-    ## is fast and stable. Only when it is empty do the other removal spellings
-    ## get asked, so a gene that GPSAdb records solely as CRISPRi or knockout
-    ## (STAT1) is not reported as having no data. An unfiltered query is avoided:
-    ## it is slow and intermittently returns nothing for the largest factors.
-    look <- function(g) {
-        ask <- function(method) tryCatch(as.data.frame(
-            gpsadb::gpsadb_search_datasets(perturbed_gene = g, method = method,
-                                           limit = 50)[[1]]),
-            error = function(e) NULL)
-        d <- .pathway_usable_datasets(ask("knockdown"))
-        if (!is.null(d)) return(d)
-        for (m in c("CRISPRi", "knockout", "siRNA", "shRNA")) {
-            d <- .pathway_usable_datasets(ask(m))
-            if (!is.null(d)) return(d)
+    errors <- character(0)
+    for (g in tries) {
+        got <- .pathway_lookup_one(g, limit)
+        errors <- c(errors, got$errors)
+        if (!is.null(got$data)) {
+            return(list(data = got$data, status = "available",
+                        message = paste(unique(errors), collapse = "; ")))
         }
-        NULL
     }
-    d <- NULL
-    for (g in tries) { d <- look(g); if (!is.null(d)) break }
-    if (is.null(d)) return(NULL)
-    ## 每个细胞系先留一份（样本多的），保证取到的几份尽量来自不同系——
-    ## 复现判定看的是细胞系数，不是数据集数。
-    if ("n_samples" %in% names(d)) d <- d[order(-d$n_samples), , drop = FALSE]
-    d <- d[!duplicated(d$cell_line), , drop = FALSE]
-    utils::head(d, limit)
+    list(data = NULL, status = if (length(errors)) "failed" else "empty",
+         message = paste(unique(errors), collapse = "; "))
+}
+
+## One spelling of the candidate. "knockdown" first because it is the common
+## spelling and the narrow query is fast and stable; the other removal spellings
+## are only asked when it yields nothing, so a factor recorded solely as CRISPRi
+## or knockout (STAT1) is not reported as having no data. An unfiltered query is
+## avoided: it is slow and intermittently returns nothing for the largest factors.
+.pathway_lookup_one <- function(gene, limit) {
+    methods <- c("knockdown", "CRISPRi", "knockout", "siRNA", "shRNA")
+    errors <- character(0)
+    for (m in methods) {
+        got <- tryCatch(
+            list(d = as.data.frame(gpsadb::gpsadb_search_datasets(
+                perturbed_gene = gene, method = m, limit = 50)[[1]]), error = NULL),
+            error = function(e) list(d = NULL, error = conditionMessage(e)))
+        if (!is.null(got$error)) {
+            errors <- c(errors, sprintf("%s: %s", m, got$error))
+            next
+        }
+        d <- .pathway_usable_datasets(got$d)
+        if (is.null(d)) next
+        ## 每个细胞系先留一份（样本多的），保证取到的几份尽量来自不同系——
+        ## 复现判定看的是细胞系数，不是数据集数。
+        if ("n_samples" %in% names(d)) d <- d[order(-d$n_samples), , drop = FALSE]
+        d <- d[!duplicated(d$cell_line), , drop = FALSE]
+        return(list(data = utils::head(d, limit), errors = errors))
+    }
+    list(data = NULL, errors = errors)
 }
 
 ## Post-query normalisation, factored out so it can be tested offline.
@@ -222,7 +246,10 @@
 #'   Testing all of them is `n_drivers * n_datasets` calls and grows without
 #'   bound; six is enough to see two cell lines agree, which is all level A
 #'   needs. Datasets from distinct cell lines are preferred over extra replicates
-#'   of one line, because replication is what the grade turns on.
+#'   of one line, because replication is what the grade turns on. The cap applies
+#'   to datasets tested, not to the lookups that resolve them: a candidate is
+#'   searched under one or more removal spellings, so an unknown symbol can cost
+#'   a handful of search calls before it is reported as empty.
 #' @param n For `print()`, how many rows to show.
 #' @param ... Ignored, for method consistency.
 #' @return A `data.frame`, one row per pathway, classed `pathway_evidence` so it
@@ -249,6 +276,14 @@
 #'   A known member support at or above `min_support` is required for promotion
 #'   based on significant perturbation evidence. Replication is counted within
 #'   the selected candidate only; contradictory datasets remain in the attribute.
+#'   The `dataset_lookup` attribute records, per requested driver, whether the
+#'   lookup returned data (`available`), succeeded but found nothing usable
+#'   (`empty`), or could not be performed (`failed`, with the error text). A
+#'   failed lookup yields reason `lookup-failed` and is never reported as the
+#'   database holding no data; `not-run` marks an empty input that never reached
+#'   dataset resolution. With several drivers, a partial failure is disclosed in
+#'   that attribute and by a warning rather than in the row `reason`, which keeps
+#'   describing the candidate that was actually tested.
 #' @export
 pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                              min_support = 0.5, max_pathways = 20L,
@@ -303,13 +338,23 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     }
 
     ## 候选数据集只解析一次，不按通路重复查——同一个驱动者在几十条通路上是同一批数据集。
+    ## `lookup` 记录每个候选的解析结果：拿到数据、成功但为空、还是查询本身失败。
+    ## 三者混同会让一次断网印成"GPSAdb 里没有这个因子的数据"。
     sets <- list()
+    lookup <- list()
     if (length(drivers)) {
         for (g in drivers) {
-            ds <- .pathway_datasets(g, limit = max_datasets_per_driver)
-            if (!is.null(ds)) sets[[g]] <- ds[, c("dataset_id", "cell_line"), drop = FALSE]
+            lk <- .pathway_dataset_lookup(g, limit = max_datasets_per_driver)
+            lookup[[g]] <- data.frame(driver = g, status = lk$status,
+                message = substr(lk$message, 1, 300), stringsAsFactors = FALSE)
+            if (!is.null(lk$data))
+                sets[[g]] <- lk$data[, c("dataset_id", "cell_line"), drop = FALSE]
         }
     }
+    lookup <- if (length(lookup)) do.call(rbind, lookup) else
+        data.frame(driver = character(), status = character(), message = character(),
+                   stringsAsFactors = FALSE)
+    failed <- lookup$driver[lookup$status %in% "failed"]
 
     ## A 级不可达这件事在**驱动者层面**就能确定，不必从每个通路的 `reason` 去反推。
     ##
@@ -328,9 +373,22 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 call. = FALSE)
         }
     } else if (length(drivers)) {
+        if (length(failed)) {
+            warning(sprintf(paste(
+                "GPSAdb could not be queried for %s; no dataset was resolved.",
+                "This is a lookup failure (network or missing gpsadb), not evidence that these factors have no data.",
+                "Every pathway will be described without perturbation evidence."),
+                paste0("`", paste(failed, collapse = "`, `"), "`")), call. = FALSE)
+        } else {
+            warning(sprintf(
+                "No usable perturbation data found in GPSAdb for %s; every pathway will be described without perturbation evidence.",
+                paste0("`", paste(drivers, collapse = "`, `"), "`")), call. = FALSE)
+        }
+    }
+    if (length(sets) && length(failed)) {
         warning(sprintf(
-            "No usable perturbation data found in GPSAdb for %s; every pathway will be described without perturbation evidence.",
-            paste0("`", paste(drivers, collapse = "`, `"), "`")), call. = FALSE)
+            "GPSAdb could not be queried for %s; those candidates are not tested. This is a lookup failure, not evidence that they have no data.",
+            paste0("`", paste(failed, collapse = "`, `"), "`")), call. = FALSE)
     }
 
     ## 按 (数据集, 成员签名) 记忆化。
@@ -466,7 +524,8 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         ## 一律说成 "no perturbation test identified a driver"——实测断网时
         ## 就是这句话，看不出是网络问题。
         blocked <- if (n_attempt > 0L && n_fail == n_attempt) "no-test-completed"
-            else if (length(drivers) && !length(sets)) "no-dataset"
+            else if (length(drivers) && !length(sets))
+                if (length(failed)) "lookup-failed" else "no-dataset"
             else NA_character_
 
         cells_agree <- character(0)
@@ -586,7 +645,16 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         ## "检验没能跑起来"比"方向由成员推导"更该被看见——否则用户会以为自己
         ## 的输入有问题，实际是网络。实测断网时逐条 reason 曾显示 `member-derived`，
         ## 只有全局 warning 说得出真相，两层信息不一致。
-        why_c <- if (is.na(support)) "no-members"
+        ## `support` is NA for two different inputs: no `signed` list at all, or
+        ## members that are not in it. Reporting both as "members were not found
+        ## in the signed gene list" misdiagnosed the first case -- a documented
+        ## way to call the function when direction comes from `pathway_direction`
+        ## or NES -- and told the user to check identifiers when the missing
+        ## input was the fold changes.
+        missing_fc <- is.null(signed) || !length(signed)
+        why_c <- if (is.na(support)) {
+                if (missing_fc) "no-fold-changes" else "no-members"
+            }
             else if (!is.na(blocked)) blocked
             else if (length(members) < 5L) "too-small"
             else if (support < min_support) "low-support"
@@ -607,12 +675,14 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
             ## 低于 50% 的下限"这种自相矛盾的话。实测 airway 上就这么印出来了。
             statement = switch(why_c,
                 "no-members" = "Members were not found in the signed gene list; the pathway's movement is unknown.",
+                "no-fold-changes" = "No signed fold changes were supplied, so member support is unknown; perturbation evidence is retained in the ledger but cannot establish the pathway's direction.",
                 "too-small" = sprintf("Only %d members reached this pathway, too few to establish its direction or test a driver; supply more differentially expressed genes.",
                                       length(members)),
                 "member-derived" = "The pathway's direction was inferred from these same members, so majority agreement cannot serve as evidence for it.",
                 "low-support" = sprintf("%.0f%% of members moved %s, below the support floor of %.0f%%.",
                                         100 * support, direction, 100 * min_support),
                 "no-test-completed" = "Every perturbation call for this pathway failed, so the absence of evidence may be an outage rather than a result.",
+                "lookup-failed" = "GPSAdb could not be queried for the candidate drivers, so no perturbation test could run; this is a lookup failure, not evidence about the factor.",
                 "no-dataset" = "No usable perturbation dataset was available for the candidate drivers, so the pathway was described but not tested.",
                 "not-significant" = sprintf("The candidates were tested against these %d members and none reached significance; this does not establish that their effects are absent.",
                                             length(members)),
@@ -630,6 +700,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
 
     out <- out[order(match(out$level, c("A", "B", "C")), -out$support), , drop = FALSE]
     attr(out, "drivers") <- drivers
+    attr(out, "dataset_lookup") <- lookup
     attr(out, "network_calls") <- calls
     attr(out, "perturbation_tests") <- if (length(perturbation_tests))
         do.call(rbind, perturbation_tests) else .pathway_perturbation_tests_empty()
@@ -651,7 +722,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     }
     ## 断网时不再重复第二条：`_pathway_warn_capped` 那句说的正是同一件事。
     ## 一次故障发两条同义 warning 只会让人以为是两个问题。
-    if (!outage) .pathway_warn_capped(out, drivers)
+    if (!outage) .pathway_warn_capped(out, names(sets), failed)
     ## 必须设 class，否则 `print.pathway_evidence` 永远不会被派发。
     ## 实测这份代码从写出来到现在**一次都没执行过**：返回的是裸 data.frame，
     ## 用户看到的是 20 列的原始表格，`reason` / `capped by` 那些行一个都没印。
@@ -678,6 +749,9 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     attr(out, "drivers") <- drivers
     attr(out, "network_calls") <- 0L
     attr(out, "perturbation_tests") <- .pathway_perturbation_tests_empty()
+    attr(out, "dataset_lookup") <- data.frame(driver = drivers %||% character(0),
+        status = rep("not-run", length(drivers %||% character(0))),
+        message = rep("", length(drivers %||% character(0))), stringsAsFactors = FALSE)
     ## 与正常返回保持同一 class。不设的话空结果不走 print.pathway_evidence，
     ## 用户在同一函数上看到两种输出形态。
     class(out) <- c("pathway_evidence", "data.frame")
@@ -700,11 +774,29 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     out <- NextMethod()
     if (is.data.frame(out)) {
         attr(out, "drivers") <- attr(x, "drivers", exact = TRUE)
+        attr(out, "dataset_lookup") <- attr(x, "dataset_lookup", exact = TRUE)
+        attr(out, "network_calls") <- attr(x, "network_calls", exact = TRUE)
+        ## A row subset and a column subset lose attributes differently:
+        ## `[.data.frame` keeps them for row subsets, but a column subset --
+        ## including a pure reorder such as `pe[, rev(names(pe))]` -- drops every
+        ## custom attribute while keeping the class. That silently removed the
+        ## retained evidence ledger, so `mechanism_report()` on a reordered table
+        ## reported `perturbation_tests = NULL` and no candidate evidence.
+        ## Whenever the pathway column survives, restore the ledger scoped to the
+        ## rows that remain; without it the attribute cannot be scoped and the
+        ## class is dropped below.
         ledger <- attr(x, "perturbation_tests", exact = TRUE)
-        row_subset <- !missing(i) && (nargs() - !missing(drop) >= 3L)
-        if (is.data.frame(ledger) && row_subset) {
-            pathways <- if ("pathway" %in% names(out)) out$pathway else x$pathway[i]
-            attr(out, "perturbation_tests") <- ledger[ledger$pathway %in% pathways, , drop = FALSE]
+        if (is.data.frame(ledger)) {
+            paths <- if ("pathway" %in% names(out)) out$pathway else NULL
+            if (is.null(paths)) {
+                ## Row-and-column subset that dropped the pathway column: the
+                ## kept rows still identify the ledger rows.
+                row_subset <- !missing(i) && (nargs() - !missing(drop) >= 3L)
+                if (row_subset && !missing(i)) paths <- x$pathway[i]
+            }
+            if (!is.null(paths))
+                attr(out, "perturbation_tests") <-
+                    ledger[ledger$pathway %in% paths, , drop = FALSE]
         }
     }
     if (is.data.frame(out) && !all(needed %in% names(out))) {
@@ -794,22 +886,30 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
 ##
 ## 只在"没有任何 A"时触发：如果已经有 A，说明条件部分满足，逐行看 `reason` 就够了，
 ## 再报一次只是噪音。
-.pathway_warn_capped <- function(out, drivers) {
+.pathway_warn_capped <- function(out, drivers, failed = character(0)) {
     ## `!any(level %in% c("A","B","C"))` 是恒假的：level 只有这三个取值。
     ## 原来那句永远不会命中，等于没写。
     if (!nrow(out)) return(invisible(NULL))
     if (any(out$level == "A", na.rm = TRUE)) return(invisible(NULL))
 
-    why <- c("single-cell-line", "no-dataset", "too-small", "no-test-completed")
+    why <- c("single-cell-line", "lookup-failed", "no-dataset", "too-small", "no-test-completed")
     rs <- out$reason[!is.na(out$reason) & out$reason %in% why]
     if (!length(rs) || length(unique(rs)) != 1L) return(invisible(NULL))
     ## 要占多数才报——零星几条小通路不够格解释整批结果。
     if (length(rs) < max(1L, floor(0.5 * nrow(out)))) return(invisible(NULL))
 
-    who <- paste0("`", paste(drivers, collapse = "`, `"), "`")
+    ## Name the candidates the sentence is true of. After a partial lookup
+    ## failure, a single-cell-line warning that also named the unresolved
+    ## candidate claimed it had evidence in one cell line when it had none.
+    named <- if (identical(unique(rs), "lookup-failed")) failed else drivers
+    if (!length(named)) return(invisible(NULL))
+    who <- paste0("`", paste(named, collapse = "`, `"), "`")
     msg <- switch(unique(rs),
         "single-cell-line" = sprintf(
             "level A was not reached: %s has direction-consistent significant evidence in only one cell line for the selected candidate; level A needs two for that same candidate.",
+            who),
+        "lookup-failed" = sprintf(
+            "level A is unreachable: GPSAdb could not be queried for %s. This is a lookup failure, not evidence about the factor.",
             who),
         "no-dataset" = sprintf(
             "level A is unreachable: GPSAdb returned no usable perturbation dataset for %s. The pathways are described, not tested.",

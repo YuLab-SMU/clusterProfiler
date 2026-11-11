@@ -3,6 +3,7 @@
     rows <- list(
         list("single-cell-line", "data", "test the candidate in an independent, relevant cell context", TRUE),
         list("no-dataset", "data", "no usable dataset was resolved; check coverage or obtain a relevant perturbation", TRUE),
+        list("lookup-failed", "data", "the lookup could not run (network or missing gpsadb); retry before reading these rows", TRUE),
         list("no-test-completed", "data", "the calls failed; rerun before interpreting the evidence", TRUE),
         list("too-small", "analysis", "check member coverage and whether a better-powered pathway test is appropriate", TRUE),
         list("low-support", "analysis", "check the contrast and pathway direction; do not lower thresholds merely to obtain support", FALSE),

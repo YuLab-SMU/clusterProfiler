@@ -45,7 +45,10 @@ otherwise, so pick this deliberately rather than leaving it high.}
 Testing all of them is `n_drivers * n_datasets` calls and grows without
 bound; six is enough to see two cell lines agree, which is all level A
 needs. Datasets from distinct cell lines are preferred over extra replicates
-of one line, because replication is what the grade turns on.}
+of one line, because replication is what the grade turns on. The cap applies
+to datasets tested, not to the lookups that resolve them: a candidate is
+searched under one or more removal spellings, so an unknown symbol can cost
+a handful of search calls before it is reported as empty.}
 
 \item{reproduction}{Optional data frame from [mechanism_reproduction()]. When
 given, a level-B row whose only support is a single cell line is worded
@@ -82,6 +85,14 @@ A `data.frame`, one row per pathway, classed `pathway_evidence` so it
   A known member support at or above `min_support` is required for promotion
   based on significant perturbation evidence. Replication is counted within
   the selected candidate only; contradictory datasets remain in the attribute.
+  The `dataset_lookup` attribute records, per requested driver, whether the
+  lookup returned data (`available`), succeeded but found nothing usable
+  (`empty`), or could not be performed (`failed`, with the error text). A
+  failed lookup yields reason `lookup-failed` and is never reported as the
+  database holding no data; `not-run` marks an empty input that never reached
+  dataset resolution. With several drivers, a partial failure is disclosed in
+  that attribute and by a warning rather than in the row `reason`, which keeps
+  describing the candidate that was actually tested.
 }
 \description{
 Test enriched pathways against measured perturbation data

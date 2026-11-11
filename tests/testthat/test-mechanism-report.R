@@ -18,7 +18,7 @@ test_that("every reason pathway_evidence can emit has an action and a side", {
     ## 是没有还是漏了。
     reasons <- c("single-cell-line", "direction-conflict", "no-dataset", "too-small",
                  "not-significant", "member-derived", "no-members", "low-support",
-                 "no-direction", "no-fold-changes", "no-test-completed",
+                 "no-direction", "no-fold-changes", "no-test-completed", "lookup-failed",
                  "no-perturbation-test", "coherent-refuted")
     tab <- clusterProfiler:::.mechanism_remedies()
     expect_equal(anyDuplicated(tab$reason), 0L)
