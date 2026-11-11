@@ -832,6 +832,35 @@ test_that("missing fold changes are not blamed on the identifier space", {
     })
 })
 
+test_that("pathway presentation uses ledger evidence even below the support floor", {
+    ds <- data.frame(driver = "TF1", dataset_id = "D1", cell_line = "cellA")
+    got <- list(D1 = data.frame(es = -1, padj = 0.001))
+    with_pathway_stubs(ds, got, {
+        signed <- pathway_test_signed
+        signed[1:2] <- -abs(signed[1:2])
+        pe <- suppressWarnings(pathway_evidence(pathway_test_input(), drivers = "TF1",
+            min_support = 0.8, signed = signed))
+        expect_equal(pe$reason, "low-support")
+        expect_equal(clusterProfiler:::.pathway_evidence_status(pe)$evidence_status, "support")
+        printed <- paste(capture.output(print(pe)), collapse = "\n")
+        expect_match(printed, "\\[support\\].*legacy level C")
+        expect_match(printed, "not a grading pass")
+        expect_match(printed, "1/1 computable")
+        attr(pe, "perturbation_tests") <- NULL
+        pe$level <- "A"
+        printed <- paste(capture.output(print(pe)), collapse = "\n")
+        expect_match(printed, "\\[undetermined\\].*legacy level A")
+        expect_match(printed, "missing-ledger")
+        expect_false(grepl("claim to test:", printed, fixed = TRUE))
+    })
+    empty <- clusterProfiler:::.pathway_evidence_empty()
+    states <- clusterProfiler:::.pathway_evidence_status(empty)
+    expect_equal(nrow(states), 0L)
+    expect_type(states$evidence_status, "character")
+    expect_type(states$n_support, "integer")
+    expect_no_error(print(empty))
+})
+
 test_that("a column-only subset keeps the retained ledger", {
     two <- data.frame(Description = c("p1", "p2"), geneID = "A/B/C/D/E",
                       pathway_direction = "up", stringsAsFactors = FALSE)
@@ -848,8 +877,13 @@ test_that("a column-only subset keeps the retained ledger", {
         rep <- mechanism_report(reordered, inventory = data.frame(perturbed_gene = "TF1"))
         expect_equal(nrow(rep$perturbation_tests), 2L)
         expect_equal(nrow(rep$candidate_evidence), 2L)
+        expect_equal(rep$verdicts$evidence_status, c("support", "support"))
+        expect_match(paste(capture.output(print(reordered)), collapse = "\n"), "\\[support\\] p1 \\(legacy level B")
         ## Dropping a required column still falls back to a plain data.frame.
         slim <- pe[, c("pathway", "level")]
         expect_false(inherits(slim, "pathway_evidence"))
+        slim_report <- mechanism_report(slim, inventory = data.frame(perturbed_gene = "TF1"))
+        expect_equal(slim_report$verdicts$evidence_status, c("support", "support"))
+        expect_equal(clusterProfiler:::.pathway_evidence_status(pe[2, ])$n_support, 1L)
     })
 })

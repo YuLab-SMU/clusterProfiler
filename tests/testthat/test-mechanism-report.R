@@ -106,7 +106,7 @@ test_that("a blocked preflight stops the report from recommending experiments", 
     expect_gt(nrow(rep2$next_steps), 0L)
 })
 
-test_that("print covers the three sections and the inventory", {
+test_that("print covers evidence sections and the inventory", {
     pe <- rbind(.make_pe("C", "unsupported", "single-cell-line", driver = "GR", pathway = "a"),
                 .make_pe("C", "coherent-refuted", "not-significant", pathway = "b"))
     rep <- mechanism_report(pe, inventory = data.frame(
@@ -114,7 +114,7 @@ test_that("print covers the three sections and the inventory", {
         tissue = "Kidney", n_samples = 3, stringsAsFactors = FALSE))
     out <- capture.output(print(rep))
     expect_true(any(grepl("mechanism report", out)))
-    expect_true(any(grepl("conflicting", out)))
+    expect_true(any(grepl("^  conflict:", out)))
     expect_true(any(grepl("undetermined", out)))
     expect_true(any(grepl("driver inventory", out)))
     expect_true(any(grepl("next experiment", out)))
@@ -311,9 +311,131 @@ test_that("a row subset cannot import unrelated pathway conflicts", {
     expect_false(any(grepl("both supporting and conflicting", out$summary)))
 })
 
-test_that("empty report exposes a stable candidate evidence schema", {
+test_that("empty report exposes stable typed evidence schemas", {
     out <- mechanism_report(data.frame())
     expect_equal(nrow(out$candidate_evidence), 0L)
-    expect_true(all(c("pathway", "driver", "n_support", "n_conflict", "assessment") %in% names(out$candidate_evidence)))
+    expect_true(all(c("pathway", "driver", "n_support", "n_conflict", "assessment",
+        "n_noncomputable", "n_nonsignificant", "n_attempted") %in% names(out$candidate_evidence)))
+    expect_type(out$verdicts$evidence_status, "character")
+    expect_type(out$verdicts$n_computable, "integer")
+    expect_type(out$verdicts$incomplete, "logical")
     expect_false(any(grepl("No experiment would change", out$summary)))
+})
+
+test_that("ledger states lead the report without reclassifying legacy verdicts", {
+    paths <- c("allNC", "NSonly", "conflictB", "supportB", "mixedA", "partialfailure")
+    pe <- do.call(rbind, lapply(seq_along(paths), function(i)
+        .make_pe(if (i == 5L) "A" else "B", "single-dataset", "low-support",
+                 driver = "TF", pathway = paths[i])))
+    ledger <- data.frame(pathway = rep(paths, c(2, 1, 1, 1, 2, 3)), driver = "TF",
+        dataset = paste0("d", 1:10), cell_line = "A",
+        status = c("not-computable", "not-computable", "not-significant", "conflicts",
+            "supports", "supports", "conflicts", "supports", "not-significant", "failed"))
+    attr(pe, "perturbation_tests") <- ledger
+    out <- mechanism_report(pe, inventory = data.frame(perturbed_gene = "TF"))
+    expect_equal(out$verdicts$evidence_status,
+        c("noncomputable", "undetermined", "conflict", "support", "mixed", "support"))
+    expect_equal(out$verdicts$class, c(rep("undetermined", 4), "supported", "undetermined"))
+    expect_identical(out$verdicts$verdict, pe$verdict)
+    expect_identical(out$verdicts$level, pe$level)
+    expect_identical(out$perturbation_tests, ledger)
+    expect_equal(out$verdicts$n_computable, c(0L, 1L, 1L, 1L, 2L, 2L))
+    expect_equal(out$verdicts$n_attempted, c(2L, 1L, 1L, 1L, 2L, 3L))
+    expect_equal(out$verdicts$availability, c(rep("available", 5), "partial"))
+    expect_equal(out$verdicts$incomplete, c(TRUE, rep(FALSE, 4), TRUE))
+    expect_equal(out$candidate_evidence$n_noncomputable, c(2L, rep(0L, 5)))
+    expect_equal(out$candidate_evidence$n_nonsignificant, c(0L, 1L, 0L, 0L, 0L, 1L))
+    expect_equal(out$candidate_evidence$assessment,
+        c("unavailable", "no-significant-support", "conflict-only", "support-only", "mixed", "support-only"))
+    printed <- capture.output(print(out, n = 10))
+    expect_equal(printed[grepl("^  (support|conflict|mixed|undetermined|noncomputable):", printed)],
+        paste0("  ", c("support", "conflict", "mixed", "undetermined", "noncomputable"), ":"))
+    expect_match(paste(printed, collapse = "\n"), "2/3 computable, 0 noncomputable, 1 failed \\[partial\\]")
+    expect_match(paste(out$summary, collapse = " "), "not.*grading pass")
+})
+
+test_that("missing ledgers and lookup outages cannot invent support or noncomputability", {
+    pe <- rbind(.make_pe("A", "perturbation-supported", NA, pathway = "a"),
+                .make_pe("B", "direction-conflict", "direction-conflict", pathway = "b"))
+    inv <- data.frame(perturbed_gene = character())
+    out <- mechanism_report(pe, inventory = inv)
+    expect_equal(out$verdicts$evidence_status, rep("undetermined", 2))
+    expect_equal(out$verdicts$availability, rep("missing-ledger", 2))
+    expect_equal(out$verdicts$class, c("supported", "conflicting"))
+    expect_true(all(out$verdicts$incomplete))
+    attr(pe, "perturbation_tests") <- clusterProfiler:::.pathway_perturbation_tests_empty()
+    for (status in c("failed", "unavailable", "not-run", "empty")) {
+        attr(pe, "dataset_lookup") <- data.frame(driver = "TF", status = status)
+        out <- mechanism_report(pe, inventory = inv)
+        expect_equal(out$verdicts$evidence_status, rep("undetermined", 2))
+        expect_equal(out$verdicts$availability, rep(switch(status,
+            failed = "lookup-unavailable", unavailable = "lookup-unavailable",
+            `not-run` = "unqueried", empty = "no-dataset"), 2))
+        expect_equal(out$verdicts$n_attempted, c(0L, 0L))
+    }
+    attr(pe, "perturbation_tests") <- data.frame(pathway = "a", driver = "TF",
+        dataset = "d", cell_line = "A", status = "failed")
+    attr(pe, "dataset_lookup") <- NULL
+    out <- mechanism_report(pe, inventory = inv)
+    expect_equal(out$verdicts$evidence_status, c("undetermined", "undetermined"))
+    expect_equal(out$verdicts$availability, c("failed", "not-tested"))
+    expect_equal(out$verdicts$n_failed, c(1L, 0L))
+    attr(pe, "perturbation_tests") <- data.frame(pathway = "a", driver = "TF",
+        dataset = "d", cell_line = "A", status = "supports")
+    for (status in c("empty", "failed", "not-run")) {
+        attr(pe, "dataset_lookup") <- data.frame(driver = c("TF", "missing"),
+            status = c("available", status))
+        out <- mechanism_report(pe, inventory = inv)
+        expect_equal(out$verdicts$evidence_status[1], "support")
+        expect_equal(out$verdicts$availability[1], "partial")
+        expect_true(out$verdicts$incomplete[1])
+        expect_equal(out$verdicts$n_failed[1], 0L)
+    }
+    attr(pe, "dataset_lookup") <- NULL
+    attr(pe, "perturbation_tests")$status <- NA_character_
+    unknown <- clusterProfiler:::.pathway_evidence_status(pe)
+    expect_equal(unknown$availability[1], "unknown")
+    expect_equal(unknown$evidence_status[1], "undetermined")
+})
+
+test_that("unknown and missing statuses never enter computable candidate denominators", {
+    pe <- .make_pe("B", "unsupported", NA, driver = "TF")
+    attr(pe, "perturbation_tests") <- data.frame(pathway = "p", driver = "TF",
+        dataset = paste0("d", 1:5), cell_line = "A",
+        status = c("supports", "not-significant", NA, "unexpected", "not-computable"))
+    out <- mechanism_report(pe, inventory = data.frame(perturbed_gene = "TF"))
+    expect_equal(out$candidate_evidence$n_tests, 4L) # Historical definition is preserved.
+    expect_equal(out$candidate_evidence$n_computable, 2L)
+    expect_identical(out$candidate_evidence$n_computable, out$verdicts$n_computable)
+    expect_equal(out$candidate_evidence$n_attempted, 5L)
+    printed <- capture.output(print(out))
+    expect_match(printed[grepl("p <- TF:", printed)], "2/5 computable")
+    expect_false(any(grepl("4/5 computable", printed)))
+    empty <- clusterProfiler:::.mechanism_candidate_evidence(NULL)
+    expect_type(empty$n_computable, "integer")
+})
+
+test_that("serialized legacy reports keep pathways and candidate rows visible", {
+    pe <- .make_pe("A", "perturbation-supported", NA, driver = "TF", pathway = "saved-pathway")
+    attr(pe, "perturbation_tests") <- data.frame(pathway = "saved-pathway", driver = "TF",
+        dataset = "d", cell_line = "A", status = "supports")
+    old <- mechanism_report(pe, inventory = data.frame(perturbed_gene = "TF"))
+    old$verdicts <- old$verdicts[, c("pathway", "class", "verdict", "reason", "detail",
+        "side", "action", "module", "module_size", "global_effect_reason")]
+    old$candidate_evidence <- old$candidate_evidence[, c("pathway", "driver", "n_tests",
+        "n_support", "n_conflict", "n_failed", "supporting_cells", "conflicting_cells", "assessment")]
+    for (has_ledger in c(TRUE, FALSE)) {
+        if (!has_ledger) old$perturbation_tests <- NULL
+        saved <- unserialize(serialize(old, NULL))
+        before <- serialize(saved, NULL)
+        printed <- capture.output(returned <- print(saved))
+        expect_match(paste(printed, collapse = "\n"), "legacy saved verdicts")
+        expect_match(paste(printed, collapse = "\n"), "evidence status and grade not inferred")
+        expect_true(any(grepl("- saved-pathway", printed, fixed = TRUE)))
+        expect_true(any(grepl("saved-pathway <- TF: 1 / 0 / 0", printed, fixed = TRUE)))
+        expect_true(any(grepl("computable denominator unavailable", printed, fixed = TRUE)))
+        expect_false(any(grepl("^  (support|conflict|mixed|undetermined|noncomputable):", printed)))
+        expect_identical(serialize(saved, NULL), before)
+        expect_identical(returned, saved)
+    }
 })

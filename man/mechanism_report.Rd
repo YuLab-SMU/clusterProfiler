@@ -64,6 +64,13 @@ A `mechanismReport` list with `verdicts` (classes `supported`,
   pathway/candidate. `next_steps$unlocks` is retained for compatibility and
   counts rows addressed by an action, not promised grade upgrades. The legacy
   `coherent-refuted` verdict is treated as undetermined, not disproved.
+  `verdicts$evidence_status` is the primary presentation: `support`, `conflict`,
+  `mixed`, `undetermined` or `noncomputable`, derived from all retained tests
+  per pathway, not from its grade. `availability`, `incomplete` and the
+  attempted/computable, nonsignificant, noncomputable and failed counts disclose
+  gaps. Missing ledgers do not establish support. Legacy `level`, `class` and
+  `verdict` remain secondary compatibility fields. Ledger support does not
+  imply that member support passed its floor or establish causal identity.
 }
 \description{
 Summarise measured evidence without treating a nonsignificant test as causal

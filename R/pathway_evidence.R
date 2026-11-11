@@ -805,19 +805,62 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
     out
 }
 
+## Presentation only: the retained ledger, never A/B/C, determines evidence state.
+.pathway_evidence_status <- function(x) {
+    tests <- attr(x, "perturbation_tests", exact = TRUE)
+    lookup <- attr(x, "dataset_lookup", exact = TRUE)
+    valid <- is.data.frame(tests) && all(c("pathway", "status") %in% names(tests))
+    empty <- data.frame(evidence_status = character(), availability = character(),
+        incomplete = logical(), n_attempted = integer(), n_computable = integer(),
+        n_support = integer(), n_conflict = integer(), n_nonsignificant = integer(),
+        n_noncomputable = integer(), n_failed = integer(), stringsAsFactors = FALSE)
+    if (!nrow(x)) return(empty)
+    rows <- lapply(as.character(x$pathway), function(path) {
+        s <- if (valid) as.character(tests$status[tests$pathway %in% path]) else character()
+        ns <- sum(s %in% "supports"); nc <- sum(s %in% "conflicts")
+        nn <- sum(s %in% "not-significant"); nx <- sum(s %in% "not-computable")
+        nf <- sum(s %in% "failed")
+        ncomp <- ns + nc + nn
+        queried <- if (is.data.frame(lookup) && "status" %in% names(lookup)) lookup$status else character()
+        gap <- any(queried %in% c("failed", "unavailable", "not-run", "empty"))
+        unknown <- length(s) != ncomp + nx + nf
+        state <- if (ns && nc) "mixed" else if (ns) "support" else if (nc) "conflict"
+            else if (nx && !ncomp) "noncomputable" else "undetermined"
+        availability <- if (!valid) "missing-ledger"
+            else if (length(s) && (nf || gap || unknown)) {
+                if (ncomp || nx) "partial" else if (nf) "failed" else "unknown"
+            } else if (length(s)) "available"
+            else if (any(queried %in% c("failed", "unavailable"))) "lookup-unavailable"
+            else if (any(queried %in% "not-run")) "unqueried"
+            else if (length(queried) && all(queried %in% "empty")) "no-dataset"
+            else "not-tested"
+        data.frame(evidence_status = state, availability = availability,
+            incomplete = availability != "available" || nx > 0L, n_attempted = as.integer(length(s)),
+            n_computable = as.integer(ncomp), n_support = as.integer(ns), n_conflict = as.integer(nc),
+            n_nonsignificant = as.integer(nn), n_noncomputable = as.integer(nx), n_failed = as.integer(nf),
+            stringsAsFactors = FALSE)
+    })
+    do.call(rbind, rows)
+}
+
 #' @rdname pathway_evidence
 #' @export
 print.pathway_evidence <- function(x, n = 10L, ...) {
     cat("<pathway evidence>\n")
+    evidence <- .pathway_evidence_status(x)
+    states <- table(factor(evidence$evidence_status,
+        levels = c("support", "conflict", "mixed", "undetermined", "noncomputable")))
+    cat("  evidence:     ", paste0(names(states), " ", as.integer(states), collapse = "  "), "\n", sep = "")
     counts <- table(factor(x$level, levels = c("A", "B", "C")))
-    cat("  levels:       ", paste0(names(counts), " ", as.integer(counts),
+    cat("  legacy levels (secondary): ", paste0(names(counts), " ", as.integer(counts),
                                   collapse = "  "), "\n", sep = "")
+    cat("  Ledger consistency is not a grading pass or causal identification; support can remain when the member-support floor fails.\n")
 
-    ## 降级原因分行列出。等级只是结论，`reason` 才是"为什么停在这里"。
+    ## Preserve legacy grade limits without confusing them with ledger state.
     rs <- x$reason[!is.na(x$reason)]
     if (length(rs)) {
         rc <- sort(table(rs), decreasing = TRUE)
-        cat("  capped by:    ", paste0(names(rc), " ", as.integer(rc),
+        cat("  legacy capped by: ", paste0(names(rc), " ", as.integer(rc),
                                        collapse = ", "), "\n", sep = "")
     }
 
@@ -831,9 +874,13 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
             ## `%||%` 只接 NULL，接不住 NA；原来方向印成 "NA"、支撑率印成 "NA%"。
             dir_txt <- if (is.na(row$direction)) "?" else row$direction
             sup_txt <- if (is.na(row$support)) "-" else sprintf("%.0f%%", 100 * row$support)
-            cat(sprintf("  [%s] %s (%s, %d members, %s together)\n",
-                        row$level, substr(row$pathway, 1, 52), dir_txt,
+            ev <- evidence[i, ]
+            cat(sprintf("  [%s] %s (legacy level %s; %s, %d members, %s together)\n",
+                        ev$evidence_status, substr(row$pathway, 1, 52), row$level, dir_txt,
                         row$n_members, sup_txt))
+            cat(sprintf("      ledger: %d support / %d conflict / %d nonsignificant; %d/%d computable, %d noncomputable, %d failed [%s]\n",
+                ev$n_support, ev$n_conflict, ev$n_nonsignificant, ev$n_computable,
+                ev$n_attempted, ev$n_noncomputable, ev$n_failed, ev$availability))
             why <- if (length(row$reason) && !is.na(row$reason)) sprintf("  [%s]", row$reason) else ""
             cat(sprintf("      driver: %s%s\n", driver, why))
         }
@@ -843,9 +890,9 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
     }
 
     ## 陈述放在末尾而不是每行都印：它是要被检验的主张，不是摘要的一部分。
-    a <- x[x$level == "A", , drop = FALSE]
+    a <- x[x$level == "A" & evidence$evidence_status == "support", , drop = FALSE]
     if (nrow(a)) {
-        cat("\n  claim to test:\n")
+        cat("\n  legacy claim to test (not causal identification):\n")
         cat("   ", a$statement[1], "\n")
     }
     invisible(x)

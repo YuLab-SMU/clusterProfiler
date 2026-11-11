@@ -1,7 +1,9 @@
-# clusterProfiler 4.21.5.004
+# clusterProfiler 4.21.5.005
 
 ## mechanism evidence: correctness and limits
 
++ Pathway and mechanism reports show ledger-derived support, conflict, mixed, undetermined and noncomputable evidence before legacy grades, with attempted/computable denominators and incomplete-coverage flags; A/B/C rules and discovery scores are unchanged (2026-11-11, Wed)
++ Added an offline paired replay of frozen perturbation responses across historical/fixed code and 8/4 versus 5/2 caps: it distinguishes corrected coverage diagnoses from cap sensitivity without claiming improved accuracy (2026-11-11, Wed)
 + `adjudicate()` retains explicit `mixed` measurements and does not select a programme half when collection directions disagree; incomplete half-statistics return unknown rather than crashing (2026-11-11, Wed)
 + `interpret()` preserves a supplied method-normalized effect even when raw perturbation responses are mixed, without inventing an effect when it is missing (2026-11-11, Wed)
 + `adjudicate()` reads every measured perturbation row instead of the first: row order no longer changes the effect; raw response directions and method-normalized effects are summarized separately, and opposing normalized effects yield no single effect (2026-11-11, Wed)

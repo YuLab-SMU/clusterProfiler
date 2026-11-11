@@ -192,6 +192,8 @@
 .mechanism_candidate_evidence <- function(tests) {
     empty <- data.frame(pathway = character(), driver = character(), n_tests = integer(),
         n_support = integer(), n_conflict = integer(), n_failed = integer(),
+        n_noncomputable = integer(), n_nonsignificant = integer(), n_attempted = integer(),
+        n_computable = integer(),
         supporting_cells = character(), conflicting_cells = character(), assessment = character(),
         stringsAsFactors = FALSE)
     if (is.null(tests) || !nrow(tests)) return(empty)
@@ -210,6 +212,9 @@
         data.frame(pathway = groups$pathway[i], driver = groups$driver[i],
             n_tests = sum(!z$status %in% c("failed", "not-computable")),
             n_support = ns, n_conflict = nc, n_failed = nf,
+            n_noncomputable = sum(z$status %in% "not-computable"),
+            n_nonsignificant = sum(z$status %in% "not-significant"), n_attempted = nrow(z),
+            n_computable = sum(z$status %in% c("supports", "conflicts", "not-significant")),
             supporting_cells = cells("supports"), conflicting_cells = cells("conflicts"),
             assessment = if (ns && nc) "mixed" else if (ns) "support-only" else if (nc) "conflict-only"
                 else if (any(z$status %in% "not-significant")) "no-significant-support" else "unavailable",
@@ -257,6 +262,13 @@
 #'   pathway/candidate. `next_steps$unlocks` is retained for compatibility and
 #'   counts rows addressed by an action, not promised grade upgrades. The legacy
 #'   `coherent-refuted` verdict is treated as undetermined, not disproved.
+#'   `verdicts$evidence_status` is the primary presentation: `support`, `conflict`,
+#'   `mixed`, `undetermined` or `noncomputable`, derived from all retained tests
+#'   per pathway, not from its grade. `availability`, `incomplete` and the
+#'   attempted/computable, nonsignificant, noncomputable and failed counts disclose
+#'   gaps. Missing ledgers do not establish support. Legacy `level`, `class` and
+#'   `verdict` remain secondary compatibility fields. Ledger support does not
+#'   imply that member support passed its floor or establish causal identity.
 #' @seealso [pathway_evidence()], [mechanism_preflight()]
 #' @export
 mechanism_report <- function(x, drivers = NULL, inventory = NULL,
@@ -296,7 +308,9 @@ mechanism_report <- function(x, drivers = NULL, inventory = NULL,
         if (is.na(d) || is.null(breadth) || !d %in% names(breadth)) return(NA_character_)
         .mechanism_global_effect_reason(d, breadth[[d]], global_effect_de)
     }
-    verdicts <- data.frame(pathway = x$pathway, class = klass, verdict = vcol,
+    evidence <- .pathway_evidence_status(x)
+    verdicts <- data.frame(pathway = x$pathway, evidence, level = x$level,
+        class = klass, verdict = vcol,
         reason = reason, detail = driver_of_row,
         side = vapply(rem, `[[`, character(1), "side"),
         action = vapply(rem, `[[`, character(1), "action"),
@@ -322,9 +336,14 @@ mechanism_report <- function(x, drivers = NULL, inventory = NULL,
     n_glob <- sum(!is.na(verdicts$global_effect_reason))
     summary <- c(
         if (blocked) sprintf("attribution is not supported by the current input screen (%s); this is a present evidence limit, not a claim that future experiments cannot help.", paste(sub(":.*", "", preflight$reasons), collapse = ", ")),
-        sprintf("%d pathways: %d supported, %d conflicting, %d undetermined.", nrow(verdicts),
-                sum(klass == "supported"), sum(klass == "conflicting"), sum(klass == "undetermined")),
-        "Supported means consistency with tested perturbations, not identification of a unique causal driver.",
+        sprintf("%d pathways: %d support, %d conflict, %d mixed, %d undetermined, %d noncomputable (ledger evidence).", nrow(verdicts),
+                sum(evidence$evidence_status == "support"), sum(evidence$evidence_status == "conflict"),
+                sum(evidence$evidence_status == "mixed"), sum(evidence$evidence_status == "undetermined"),
+                sum(evidence$evidence_status == "noncomputable")),
+        "Support means consistency with tested perturbations, not identification of a unique causal driver or a grading pass; it can remain when the member-support floor fails.",
+        "Evidence states aggregate all retained candidate/dataset tests per pathway; inspect candidate_evidence for candidate-specific support and conflicts.",
+        "Legacy A/B/C levels, class and verdict are secondary compatibility fields, not the ledger evidence status.",
+        if (any(evidence$incomplete)) "Evidence is incomplete or unavailable for some pathways; inspect availability, attempted/computable denominators and failed counts. Missing ledgers or unqueried/failed lookups are not noncomputable tests.",
         if (n_mod) sprintf("%d row(s) have target-overlap neighbours; shared annotations do not establish indistinguishability or upstream order.", n_mod),
         if (n_glob) sprintf("%d row(s) have a perturbation breadth flag; inspect global_effect_reason and context before interpreting specificity.", n_glob),
         if (any(candidates$assessment == "mixed")) "Some candidate/pathway pairs have both supporting and conflicting tests; inspect candidate_evidence and perturbation_tests.",
@@ -337,7 +356,8 @@ mechanism_report <- function(x, drivers = NULL, inventory = NULL,
 }
 
 .mechanism_report_empty <- function(reason) {
-    structure(list(verdicts = data.frame(pathway = character(), class = character(),
+    structure(list(verdicts = data.frame(pathway = character(),
+        .pathway_evidence_status(data.frame(pathway = character())), level = character(), class = character(),
         verdict = character(), reason = character(), detail = character(), side = character(),
         action = character(), module = character(), module_size = integer(), global_effect_reason = character()),
         gaps = NULL, next_steps = data.frame(action = character(), side = character(), unlocks = integer(), examples = character()),
@@ -353,11 +373,20 @@ print.mechanismReport <- function(x, n = 6L, ...) {
     cat("<mechanism report>\n")
     for (s in x$summary) cat("  ", s, "\n", sep = "")
     v <- x$verdicts
-    if (nrow(v)) for (cl in c("supported", "conflicting", "undetermined")) {
-        cat("\n  ", cl, ":\n", sep = "")
-        z <- utils::head(v[v$class == cl, , drop = FALSE], n)
-        if (!nrow(z)) cat("    (none)\n") else for (i in seq_len(nrow(z)))
-            cat(sprintf("    - %s [%s] <- %s\n", substr(z$pathway[i], 1, 56), z$reason[i], z$detail[i]))
+    if (nrow(v) && !"evidence_status" %in% names(v)) {
+        cat("\n  legacy saved verdicts (historical classes; evidence status and grade not inferred):\n")
+        for (i in seq_len(min(nrow(v), n)))
+            cat(sprintf("    - %s [%s; %s] <- %s\n", substr(v$pathway[i], 1, 56), v$class[i], v$reason[i], v$detail[i]))
+        if (nrow(v) > n) cat("    ... inspect $verdicts for all saved pathways\n")
+    } else if (nrow(v)) for (state in c("support", "conflict", "mixed", "undetermined", "noncomputable")) {
+        cat("\n  ", state, ":\n", sep = "")
+        z <- utils::head(v[v$evidence_status == state, , drop = FALSE], n)
+        if (!nrow(z)) cat("    (none)\n") else for (i in seq_len(nrow(z))) {
+            cat(sprintf("    - %s <- %s [legacy level %s; %s]\n", substr(z$pathway[i], 1, 56), z$detail[i], z$level[i], z$reason[i]))
+            cat(sprintf("      %d support / %d conflict / %d nonsignificant; %d/%d computable, %d noncomputable, %d failed [%s]\n",
+                z$n_support[i], z$n_conflict[i], z$n_nonsignificant[i], z$n_computable[i],
+                z$n_attempted[i], z$n_noncomputable[i], z$n_failed[i], z$availability[i]))
+        }
     }
     mod <- v[!is.na(v$module_size) & v$module_size > 1L, , drop = FALSE]
     if (nrow(mod)) {
@@ -374,8 +403,14 @@ print.mechanismReport <- function(x, n = 6L, ...) {
     cands <- x$candidate_evidence
     if (!is.null(cands) && nrow(cands)) {
         cat("\n  candidate evidence (support / conflict / failed):\n")
-        for (i in seq_len(min(nrow(cands), n))) cat(sprintf("    %s <- %s: %d / %d / %d [%s]\n",
-            cands$pathway[i], cands$driver[i], cands$n_support[i], cands$n_conflict[i], cands$n_failed[i], cands$assessment[i]))
+        for (i in seq_len(min(nrow(cands), n))) {
+            cat(sprintf("    %s <- %s: %d / %d / %d [%s]",
+                cands$pathway[i], cands$driver[i], cands$n_support[i], cands$n_conflict[i], cands$n_failed[i], cands$assessment[i]))
+            if (all(c("n_computable", "n_attempted", "n_nonsignificant", "n_noncomputable") %in% names(cands)))
+                cat(sprintf("; %d/%d computable, %d nonsignificant, %d noncomputable\n",
+                    cands$n_computable[i], cands$n_attempted[i], cands$n_nonsignificant[i], cands$n_noncomputable[i]))
+            else cat(sprintf("; %d legacy tests (computable denominator unavailable)\n", cands$n_tests[i]))
+        }
         if (nrow(cands) > n) cat("    ... inspect $candidate_evidence and $perturbation_tests for all candidates\n")
     }
     if (!is.null(x$gaps) && nrow(x$gaps)) {

@@ -1,6 +1,6 @@
 # Mechanism evidence: three-stage completion record
 
-Development version **4.21.5.004**, formal baseline **4.21.5**. Updated 2026-11-11.
+Development version **4.21.5.005**, formal baseline **4.21.5**. Updated 2026-11-11.
 This is a correctness, reproducibility and disclosure change, not a new causal
 identification algorithm or a validated accuracy improvement.
 
@@ -65,7 +65,41 @@ swallowed every lookup error, so a network outage or a machine without the sugge
 attribute); failures produce reason `lookup-failed` and an explicit warning, and a
 partial failure is disclosed even when another candidate resolves.
 
-## Current .004 validation gate
+## .005 evidence-first presentation and paired experiment
+
+| Gate | Observed result |
+|---|---|
+| Documentation | `make rd` completed from R/roxygen |
+| Eight focused files | **753 passed, 0 failures, 0 errors**; 2 expected empty-input warnings, 4 existing network-gated skips |
+| Full project check | `make check`: **0 errors, 0 warnings, 0 notes**, 14m19.6s |
+| Replay self-tests | Four conditions, fresh-process replay, seven malformed-cache cases, missing-key/budget guards, pacing and external analysis manifests verified offline |
+| Independent review | Evidence-state semantics and serialized-report compatibility reviewed; reported denominator/cache/manifest defects fixed and regression tested |
+
+Printing now prioritizes ledger-derived `support`, `conflict`, `mixed`,
+`undetermined` and `noncomputable`; A/B/C and existing report `class`/`verdict`
+remain secondary compatibility fields without regrading. Availability, incomplete
+coverage and attempted/computable denominators remain separate. Native historical
+reports without these columns retain a visible legacy section rather than losing
+their saved rows. Unknown ledger statuses do not count as computable.
+
+The new [prespecified paired design](<mechanism-paired-4215-plan.md>) fixes all17
+expected labels, two source versions and the 8/4 versus 5/2 caps. The
+[runner](<mechanism-paired-4215.R>) stores raw responses, including errors, and
+replays all four conditions offline. Its plan, source snapshots, input objects
+and dependency provenance are checksummed. This experiment is separate from the
+historical .002 regrade below and does not establish causal accuracy.
+
+The final paced snapshot contains **235 unique requests, zero failures** (13
+lookups; 222 tests, of which 57 are noncomputable). At either fixed cap, code
+changes produce **zero grade or verdict changes** on these inputs, but correct
+STAT1's coverage diagnosis. Holding code fixed, 8/4 -> 5/2 removes 45 pathways;
+3 of 75 common rows change A -> B. In the fixed native ledger, profiles with any
+support change **9/17 -> 8/17**; SMAD3 has both support and conflict at the wide
+cap. These are cap sensitivity and disclosure results, not accuracy gains. The
+[full paired report](<mechanism-paired-4215-results.md>) supplies exact endpoints,
+operational amendment, preserved rate-limited pilot and reproduction instructions.
+
+## Historical .004 validation gate
 
 | Gate | Observed result |
 |---|---|
