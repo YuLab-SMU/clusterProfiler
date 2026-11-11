@@ -1,7 +1,8 @@
-# clusterProfiler 4.21.5.001
+# clusterProfiler 4.21.5.002
 
 ## mechanism evidence: correctness and limits
 
++ `pathway_evidence()` resolves a candidate's datasets through every removal method GPSAdb records (siRNA, shRNA, CRISPRi, knockout) instead of requiring the literal "knockdown", which had reported STAT1 -- CRISPRi plus knockout only -- as having no data; overexpression is still excluded (2026-11-11, Wed)
 + `pathway_evidence()` counts supporting cell lines within a driver, applies the member-support floor before promotion, maps all Entrez members, and retains every candidate/dataset outcome in `attr(x, "perturbation_tests")`, including conflicts and failures (2026-11-10, Tue)
 + `mechanism_reproduction()` requires enough finite members per dataset, rejects conflicting experiment identities and does not count unknown biosamples as independent replication; `mechanism_preflight()` distinguishes zero coverage from unavailable coverage (2026-11-10, Tue)
 + `mechanism_report()` exposes `perturbation_tests` and per-candidate support/conflict summaries; its classes are now `supported`, `conflicting` and `undetermined` rather than `excluded`. Nonsignificance is not disproof; target-overlap neighbourhoods and perturbation breadth are descriptive flags, not causal equivalence or specificity tests (2026-11-10, Tue)

@@ -91,22 +91,57 @@
     tries <- unique(c(gene, fwd, back))
     tries <- tries[!is.na(tries) & nzchar(tries)]
 
+    ## "knockdown" first because it is the common spelling and the narrow query
+    ## is fast and stable. Only when it is empty do the other removal spellings
+    ## get asked, so a gene that GPSAdb records solely as CRISPRi or knockout
+    ## (STAT1) is not reported as having no data. An unfiltered query is avoided:
+    ## it is slow and intermittently returns nothing for the largest factors.
     look <- function(g) {
-        d <- tryCatch(as.data.frame(
-            gpsadb::gpsadb_search_datasets(perturbed_gene = g, method = "knockdown",
+        ask <- function(method) tryCatch(as.data.frame(
+            gpsadb::gpsadb_search_datasets(perturbed_gene = g, method = method,
                                            limit = 50)[[1]]),
             error = function(e) NULL)
-        if (is.null(d) || !nrow(d)) NULL else d
+        d <- .pathway_usable_datasets(ask("knockdown"))
+        if (!is.null(d)) return(d)
+        for (m in c("CRISPRi", "knockout", "siRNA", "shRNA")) {
+            d <- .pathway_usable_datasets(ask(m))
+            if (!is.null(d)) return(d)
+        }
+        NULL
     }
     d <- NULL
     for (g in tries) { d <- look(g); if (!is.null(d)) break }
     if (is.null(d)) return(NULL)
-    d <- d[!is.na(d$in_reference) & d$in_reference, , drop = FALSE]
+    ## 每个细胞系先留一份（样本多的），保证取到的几份尽量来自不同系——
+    ## 复现判定看的是细胞系数，不是数据集数。
+    if ("n_samples" %in% names(d)) d <- d[order(-d$n_samples), , drop = FALSE]
+    d <- d[!duplicated(d$cell_line), , drop = FALSE]
+    utils::head(d, limit)
+}
+
+## Post-query normalisation, factored out so it can be tested offline.
+##
+## The method filter used to be `method = "knockdown"`. GPSAdb spells removal
+## four ways (siRNA, shRNA, CRISPRi, knockout), so that whitelist reported STAT1
+## -- which has one CRISPRi and one knockout dataset and no literal "knockdown"
+## -- as having no data at all, the same false negative the inventory lookup was
+## fixed for. Overexpression is excluded instead.
+.pathway_usable_datasets <- function(d) {
+    if (is.null(d) || !nrow(d)) return(NULL)
+    if (!"cell_line" %in% names(d) || !"dataset_id" %in% names(d)) return(NULL)
+    if ("method" %in% names(d)) {
+        d <- d[is.na(d$method) | !grepl("overexpress", d$method, ignore.case = TRUE), ,
+               drop = FALSE]
+    }
+    if ("in_reference" %in% names(d)) {
+        d <- d[!is.na(d$in_reference) & d$in_reference, , drop = FALSE]
+    }
     if (!nrow(d)) return(NULL)
     d$cell_line <- trimws(as.character(d$cell_line))
     d$cell_line[!is.na(d$cell_line) & !nzchar(d$cell_line)] <- NA_character_
     identities <- split(d$cell_line, as.character(d$dataset_id))
-    conflicting <- names(identities)[vapply(identities, function(z) length(unique(z)) > 1L, TRUE)]
+    conflicting <- names(identities)[vapply(identities, function(z)
+        length(unique(z)) > 1L, TRUE)]
     if (length(conflicting)) {
         warning(sprintf("Ignoring GPSAdb dataset(s) with conflicting cell-line identities: %s.",
                         paste(conflicting, collapse = ", ")), call. = FALSE)
@@ -114,11 +149,7 @@
     }
     if (!nrow(d)) return(NULL)
     d <- d[!duplicated(d$dataset_id), , drop = FALSE]
-    ## 每个细胞系先留一份（样本多的），保证取到的几份尽量来自不同系——
-    ## 复现判定看的是细胞系数，不是数据集数。
-    d <- d[order(-d$n_samples), , drop = FALSE]
-    d <- d[!duplicated(d$cell_line), , drop = FALSE]
-    utils::head(d, limit)
+    if (!nrow(d)) NULL else d
 }
 
 ## 单细胞系那一路取复现行。**别名要在两侧都解析**：GPSAdb 返回的是
@@ -200,8 +231,8 @@
 #'   refute, and `reason` says why a row stopped short of level A
 #'   (`single-cell-line`, `direction-conflict`, `no-dataset`, `too-small`,
 #'   `not-significant`, `member-derived` and the input-side cases). Level A leaves
-#'   `reason` as `NA`. Level A is weaker than its name suggests: a knockdown that
-#'   moves the pathway also moves it if the knockdown is unrelated but perturbs
+#'   `reason` as `NA`. Level A is weaker than its name suggests: a perturbation that
+#'   moves the pathway also moves it if the perturbation is unrelated but perturbs
 #'   transcription broadly, and four of thirty background drivers reached A on the
 #'   hypoxia pilot. Read A as consistency worth following up, not as identification
 #'   of the driver; the statement says as much. A level-B row distinguishes `coherent-untested` (no test
@@ -292,13 +323,13 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
         }, 0L)
         if (all(cells_each < 2L)) {
             warning(sprintf(
-                "Level A is unreachable: %s has knockdown data in a single cell line, and level A requires two. Results here cannot exceed B.",
+                "Level A is unreachable: %s has perturbation data in a single cell line, and level A requires two. Results here cannot exceed B.",
                 paste(sprintf("`%s` (%d)", names(cells_each), cells_each), collapse = ", ")),
                 call. = FALSE)
         }
     } else if (length(drivers)) {
         warning(sprintf(
-            "No knockdown data found in GPSAdb for %s; every pathway will be described without perturbation evidence.",
+            "No usable perturbation data found in GPSAdb for %s; every pathway will be described without perturbation evidence.",
             paste0("`", paste(drivers, collapse = "`, `"), "`")), call. = FALSE)
     }
 
@@ -582,7 +613,7 @@ pathway_evidence <- function(x, drivers = NULL, signed = NULL, alpha = 0.05,
                 "low-support" = sprintf("%.0f%% of members moved %s, below the support floor of %.0f%%.",
                                         100 * support, direction, 100 * min_support),
                 "no-test-completed" = "Every perturbation call for this pathway failed, so the absence of evidence may be an outage rather than a result.",
-                "no-dataset" = "No knockdown dataset was available for the candidate drivers, so the pathway was described but not tested.",
+                "no-dataset" = "No usable perturbation dataset was available for the candidate drivers, so the pathway was described but not tested.",
                 "not-significant" = sprintf("The candidates were tested against these %d members and none reached significance; this does not establish that their effects are absent.",
                                             length(members)),
                 "unsupported"),
@@ -781,7 +812,7 @@ print.pathway_evidence <- function(x, n = 10L, ...) {
             "level A was not reached: %s has direction-consistent significant evidence in only one cell line for the selected candidate; level A needs two for that same candidate.",
             who),
         "no-dataset" = sprintf(
-            "level A is unreachable: GPSAdb returned no knockdown dataset for %s. The pathways are described, not tested.",
+            "level A is unreachable: GPSAdb returned no usable perturbation dataset for %s. The pathways are described, not tested.",
             who),
         "too-small" = paste(
             "level A is unreachable: the pathways were too small for test_gene_set to produce a p-value,",

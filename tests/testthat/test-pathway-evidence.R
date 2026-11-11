@@ -693,3 +693,33 @@ test_that("Entrez conversion includes IDs beyond the fifth pathway", {
     expect_equal(nrow(out), 6L)
     expect_identical(out$geneID, paste0("G", 1:6))
 })
+
+test_that("dataset resolution accepts every removal method, not only 'knockdown'", {
+    ## GPSAdb spells removal siRNA/shRNA/CRISPRi/knockout. A literal
+    ## method = "knockdown" filter reported STAT1 -- CRISPRi plus knockout,
+    ## no literal knockdown -- as having no data, the same false negative the
+    ## inventory lookup was fixed for. Overexpression stays excluded.
+    d <- data.frame(
+        dataset_id = c("d1", "d2", "d3", "d4", "d5"),
+        cell_line = c("A", "B", "C", "D", "E"),
+        method = c("CRISPRi", "knockout", "siRNA", "overexpression", "shRNA"),
+        in_reference = c(TRUE, TRUE, TRUE, TRUE, FALSE),
+        n_samples = c(3, 2, 4, 9, 1), stringsAsFactors = FALSE)
+    got <- .pathway_usable_datasets(d)
+    expect_identical(got$dataset_id, c("d1", "d2", "d3"))
+    expect_false(any(grepl("overexpress", got$method)))
+})
+
+test_that("unusable dataset tables are empty, not fabricated data", {
+    expect_null(.pathway_usable_datasets(NULL))
+    expect_null(.pathway_usable_datasets(data.frame()))
+    expect_null(.pathway_usable_datasets(data.frame(dataset_id = "d1")))
+    d <- data.frame(dataset_id = c("d1", "d1"), cell_line = c("A", " "),
+                    method = "siRNA", in_reference = TRUE, stringsAsFactors = FALSE)
+    expect_null(suppressWarnings(.pathway_usable_datasets(d)))
+    blank <- data.frame(dataset_id = c("d1", "d2"), cell_line = c("A", "  "),
+                        method = "siRNA", in_reference = TRUE, stringsAsFactors = FALSE)
+    out <- .pathway_usable_datasets(blank)
+    expect_equal(nrow(out), 2L)
+    expect_true(is.na(out$cell_line[2]))
+})

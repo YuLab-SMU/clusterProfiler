@@ -27,14 +27,19 @@ identification algorithm or a validated accuracy improvement.
 Independent final review found three further edge cases, all fixed and covered:
 requested candidates disappeared when no datasets resolved; row subsets imported
 unrelated pathway ledgers; blank cell identities falsely established replication.
-Conflicting dataset/cell identities are also rejected with a warning.
+Conflicting dataset/cell identities are also rejected with a warning. A bounded
+live replicate then exposed one more false negative: dataset resolution required
+the literal method `"knockdown"`, so a factor recorded only as CRISPRi or knockout
+(`STAT1`) read as "no dataset" while the report inventory listed its data. Removal
+is now recognised in all four spellings with overexpression still excluded, and the
+same profile moved from zero calls to five real non-significant tests.
 
 ## Actual validation
 
 | Gate | Observed result |
 |---|---|
 | Project documentation | `make rd` completed; Rd generated from R/roxygen, not hand-edited |
-| Seven focused test files | **474 passed, 0 failures, 0 errors**; 8 existing structural warning records and 4 pre-existing network-gated skips |
+| Seven focused test files | **482 passed, 0 failures, 0 errors**; 8 existing structural warning records and 4 pre-existing network-gated skips |
 | Full project check | `make check`: **0 errors, 0 warnings, 1 NOTE**, 17m18.5s; tests, examples and vignettes passed |
 | Remaining NOTE | `Unable to verify current time` in future-file-timestamp check |
 | Frozen benchmark | `--self-test` passed; complete expected-label ranks and denominators asserted |
@@ -65,6 +70,43 @@ condition-informed labels do not establish independent or exclusive causal truth
 The module endpoint provides no basis for claiming a substantial validated gain.
 No target-count weighting parameter was introduced.
 
+## Bounded current-grading replicate (not a replacement for the frozen table)
+
+Because the frozen verification table was produced by pre-fix code, the expected
+driver of every frozen profile was re-graded with the fixed logic at
+deliberately capped depth: at most **5 pathways** and **2 datasets per driver**,
+`alpha = 0.05`. This run is a pipeline and reason-code check, not a full re-scan.
+
+| Observed | Count |
+|---|---:|
+| Profiles graded | 15/17 |
+| Profiles with no enrichment result | 2/17 (`GSE311462` oestradiol, `GSE276150` cigarette extract) |
+| Perturbation test calls / failed | 102 / 0 |
+| Expected driver with any supporting test | 8/17 |
+| Expected driver with at least one A pathway | 4/17 |
+| Datasets where the historical table had an expected-label verdict | 10 |
+| Historical A/B, still any support | 4 |
+| Historical A/B, no support at this cap | 3 |
+| Historical C, any support | 0 |
+
+The losses are explained by the cap as much as by the fix: `best` is chosen among
+the datasets actually queried, so asking two instead of six can change both the
+`es` and the significant/conflicting split. For example both NR3C1 profiles now
+record three or four significant *conflicts* rather than support, and SMAD3 records
+five. These rows are not evidence that the old grades were right; they are evidence
+that a two-dataset cap cannot adjudicate them. Only a full re-scan under the fixed
+logic could, and that has not been run.
+
+One earlier attempt of this same run recorded 10 failed calls in the hypoxia
+profile after 482 s; an immediate retry of that profile returned the same A/B
+pattern as the successful run (7 supports, 0 failed). The live service is therefore
+intermittently unreliable, which is why the report keeps failed and unknown
+outcomes separate from negative ones. The stored artifact is the clean final run.
+
+Artifacts: [summary](<../../adjudicate-interpret/results/mechanism-4215-regrade/summary.tsv>),
+[retained tests](<../../adjudicate-interpret/results/mechanism-4215-regrade/perturbation-tests.tsv>),
+[script](<../../adjudicate-interpret/scripts/64_regrade_4215.R>).
+
 ## Reproduce and inspect
 
 - [Workflow and interpretation boundaries](<mechanism-evidence-workflow.md>)
@@ -74,7 +116,8 @@ No target-count weighting parameter was introduced.
 - [Live per-dataset smoke results](<../../adjudicate-interpret/results/mechanism-4215-live-smoke/perturbation-tests.tsv>)
 - [Standalone benchmark archive](<../../adjudicate-interpret/results/mechanism-audit-4215.tar.gz>)
 
-Historical verification was not fully rerun against the fixed grading logic;
-original DE was not recomputed. Structured prompt constraints are auditable input
-restrictions, not a formal guarantee of model compliance. External independent
-validation and intervention-based causal testing remain outside this completion.
+Historical verification was not fully rerun against the fixed grading logic; the
+bounded replicate above covers the expected driver at reduced depth. Original DE
+was not recomputed. Structured prompt constraints are auditable input restrictions,
+not a formal guarantee of model compliance. External independent validation and
+intervention-based causal testing remain outside this completion.
