@@ -179,6 +179,23 @@ test_that("the sign test reads a side only when the test supports it", {
     expect_true(is.na(tiny$direction))
 })
 
+test_that("half directions require scalar finite statistics on both sides", {
+    valid <- list(padj = 1e-6, rise = 0L, fall = 12L)
+    expect_identical(clusterProfiler:::.mechanism_half_direction(valid), "down")
+    for (field in names(valid)) {
+        for (value in list(NULL, numeric(), NA_real_, Inf, -Inf, c(1, 2))) {
+            half <- valid
+            half[field] <- list(value)
+            expect_identical(clusterProfiler:::.mechanism_half_direction(half),
+                             NA_character_, info = field)
+        }
+    }
+    valid$padj <- 0.5
+    expect_identical(clusterProfiler:::.mechanism_half_direction(valid), "mixed")
+    valid$fall <- NULL
+    expect_identical(clusterProfiler:::.mechanism_half_direction(valid), NA_character_)
+})
+
 test_that("perturbation_effect names the mode of action, not agreement", {
     ## Both of these are mechanisms. A boolean "concordant" flag would call the
     ## second one a failure, which it is not: it says the factor restrains these

@@ -396,7 +396,10 @@ process_enrichment_input <- function(x, n_pathways) {
     "a family, complex, alias or collided label with a specific gene. ",
     "Preserve `direction` (the collection programme) separately from ",
     "`measured_direction` (the perturbation response) and `perturbation_effect`. ",
-    "Do not reverse them or infer a sign when null or mixed. ",
+    "Do not reverse these fields or infer a direction where that field is null or mixed. ",
+    "Preserve an explicit `perturbation_effect` even when `measured_direction` is mixed: ",
+    "opposite perturbation methods can have opposite responses yet imply the same effect. ",
+    "Never infer an effect when `perturbation_effect` is null. ",
     "No verdict proves an upstream causal driver in the caller's experiment. ",
     "These are writing constraints, not a guarantee of model compliance.")
   rows <- .adjudication_prompt_rows(verdicts)

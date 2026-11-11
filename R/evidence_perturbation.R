@@ -454,7 +454,11 @@ mechanism_lapply <- function(x, fun) {
 ## as the genes going both ways. Saying `mixed` for "no evidence of a side" is
 ## the honest report; saying `up` because one more gene rose would not be.
 .mechanism_half_direction <- function(half, alpha = 0.05) {
-    if (is.null(half$padj) || is.na(half$padj) || is.na(half$rise)) {
+    valid <- vapply(c("padj", "rise", "fall"), function(field) {
+        x <- half[[field]]
+        is.numeric(x) && length(x) == 1L && is.finite(x)
+    }, logical(1))
+    if (!all(valid)) {
         return(NA_character_)
     }
     if (half$padj >= alpha) return("mixed")

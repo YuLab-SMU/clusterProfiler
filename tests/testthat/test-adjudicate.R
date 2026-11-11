@@ -378,12 +378,88 @@ test_that("measured rows are read independently of their order", {
     ## measured evidence disagrees, so no single effect is claimed.
     expect_true(is.na(fwd$verdicts$perturbation_effect))
 
-    ## When the two measured rows agree, the effect is still reported.
+    expect_identical(fwd$verdicts$measured_direction, "down")
+
+    ## Opposite measurements agree after normalizing by perturbation method.
     agree <- bundle
     agree$regulators <- rbind(ev$regulators[1, , drop = FALSE], p, b)
     agree$regulators$direction[3] <- "up"
     both <- adjudicate(agree)
     expect_identical(both$verdicts$perturbation_effect, "activator")
+    expect_identical(both$verdicts$measured_direction, "mixed")
     agree$regulators <- agree$regulators[3:1, , drop = FALSE]
-    expect_identical(adjudicate(agree)$verdicts$perturbation_effect, "activator")
+    expect_identical(adjudicate(agree)$verdicts, both$verdicts)
+})
+
+test_that("mixed and unknown measurements do not invent opposing effects", {
+    cases <- list(
+        list(direction = "mixed", method = "knockout", measured = "mixed"),
+        list(direction = NA_character_, method = "knockout", measured = "down"),
+        list(direction = "up", method = "unknown_method", measured = "mixed"))
+    for (case in cases) {
+        ev <- adjudication_contract_bundle()
+        other <- ev$regulators[2, , drop = FALSE]
+        other$term <- "D2"
+        other$direction <- case$direction
+        other$method <- case$method
+        ev$regulators <- rbind(ev$regulators, other)
+        fwd <- adjudicate(ev)
+        expect_identical(fwd$verdicts$measured_direction, case$measured)
+        expect_identical(fwd$verdicts$perturbation_effect, "activator")
+        expect_identical(fwd$verdicts$verdict, "supported")
+        ev$regulators <- ev$regulators[3:1, , drop = FALSE]
+        rev <- adjudicate(ev)
+        expect_identical(rev$verdicts, fwd$verdicts)
+        expect_identical(rev$provenance$evidence_sha, fwd$provenance$evidence_sha)
+    }
+    ev <- adjudication_contract_bundle()
+    ev$regulators$direction[2] <- "mixed"
+    expect_identical(adjudicate(ev)$verdicts$measured_direction, "mixed")
+    expect_true(is.na(adjudicate(ev)$verdicts$perturbation_effect))
+})
+
+test_that("mixed collections do not select a directional programme half", {
+    for (direction in c("up", "down")) {
+        ev <- adjudication_contract_bundle()
+        ev$regulators$direction[1] <- direction
+        ev$regulators$down_rise <- 0L
+        ev$regulators$down_fall <- 12L
+        ev$regulators$down_sign_padj <- 1e-6
+        other <- ev$regulators[1, , drop = FALSE]
+        other$term <- "OTHER_TARGETS"
+        other$direction <- "mixed"
+        ev$regulators <- rbind(ev$regulators, other)
+        fwd <- adjudicate(ev)
+        expect_identical(fwd$verdicts$direction, "mixed")
+        expect_true(is.na(fwd$verdicts$measured_direction))
+        expect_true(is.na(fwd$verdicts$perturbation_effect))
+        expect_identical(fwd$verdicts$verdict, "supported")
+        ev$regulators <- ev$regulators[3:1, , drop = FALSE]
+        expect_identical(adjudicate(ev)$verdicts, fwd$verdicts)
+    }
+})
+
+test_that("missing or nonfinite down-half statistics leave adjudication unknown", {
+    base <- adjudication_contract_bundle()
+    base$regulators$direction[1] <- "down"
+    base$regulators$down_rise <- 0L
+    base$regulators$down_fall <- 12L
+    base$regulators$down_sign_padj <- 1e-6
+    valid <- adjudicate(base)$verdicts
+    expect_identical(valid$measured_direction, "down")
+    expect_identical(valid$perturbation_effect, "activator")
+    for (field in c("down_rise", "down_fall", "down_sign_padj")) {
+        for (value in list(NULL, NA_real_, Inf, c(1, 2))) {
+            ev <- base
+            ev$regulators[[field]] <- if (length(value) > 1L) {
+                rep(list(value), nrow(ev$regulators))
+            } else value
+            fwd <- adjudicate(ev)
+            expect_true(is.na(fwd$verdicts$measured_direction), info = field)
+            expect_true(is.na(fwd$verdicts$perturbation_effect), info = field)
+            expect_identical(fwd$verdicts$verdict, "supported")
+            ev$regulators <- ev$regulators[2:1, , drop = FALSE]
+            expect_identical(adjudicate(ev)$verdicts, fwd$verdicts)
+        }
+    }
 })

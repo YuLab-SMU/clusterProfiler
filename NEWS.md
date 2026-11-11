@@ -1,8 +1,10 @@
-# clusterProfiler 4.21.5.003
+# clusterProfiler 4.21.5.004
 
 ## mechanism evidence: correctness and limits
 
-+ `adjudicate()` reads every measured perturbation row for a regulator instead of the first, so reversing the same bundle no longer flips `perturbation_effect` between activator and repressor while `evidence_sha` stays identical; datasets that disagree are reported as `mixed` with no single effect (2026-11-11, Wed)
++ `adjudicate()` retains explicit `mixed` measurements and does not select a programme half when collection directions disagree; incomplete half-statistics return unknown rather than crashing (2026-11-11, Wed)
++ `interpret()` preserves a supplied method-normalized effect even when raw perturbation responses are mixed, without inventing an effect when it is missing (2026-11-11, Wed)
++ `adjudicate()` reads every measured perturbation row instead of the first: row order no longer changes the effect; raw response directions and method-normalized effects are summarized separately, and opposing normalized effects yield no single effect (2026-11-11, Wed)
 + `pathway_evidence()` reports whether dataset resolution returned data, found nothing usable, or failed; a network outage or a machine without the suggested `gpsadb` previously printed "No usable perturbation data found in GPSAdb" and reason `no-dataset`, which is a false statement about the database. Failures are now `lookup-failed` with the error text in the `dataset_lookup` attribute, and a partial failure is disclosed even when another candidate resolves (2026-11-11, Wed)
 + `pathway_evidence()` distinguishes missing fold changes from members that are absent from them: with direction supplied by `pathway_direction` or NES and no `signed` list, the row now says `no-fold-changes` instead of claiming the members were not found (2026-11-11, Wed)
 + Subsetting `pathway_evidence()` by columns keeps the retained evidence ledger; a pure column reorder used to strip the attributes while keeping the class, so `mechanism_report()` saw no candidate/dataset evidence (2026-11-11, Wed)

@@ -1,5 +1,18 @@
 library(testthat)
 
+test_that("adjudication instructions distinguish response direction from normalized effect", {
+  cv <- data.frame(regulator = "FOXO3", verdict = "supported", max_level = "A",
+                   direction = "up", measured_direction = "mixed",
+                   perturbation_effect = "activator", writable = "fixture")
+  prompt <- .adjudication_declaration(cv)
+  expect_match(prompt, "Preserve an explicit `perturbation_effect` even when `measured_direction` is mixed", fixed = TRUE)
+  expect_match(prompt, "Never infer an effect when `perturbation_effect` is null", fixed = TRUE)
+  json <- sub(".*ADJUDICATION_ROWS_JSON:\\n", "", prompt)
+  rows <- jsonlite::fromJSON(json)
+  expect_identical(rows$measured_direction, "mixed")
+  expect_identical(rows$perturbation_effect, "activator")
+})
+
 test_that("measured-only admitted evidence reaches the prompt without enrichment objects", {
   r <- data.frame(regulator = "FOXO3", source = "perturbagen", term = "D1",
                   named = TRUE, level = "A", padj_within_source = 1e-6,

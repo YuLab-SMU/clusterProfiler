@@ -429,12 +429,9 @@ sources_source <- function(src) {
     if (is.null(mine) || !nrow(mine)) return(empty)
 
     coll <- mine$direction[!mine$source %in% c("perturbagen", "biotrigger")]
-    coll <- coll[!is.na(coll) & coll %in% c("up", "down")]
-    if (!length(coll)) return(empty)
-    direction <- unique(coll)
-    ## Two collection rows pointing different ways means there is no single
-    ## programme to compare against.
-    if (length(direction) != 1L) return(empty)
+    direction <- .consensus_direction(coll)
+    ## A mixed collection has no single programme half to compare against.
+    if (!direction %in% c("up", "down")) return(empty)
 
     pert <- mine[mine$source %in% c("perturbagen", "biotrigger"), , drop = FALSE]
     if (!nrow(pert)) return(empty)
@@ -442,8 +439,8 @@ sources_source <- function(src) {
     ## Read every measured row, then collapse. Taking the first row made the
     ## answer depend on row order: the same bundle with its measured rows
     ## reversed reported activator or repressor while the evidence fingerprint
-    ## stayed identical. Disagreement is reported as `mixed` (measured) and no
-    ## effect, rather than silently resolved by whichever dataset came first.
+    ## stayed identical. Summarize measured directions separately from known,
+    ## method-normalized effects: opposite measurements can imply the same effect.
     one <- lapply(seq_len(nrow(pert)), function(i) {
         r <- pert[i, , drop = FALSE]
         sign <- mechanism_method_sign(r$method[1])
@@ -454,18 +451,18 @@ sources_source <- function(src) {
                                            fall = r$down_fall[1],
                                            padj = r$down_sign_padj[1]))
         }
-        if (is.null(measured) || is.na(measured) || !measured %in% c("up", "down"))
+        if (is.null(measured) || is.na(measured) || !measured %in% c("up", "down", "mixed"))
             measured <- NA_character_
         expected <- mechanism_expected_measured(sign)
-        effect <- if (is.na(measured) || is.na(expected)) NA_character_
+        effect <- if (!measured %in% c("up", "down") || is.na(expected)) NA_character_
                   else if (identical(measured, expected)) "activator" else "repressor"
         list(measured = measured, sign = sign, effect = effect)
     })
-    measured <- unique(stats::na.omit(vapply(one, `[[`, character(1), "measured")))
+    measured <- .consensus_direction(vapply(one, `[[`, character(1), "measured"))
     signs <- unique(stats::na.omit(vapply(one, `[[`, character(1), "sign")))
     effects <- unique(stats::na.omit(vapply(one, `[[`, character(1), "effect")))
     list(direction = direction,
-         measured = if (length(measured) == 1L) measured else if (length(measured)) "mixed" else NA_character_,
+         measured = measured,
          sign = if (length(signs) == 1L) signs else NA_character_,
          effect = if (length(effects) == 1L) effects else NA_character_)
 }
